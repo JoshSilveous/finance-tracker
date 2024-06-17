@@ -2,15 +2,21 @@
 	display: flex;
 	flex-direction: column;
 	background-color: var(--frosted-glass);
-	border: var(--frosted-glass-border);
 	backdrop-filter: blur(5px);
 	padding: 30px;
 	border-radius: var(--border-radius);
+	box-shadow: var(--frosted-glass-box-shadow);
 
 	.main {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+
+		h3.title {
+		}
+
+		p.description {
+		}
 	}
 }
