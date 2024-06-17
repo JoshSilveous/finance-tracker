@@ -1,3 +1,7 @@
 {
-	"exportall.config.folderListener": ["/components/ui/AuthForms/PasswordSignIn"]
+	"exportall.config.folderListener": [
+		"/components/ui/AuthForms/PasswordSignIn",
+		"/components/ui/FormElements/JInput",
+		"/components/ui/FormElements"
+	]
 }

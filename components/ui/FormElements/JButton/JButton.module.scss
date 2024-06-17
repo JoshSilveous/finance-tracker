@@ -1,0 +1,19 @@
+.main {
+	padding: 5px;
+	font-family: inherit;
+	outline: none;
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	background-color: #ffffff;
+	transition: background-color 0.1s ease;
+	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+	width: 100%;
+	&.primary {
+		background-color: var(--primary-color);
+		&:hover {
+			background-color: var(--primary-color-lightened);
+		}
+		color: white;
+	}
+}

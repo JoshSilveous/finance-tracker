@@ -7,6 +7,8 @@ import { signInWithPassword } from '@/utils/auth-helpers/server'
 import { handleRequest } from '@/utils/auth-helpers/client'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
+import { JInput } from '../../FormElements'
+import { JButton } from '../../FormElements/JButton/JButton'
 
 // Define prop type with allowEmail boolean
 interface PasswordSignInProps {
@@ -30,7 +32,7 @@ export default function PasswordSignIn({ allowEmail, redirectMethod }: PasswordS
 				<div className={style.credentials_container}>
 					<div className={style.credentials_form}>
 						<label htmlFor='email'>Email</label>
-						<input
+						<JInput
 							id='email'
 							placeholder='name@example.com'
 							type='email'
@@ -40,7 +42,7 @@ export default function PasswordSignIn({ allowEmail, redirectMethod }: PasswordS
 							autoCorrect='off'
 						/>
 						<label htmlFor='password'>Password</label>
-						<input
+						<JInput
 							id='password'
 							placeholder='Password'
 							type='password'
@@ -48,7 +50,9 @@ export default function PasswordSignIn({ allowEmail, redirectMethod }: PasswordS
 							autoComplete='current-password'
 						/>
 					</div>
-					<button type='submit'>Sign in</button>
+					<JButton className={style.sign_in_button} accent='primary' type='submit'>
+						Sign in
+					</JButton>
 				</div>
 			</form>
 			<p>
