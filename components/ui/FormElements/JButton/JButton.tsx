@@ -3,6 +3,7 @@ import style from './JButton.module.scss'
 
 interface Props {
 	accent?: 'primary' | 'secondary'
+	isLoading?: boolean
 }
 
 export function JButton({
