@@ -50,9 +50,13 @@ export default function PasswordSignIn({ allowEmail, redirectMethod }: PasswordS
 							autoComplete='current-password'
 						/>
 					</div>
-					<JButton className={style.sign_in_button} accent='primary' type='submit'>
-						Sign in
-					</JButton>
+					<JButton
+						text='Sign in'
+						className={style.sign_in_button}
+						accent='primary'
+						type='submit'
+						isLoading={isSubmitting}
+					/>
 				</div>
 			</form>
 			<p>
