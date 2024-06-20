@@ -1,7 +1,6 @@
 'use client'
 
 import style from './PasswordSignIn.module.scss'
-import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import { signInWithPassword } from '@/utils/auth-helpers/server'
 import { handleRequest } from '@/utils/auth-helpers/client'
@@ -33,6 +32,7 @@ export default function PasswordSignIn({ allowEmail, redirectMethod }: PasswordS
 					<div className={style.credentials_form}>
 						<label htmlFor='email'>Email</label>
 						<JInput
+							className={style.email_input}
 							id='email'
 							placeholder='name@example.com'
 							type='email'
@@ -43,6 +43,7 @@ export default function PasswordSignIn({ allowEmail, redirectMethod }: PasswordS
 						/>
 						<label htmlFor='password'>Password</label>
 						<JInput
+							className={style.password_input}
 							id='password'
 							placeholder='Password'
 							type='password'

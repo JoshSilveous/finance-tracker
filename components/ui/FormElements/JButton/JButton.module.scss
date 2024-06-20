@@ -48,6 +48,11 @@
 			background-color: var(--primary-color-lightened);
 		}
 		color: var(--primary-text-color);
+		&.loading {
+			background-color: var(--primary-color-lightened);
+			transform: translate(1px, 1px);
+			box-shadow: none;
+		}
 	}
 	&:not(.loading):active {
 		transform: translate(1px, 1px);
