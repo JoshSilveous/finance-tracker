@@ -1,7 +1,6 @@
 'use client'
 
 import style from './OauthSignIn.module.scss'
-import Button from '@/components/ui/Button'
 import { default as GitHubIcon } from '@/public/github.svg'
 import { signInWithOAuth } from '@/utils/auth-helpers/client'
 import { type Provider } from '@supabase/supabase-js'

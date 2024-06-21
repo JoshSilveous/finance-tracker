@@ -1,6 +1,5 @@
 'use client'
 
-import Button from '@/components/ui/Button'
 import style from './UpdatePassword.module.scss'
 import { updatePassword } from '@/utils/auth-helpers/server'
 import { handleRequest } from '@/utils/auth-helpers/client'
