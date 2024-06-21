@@ -1,10 +1,13 @@
 'use client'
 
 import Button from '@/components/ui/Button'
+import style from './UpdatePassword.module.scss'
 import { updatePassword } from '@/utils/auth-helpers/server'
 import { handleRequest } from '@/utils/auth-helpers/client'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
+import { JInput } from '../../FormElements'
+import { JButton } from '../../FormElements/JButton/JButton'
 
 interface UpdatePasswordProps {
 	redirectMethod: string
@@ -21,18 +24,18 @@ export function UpdatePassword({ redirectMethod }: UpdatePasswordProps) {
 	}
 
 	return (
-		<div className='my-8'>
+		<div className={style.container}>
 			<form noValidate={true} className='mb-4' onSubmit={(e) => handleSubmit(e)}>
-				<div className='grid gap-2'>
-					<div className='grid gap-1'>
+				<div className={style.credentials_container}>
+					<div className={style.credentials_form}>
 						<label htmlFor='password'>New Password</label>
-						<input
+						<JInput
+							className={style.password_input}
 							id='password'
 							placeholder='Password'
 							type='password'
 							name='password'
 							autoComplete='current-password'
-							className='w-full p-3 rounded-md bg-zinc-800'
 						/>
 						<label htmlFor='passwordConfirm'>Confirm New Password</label>
 						<input
@@ -43,10 +46,22 @@ export function UpdatePassword({ redirectMethod }: UpdatePasswordProps) {
 							autoComplete='current-password'
 							className='w-full p-3 rounded-md bg-zinc-800'
 						/>
+						<JInput
+							className={style.first_input}
+							id='passwordConfirm'
+							placeholder='Password'
+							type='password'
+							name='passwordConfirm'
+							autoComplete='current-password'
+						/>
 					</div>
-					<Button variant='slim' type='submit' className='mt-1' loading={isSubmitting}>
-						Update Password
-					</Button>
+					<JButton
+						text='Update Password'
+						className={style.sign_in_button}
+						accent='primary'
+						type='submit'
+						isLoading={isSubmitting}
+					/>
 				</div>
 			</form>
 		</div>
