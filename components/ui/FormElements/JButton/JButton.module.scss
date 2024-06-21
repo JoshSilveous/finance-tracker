@@ -43,13 +43,13 @@
 	}
 
 	&.primary {
-		background-color: var(--primary-color);
+		background-color: var(--primary-bg);
 		&:not(.loading):hover {
-			background-color: var(--primary-color-lightened);
+			background-color: var(--primary-bg-light);
 		}
 		color: var(--primary-text-color);
 		&.loading {
-			background-color: var(--primary-color-lightened);
+			background-color: var(--primary-bg-light);
 			transform: translate(1px, 1px);
 			box-shadow: none;
 		}

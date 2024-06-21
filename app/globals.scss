@@ -5,18 +5,20 @@
 		'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro', 'Fira Mono', 'Droid Sans Mono',
 		'Courier New', monospace;
 
-	--primary-color: #7c3aed;
-	--primary-color-lightened: #9a67f3;
+	--standard-bg: url('/background_light.svg');
+	--standard-text-color: #ffffff;
+	--input-bg: #ffffff;
+	--input-text-color: #000000;
+	--primary-bg: #7c3aed;
+	--primary-bg-light: #9a67f3;
 	--primary-text-color: #ffffff;
-
-	--background-graphic: url('/background_light.svg');
-	--frosted-glass: rgba(0, 0, 0, 0.1);
+	--frosted-glass-bg: rgba(0, 0, 0, 0.1);
 	--frosted-glass-box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.15), 5px 5px 3px rgba(0, 0, 0, 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--background-graphic: url('/background_dark.svg');
+		--standard-bg: url('/background_dark.svg');
 		--frosted-glass: rgba(255, 255, 255, 0.1);
 		--frosted-glass-box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.2),
 			5px 5px 3px rgba(0, 0, 0, 0.4);
@@ -38,7 +40,7 @@ body {
 body {
 	color: rgb(var(--foreground-rgb));
 	background-color: #242424;
-	background-image: var(--background-graphic);
+	background-image: var(--standard-bg);
 	background-size: cover;
 	background-attachment: fixed;
 }
