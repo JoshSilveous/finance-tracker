@@ -2,6 +2,12 @@
 	"exportall.config.folderListener": [
 		"/components/ui/AuthForms/PasswordSignIn",
 		"/components/ui/FormElements/JInput",
-		"/components/ui/FormElements"
+		"/components/ui/FormElements",
+		"/components/ui/AuthForms/Signup",
+		"/components/ui/AuthForms",
+		"/components/ui/AuthForms/EmailSignIn",
+		"/components/ui/AuthForms/ForgotPassword",
+		"/components/ui/AuthForms/OauthSignIn",
+		"/components/ui/AuthForms/UpdatePassword"
 	]
 }
