@@ -1,10 +1,12 @@
 'use client'
 
+import style from './OauthSignIn.module.scss'
 import Button from '@/components/ui/Button'
+import { default as GitHubIcon } from '@/public/github.svg'
 import { signInWithOAuth } from '@/utils/auth-helpers/client'
 import { type Provider } from '@supabase/supabase-js'
-import { Github } from 'lucide-react'
 import { useState } from 'react'
+import { JButton } from '../../FormElements/JButton/JButton'
 
 type OAuthProviders = {
 	name: Provider
@@ -17,7 +19,7 @@ export function OauthSignIn() {
 		{
 			name: 'github',
 			displayName: 'GitHub',
-			icon: <Github className='h-5 w-5' />,
+			icon: <GitHubIcon />,
 		},
 		/* Add desired OAuth providers here */
 	]
@@ -30,14 +32,15 @@ export function OauthSignIn() {
 	}
 
 	return (
-		<div className='mt-8'>
+		<div className={style.main}>
 			{oAuthProviders.map((provider) => (
-				<form key={provider.name} className='pb-2' onSubmit={(e) => handleSubmit(e)}>
+				<form key={provider.name} onSubmit={(e) => handleSubmit(e)}>
 					<input type='hidden' name='provider' value={provider.name} />
-					<Button variant='slim' type='submit' className='w-full' loading={isSubmitting}>
-						<span className='mr-2'>{provider.icon}</span>
-						<span>{provider.displayName}</span>
-					</Button>
+					<JButton
+						icon={provider.icon}
+						text={provider.displayName}
+						isLoading={isSubmitting}
+					/>
 				</form>
 			))}
 		</div>

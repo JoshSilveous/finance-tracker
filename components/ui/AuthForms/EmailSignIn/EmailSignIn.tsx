@@ -7,6 +7,8 @@ import { signInWithEmail } from '@/utils/auth-helpers/server'
 import { handleRequest } from '@/utils/auth-helpers/client'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { JInput } from '../../FormElements'
+import { JButton } from '../../FormElements/JButton/JButton'
 
 // Define prop type with allowPassword boolean
 interface EmailSignInProps {
@@ -26,12 +28,13 @@ export function EmailSignIn({ allowPassword, redirectMethod, disableButton }: Em
 	}
 
 	return (
-		<div className='my-8'>
+		<div className={style.container}>
 			<form noValidate={true} className='mb-4' onSubmit={(e) => handleSubmit(e)}>
-				<div className='grid gap-2'>
-					<div className='grid gap-1'>
+				<div className={style.credentials_container}>
+					<div className={style.credentials_form}>
 						<label htmlFor='email'>Email</label>
-						<input
+						<JInput
+							className={style.email_input}
 							id='email'
 							placeholder='name@example.com'
 							type='email'
@@ -39,22 +42,19 @@ export function EmailSignIn({ allowPassword, redirectMethod, disableButton }: Em
 							autoCapitalize='none'
 							autoComplete='email'
 							autoCorrect='off'
-							className='w-full p-3 rounded-md bg-zinc-800'
 						/>
 					</div>
-					<Button
-						variant='slim'
+					<JButton
+						text='Sign in'
+						className={style.sign_in_button}
+						accent='primary'
 						type='submit'
-						className='mt-1'
-						loading={isSubmitting}
-						disabled={disableButton}
-					>
-						Sign in
-					</Button>
+						isLoading={isSubmitting}
+					/>
 				</div>
 			</form>
 			{allowPassword && (
-				<>
+				<div className={style.links_container}>
 					<p>
 						<Link href='/signin/password_signin' className='font-light text-sm'>
 							Sign in with email and password
@@ -65,7 +65,7 @@ export function EmailSignIn({ allowPassword, redirectMethod, disableButton }: Em
 							Don't have an account? Sign up
 						</Link>
 					</p>
-				</>
+				</div>
 			)}
 		</div>
 	)

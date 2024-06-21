@@ -17,7 +17,7 @@ import {
 	OauthSignIn,
 	UpdatePassword,
 } from '@/components/ui/AuthForms/'
-import Separator from '@/components/ui/AuthForms/Separator'
+import style from './page.module.scss'
 
 export default async function SignIn({
 	params,
@@ -97,7 +97,12 @@ export default async function SignIn({
 					)}
 					{viewProp !== 'update_password' && viewProp !== 'signup' && allowOauth && (
 						<>
-							<Separator text='Third-party sign-in' />
+							<div className={style.divider_with_text}>
+								<div className={style.left} />
+								<div className={style.text}>or</div>
+								<div className={style.right} />
+							</div>
+							<div className={style.sign_in_with}>Sign in with</div>
 							<OauthSignIn />
 						</>
 					)}

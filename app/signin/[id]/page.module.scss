@@ -1,0 +1,20 @@
+.divider_with_text {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+	margin: 12px 0;
+	.left,
+	.right {
+		width: 100%;
+		background-color: var(--input-text-color);
+		height: 1px;
+		border-radius: 1px;
+	}
+}
+.sign_in_with {
+	font-size: 11px;
+	width: 100%;
+	margin-bottom: 3px;
+}
