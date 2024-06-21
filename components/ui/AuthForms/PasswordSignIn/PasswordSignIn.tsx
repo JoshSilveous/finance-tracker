@@ -15,7 +15,7 @@ interface PasswordSignInProps {
 	redirectMethod: string
 }
 
-export default function PasswordSignIn({ allowEmail, redirectMethod }: PasswordSignInProps) {
+export function PasswordSignIn({ allowEmail, redirectMethod }: PasswordSignInProps) {
 	const router = redirectMethod === 'client' ? useRouter() : null
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -60,17 +60,19 @@ export default function PasswordSignIn({ allowEmail, redirectMethod }: PasswordS
 					/>
 				</div>
 			</form>
-			<p>
-				<Link href='/signin/forgot_password'>Forgot your password?</Link>
-			</p>
-			{allowEmail && (
+			<div className={style.links_container}>
 				<p>
-					<Link href='/signin/email_signin'>Sign in via magic link</Link>
+					<Link href='/signin/forgot_password'>Forgot your password?</Link>
 				</p>
-			)}
-			<p>
-				<Link href='/signin/signup'>Don't have an account? Sign up</Link>
-			</p>
+				{allowEmail && (
+					<p>
+						<Link href='/signin/email_signin'>Sign in via magic link</Link>
+					</p>
+				)}
+				<p>
+					<Link href='/signin/signup'>Don't have an account? Sign up</Link>
+				</p>
+			</div>
 		</div>
 	)
 }

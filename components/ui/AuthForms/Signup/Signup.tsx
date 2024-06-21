@@ -1,7 +1,6 @@
 'use client'
 
 import style from './Signup.module.scss'
-import Button from '@/components/ui/Button'
 import React from 'react'
 import Link from 'next/link'
 import { signUp } from '@/utils/auth-helpers/server'
@@ -17,7 +16,7 @@ interface SignUpProps {
 	redirectMethod: string
 }
 
-export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
+export function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
 	const router = redirectMethod === 'client' ? useRouter() : null
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -62,19 +61,24 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
 					/>
 				</div>
 			</form>
-			<p>Already have an account?</p>
-			<p>
-				<Link href='/signin/password_signin' className='font-light text-sm'>
-					Sign in with email and password
-				</Link>
-			</p>
-			{allowEmail && (
+			<div className={style.links_container}>
 				<p>
-					<Link href='/signin/email_signin' className='font-light text-sm'>
-						Sign in via magic link
+					<strong>Already have an account?</strong>
+				</p>
+
+				<p>
+					<Link href='/signin/password_signin' className='font-light text-sm'>
+						Sign in with email and password
 					</Link>
 				</p>
-			)}
+				{allowEmail && (
+					<p>
+						<Link href='/signin/email_signin' className='font-light text-sm'>
+							Sign in via magic link
+						</Link>
+					</p>
+				)}
+			</div>
 		</div>
 	)
 }
