@@ -38,6 +38,7 @@ export function OauthSignIn() {
 					<JButton
 						icon={provider.icon}
 						text={provider.displayName}
+						className={provider.name === 'github' ? style.github_button : ''}
 						isLoading={isSubmitting}
 					/>
 				</form>
