@@ -5,7 +5,9 @@ import { SignOut } from '@/utils/auth-helpers/server'
 import { handleRequest } from '@/utils/auth-helpers/client'
 import { usePathname, useRouter } from 'next/navigation'
 import { getRedirectMethod } from '@/utils/auth-helpers/settings'
-import s from './Navbar.module.css'
+
+import style from './Navlinks.module.scss'
+import { MainLogo } from '@/components/svg/MainLogo'
 
 interface NavlinksProps {
 	user?: any
@@ -15,34 +17,24 @@ export default function Navlinks({ user }: NavlinksProps) {
 	const router = getRedirectMethod() === 'client' ? useRouter() : null
 
 	return (
-		<div className='relative flex flex-row justify-between py-4 align-center md:py-6'>
-			<div className='flex items-center flex-1'>
-				<Link href='/' className={s.logo} aria-label='Logo'>
-					<>logo</>
+		<div className={style.main}>
+			<div className={style.main}>
+				<Link href='/' aria-label='Logo'>
+					<MainLogo />
 				</Link>
-				<nav className='ml-6 space-x-2 lg:block'>
-					<Link href='/' className={s.link}>
-						Pricing
-					</Link>
-					{user && (
-						<Link href='/account' className={s.link}>
-							Account
-						</Link>
-					)}
+				<nav>
+					<Link href='/'>Pricing</Link>
+					{user && <Link href='/account'>Account</Link>}
 				</nav>
 			</div>
-			<div className='flex justify-end space-x-8'>
+			<div className={style.main}>
 				{user ? (
 					<form onSubmit={(e) => handleRequest(e, SignOut, router)}>
 						<input type='hidden' name='pathName' value={usePathname()} />
-						<button type='submit' className={s.link}>
-							Sign out
-						</button>
+						<button type='submit'>Sign out</button>
 					</form>
 				) : (
-					<Link href='/signin' className={s.link}>
-						Sign In
-					</Link>
+					<Link href='/signin'>Sign In</Link>
 				)}
 			</div>
 		</div>
