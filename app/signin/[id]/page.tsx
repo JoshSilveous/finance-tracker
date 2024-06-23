@@ -1,4 +1,3 @@
-import Logo from '@/components/icons/Logo'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -59,7 +58,7 @@ export default async function SignIn({
 		<div>
 			<div>
 				<div>
-					<Logo width='64px' height='64px' />
+					<>logo</>
 				</div>
 				<Card
 					title={

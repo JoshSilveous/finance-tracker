@@ -1,7 +1,7 @@
 'use client'
 
 import style from './OauthSignIn.module.scss'
-import { default as GitHubIcon } from '@/public/github.svg'
+import { GitHubLogo } from '../../../svg/GitHubLogo'
 import { signInWithOAuth } from '@/utils/auth-helpers/client'
 import { type Provider } from '@supabase/supabase-js'
 import { useState } from 'react'
@@ -18,7 +18,7 @@ export function OauthSignIn() {
 		{
 			name: 'github',
 			displayName: 'GitHub',
-			icon: <GitHubIcon />,
+			icon: <GitHubLogo />,
 		},
 		/* Add desired OAuth providers here */
 	]
