@@ -1,6 +1,12 @@
-import Image from 'next/image'
-import styles from './page.module.scss'
+import { createClient } from '@/utils/supabase/server'
+import Link from 'next/link'
 
-export default function Home() {
-	return <main className={styles.main}>Home!</main>
+export default async function Home() {
+	return (
+		<p>
+			Home!
+			<Link href='/login'>Login</Link>
+			<Link href='/private'>Private</Link>
+		</p>
+	)
 }
