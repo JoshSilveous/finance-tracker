@@ -1,13 +1,16 @@
-import Image from 'next/image'
-import styles from './page.module.scss'
-import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
-export default function Home() {
-	return (
-		<main className={styles.main}>
-			<h1>Finance Tracker!</h1>
-			<Link href='/login'>Login</Link>
-			<Link href='/private'>Private Page</Link>
-		</main>
-	)
+import { createClient } from '@/utils/supabase/server'
+
+export default async function Home() {
+	const supabase = createClient()
+
+	const { data, error } = await supabase.auth.getUser()
+	if (error || !data?.user) {
+		console.log('redirecting to home')
+		redirect('/home')
+	} else {
+		console.log('redirecting to private home')
+		redirect('/p/home')
+	}
 }
