@@ -5,11 +5,11 @@ import { login, signup } from './actions'
 export default function LoginPage() {
 	const [error, setError] = useState('')
 	async function loginHandler(formData: FormData) {
-		try {
-			login(formData)
-			setError('')
-		} catch (err: any) {
-			setError(err)
+		const { errorMessage } = await login(formData)
+
+		if (errorMessage) {
+			setError(errorMessage)
+			console.log('error!', errorMessage)
 		}
 	}
 	function signupHandler() {}
