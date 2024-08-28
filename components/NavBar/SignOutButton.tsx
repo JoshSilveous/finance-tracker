@@ -1,16 +1,17 @@
 'use client'
-import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { redirectToError } from '@/utils/redirectToError'
+import { useRouter } from 'next/navigation'
 
 export function SignOutButton() {
+	const router = useRouter()
 	async function signOut() {
 		const supabase = createClient()
 		const { error } = await supabase.auth.signOut()
 		if (error) {
-			redirectToError(error.message)
+			router.push(`/error?message=${encodeURIComponent(error.message)}`)
 		} else {
-			redirectToError('just kidding, success!')
+			router.push(`/home`)
+			// later on, have this create a popup that says "you have signed out" and an option to login / return to home
 		}
 	}
 
