@@ -1,0 +1,43 @@
+body {
+	background-color: #171717;
+	--font-color-1: #eeeeee;
+	--error-color: rgb(255, 131, 131);
+	--button-primary-bg: rgb(124, 58, 237);
+	--button-primary-bg-hover: rgb(143, 87, 239);
+	color: var(--font-color-1);
+	h1 {
+		font-weight: 500;
+		font-size: 30px;
+	}
+	input,
+	button {
+		color: var(--font-color-1);
+		font-family: inherit;
+		height: 36px;
+		box-sizing: border-box;
+		width: 100%;
+		padding: 8px 12px;
+		border-radius: 3px;
+		outline: solid rgba(229, 229, 229, 0.2);
+		border: 0;
+		outline-width: 1px;
+		background-color: rgb(34, 34, 34);
+		transition: outline-width 0.15s ease;
+
+		&:focus,
+		&:active {
+			outline-width: 3px;
+			box-shadow: none;
+		}
+	}
+
+	button {
+		font-weight: 600;
+	}
+	label {
+		display: inline-block;
+		font-size: 16px;
+		font-weight: 500;
+		padding: 8px 0;
+	}
+}
