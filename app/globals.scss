@@ -2,9 +2,15 @@ body {
 	background-color: #171717;
 	--font-color-1: #eeeeee;
 	--error-color: rgb(255, 131, 131);
-	--button-primary-bg: rgb(124, 58, 237);
-	--button-primary-bg-hover: rgb(143, 87, 239);
+	--primary: rgb(124, 58, 237);
+	--primary-light-1: rgb(143, 87, 239);
+	--primary-light-2: rgb(164, 119, 241);
 	color: var(--font-color-1);
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
 	h1 {
 		font-weight: 500;
 		font-size: 30px;
@@ -39,5 +45,16 @@ body {
 		font-size: 16px;
 		font-weight: 500;
 		padding: 8px 0;
+	}
+	a {
+		color: var(--primary-light-1);
+		font-weight: 700;
+		transition: color 0.15s ease;
+		cursor: pointer;
+		&:hover,
+		&:focus,
+		&:active {
+			color: var(--primary-light-2);
+		}
 	}
 }

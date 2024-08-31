@@ -1,18 +1,24 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
-import { login } from './actions'
-import s from './LoginForm.module.scss'
+import { login, signup } from '../actions'
+import s from './SignupForm.module.scss'
 
 interface Errors {
 	email: string
 	password: string
+	password_confirm: string
 	general: string
 }
 
-export function LoginForm() {
-	const [formData, setFormData] = useState({ email: '', password: '' })
+export function SignupForm() {
+	const [formData, setFormData] = useState({
+		email: '',
+		password: '',
+		password_confirm: '',
+	})
 	const [errors, setErrors] = useState<Errors>({
 		email: '',
 		password: '',
+		password_confirm: '',
 		general: '',
 	})
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -31,6 +37,7 @@ export function LoginForm() {
 		setErrors({
 			email: '',
 			password: '',
+			password_confirm: '',
 			general: '',
 		})
 		let formValid = true
@@ -62,9 +69,72 @@ export function LoginForm() {
 			formValid = false
 		}
 
+		let passwordIsAtLeast8Chars = true
+		let passwordHasUppercase = true
+		let passwordHasLowercase = true
+		let passwordHasNumber = true
+
+		// password doesn't meet length requirement
+		if (!/.{8,}/.test(formData.password)) {
+			passwordIsAtLeast8Chars = false
+		}
+
+		// password doesn't have an uppercase character
+		if (!/[A-Z]/.test(formData.password)) {
+			passwordHasUppercase = false
+		}
+
+		// password doesn't have a lowercase character
+		if (!/[a-z]/.test(formData.password)) {
+			passwordHasLowercase = false
+		}
+
+		// password doesn't have a number
+		if (!/\d/.test(formData.password)) {
+			passwordHasNumber = false
+		}
+
+		if (
+			!passwordIsAtLeast8Chars ||
+			!passwordHasUppercase ||
+			!passwordHasLowercase ||
+			!passwordHasNumber
+		) {
+			const errorsTxt: string[] = []
+
+			if (!passwordIsAtLeast8Chars) {
+				errorsTxt.push('at least 8 characters')
+			}
+			if (!passwordHasUppercase) {
+				errorsTxt.push('an uppercase character')
+			}
+			if (!passwordHasLowercase) {
+				errorsTxt.push('a lowercase character')
+			}
+			if (!passwordHasNumber) {
+				errorsTxt.push('a number')
+			}
+			setErrors((prev) => ({
+				...prev,
+				password: `Password needs ${errorsTxt.slice(0, -1).join(', ')}${
+					errorsTxt.length > 1 ? ', and ' : ''
+				}${errorsTxt.slice(-1)}`,
+			}))
+			formValid = false
+		}
+
+		if (formData.password !== formData.password_confirm) {
+			// passwords don't match
+			setErrors((prev) => ({
+				...prev,
+				password_confirm: 'Passwords do not match',
+			}))
+			formValid = false
+		}
+
 		if (formValid) {
 			setIsSubmitting(true)
-			const { error } = await login(formData.email, formData.password)
+			const { error } = await signup(formData.email, formData.password)
 
 			if (error) {
 				setErrors((prev) => ({ ...prev, general: error }))
@@ -102,9 +172,22 @@ export function LoginForm() {
 					{errors.password && <div>{errors.password}</div>}
 				</div>
 			</div>
+			<div className={errors.password_confirm ? s.error : ''}>
+				<label htmlFor='password_confirm'>Password Confirm</label>
+				<input
+					id='password_confirm'
+					name='password_confirm'
+					type='password'
+					required
+					onChange={handleInputChange}
+				/>
+				<div className={s.error_container}>
+					{errors.password_confirm && <div>{errors.password_confirm}</div>}
+				</div>
+			</div>
 			<div>
 				<button type='submit' disabled={isSubmitting}>
-					{isSubmitting ? 'Loading...' : 'Sign in'}
+					{isSubmitting ? 'Loading...' : 'Sign up'}
 				</button>
 				<div className={s.error_container}>
 					{errors.general && <div>{errors.general}</div>}

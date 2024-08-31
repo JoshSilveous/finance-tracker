@@ -1,5 +1,6 @@
 .form {
 	width: 360px;
+	text-align: left;
 
 	div {
 		&.error {
@@ -19,11 +20,11 @@
 		transition: background-color 0.15s ease;
 		cursor: pointer;
 		&:hover {
-			background-color: var(--button-primary-bg-hover);
+			background-color: var(--primary-light-1);
 		}
 		&:disabled {
 			cursor: progress;
-			background-color: var(--button-primary-bg-hover);
+			background-color: var(--primary-light-1);
 		}
 	}
 }

@@ -1,0 +1,30 @@
+.form {
+	width: 360px;
+	text-align: left;
+
+	div {
+		&.error {
+			input {
+				outline-color: var(--error-color);
+			}
+		}
+		div.error_container {
+			min-height: 16px;
+			padding: 2px 0 0px 0;
+			font-size: 12px;
+			color: var(--error-color);
+		}
+	}
+
+	button {
+		transition: background-color 0.15s ease;
+		cursor: pointer;
+		&:hover {
+			background-color: var(--primary-light-1);
+		}
+		&:disabled {
+			cursor: progress;
+			background-color: var(--primary-light-1);
+		}
+	}
+}
