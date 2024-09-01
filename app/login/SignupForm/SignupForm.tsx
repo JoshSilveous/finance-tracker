@@ -134,10 +134,9 @@ export function SignupForm() {
 
 		if (formValid) {
 			setIsSubmitting(true)
-			const { error } = await signup(formData.email, formData.password)
-
-			if (error) {
-				setErrors((prev) => ({ ...prev, general: error }))
+			const res = await signup(formData.email, formData.password)
+			if (res?.error) {
+				setErrors((prev) => ({ ...prev, general: res.error }))
 				setIsSubmitting(false)
 			}
 		}

@@ -25,8 +25,8 @@ export async function signup(email: string, password: string) {
 
 	if (error) {
 		return { error: error.message }
+	} else {
+		revalidatePath('/', 'layout')
+		redirect('/')
 	}
-
-	revalidatePath('/', 'layout')
-	redirect('/')
 }

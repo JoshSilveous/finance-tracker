@@ -64,10 +64,10 @@ export function LoginForm() {
 
 		if (formValid) {
 			setIsSubmitting(true)
-			const { error } = await login(formData.email, formData.password)
+			const res = await login(formData.email, formData.password)
 
-			if (error) {
-				setErrors((prev) => ({ ...prev, general: error }))
+			if (res?.error) {
+				setErrors((prev) => ({ ...prev, general: res.error }))
 				setIsSubmitting(false)
 			}
 		}
