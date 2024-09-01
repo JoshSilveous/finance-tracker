@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
-import { login, signup } from '../actions'
+import { signup } from './signup'
 import s from './SignupForm.module.scss'
 
 interface Errors {

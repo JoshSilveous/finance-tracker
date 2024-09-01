@@ -2,8 +2,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import s from './page.module.scss'
-import { LoginForm } from './LoginForm/LoginForm'
-import { SignupForm } from './SignupForm/SignupForm'
+import { LoginForm } from '@/components/LoginForm/LoginForm'
+import { SignupForm } from '@/components/SignupForm/SignupForm'
 
 type FormType = 'login' | 'signup'
 export default function LoginPage() {
