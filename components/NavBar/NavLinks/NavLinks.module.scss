@@ -1,0 +1,7 @@
+.container {
+	display: flex;
+	width: 300px;
+	margin-right: 16px;
+	justify-content: space-between;
+	margin-left: calc((60px - 17px) / 2 - 12px);
+}

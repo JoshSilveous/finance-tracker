@@ -1,14 +1,15 @@
 import { SignOutButton } from './SignOutButton'
+import { createClient } from '@/utils/supabase/server'
 import s from './NavBar.module.scss'
+import { NavLinks } from './NavLinks/NavLinks'
 
-export default function NavBar() {
+export default async function NavBar() {
+	const supabase = createClient()
+
+	const { data, error } = await supabase.auth.getUser()
 	return (
 		<div className={s.container}>
-			<div className={s.navigation_links}>
-				<div className={s.link_container}>Log</div>
-				<div className={s.link_container}>Categories</div>
-				<div className={s.link_container}>Accounts</div>
-			</div>
+			<NavLinks />
 			<div className={s.sign_out_container}>
 				<SignOutButton />
 			</div>
