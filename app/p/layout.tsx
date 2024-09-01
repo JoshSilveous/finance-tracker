@@ -1,14 +1,16 @@
-import { SignOutButton } from '@/components/NavBar/SignOutButton'
+import NavBar from '@/components/NavBar/NavBar'
+import s from './layout.module.scss'
 export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
 }>) {
 	return (
-		<div>
-			This is the NavBar which only shows while signed in.
-			{children}
-			<SignOutButton />
+		<div className={s.main}>
+			<div className={s.navbar_container}>
+				<NavBar />
+			</div>
+			<div className={s.content_container}>{children}</div>
 		</div>
 	)
 }

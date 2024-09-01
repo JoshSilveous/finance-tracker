@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import s from './page.module.scss'
 
 export default async function Home() {
 	const supabase = createClient()
@@ -9,5 +10,56 @@ export default async function Home() {
 		redirect('/login')
 	}
 
-	return <p>Hello {data.user.email}</p>
+	return (
+		<div className={s.container}>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+			<p>Hello {data.user.email}</p>
+		</div>
+	)
 }

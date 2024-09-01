@@ -1,16 +1,20 @@
 body {
-	background-color: #171717;
+	--background-color: #171717;
+	background-color: var(--background-color);
 	--font-color-1: #eeeeee;
 	--error-color: rgb(255, 131, 131);
 	--primary: rgb(124, 58, 237);
 	--primary-light-1: rgb(143, 87, 239);
 	--primary-light-2: rgb(164, 119, 241);
+	--primary-dark-1: rgb(96, 41, 191);
+	--primary-dark-2: rgb(63, 27, 124);
 	color: var(--font-color-1);
 	font-size: 14px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-direction: column;
+	margin: 0;
 	h1 {
 		font-weight: 500;
 		font-size: 30px;
