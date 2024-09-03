@@ -1,0 +1,82 @@
+// shorthand border properties don't work with cascaded inheritance (for color, specifically so that users can control border-color with their class or JSX style tag. It looks ugly, but it's the only way to inherit border-color properly.
+.container {
+	display: flex;
+	width: 100%;
+	justify-content: flex-start;
+	overflow-x: auto;
+	border-radius: inherit;
+
+	.grid {
+		display: grid;
+		grid-auto-rows: 35px;
+		align-self: flex-start;
+		border-color: inherit;
+		border-width: 1px;
+		border-style: solid;
+		border-right-width: 0px;
+		border-bottom-width: 0px;
+
+		.row {
+			display: contents;
+			border-color: inherit;
+
+			.cell {
+				box-sizing: border-box;
+				display: flex;
+				align-items: center;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				width: 100%;
+				height: 100%;
+
+				&.header {
+					user-select: none;
+					font-weight: 700;
+					grid-row: 1 / 2;
+					justify-content: center;
+				}
+				border-right-width: 1px;
+				border-right-color: inherit;
+				border-right-style: solid;
+				border-bottom-width: 1px;
+				border-bottom-color: inherit;
+				border-bottom-style: solid;
+			}
+		}
+		.measurer {
+			grid-row: 1 / 2;
+			display: flex;
+			justify-content: flex-end;
+			pointer-events: none;
+			border-color: inherit;
+
+			.grabber {
+				pointer-events: all;
+				width: 10px;
+				height: 100%;
+				position: relative;
+				overflow: hidden;
+				cursor: e-resize;
+				border-color: inherit;
+
+				&::before {
+					content: '';
+					position: absolute;
+					top: 0;
+					right: 0;
+					bottom: 0;
+					left: 100%;
+					border-left-color: inherit;
+					border-left-width: 10px;
+					border-left-style: solid;
+					transition: left 0.2s;
+				}
+				&:hover::before,
+				&.resizing::before {
+					left: 6px;
+				}
+			}
+		}
+	}
+}

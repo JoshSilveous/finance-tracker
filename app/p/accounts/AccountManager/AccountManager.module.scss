@@ -2,3 +2,13 @@
 	display: flex;
 	gap: 50px;
 }
+.jgrid_container {
+	.jgrid {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		& > div {
+			border-radius: 10px;
+		}
+	}
+}
