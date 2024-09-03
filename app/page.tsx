@@ -11,6 +11,6 @@ export default async function Home() {
 		redirect('/home')
 	} else {
 		console.log('redirecting to private home')
-		redirect('/p/home')
+		redirect('/p/log')
 	}
 }

@@ -1,7 +1,31 @@
 .container {
-	display: flex;
 	width: 300px;
 	margin-right: 16px;
-	justify-content: space-between;
 	margin-left: calc((60px - 17px) / 2 - 12px);
+	.links_container {
+		display: flex;
+		justify-content: space-between;
+		.link {
+			a {
+				text-decoration: none;
+				color: var(--font-color-1);
+			}
+			transition: transform 0.15s ease;
+			&:hover {
+				color: var(--font-color-1);
+				transform: translateY(-2px);
+			}
+			&:active {
+				transform: translateY(-1px);
+			}
+		}
+	}
+	.link_underline {
+		position: absolute;
+		height: 2px;
+		transform: translateY(2px);
+		background-color: var(--font-color-1);
+		transition: width 0.3s ease, left 0.3s ease;
+		box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+	}
 }

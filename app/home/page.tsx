@@ -3,12 +3,12 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 
 export default async function Home() {
-	// const supabase = createClient()
+	const supabase = createClient()
 
-	// const { data, error } = await supabase.auth.getUser()
-	// if (!(error || !data?.user)) {
-	// 	redirect('/p/home')
-	// }
+	const { data, error } = await supabase.auth.getUser()
+	if (!(error || !data?.user)) {
+		redirect('/p/log')
+	}
 
 	return (
 		<div>
