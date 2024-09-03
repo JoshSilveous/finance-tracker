@@ -1,5 +1,4 @@
 import { SignOutButton } from './SignOutButton'
-import { createClient } from '@/utils/supabase/server'
 import s from './NavBar.module.scss'
 import { NavLinks } from './NavLinks/NavLinks'
 

@@ -13,53 +13,6 @@ export default async function Home() {
 	return (
 		<div className={s.container}>
 			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
-			<p>Hello {data.user.email}</p>
 		</div>
 	)
 }
