@@ -1,3 +1,4 @@
+import { AccountManager } from './AccountManager/AccountManager'
 import { insertAccount } from './insertAccount'
 import { createClient } from '@/utils/supabase/server'
 
@@ -10,17 +11,7 @@ export default async function Accounts() {
 	}
 	return (
 		<div>
-			Accounts!
-			<form style={{ maxWidth: '400px' }}>
-				<input type='text' id='name' name='name' />
-				<input type='number' id='starting_amount' name='starting_amount' />
-				<button type='submit' formAction={insertAccount}>
-					Submit
-				</button>
-			</form>
-			{data?.map((item) => (
-				<div>{JSON.stringify(item)}</div>
-			))}
+			<AccountManager />
 		</div>
 	)
 }
