@@ -1,5 +1,6 @@
 body {
 	--background-color: #171717;
+	--background-color-lighter: rgb(34, 34, 34);
 	background-color: var(--background-color);
 	--font-color-1: #eeeeee;
 	--error-color: rgb(255, 131, 131);
@@ -31,7 +32,7 @@ body {
 		outline: solid rgba(229, 229, 229, 0.2);
 		border: 0;
 		outline-width: 1px;
-		background-color: rgb(34, 34, 34);
+		background-color: var(--background-color-lighter);
 		transition: outline-width 0.15s ease;
 
 		&:focus,

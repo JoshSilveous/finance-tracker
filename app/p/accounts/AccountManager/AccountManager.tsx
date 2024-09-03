@@ -1,8 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import s from './AccountManager.module.scss'
 import { createClient } from '@/utils/supabase/client'
 import { JGrid, JGridProps } from '@/components/JGrid/JGrid'
+import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccounting'
+import { JText } from '@/components/JForm/JText/JText'
 
 interface AccountData {
 	id: string
@@ -10,9 +12,16 @@ interface AccountData {
 	starting_amount: number
 }
 
+interface Change {
+	account_id: string
+	key: 'name' | 'starting_amount'
+	newVal: string | number
+}
+
 export function AccountManager() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [data, setData] = useState<AccountData[]>()
+	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 
 	const supabase = createClient()
 
@@ -32,31 +41,92 @@ export function AccountManager() {
 		fetchData()
 	}, [])
 
+	function handleChange(e: ChangeEvent<HTMLInputElement>) {
+		console.log('updating with following info:')
+		const account_id = e.target.dataset['id'] as Change['account_id']
+		const key = e.target.dataset['key'] as Change['key']
+		const startingValue = e.target.defaultValue
+		const currentValue = e.target.value
+
+		const currentChangeIndex = pendingChanges?.findIndex((change) => {
+			if (change.account_id === account_id && change.key === key) {
+				return true
+			} else {
+				return false
+			}
+		})
+		console.log('currentChangeIndex', currentChangeIndex)
+
+		if (startingValue == currentValue) {
+			// if new val equals starting value, remove change item and class
+			e.target.classList.remove(s.changed)
+			if (currentChangeIndex !== -1) {
+				setPendingChanges((prev) => {
+					const newArr = [...prev]
+					newArr.splice(currentChangeIndex, 1)
+					return newArr
+				})
+			}
+		} else if (currentChangeIndex === -1) {
+			// if change isn't already present in pendingChanges
+			e.target.classList.add(s.changed)
+			setPendingChanges((prev) => [
+				...prev,
+				{
+					account_id: account_id,
+					key: key,
+					newVal: currentValue,
+				},
+			])
+		} else {
+			// if change is already present in pendingChanges
+			setPendingChanges((prev) => {
+				const newArr = [...prev]
+				newArr[currentChangeIndex] = {
+					account_id: account_id,
+					key: key,
+					newVal: currentValue,
+				}
+				return newArr
+			})
+		}
+	}
+	useEffect(() => {
+		console.log(pendingChanges)
+	}, [pendingChanges])
+
 	if (!isLoading && data) {
 		const gridHeaders = ['Account Name', 'Starting Amount']
 
 		const gridConfig: JGridProps = {
 			headers: gridHeaders.map((text) => <div className={s.header}>{text}</div>),
 			content: data.map((item) => [
-				<div data-id={item.id} className={s.cell}>
-					{item.name}
-				</div>,
-				<div data-id={item.id}>{item.starting_amount}</div>,
+				<JText
+					onChange={handleChange}
+					data-id={item.id}
+					data-key='name'
+					defaultValue={item.name}
+				/>,
+				<JNumberAccounting
+					onChange={handleChange}
+					data-id={item.id}
+					data-key='starting_amount'
+					defaultValue={item.starting_amount}
+				/>,
 			]),
 			defaultColumnWidths: ['250px', '150px'],
-			noOuterBorders: true,
 		}
 
 		return (
-			<div>
+			<div className={s.main}>
 				<div>Account Manager</div>
-				{isLoading ? (
-					<div>Loading...</div>
-				) : (
-					<div className={s.jgrid_container}>
-						<JGrid {...gridConfig} className={s.jgrid} />
-					</div>
-				)}
+				<div className={s.jgrid_container}>
+					<JGrid {...gridConfig} className={s.jgrid} />
+				</div>
+				<div className={s.buttons_container}>
+					<button>Create new account</button>
+					<button>Save changes</button>
+				</div>
 			</div>
 		)
 	} else {
