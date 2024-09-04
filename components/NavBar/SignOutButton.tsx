@@ -1,6 +1,7 @@
 'use client'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
+import { JButton } from '../JForm/JButton/JButton'
 
 export function SignOutButton() {
 	const router = useRouter()
@@ -15,5 +16,9 @@ export function SignOutButton() {
 		}
 	}
 
-	return <button onClick={signOut}>Sign Out</button>
+	return (
+		<JButton jstyle='secondary' onClick={signOut}>
+			Sign Out
+		</JButton>
+	)
 }

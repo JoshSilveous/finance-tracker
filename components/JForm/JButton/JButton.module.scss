@@ -1,0 +1,56 @@
+.jbutton {
+	cursor: pointer;
+	transition: background-color 0.15s ease, outline-color 0.15s ease,
+		outline-width 0.15s ease, transform 0.05s ease;
+	color: var(--font-color);
+	font-family: inherit;
+	height: 36px;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 8px 12px;
+	border-radius: 3px;
+	outline: solid;
+	outline-width: 1px;
+	border: 0;
+	font-weight: 600;
+
+	&:focus {
+		outline-width: 3px;
+	}
+	&:active {
+		transform: translateY(2px);
+	}
+
+	&:disabled {
+		background-color: var(--bg-color-lighter-1);
+		outline-color: var(--bg-color-lighter-2);
+		color: var(--font-color-disabled);
+		cursor: not-allowed;
+
+		&:hover,
+		&:focus {
+			outline-width: 1px;
+		}
+		&:active {
+			transform: translateY(0px);
+		}
+	}
+
+	&.primary:not(:disabled) {
+		background-color: var(--prim-bg);
+		outline-color: var(--prim-bg-dark-1);
+
+		&:hover {
+			background-color: var(--prim-bg-light-1);
+			outline-color: var(--prim-bg);
+		}
+	}
+	&.secondary:not(:disabled) {
+		background-color: var(--bg-color-lighter-1);
+		outline-color: var(--bg-color-lighter-2);
+		&:hover {
+			background-color: var(--bg-color-lighter-2);
+			outline-color: var(--bg-color-lighter-3);
+		}
+	}
+}

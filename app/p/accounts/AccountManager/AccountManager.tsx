@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { JGrid, JGridProps } from '@/components/JGrid/JGrid'
 import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccounting'
 import { JText } from '@/components/JForm/JText/JText'
+import { JButton } from '@/components/JForm/JButton/JButton'
 
 interface AccountData {
 	id: string
@@ -124,13 +125,23 @@ export function AccountManager() {
 					<JGrid {...gridConfig} className={s.jgrid} />
 				</div>
 				<div className={s.buttons_container}>
-					<button className={s.create_new}>Create new account</button>
-					<button className={s.discard} disabled={pendingChanges.length === 0}>
+					<JButton jstyle='primary' className={s.create_new}>
+						Create new account
+					</JButton>
+					<JButton
+						jstyle='primary'
+						className={s.discard}
+						disabled={pendingChanges.length === 0}
+					>
 						Discard changes
-					</button>
-					<button className={s.save} disabled={pendingChanges.length === 0}>
+					</JButton>
+					<JButton
+						jstyle='primary'
+						className={s.save}
+						disabled={pendingChanges.length === 0}
+					>
 						Save changes
-					</button>
+					</JButton>
 				</div>
 			</div>
 		)

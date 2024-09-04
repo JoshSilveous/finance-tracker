@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { login } from './login'
 import s from './LoginForm.module.scss'
+import { JButton } from '../JForm/JButton/JButton'
 
 interface Errors {
 	email: string
@@ -103,9 +104,14 @@ export function LoginForm() {
 				</div>
 			</div>
 			<div>
-				<button type='submit' disabled={isSubmitting}>
-					{isSubmitting ? 'Loading...' : 'Sign in'}
-				</button>
+				<JButton
+					jstyle='primary'
+					type='submit'
+					disabled={isSubmitting}
+					loading={isSubmitting}
+				>
+					Sign In
+				</JButton>
 				<div className={s.error_container}>
 					{errors.general && <div>{errors.general}</div>}
 				</div>
