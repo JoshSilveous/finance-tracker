@@ -9,13 +9,13 @@
 	justify-content: space-between;
 	background: linear-gradient(
 		135deg,
-		var(--primary-light-2) 0%,
-		var(--primary) 30%,
-		var(--primary-dark-2) 70%,
-		var(--background-color) 100%
+		var(--prim-bg-light-1) 0%,
+		var(--prim-bg) 30%,
+		var(--prim-bg-dark-1) 70%,
+		var(--bg-color) 100%
 	);
 	background-size: 400% 400%;
-	animation: backgroundGradientIdle 10s ease-in-out 4s infinite;
+	animation: backgroundGradientIdle 10s ease-in-out infinite;
 
 	font-weight: 700;
 
