@@ -1,8 +1,10 @@
 body {
 	--background-color: #171717;
 	--background-color-lighter: rgb(34, 34, 34);
+	--background-color-lighter-2: rgb(61, 61, 61);
 	background-color: var(--background-color);
 	--font-color-1: #eeeeee;
+	--font-color-1-disabled: #bbbbbb;
 	--error-color: rgb(255, 131, 131);
 	--primary: rgb(124, 58, 237);
 	--primary-light-1: rgb(143, 87, 239);

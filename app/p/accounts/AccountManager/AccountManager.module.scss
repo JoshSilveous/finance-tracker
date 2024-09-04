@@ -10,6 +10,28 @@
 	padding: 0 20px;
 	button {
 		width: calc(50% - 10px);
+		background-color: var(--primary);
+		outline-color: var(--primary);
+		cursor: pointer;
+		transition: background-color 0.15s ease, outline-color 0.15s ease;
+
+		&:hover,
+		&:focus {
+			background-color: var(--primary-light-1);
+			outline-color: var(--primary-light-1);
+		}
+
+		&:disabled {
+			background-color: var(--background-color-lighter);
+			outline-color: var(--background-color-lighter-2);
+			color: var(--font-color-1-disabled);
+			cursor: not-allowed;
+
+			&:hover,
+			&:focus {
+				outline-width: 1px;
+			}
+		}
 	}
 }
 
@@ -19,13 +41,21 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 20px;
+	background-color: red;
+	padding: 20px;
+	border-radius: 20px;
+	background-color: var(--background-color-lighter);
 }
 
 .jgrid_container {
 	.jgrid {
+		width: 80vw;
+		input {
+			background-color: var(--background-color-lighter-2);
+		}
 		.header {
 			color: var(--font-color-1);
-			background-color: var(--background-color-lighter);
+			background-color: var(--background-color-lighter-2);
 			width: 100%;
 			height: 100%;
 			display: flex;

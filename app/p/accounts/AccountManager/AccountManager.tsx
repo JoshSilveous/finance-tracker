@@ -114,22 +114,27 @@ export function AccountManager() {
 					defaultValue={item.starting_amount}
 				/>,
 			]),
-			defaultColumnWidths: ['250px', '150px'],
+			defaultColumnWidths: ['122px', '133px'],
 		}
 
 		return (
 			<div className={s.main}>
-				<div>Account Manager</div>
+				<h2>Account Manager</h2>
 				<div className={s.jgrid_container}>
 					<JGrid {...gridConfig} className={s.jgrid} />
 				</div>
 				<div className={s.buttons_container}>
-					<button>Create new account</button>
-					<button>Save changes</button>
+					<button className={s.create_new}>Create new account</button>
+					<button className={s.discard} disabled={pendingChanges.length === 0}>
+						Discard changes
+					</button>
+					<button className={s.save} disabled={pendingChanges.length === 0}>
+						Save changes
+					</button>
 				</div>
 			</div>
 		)
 	} else {
-		return <div>loading...</div>
+		return <div className={s.main}>loading...</div>
 	}
 }
