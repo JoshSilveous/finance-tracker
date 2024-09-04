@@ -1,0 +1,31 @@
+.popup_background {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 100vw;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 19;
+
+	.popup_container {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: auto;
+		height: auto;
+		background-color: var(--bg-color-lighter-3);
+		border-radius: 20px;
+		z-index: 20;
+		color: black;
+		padding: 40px 20px 20px 20px;
+
+		.popup_exit {
+			right: 13px;
+			top: 9px;
+			position: absolute;
+			cursor: pointer;
+			user-select: none;
+		}
+	}
+}

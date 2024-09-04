@@ -52,6 +52,6 @@ svg.loading_anim {
 	}
 
 	.changed {
-		color: red;
+		color: var(--font-color-changed) !important;
 	}
 }

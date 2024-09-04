@@ -7,6 +7,7 @@ import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccou
 import { JInput } from '@/components/JForm/JInput/JInput'
 import { JButton } from '@/components/JForm/JButton/JButton'
 import { default as LoadingAnim } from '@/public/loading.svg'
+import { triggerPopup } from '@/utils/triggerPopup/triggerPopup'
 
 interface AccountData {
 	id: string
@@ -96,8 +97,18 @@ export function AccountManager() {
 	function discardChanges() {
 		pendingChanges.forEach((change) => {
 			change.node.value = change.node.defaultValue
+			change.node.classList.remove(s.changed)
 		})
 		setPendingChanges([])
+	}
+
+	function handleCreateAccount() {
+		const popupContent = <div className={s.create_account_popup}>Popup!</div>
+		const popupCloseMethod = () => {
+			console.log('closed.')
+		}
+
+		triggerPopup(popupContent, popupCloseMethod)
 	}
 
 	if (!isLoading && data) {
@@ -129,7 +140,17 @@ export function AccountManager() {
 					<JGrid {...gridConfig} className={s.jgrid} />
 				</div>
 				<div className={s.buttons_container}>
-					<JButton jstyle='primary' className={s.create_new}>
+					<JButton
+						jstyle='primary'
+						className={s.create_new}
+						disabled={pendingChanges.length !== 0}
+						title={
+							pendingChanges.length !== 0
+								? 'Save or discard changes to create a new account'
+								: ''
+						}
+						onClick={handleCreateAccount}
+					>
 						Create new account
 					</JButton>
 					<JButton
