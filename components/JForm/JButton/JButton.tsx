@@ -1,5 +1,6 @@
 import { ButtonHTMLAttributes } from 'react'
 import s from './JButton.module.scss'
+import { default as LoadingAnim } from '@/public/loading.svg'
 
 interface JButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	jstyle: 'primary' | 'secondary'
@@ -18,8 +19,13 @@ export function JButton(props: JButtonProps) {
 	}
 
 	return (
-		<button {...props} className={`${props.className} ${s.jbutton} ${jstyleClass}`}>
-			{props.loading ? '...' : props.children}
+		<button
+			{...props}
+			className={`${props.className} ${s.jbutton} ${jstyleClass} ${
+				props.loading ? s.loading : ''
+			}`}
+		>
+			{props.loading ? <LoadingAnim /> : props.children}
 		</button>
 	)
 }

@@ -11,13 +11,36 @@
 	}
 	input {
 		text-align: right;
-		padding-left: 28px;
 		-moz-appearance: textfield;
+		font-family: inherit;
+		color: var(--font-color);
+		height: 36px;
+		box-sizing: border-box;
+		width: 100%;
+		padding: 8px 12px 8px 28px;
+		border-radius: 3px;
+		outline: solid rgba(229, 229, 229, 0.2);
+		border: 0;
+		outline-width: 1px;
+		background-color: var(--bg-color-lighter-1);
+		transition: outline-width 0.15s ease;
 
 		&::-webkit-outer-spin-button,
 		&::-webkit-inner-spin-button {
 			-webkit-appearance: none;
 			margin: 0;
+		}
+		&:focus,
+		&:active {
+			outline-width: 3px;
+		}
+		&:disabled {
+			color: var(--font-color-disabled);
+			cursor: not-allowed;
+			&:focus,
+			&:active {
+				outline-width: 1px;
+			}
 		}
 	}
 }

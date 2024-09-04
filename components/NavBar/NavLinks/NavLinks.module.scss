@@ -8,11 +8,11 @@
 		.link {
 			a {
 				text-decoration: none;
-				color: var(--font-color-1);
+				color: var(--font-color);
 			}
 			transition: transform 0.15s ease;
 			&:hover {
-				color: var(--font-color-1);
+				color: var(--font-color);
 				transform: translateY(-2px);
 			}
 			&:active {
@@ -24,7 +24,7 @@
 		position: absolute;
 		height: 2px;
 		transform: translateY(2px);
-		background-color: var(--font-color-1);
+		background-color: var(--font-color);
 		transition: width 0.3s ease, left 0.3s ease;
 		box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 	}

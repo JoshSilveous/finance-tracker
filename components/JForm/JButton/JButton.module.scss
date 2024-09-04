@@ -44,6 +44,10 @@
 			background-color: var(--prim-bg-light-1);
 			outline-color: var(--prim-bg);
 		}
+		&.loading {
+			cursor: progress;
+			transform: translateY(2px);
+		}
 	}
 	&.secondary:not(:disabled) {
 		background-color: var(--bg-color-lighter-1);
@@ -52,5 +56,12 @@
 			background-color: var(--bg-color-lighter-2);
 			outline-color: var(--bg-color-lighter-3);
 		}
+		&.loading {
+			cursor: progress;
+			transform: translateY(2px);
+		}
+	}
+	svg {
+		height: 100%;
 	}
 }

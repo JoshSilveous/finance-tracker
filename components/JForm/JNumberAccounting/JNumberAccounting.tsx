@@ -7,7 +7,6 @@ import {
 	useState,
 } from 'react'
 import s from './JNumberAccounting.module.scss'
-import { JInput } from '../JInput/JInput'
 
 interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {}
 
@@ -28,13 +27,7 @@ export default function JNumberAccounting(props: JNumberAccountingProps) {
 	return (
 		<div className={s.main}>
 			<span className={s.dollar_symbol}>$</span>
-			<JInput
-				ref={inputRef}
-				{...props}
-				type='number'
-				step={0.01}
-				onBlur={handleBlur}
-			/>
+			<input ref={inputRef} {...props} type='number' step={0.01} onBlur={handleBlur} />
 		</div>
 	)
 }

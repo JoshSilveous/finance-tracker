@@ -106,12 +106,7 @@ export function LoginForm() {
 				</div>
 			</div>
 			<div>
-				<JButton
-					jstyle='primary'
-					type='submit'
-					disabled={isSubmitting}
-					loading={isSubmitting}
-				>
+				<JButton jstyle='primary' type='submit' loading={isSubmitting}>
 					Sign In
 				</JButton>
 				<div className={s.error_container}>

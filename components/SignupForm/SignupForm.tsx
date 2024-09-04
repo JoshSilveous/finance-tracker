@@ -187,7 +187,7 @@ export function SignupForm() {
 				</div>
 			</div>
 			<div>
-				<JButton jstyle='primary' type='submit' disabled={isSubmitting}>
+				<JButton jstyle='primary' type='submit'>
 					{isSubmitting ? 'Loading...' : 'Sign up'}
 				</JButton>
 				<div className={s.error_container}>
