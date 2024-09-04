@@ -1,6 +1,8 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { signup } from './signup'
 import s from './SignupForm.module.scss'
+import { JInput } from '../JForm/JInput/JInput'
+import { JButton } from '../JForm/JButton/JButton'
 
 interface Errors {
 	email: string
@@ -147,7 +149,7 @@ export function SignupForm() {
 		<form className={s.form} onSubmit={handleSubmit} noValidate>
 			<div className={errors.email ? s.error : ''}>
 				<label htmlFor='email'>Email</label>
-				<input
+				<JInput
 					id='email'
 					name='email'
 					type='email'
@@ -160,7 +162,7 @@ export function SignupForm() {
 			</div>
 			<div className={errors.password ? s.error : ''}>
 				<label htmlFor='password'>Password</label>
-				<input
+				<JInput
 					id='password'
 					name='password'
 					type='password'
@@ -173,7 +175,7 @@ export function SignupForm() {
 			</div>
 			<div className={errors.password_confirm ? s.error : ''}>
 				<label htmlFor='password_confirm'>Password Confirm</label>
-				<input
+				<JInput
 					id='password_confirm'
 					name='password_confirm'
 					type='password'
@@ -185,9 +187,9 @@ export function SignupForm() {
 				</div>
 			</div>
 			<div>
-				<button type='submit' disabled={isSubmitting}>
+				<JButton jstyle='primary' type='submit' disabled={isSubmitting}>
 					{isSubmitting ? 'Loading...' : 'Sign up'}
-				</button>
+				</JButton>
 				<div className={s.error_container}>
 					{errors.general && <div>{errors.general}</div>}
 				</div>

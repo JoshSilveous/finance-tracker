@@ -2,6 +2,7 @@ import { ChangeEvent, FormEvent, useState } from 'react'
 import { login } from './login'
 import s from './LoginForm.module.scss'
 import { JButton } from '../JForm/JButton/JButton'
+import { JInput } from '../JForm/JInput/JInput'
 
 interface Errors {
 	email: string
@@ -79,7 +80,7 @@ export function LoginForm() {
 		<form className={s.form} onSubmit={handleSubmit} noValidate>
 			<div className={errors.email ? s.error : ''}>
 				<label htmlFor='email'>Email</label>
-				<input
+				<JInput
 					id='email'
 					name='email'
 					type='email'
@@ -92,12 +93,13 @@ export function LoginForm() {
 			</div>
 			<div className={errors.password ? s.error : ''}>
 				<label htmlFor='password'>Password</label>
-				<input
+				<JInput
 					id='password'
 					name='password'
 					type='password'
 					required
 					onChange={handleInputChange}
+					disabled={isSubmitting}
 				/>
 				<div className={s.error_container}>
 					{errors.password && <div>{errors.password}</div>}

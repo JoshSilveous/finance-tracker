@@ -4,7 +4,7 @@ import s from './AccountManager.module.scss'
 import { createClient } from '@/utils/supabase/client'
 import { JGrid, JGridProps } from '@/components/JGrid/JGrid'
 import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccounting'
-import { JText } from '@/components/JForm/JText/JText'
+import { JInput } from '@/components/JForm/JInput/JInput'
 import { JButton } from '@/components/JForm/JButton/JButton'
 
 interface AccountData {
@@ -102,7 +102,7 @@ export function AccountManager() {
 		const gridConfig: JGridProps = {
 			headers: gridHeaders.map((text) => <div className={s.header}>{text}</div>),
 			content: data.map((item) => [
-				<JText
+				<JInput
 					onChange={handleChange}
 					data-id={item.id}
 					data-key='name'
