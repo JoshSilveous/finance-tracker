@@ -6,6 +6,7 @@ import { JGrid, JGridProps } from '@/components/JGrid/JGrid'
 import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccounting'
 import { JInput } from '@/components/JForm/JInput/JInput'
 import { JButton } from '@/components/JForm/JButton/JButton'
+import { default as LoadingAnim } from '@/public/loading.svg'
 
 interface AccountData {
 	id: string
@@ -16,16 +17,17 @@ interface AccountData {
 interface Change {
 	account_id: string
 	key: 'name' | 'starting_amount'
-	newVal: string | number
+	node: EventTarget & HTMLInputElement
+	newVal: string
 }
 
 export function AccountManager() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [data, setData] = useState<AccountData[]>()
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
+	const [isSavingChanges, setIsSavingChanges] = useState(false)
 
 	const supabase = createClient()
-
 	async function fetchData() {
 		const { data, error } = await supabase
 			.from('accounts')
@@ -43,7 +45,6 @@ export function AccountManager() {
 	}, [])
 
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
-		console.log('updating with following info:')
 		const account_id = e.target.dataset['id'] as Change['account_id']
 		const key = e.target.dataset['key'] as Change['key']
 		const startingValue = e.target.defaultValue
@@ -56,7 +57,6 @@ export function AccountManager() {
 				return false
 			}
 		})
-		console.log('currentChangeIndex', currentChangeIndex)
 
 		if (startingValue == currentValue) {
 			// if new val equals starting value, remove change item and class
@@ -76,6 +76,7 @@ export function AccountManager() {
 				{
 					account_id: account_id,
 					key: key,
+					node: e.target,
 					newVal: currentValue,
 				},
 			])
@@ -84,17 +85,20 @@ export function AccountManager() {
 			setPendingChanges((prev) => {
 				const newArr = [...prev]
 				newArr[currentChangeIndex] = {
-					account_id: account_id,
-					key: key,
+					...newArr[currentChangeIndex],
 					newVal: currentValue,
 				}
 				return newArr
 			})
 		}
 	}
-	useEffect(() => {
-		console.log(pendingChanges)
-	}, [pendingChanges])
+
+	function discardChanges() {
+		pendingChanges.forEach((change) => {
+			change.node.value = change.node.defaultValue
+		})
+		setPendingChanges([])
+	}
 
 	if (!isLoading && data) {
 		const gridHeaders = ['Account Name', 'Starting Amount']
@@ -112,7 +116,7 @@ export function AccountManager() {
 					onChange={handleChange}
 					data-id={item.id}
 					data-key='starting_amount'
-					defaultValue={item.starting_amount}
+					defaultValue={item.starting_amount.toFixed(2)}
 				/>,
 			]),
 			defaultColumnWidths: ['122px', '133px'],
@@ -132,6 +136,7 @@ export function AccountManager() {
 						jstyle='primary'
 						className={s.discard}
 						disabled={pendingChanges.length === 0}
+						onClick={discardChanges}
 					>
 						Discard changes
 					</JButton>
@@ -139,6 +144,7 @@ export function AccountManager() {
 						jstyle='primary'
 						className={s.save}
 						disabled={pendingChanges.length === 0}
+						loading={isSavingChanges}
 					>
 						Save changes
 					</JButton>
@@ -146,6 +152,10 @@ export function AccountManager() {
 			</div>
 		)
 	} else {
-		return <div className={s.main}>loading...</div>
+		return (
+			<div className={s.main}>
+				<LoadingAnim className={s.loading_anim} />
+			</div>
+		)
 	}
 }
