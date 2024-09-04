@@ -46,3 +46,14 @@ export function triggerPopup(content: JSX.Element, handleClose?: () => void) {
 
 	popupDomLocation.render(popupFinal)
 }
+
+export function createPopup() {
+	let x = 1
+	function incrementX() {
+		x++
+	}
+	function returnX() {
+		return x
+	}
+	return { incrementX, returnX }
+}
