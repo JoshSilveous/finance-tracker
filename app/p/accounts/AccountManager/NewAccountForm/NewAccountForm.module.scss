@@ -1,0 +1,22 @@
+.form {
+	min-width: 250px;
+	max-width: 360px;
+	text-align: left;
+
+	div {
+		&.error {
+			input {
+				outline-color: var(--font-color-error);
+			}
+		}
+		div.error_container {
+			min-height: 16px;
+			padding: 2px 0 0px 0;
+			font-size: 12px;
+			color: var(--font-color-error);
+		}
+	}
+	button {
+		margin-top: 12px;
+	}
+}
