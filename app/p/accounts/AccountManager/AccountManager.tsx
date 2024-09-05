@@ -7,7 +7,7 @@ import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccou
 import { JInput } from '@/components/JForm/JInput/JInput'
 import { JButton } from '@/components/JForm/JButton/JButton'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import { triggerPopup } from '@/utils/triggerPopup/triggerPopup'
+import { createPopup } from '@/utils/triggerPopup/triggerPopup'
 
 interface AccountData {
 	id: string
@@ -103,12 +103,28 @@ export function AccountManager() {
 	}
 
 	function handleCreateAccount() {
-		const popupContent = <div className={s.create_account_popup}>Popup!</div>
-		const popupCloseMethod = () => {
-			console.log('closed.')
-		}
+		// const popupContent = <div className={s.create_account_popup}>Popup!</div>
+		// const popupCloseMethod = () => {
+		// 	console.log('closed.')
+		// }
 
-		triggerPopup(popupContent, popupCloseMethod)
+		// triggerPopup(popupContent, popupCloseMethod)
+		const myPopup = createPopup(
+			<div>
+				<h1>Hello!</h1>
+				<button
+					onClick={() => {
+						myPopup.close()
+					}}
+				>
+					Close
+				</button>
+			</div>,
+			() => {
+				console.log('closed!')
+			}
+		)
+		myPopup.trigger()
 	}
 
 	if (!isLoading && data) {

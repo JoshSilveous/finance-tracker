@@ -9,51 +9,43 @@ import s from './triggerPopup.module.scss'
 
 /**
  * Creates a blocking popup on the screen. Overrides other popups.
- * @param content The content to hold within the popup.
- * @param handleClose A callback function that is ran when the popup is closed by the user pressing the `x` button.
- * @param specialType `"warning"` will make the popup tinted red.
+ * @param content The JSX content to hold within the popup.
+ * @param handleClose A callback function that is ran when the popup is closed by the user pressing the `x` button (not when closed via `this.close()`).
+ * @returns an object containing the `trigger()` and `close()` functions
  */
-export function triggerPopup(content: JSX.Element, handleClose?: () => void) {
+export function createPopup(content: JSX.Element, handleClose?: () => void) {
 	const body = document.body
-	const newPopupDiv = document.createElement('div')
-	body.appendChild(newPopupDiv)
-	console.log('newPopupDiv', newPopupDiv)
-	const popupDomLocation = ReactDOM.createRoot(newPopupDiv)
-	const popupFinal = (
-		<div className={s.popup_background}>
-			<div className={s.popup_container}>
-				<div
-					className={s.popup_exit}
-					onClick={() => {
-						closePopup()
-						if (handleClose) {
-							handleClose()
-						}
-					}}
-				>
-					✖
+	const popupContainer = document.createElement('div')
+
+	body.appendChild(popupContainer)
+	const popupDomLocation = ReactDOM.createRoot(popupContainer)
+	console.log(popupContainer)
+
+	return {
+		trigger() {
+			popupDomLocation.render(
+				<div className={s.popup_background}>
+					<div className={s.popup_container}>
+						<div
+							className={s.popup_exit}
+							onClick={() => {
+								this.close()
+								if (handleClose) {
+									handleClose()
+								}
+							}}
+						>
+							✖
+						</div>
+						{content}
+					</div>
 				</div>
-				{content}
-			</div>
-		</div>
-	)
-	/**
-	 * Closes the current popup.
-	 */
-	function closePopup() {
-		popupDomLocation.render(<></>)
+			)
+		},
+		close() {
+			popupDomLocation.render(<></>)
+			popupDomLocation.unmount()
+			popupContainer.remove()
+		},
 	}
-
-	popupDomLocation.render(popupFinal)
-}
-
-export function createPopup() {
-	let x = 1
-	function incrementX() {
-		x++
-	}
-	function returnX() {
-		return x
-	}
-	return { incrementX, returnX }
 }
