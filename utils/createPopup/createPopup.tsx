@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import s from './triggerPopup.module.scss'
+import s from './createPopup.module.scss'
 
 // const popupDomLocation = ReactDOM.createRoot(
 // 	document.getElementById('popup-root') as HTMLDivElement
