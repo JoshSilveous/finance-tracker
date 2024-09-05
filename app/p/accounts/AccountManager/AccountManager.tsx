@@ -52,8 +52,10 @@ export function AccountManager() {
 	useEffect(() => {
 		fetchData()
 	}, [])
+	console.log(data)
 
 	async function saveChanges() {
+		let test = [...data!]
 		await updateAccounts(pendingChanges)
 	}
 
