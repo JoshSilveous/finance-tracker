@@ -7,7 +7,9 @@ import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccou
 import { JInput } from '@/components/JForm/JInput/JInput'
 import { JButton } from '@/components/JForm/JButton/JButton'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import { createPopup } from '@/utils/triggerPopup/triggerPopup'
+import { createPopup } from '@/utils/createPopup/createPopup'
+import { NewAccountForm } from './NewAccountForm/NewAccountForm'
+import { updateAccounts } from './updateAccounts'
 
 interface AccountData {
 	id: string
@@ -15,7 +17,7 @@ interface AccountData {
 	starting_amount: number
 }
 
-interface Change {
+export interface Change {
 	account_id: string
 	key: 'name' | 'starting_amount'
 	node: EventTarget & HTMLInputElement
@@ -29,7 +31,9 @@ export function AccountManager() {
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 
 	const supabase = createClient()
+
 	async function fetchData() {
+		setIsLoading(true)
 		const { data, error } = await supabase
 			.from('accounts')
 			.select('id, name, starting_amount')
@@ -42,10 +46,21 @@ export function AccountManager() {
 	}
 
 	useEffect(() => {
+		console.log(pendingChanges)
+	}, [pendingChanges])
+
+	useEffect(() => {
 		fetchData()
 	}, [])
 
+	async function saveChanges() {
+		await updateAccounts(pendingChanges)
+	}
+
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
+		// prevent leading spaces
+		e.target.value = e.target.value.trimStart()
+
 		const account_id = e.target.dataset['id'] as Change['account_id']
 		const key = e.target.dataset['key'] as Change['key']
 		const startingValue = e.target.defaultValue
@@ -78,7 +93,7 @@ export function AccountManager() {
 					account_id: account_id,
 					key: key,
 					node: e.target,
-					newVal: currentValue,
+					newVal: currentValue.trim(),
 				},
 			])
 		} else {
@@ -87,10 +102,39 @@ export function AccountManager() {
 				const newArr = [...prev]
 				newArr[currentChangeIndex] = {
 					...newArr[currentChangeIndex],
-					newVal: currentValue,
+					newVal: currentValue.trim(),
 				}
 				return newArr
 			})
+		}
+	}
+
+	function handleBlur(e: ChangeEvent<HTMLInputElement>) {
+		e.target.value = e.target.value.trim()
+
+		const startingValue = e.target.defaultValue
+		const currentValue = e.target.value
+
+		// handles edge case where the user just adds spaces to the end of the value
+		// this will remove those spaces and the Change
+		if (startingValue.trim() == currentValue.trim()) {
+			const account_id = e.target.dataset['id'] as Change['account_id']
+			const key = e.target.dataset['key'] as Change['key']
+			const currentChangeIndex = pendingChanges?.findIndex((change) => {
+				if (change.account_id === account_id && change.key === key) {
+					return true
+				} else {
+					return false
+				}
+			})
+			e.target.classList.remove(s.changed)
+			if (currentChangeIndex !== -1) {
+				setPendingChanges((prev) => {
+					const newArr = [...prev]
+					newArr.splice(currentChangeIndex, 1)
+					return newArr
+				})
+			}
 		}
 	}
 
@@ -102,27 +146,14 @@ export function AccountManager() {
 		setPendingChanges([])
 	}
 
-	function handleCreateAccount() {
-		// const popupContent = <div className={s.create_account_popup}>Popup!</div>
-		// const popupCloseMethod = () => {
-		// 	console.log('closed.')
-		// }
-
-		// triggerPopup(popupContent, popupCloseMethod)
+	function handleCreateAccountButton() {
 		const myPopup = createPopup(
-			<div>
-				<h1>Hello!</h1>
-				<button
-					onClick={() => {
-						myPopup.close()
-					}}
-				>
-					Close
-				</button>
-			</div>,
-			() => {
-				console.log('closed!')
-			}
+			<NewAccountForm
+				afterSubmit={() => {
+					myPopup.close()
+					fetchData()
+				}}
+			/>
 		)
 		myPopup.trigger()
 	}
@@ -135,12 +166,14 @@ export function AccountManager() {
 			content: data.map((item) => [
 				<JInput
 					onChange={handleChange}
+					onBlur={handleBlur}
 					data-id={item.id}
 					data-key='name'
 					defaultValue={item.name}
 				/>,
 				<JNumberAccounting
 					onChange={handleChange}
+					onBlur={handleBlur}
 					data-id={item.id}
 					data-key='starting_amount'
 					defaultValue={item.starting_amount.toFixed(2)}
@@ -165,7 +198,7 @@ export function AccountManager() {
 								? 'Save or discard changes to create a new account'
 								: ''
 						}
-						onClick={handleCreateAccount}
+						onClick={handleCreateAccountButton}
 					>
 						Create new account
 					</JButton>
@@ -182,6 +215,7 @@ export function AccountManager() {
 						className={s.save}
 						disabled={pendingChanges.length === 0}
 						loading={isSavingChanges}
+						onClick={saveChanges}
 					>
 						Save changes
 					</JButton>
