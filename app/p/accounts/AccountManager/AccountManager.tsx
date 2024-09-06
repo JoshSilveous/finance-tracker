@@ -92,10 +92,34 @@ export function AccountManager() {
 		if (startingValue == currentValue) {
 			// if new val equals starting value, remove change item and class
 			e.target.classList.remove(s.changed)
-			if (currentChangeIndex !== -1) {
+
+			const thisChange = pendingChanges[currentChangeIndex]
+			let allChangesAreReverted = false
+			if (key === 'name') {
+				allChangesAreReverted =
+					thisChange.name.old === currentValue &&
+					thisChange.starting_amount.old === thisChange.starting_amount.new
+			} else if (key === 'starting_amount') {
+				allChangesAreReverted =
+					thisChange.name.old === thisChange.name.new &&
+					thisChange.starting_amount.old ===
+						Math.round(parseFloat(currentValue) * 100) / 100
+			}
+			if (currentChangeIndex !== -1 && allChangesAreReverted) {
 				setPendingChanges((prev) => {
 					const newArr = [...prev]
 					newArr.splice(currentChangeIndex, 1)
+					return newArr
+				})
+			} else if (currentChangeIndex !== -1) {
+				setPendingChanges((prev) => {
+					const newArr = [...prev]
+					if (key === 'name') {
+						newArr[currentChangeIndex].name.new = currentValue
+					} else if (key === 'starting_amount') {
+						newArr[currentChangeIndex].starting_amount.new =
+							Math.round(parseFloat(currentValue) * 100) / 100
+					}
 					return newArr
 				})
 			}
