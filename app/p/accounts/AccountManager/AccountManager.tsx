@@ -43,6 +43,43 @@ Or:
 	Do the same visual cue logic, but don't bother with a pendingChanges array.
 	Do all the logic on save. When the save button is pressed, pull each node from the visual cue array, and extract data from that + data to build the query.
 
+
+OR: !!!
+
+	pendingChanges = []: {
+		account_id: ...,
+		new: {
+			...
+		}
+	}
+
+	When onChange fires:
+	- do data validation stuff
+	- check if value equals defaultValue
+		TRUE:
+		- remove class
+		- check if there's other keys on change.new
+			TRUE: remove the key
+			FALSE: remove the change
+		FALSE:
+		- add the class
+		- check if account_id already in pendingChanges
+			TRUE: set change.new.[key] to new value
+			FALSE: add the change and set change.new.[key]
+	
+	When onBlur fires:
+	- check if value changes when trimmed
+		TRUE: set value then manually fire onChange
+
+	When discard changes is used:
+	- querySelectorAll for the "changed" class, and reset those nodes
+	- clear the changes array
+
+	When save changes is used:
+	- use the changes array and data array to build query data, and submit.
+
+	This way, logic is entirely separated from DOM nodes being held in memory. This will allow for row reordering logic later.
+
 */
 
 export function AccountManager() {
