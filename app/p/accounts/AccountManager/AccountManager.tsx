@@ -25,6 +25,26 @@ interface Change {
 	}
 }
 
+/*
+Idea for a better change system:
+For visual cues, just use an array of each node that has been changed. Then, to "discard changes", i can just go through those and reset
+
+For keeping memory of the changes, I can have an array of exact replicas of the items in "data".
+
+When a change is made:
+	Compare to defaultValue. If different, add class and add node to array. If same, remove class and node.
+	THEN
+	Check the pendingChanges array for the item. If it's found, compare that item to the default item, and see if there's any reason for it to remain in pendingChanges. If so, update it, and if not, remove it.
+
+
+	This way, you can abstract value parsing to a different function for each type of key.
+
+Or:
+	Do the same visual cue logic, but don't bother with a pendingChanges array.
+	Do all the logic on save. When the save button is pressed, pull each node from the visual cue array, and extract data from that + data to build the query.
+
+*/
+
 export function AccountManager() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [data, setData] = useState<Account[]>()
