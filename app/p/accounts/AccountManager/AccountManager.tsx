@@ -11,22 +11,23 @@ import { createPopup } from '@/utils/createPopup/createPopup'
 import { NewAccountForm } from './NewAccountForm/NewAccountForm'
 import { updateAccounts } from './updateAccounts'
 
-interface AccountData {
-	id: string
-	name: string
-	starting_amount: number
-}
-
-export interface Change {
+interface Change {
 	account_id: string
-	key: 'name' | 'starting_amount'
-	node: EventTarget & HTMLInputElement
-	newVal: string
+	name: {
+		old: string
+		new: string
+		node?: EventTarget & HTMLInputElement
+	}
+	starting_amount: {
+		old: number
+		new: number
+		node?: EventTarget & HTMLInputElement
+	}
 }
 
 export function AccountManager() {
 	const [isLoading, setIsLoading] = useState(true)
-	const [data, setData] = useState<AccountData[]>()
+	const [data, setData] = useState<Account[]>()
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 
@@ -52,29 +53,41 @@ export function AccountManager() {
 	useEffect(() => {
 		fetchData()
 	}, [])
-	console.log(data)
 
 	async function saveChanges() {
-		let test = [...data!]
-		await updateAccounts(pendingChanges)
+		// construct the Account object updates
+		const {
+			data: { user },
+			error: userError,
+		} = await supabase.auth.getUser()
+
+		if (userError) {
+			console.log('User error:', userError)
+			return
+		}
+
+		const accountUpdates: AccountFull[] = pendingChanges.map((change) => ({
+			id: change.account_id,
+			name: change.name.new,
+			starting_amount: change.starting_amount.new,
+			user_id: user!.id,
+		}))
+
+		await updateAccounts(accountUpdates)
 	}
 
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
 		// prevent leading spaces
 		e.target.value = e.target.value.trimStart()
 
-		const account_id = e.target.dataset['id'] as Change['account_id']
-		const key = e.target.dataset['key'] as Change['key']
+		const account_id = e.target.dataset['id'] as Account['id']
+		const key = e.target.dataset['key'] as 'name' | 'starting_amount'
 		const startingValue = e.target.defaultValue
 		const currentValue = e.target.value
 
-		const currentChangeIndex = pendingChanges?.findIndex((change) => {
-			if (change.account_id === account_id && change.key === key) {
-				return true
-			} else {
-				return false
-			}
-		})
+		const currentChangeIndex = pendingChanges.findIndex(
+			(change) => change.account_id === account_id
+		)
 
 		if (startingValue == currentValue) {
 			// if new val equals starting value, remove change item and class
@@ -89,22 +102,49 @@ export function AccountManager() {
 		} else if (currentChangeIndex === -1) {
 			// if change isn't already present in pendingChanges
 			e.target.classList.add(s.changed)
+
+			const origData = data!.find((item) => item.id === account_id)!
+
 			setPendingChanges((prev) => [
 				...prev,
 				{
 					account_id: account_id,
-					key: key,
-					node: e.target,
-					newVal: currentValue.trim(),
+					name: {
+						old: origData.name,
+						new: origData.name,
+					},
+					starting_amount: {
+						old: origData.starting_amount,
+						new: origData.starting_amount,
+					},
+					[key]: {
+						old: origData[key],
+						new:
+							key === 'name'
+								? currentValue.trim()
+								: Math.round(parseFloat(currentValue) * 100) / 100,
+						node: e.target,
+					},
 				},
 			])
 		} else {
 			// if change is already present in pendingChanges
+			if (pendingChanges[currentChangeIndex][key].old !== currentValue) {
+				e.target.classList.add(s.changed)
+			}
+
 			setPendingChanges((prev) => {
 				const newArr = [...prev]
 				newArr[currentChangeIndex] = {
 					...newArr[currentChangeIndex],
-					newVal: currentValue.trim(),
+					[key]: {
+						old: prev[currentChangeIndex][key].old,
+						new:
+							key === 'name'
+								? currentValue.trim()
+								: Math.round(parseFloat(currentValue) * 100) / 100,
+						node: e.target,
+					},
 				}
 				return newArr
 			})
@@ -113,23 +153,27 @@ export function AccountManager() {
 
 	function handleBlur(e: ChangeEvent<HTMLInputElement>) {
 		e.target.value = e.target.value.trim()
-
 		const startingValue = e.target.defaultValue
 		const currentValue = e.target.value
-
 		// handles edge case where the user just adds spaces to the end of the value
 		// this will remove those spaces and the Change
 		if (startingValue.trim() == currentValue.trim()) {
+			e.target.classList.remove(s.changed)
+
+			// remove change from array if needed
 			const account_id = e.target.dataset['id'] as Change['account_id']
-			const key = e.target.dataset['key'] as Change['key']
+			const key = e.target.dataset['key'] as 'name' | 'starting_amount'
 			const currentChangeIndex = pendingChanges?.findIndex((change) => {
-				if (change.account_id === account_id && change.key === key) {
+				if (
+					change.account_id === account_id &&
+					change.name.old === change.name.new &&
+					change.starting_amount.old === change.starting_amount.new
+				) {
 					return true
 				} else {
 					return false
 				}
 			})
-			e.target.classList.remove(s.changed)
 			if (currentChangeIndex !== -1) {
 				setPendingChanges((prev) => {
 					const newArr = [...prev]
@@ -142,8 +186,14 @@ export function AccountManager() {
 
 	function discardChanges() {
 		pendingChanges.forEach((change) => {
-			change.node.value = change.node.defaultValue
-			change.node.classList.remove(s.changed)
+			if (change.name.node) {
+				change.name.node.value = change.name.node.defaultValue
+				change.name.node.classList.remove(s.changed)
+			}
+			if (change.starting_amount.node) {
+				change.starting_amount.node.value = change.starting_amount.node.defaultValue
+				change.starting_amount.node.classList.remove(s.changed)
+			}
 		})
 		setPendingChanges([])
 	}
