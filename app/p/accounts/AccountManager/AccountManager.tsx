@@ -9,78 +9,15 @@ import { JButton } from '@/components/JForm/JButton/JButton'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { createPopup } from '@/utils/createPopup/createPopup'
 import { NewAccountForm } from './NewAccountForm/NewAccountForm'
-import { updateAccounts } from './updateAccounts'
+import { removeFromArray } from '@/utils/removeFromArray/removeFromArray'
 
 interface Change {
 	account_id: string
-	name: {
-		old: string
-		new: string
-		node?: EventTarget & HTMLInputElement
-	}
-	starting_amount: {
-		old: number
-		new: number
-		node?: EventTarget & HTMLInputElement
+	new: {
+		name?: string
+		starting_amount?: string
 	}
 }
-
-/*
-Idea for a better change system:
-For visual cues, just use an array of each node that has been changed. Then, to "discard changes", i can just go through those and reset
-
-For keeping memory of the changes, I can have an array of exact replicas of the items in "data".
-
-When a change is made:
-	Compare to defaultValue. If different, add class and add node to array. If same, remove class and node.
-	THEN
-	Check the pendingChanges array for the item. If it's found, compare that item to the default item, and see if there's any reason for it to remain in pendingChanges. If so, update it, and if not, remove it.
-
-
-	This way, you can abstract value parsing to a different function for each type of key.
-
-Or:
-	Do the same visual cue logic, but don't bother with a pendingChanges array.
-	Do all the logic on save. When the save button is pressed, pull each node from the visual cue array, and extract data from that + data to build the query.
-
-
-OR: !!!
-
-	pendingChanges = []: {
-		account_id: ...,
-		new: {
-			...
-		}
-	}
-
-	When onChange fires:
-	- do data validation stuff
-	- check if value equals defaultValue
-		TRUE:
-		- remove class
-		- check if there's other keys on change.new
-			TRUE: remove the key
-			FALSE: remove the change
-		FALSE:
-		- add the class
-		- check if account_id already in pendingChanges
-			TRUE: set change.new.[key] to new value
-			FALSE: add the change and set change.new.[key]
-	
-	When onBlur fires:
-	- check if value changes when trimmed
-		TRUE: set value then manually fire onChange
-
-	When discard changes is used:
-	- querySelectorAll for the "changed" class, and reset those nodes
-	- clear the changes array
-
-	When save changes is used:
-	- use the changes array and data array to build query data, and submit.
-
-	This way, logic is entirely separated from DOM nodes being held in memory. This will allow for row reordering logic later.
-
-*/
 
 export function AccountManager() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -112,25 +49,41 @@ export function AccountManager() {
 	}, [])
 
 	async function saveChanges() {
-		// construct the Account object updates
-		const {
-			data: { user },
-			error: userError,
-		} = await supabase.auth.getUser()
-
-		if (userError) {
-			console.log('User error:', userError)
+		setIsSavingChanges(true)
+		const getUserRes = await supabase.auth.getUser()
+		if (getUserRes.error) {
+			console.log('User error:', getUserRes.error)
 			return
 		}
 
-		const accountUpdates: AccountFull[] = pendingChanges.map((change) => ({
-			id: change.account_id,
-			name: change.name.new,
-			starting_amount: change.starting_amount.new,
-			user_id: user!.id,
-		}))
+		const accountUpdates: AccountFull[] = pendingChanges.map((change) => {
+			const thisAccount = data!.find(
+				(item) => item.id === change.account_id
+			) as Account
+			return {
+				id: change.account_id,
+				user_id: getUserRes.data.user.id,
+				name: change.new.name === undefined ? thisAccount.name : change.new.name,
+				starting_amount:
+					change.new.starting_amount === undefined
+						? thisAccount.starting_amount
+						: Math.round(parseFloat(change.new.starting_amount) * 100) / 100,
+			}
+		})
 
-		await updateAccounts(accountUpdates)
+		const upsertRes = await supabase.from('accounts').upsert(accountUpdates, {
+			defaultToNull: false,
+			onConflict: 'id',
+			ignoreDuplicates: false,
+		})
+		if (upsertRes.error) {
+			console.log('ERROR!', upsertRes.error)
+			setIsSavingChanges(false)
+		} else {
+			fetchData()
+			setIsSavingChanges(false)
+			setPendingChanges([])
+		}
 	}
 
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -138,7 +91,7 @@ export function AccountManager() {
 		e.target.value = e.target.value.trimStart()
 
 		const account_id = e.target.dataset['id'] as Account['id']
-		const key = e.target.dataset['key'] as 'name' | 'starting_amount'
+		const key = e.target.dataset['key'] as keyof Change['new']
 		const startingValue = e.target.defaultValue
 		const currentValue = e.target.value
 
@@ -146,136 +99,86 @@ export function AccountManager() {
 			(change) => change.account_id === account_id
 		)
 
-		if (startingValue == currentValue) {
+		if (startingValue === currentValue) {
 			// if new val equals starting value, remove change item and class
 			e.target.classList.remove(s.changed)
 
 			const thisChange = pendingChanges[currentChangeIndex]
-			let allChangesAreReverted = false
-			if (key === 'name') {
-				allChangesAreReverted =
-					thisChange.name.old === currentValue &&
-					thisChange.starting_amount.old === thisChange.starting_amount.new
-			} else if (key === 'starting_amount') {
-				allChangesAreReverted =
-					thisChange.name.old === thisChange.name.new &&
-					thisChange.starting_amount.old ===
-						Math.round(parseFloat(currentValue) * 100) / 100
-			}
-			if (currentChangeIndex !== -1 && allChangesAreReverted) {
+
+			if (Object.keys(thisChange.new).length > 1) {
+				// remove this key from thisChange.new
 				setPendingChanges((prev) => {
 					const newArr = [...prev]
-					newArr.splice(currentChangeIndex, 1)
+					delete newArr[currentChangeIndex].new[key]
 					return newArr
 				})
-			} else if (currentChangeIndex !== -1) {
-				setPendingChanges((prev) => {
-					const newArr = [...prev]
-					if (key === 'name') {
-						newArr[currentChangeIndex].name.new = currentValue
-					} else if (key === 'starting_amount') {
-						newArr[currentChangeIndex].starting_amount.new =
-							Math.round(parseFloat(currentValue) * 100) / 100
-					}
-					return newArr
-				})
+			} else {
+				// remove thisChange from pendingChanges
+				setPendingChanges((prev) => removeFromArray(prev, currentChangeIndex))
 			}
 		} else if (currentChangeIndex === -1) {
 			// if change isn't already present in pendingChanges
 			e.target.classList.add(s.changed)
-
-			const origData = data!.find((item) => item.id === account_id)!
-
 			setPendingChanges((prev) => [
 				...prev,
 				{
-					account_id: account_id,
-					name: {
-						old: origData.name,
-						new: origData.name,
-					},
-					starting_amount: {
-						old: origData.starting_amount,
-						new: origData.starting_amount,
-					},
-					[key]: {
-						old: origData[key],
-						new:
-							key === 'name'
-								? currentValue.trim()
-								: Math.round(parseFloat(currentValue) * 100) / 100,
-						node: e.target,
-					},
+					account_id,
+					new: { [key]: currentValue },
 				},
 			])
 		} else {
 			// if change is already present in pendingChanges
-			if (pendingChanges[currentChangeIndex][key].old !== currentValue) {
-				e.target.classList.add(s.changed)
-			}
-
+			e.target.classList.add(s.changed)
 			setPendingChanges((prev) => {
 				const newArr = [...prev]
-				newArr[currentChangeIndex] = {
-					...newArr[currentChangeIndex],
-					[key]: {
-						old: prev[currentChangeIndex][key].old,
-						new:
-							key === 'name'
-								? currentValue.trim()
-								: Math.round(parseFloat(currentValue) * 100) / 100,
-						node: e.target,
-					},
-				}
+				newArr[currentChangeIndex].new[key] = currentValue
 				return newArr
 			})
 		}
 	}
 
 	function handleBlur(e: ChangeEvent<HTMLInputElement>) {
-		e.target.value = e.target.value.trim()
+		e.target.value = e.target.value.trimEnd()
 		const startingValue = e.target.defaultValue
 		const currentValue = e.target.value
 		// handles edge case where the user just adds spaces to the end of the value
 		// this will remove those spaces and the Change
-		if (startingValue.trim() == currentValue.trim()) {
+		if (startingValue === currentValue) {
 			e.target.classList.remove(s.changed)
+			const account_id = e.target.dataset['id'] as Account['id']
+			const key = e.target.dataset['key'] as keyof Change['new']
 
-			// remove change from array if needed
-			const account_id = e.target.dataset['id'] as Change['account_id']
-			const key = e.target.dataset['key'] as 'name' | 'starting_amount'
-			const currentChangeIndex = pendingChanges?.findIndex((change) => {
-				if (
-					change.account_id === account_id &&
-					change.name.old === change.name.new &&
-					change.starting_amount.old === change.starting_amount.new
-				) {
-					return true
-				} else {
-					return false
-				}
-			})
-			if (currentChangeIndex !== -1) {
+			const currentChangeIndex = pendingChanges.findIndex(
+				(change) => change.account_id === account_id
+			)
+			const thisChange = pendingChanges[currentChangeIndex]
+			if (thisChange === undefined) {
+				return
+			}
+
+			if (Object.keys(thisChange.new).length > 1) {
+				// remove this key from thisChange.new
 				setPendingChanges((prev) => {
 					const newArr = [...prev]
-					newArr.splice(currentChangeIndex, 1)
+					delete newArr[currentChangeIndex].new[key]
 					return newArr
 				})
+			} else {
+				// remove thisChange from pendingChanges
+				setPendingChanges((prev) => removeFromArray(prev, currentChangeIndex))
 			}
 		}
 	}
 
 	function discardChanges() {
-		pendingChanges.forEach((change) => {
-			if (change.name.node) {
-				change.name.node.value = change.name.node.defaultValue
-				change.name.node.classList.remove(s.changed)
-			}
-			if (change.starting_amount.node) {
-				change.starting_amount.node.value = change.starting_amount.node.defaultValue
-				change.starting_amount.node.classList.remove(s.changed)
-			}
+		const changedNodes = document.querySelectorAll(
+			`.${s.changed}`
+		) as NodeListOf<HTMLInputElement>
+		changedNodes.forEach((node) => {
+			node.classList.remove(s.changed)
+			node.value = node.defaultValue
 		})
+		console.log(changedNodes)
 		setPendingChanges([])
 	}
 
