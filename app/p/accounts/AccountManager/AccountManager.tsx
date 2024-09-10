@@ -88,7 +88,9 @@ export function AccountManager() {
 
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
 		// prevent leading spaces
-		e.target.value = e.target.value.trimStart()
+		if (e.target.value !== e.target.value.trimStart()) {
+			e.target.value = e.target.value.trimStart()
+		}
 
 		const account_id = e.target.dataset['id'] as Account['id']
 		const key = e.target.dataset['key'] as keyof Change['new']
@@ -104,6 +106,9 @@ export function AccountManager() {
 			e.target.classList.remove(s.changed)
 
 			const thisChange = pendingChanges[currentChangeIndex]
+			if (thisChange === undefined) {
+				return
+			}
 
 			if (Object.keys(thisChange.new).length > 1) {
 				// remove this key from thisChange.new
