@@ -8,6 +8,7 @@
 		user-select: none;
 		color: var(--font-color);
 		transform: translateX(10px);
+		pointer-events: none;
 	}
 	input {
 		text-align: right;
