@@ -103,7 +103,7 @@ export function AccountManager() {
 
 		if (startingValue === currentValue) {
 			// if new val equals starting value, remove change item and class
-			e.target.classList.remove(s.changed)
+			e.target.parentElement!.classList.remove(s.changed)
 
 			const thisChange = pendingChanges[currentChangeIndex]
 			if (thisChange === undefined) {
@@ -123,7 +123,7 @@ export function AccountManager() {
 			}
 		} else if (currentChangeIndex === -1) {
 			// if change isn't already present in pendingChanges
-			e.target.classList.add(s.changed)
+			e.target.parentElement!.classList.add(s.changed)
 			setPendingChanges((prev) => [
 				...prev,
 				{
@@ -133,7 +133,7 @@ export function AccountManager() {
 			])
 		} else {
 			// if change is already present in pendingChanges
-			e.target.classList.add(s.changed)
+			e.target.parentElement!.classList.add(s.changed)
 			setPendingChanges((prev) => {
 				const newArr = [...prev]
 				newArr[currentChangeIndex].new[key] = currentValue
@@ -149,7 +149,7 @@ export function AccountManager() {
 		// handles edge case where the user just adds spaces to the end of the value
 		// this will remove those spaces and the Change
 		if (startingValue === currentValue) {
-			e.target.classList.remove(s.changed)
+			e.target.parentElement!.classList.remove(s.changed)
 			const account_id = e.target.dataset['id'] as Account['id']
 			const key = e.target.dataset['key'] as keyof Change['new']
 
@@ -176,14 +176,20 @@ export function AccountManager() {
 	}
 
 	function discardChanges() {
-		const changedNodes = document.querySelectorAll(
+		const changedContainers = document.querySelectorAll(
 			`.${s.changed}`
+		) as NodeListOf<HTMLDivElement>
+		const changedInputs = document.querySelectorAll(
+			`.${s.changed} > input`
 		) as NodeListOf<HTMLInputElement>
-		changedNodes.forEach((node) => {
+		changedContainers.forEach((node) => {
 			node.classList.remove(s.changed)
-			node.value = node.defaultValue
 		})
-		console.log(changedNodes)
+		changedInputs.forEach((node) => {
+			node.value = node.defaultValue
+			node.focus()
+			node.blur()
+		})
 		setPendingChanges([])
 	}
 
@@ -215,6 +221,7 @@ export function AccountManager() {
 				<JNumberAccounting
 					onChange={handleChange}
 					onBlur={handleBlur}
+					className={s.accounting_input}
 					data-id={item.id}
 					data-key='starting_amount'
 					defaultValue={item.starting_amount.toFixed(2)}

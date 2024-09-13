@@ -51,7 +51,15 @@ svg.loading_anim {
 		color: var(--bg-color);
 	}
 
-	.changed {
-		color: var(--font-color-changed) !important;
+	.accounting_input {
+		&:not(.changed) {
+			color: var(--font-color);
+		}
+		&.changed {
+			color: var(--font-color-changed);
+			& > input {
+				color: var(--font-color-changed);
+			}
+		}
 	}
 }

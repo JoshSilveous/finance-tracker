@@ -5,26 +5,26 @@
 	width: 100%;
 
 	.dollar_symbol {
-		position: fixed;
+		position: absolute;
 		user-select: none;
-		color: var(--font-color);
-		transform: translateX(10px);
+		left: 10px;
 		pointer-events: none;
 	}
 	.formatted {
 		position: absolute;
 		user-select: none;
-		color: var(--font-color);
-		transform: translateX(-10px);
 		text-align: right;
-		right: 0;
+		right: 12px;
 		pointer-events: none;
+		font-family: inherit;
+		font-size: 13.3333px;
+		overflow: hidden;
+		max-width: calc(100% - 12px - 28px);
 	}
 	input {
 		text-align: right;
 		-moz-appearance: textfield;
 		font-family: inherit;
-		color: var(--font-color);
 		height: 36px;
 		box-sizing: border-box;
 		width: 100%;

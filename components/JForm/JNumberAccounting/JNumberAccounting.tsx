@@ -1,94 +1,97 @@
-import { ChangeEvent, InputHTMLAttributes, useEffect, useRef, useState } from 'react'
+import {
+	ChangeEvent,
+	FocusEvent,
+	InputHTMLAttributes,
+	MouseEvent,
+	useEffect,
+	useRef,
+	useState,
+} from 'react'
 import s from './JNumberAccounting.module.scss'
 
 interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {}
 
 export default function JNumberAccounting(props: JNumberAccountingProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
+	const displayRef = useRef<HTMLDivElement>(null)
 	const [isFocused, setIsFocused] = useState(false)
 	const [isHovering, setIsHovering] = useState(false)
 
 	useEffect(() => {
-		applyFormatting()
+		updateDisplayText()
 	}, [])
 
-	function handleMouseEnter() {
-		if (!isFocused) {
-			removeFormatting()
+	function updateDisplayText() {
+		const valFloat = parseFloat(inputRef.current!.value)
+		const valRounded = valFloat.toFixed(2)
+		inputRef.current!.value = valRounded
+
+		let newDisplayVal = addCommas(valRounded)
+
+		if (valFloat < 0) {
+			newDisplayVal = `(${newDisplayVal})`
+			displayRef.current!.style.right = '7px'
+		} else {
+			displayRef.current!.style.right = '12px'
 		}
+
+		displayRef.current!.innerText = newDisplayVal
+	}
+
+	function handleMouseEnter(e: MouseEvent<HTMLInputElement>) {
 		setIsHovering(true)
-	}
-	function handleMouseLeave() {
-		if (!isFocused) {
-			applyFormatting()
+		if (props.onMouseEnter) {
+			props.onMouseEnter(e)
 		}
+	}
+	function handleMouseLeave(e: MouseEvent<HTMLInputElement>) {
 		setIsHovering(false)
-	}
-	function handleBlur() {
-		if (!isHovering) {
-			applyFormatting()
+		if (props.onMouseLeave) {
+			props.onMouseLeave(e)
 		}
+	}
+	function handleBlur(e: FocusEvent<HTMLInputElement>) {
 		setIsFocused(false)
-	}
-	function handleFocus() {
-		if (!isHovering) {
-			removeFormatting()
+		updateDisplayText()
+		if (props.onBlur) {
+			props.onBlur(e)
 		}
+	}
+	function handleFocus(e: FocusEvent<HTMLInputElement>) {
 		setIsFocused(true)
+		if (props.onFocus) {
+			props.onFocus(e)
+		}
+	}
+	function handleChange(e: ChangeEvent<HTMLInputElement>) {
+		if (props.onChange) {
+			props.onChange(e)
+		}
 	}
 
-	function applyFormatting() {
-		const unroundedVal = inputRef.current!.value
-		const numVal = parseFloat(unroundedVal)
-		const roundedVal = numVal.toFixed(2)
-
-		inputRef.current!.dataset.rawValue = roundedVal
-
-		let formattedVal = addCommasToNumber(roundedVal)
-
-		// if (numVal < 0) {
-		// 	formattedVal = `(${formattedVal.slice(1)})`
-		// }
-
-		inputRef.current!.type = 'text'
-		inputRef.current!.value = formattedVal
-	}
-
-	function addCommasToNumber(numberString: string) {
-		// Split the string into the whole number and decimal parts
+	function addCommas(numberString: string) {
 		let [wholePart, decimalPart] = numberString.split('.')
-
-		// Use a regular expression to add commas to the whole number part
 		wholePart = wholePart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-
-		// Reassemble the whole number and decimal parts (if present)
 		return decimalPart ? `${wholePart}.${decimalPart}` : wholePart
 	}
 
-	function removeFormatting() {
-		console.log('    removeFormatting ran')
-		const rawValue = inputRef.current!.dataset.rawValue
-
-		inputRef.current!.type = 'number'
-		if (rawValue !== '' && rawValue !== undefined) {
-			inputRef.current!.value = rawValue
-		}
-	}
+	const showFormatted = !(isHovering || isFocused)
 
 	return (
-		<div className={s.main}>
+		<div className={`${s.main} ${props.className ? props.className : ''}`}>
 			<span className={s.dollar_symbol}>$</span>
-			<span className={s.formatted}>123.45</span>
+			<div className={s.formatted} hidden={!showFormatted} ref={displayRef} />
 			<input
 				{...props}
 				ref={inputRef}
-				type='text'
+				type='number'
 				step={0.01}
+				onChange={handleChange}
 				onBlur={handleBlur}
 				onFocus={handleFocus}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
-				data-raw-value={props.value}
+				style={showFormatted ? { color: 'transparent' } : {}}
 			/>
 		</div>
 	)
