@@ -1,21 +1,57 @@
-import { ChangeEvent, InputHTMLAttributes, useRef } from 'react'
+import { ChangeEvent, InputHTMLAttributes, useEffect, useRef, useState } from 'react'
 import s from './JNumberAccounting.module.scss'
 
 interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {}
 
 export default function JNumberAccounting(props: JNumberAccountingProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
-	function handleBlur(e: ChangeEvent<HTMLInputElement>) {
-		const unroundedVal = e.target.value
-		const roundedVal = parseFloat(unroundedVal).toFixed(2)
+	const [isFocused, setIsFocused] = useState(false)
+	const [isHovering, setIsHovering] = useState(false)
 
-		e.target.dataset.rawValue = roundedVal
+	useEffect(() => {
+		applyFormatting()
+	}, [])
 
-		const formattedVal = addCommasToNumber(roundedVal)
-		console.log('roundedVal', roundedVal, 'formattedVal', formattedVal)
+	function handleMouseEnter() {
+		if (!isFocused) {
+			removeFormatting()
+		}
+		setIsHovering(true)
+	}
+	function handleMouseLeave() {
+		if (!isFocused) {
+			applyFormatting()
+		}
+		setIsHovering(false)
+	}
+	function handleBlur() {
+		if (!isHovering) {
+			applyFormatting()
+		}
+		setIsFocused(false)
+	}
+	function handleFocus() {
+		if (!isHovering) {
+			removeFormatting()
+		}
+		setIsFocused(true)
+	}
 
-		e.target.type = 'text'
-		e.target.value = formattedVal
+	function applyFormatting() {
+		const unroundedVal = inputRef.current!.value
+		const numVal = parseFloat(unroundedVal)
+		const roundedVal = numVal.toFixed(2)
+
+		inputRef.current!.dataset.rawValue = roundedVal
+
+		let formattedVal = addCommasToNumber(roundedVal)
+
+		// if (numVal < 0) {
+		// 	formattedVal = `(${formattedVal.slice(1)})`
+		// }
+
+		inputRef.current!.type = 'text'
+		inputRef.current!.value = formattedVal
 	}
 
 	function addCommasToNumber(numberString: string) {
@@ -29,26 +65,29 @@ export default function JNumberAccounting(props: JNumberAccountingProps) {
 		return decimalPart ? `${wholePart}.${decimalPart}` : wholePart
 	}
 
-	function handleFocus(e: ChangeEvent<HTMLInputElement>) {
-		const rawValue = e.target.dataset.rawValue
-		console.log('focus rawValue', rawValue)
+	function removeFormatting() {
+		console.log('    removeFormatting ran')
+		const rawValue = inputRef.current!.dataset.rawValue
 
-		e.target.type = 'number'
+		inputRef.current!.type = 'number'
 		if (rawValue !== '' && rawValue !== undefined) {
-			e.target.value = rawValue
+			inputRef.current!.value = rawValue
 		}
 	}
 
 	return (
 		<div className={s.main}>
 			<span className={s.dollar_symbol}>$</span>
+			<span className={s.formatted}>123.45</span>
 			<input
-				ref={inputRef}
 				{...props}
+				ref={inputRef}
 				type='text'
 				step={0.01}
 				onBlur={handleBlur}
 				onFocus={handleFocus}
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
 				data-raw-value={props.value}
 			/>
 		</div>

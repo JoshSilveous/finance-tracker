@@ -1,5 +1,6 @@
 .main {
 	display: flex;
+	position: relative;
 	align-items: center;
 	width: 100%;
 
@@ -8,6 +9,15 @@
 		user-select: none;
 		color: var(--font-color);
 		transform: translateX(10px);
+		pointer-events: none;
+	}
+	.formatted {
+		position: absolute;
+		user-select: none;
+		color: var(--font-color);
+		transform: translateX(-10px);
+		text-align: right;
+		right: 0;
 		pointer-events: none;
 	}
 	input {
