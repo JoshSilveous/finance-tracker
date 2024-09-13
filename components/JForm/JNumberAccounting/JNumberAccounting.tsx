@@ -14,6 +14,7 @@ interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {
 export default function JNumberAccounting(props: JNumberAccountingProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
 	const displayRef = useRef<HTMLDivElement>(null)
+	const [showParenthesis, setShowParenthesis] = useState(false)
 	const [isFocused, setIsFocused] = useState(false)
 	const [isHovering, setIsHovering] = useState(false)
 
@@ -29,10 +30,10 @@ export default function JNumberAccounting(props: JNumberAccountingProps) {
 		let newDisplayVal = addCommas(valRounded)
 
 		if (valFloat < 0) {
-			newDisplayVal = `(${newDisplayVal})`
-			displayRef.current!.style.right = '7px'
+			newDisplayVal = newDisplayVal.slice(1)
+			setShowParenthesis(true)
 		} else {
-			displayRef.current!.style.right = '12px'
+			setShowParenthesis(false)
 		}
 
 		displayRef.current!.innerText = newDisplayVal
@@ -80,6 +81,9 @@ export default function JNumberAccounting(props: JNumberAccountingProps) {
 	return (
 		<div className={`${s.main} ${props.className ? props.className : ''}`}>
 			<span className={s.dollar_symbol}>$</span>
+			<div className={s.left_parenthesis} hidden={!(showParenthesis && showFormatted)}>
+				(
+			</div>
 			<div className={s.formatted} hidden={!showFormatted} ref={displayRef} />
 			<input
 				{...props}
@@ -93,6 +97,12 @@ export default function JNumberAccounting(props: JNumberAccountingProps) {
 				onMouseLeave={handleMouseLeave}
 				style={showFormatted ? { color: 'transparent' } : {}}
 			/>
+			<div
+				className={s.right_parenthesis}
+				hidden={!(showParenthesis && showFormatted)}
+			>
+				)
+			</div>
 		</div>
 	)
 }

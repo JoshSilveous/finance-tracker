@@ -19,7 +19,19 @@
 		font-family: inherit;
 		font-size: 13.3333px;
 		overflow: hidden;
-		max-width: calc(100% - 12px - 28px);
+		max-width: calc(100% - 14px - 28px);
+	}
+	.left_parenthesis,
+	.right_parenthesis {
+		position: absolute;
+		font-size: 16px;
+		transform: translateY(-1px);
+	}
+	.left_parenthesis {
+		left: 21px;
+	}
+	.right_parenthesis {
+		right: 2px;
 	}
 	input {
 		text-align: right;
