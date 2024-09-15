@@ -9,9 +9,11 @@ export interface JGridProps {
 	className?: string
 	noOuterBorders?: boolean
 	minColumnWidth?: number
-	onResize?: (e: ColumnResizeEvent) => void
+	onResize?: ColumnResizeEventHandler
 }
-interface ColumnResizeEvent {
+
+export type ColumnResizeEventHandler = (e: ColumnResizeEvent) => void
+export interface ColumnResizeEvent {
 	columnIndex: number
 	newWidth: number
 }
@@ -56,28 +58,27 @@ export function JGrid({
 
 			const startX = e.screenX
 			const startWidth = (e.target as HTMLDivElement).parentElement!.clientWidth
+			let newWidth: number
 
 			function handleMouseMove(e: MouseEvent) {
 				const curX = e.screenX
 				const diffX = curX - startX
-				const newWidth = Math.max(
-					minColumnWidth ? minColumnWidth : 50,
-					startWidth + diffX
-				)
+				newWidth = Math.max(minColumnWidth ? minColumnWidth : 50, startWidth + diffX)
 
 				setColumnWidths((prev) => {
 					const newArr = [...prev]
 					newArr[index] = `${newWidth}px`
 					return newArr
 				})
-				if (onResize !== undefined) {
-					onResize({ columnIndex: index, newWidth: newWidth })
-				}
 
 				window.addEventListener('mouseup', handleMouseUp)
 			}
 
 			function handleMouseUp() {
+				if (onResize !== undefined) {
+					onResize({ columnIndex: index, newWidth: newWidth })
+				}
+
 				;(e.target as HTMLDivElement).classList.remove(styles.resizing)
 				setIsResizing(false)
 
