@@ -51,7 +51,8 @@ svg.loading_anim {
 			color: var(--bg-color);
 		}
 
-		.accounting_input {
+		.starting_amount_input,
+		.account_name_input {
 			&:not(.changed) {
 				color: var(--font-color);
 			}

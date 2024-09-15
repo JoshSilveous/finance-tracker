@@ -250,6 +250,7 @@ export function AccountManager() {
 				<JInput
 					onChange={handleChange}
 					onBlur={handleBlur}
+					className={s.account_name_input}
 					data-id={item.id}
 					data-key='name'
 					defaultValue={item.name}
@@ -257,7 +258,7 @@ export function AccountManager() {
 				<JNumberAccounting
 					onChange={handleChange}
 					onBlur={handleBlur}
-					className={s.accounting_input}
+					className={s.starting_amount_input}
 					data-id={item.id}
 					data-key='starting_amount'
 					defaultValue={item.starting_amount.toFixed(2)}
