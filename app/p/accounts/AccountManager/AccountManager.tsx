@@ -205,10 +205,11 @@ export function AccountManager() {
 		myPopup.trigger()
 	}
 
-	if (!isLoading && data) {
-		const gridHeaders = ['Account Name', 'Starting Amount']
+	const gridHeaders = ['Account Name', 'Starting Amount']
+	let gridConfig: JGridProps | undefined
 
-		const gridConfig: JGridProps = {
+	if (!isLoading && data) {
+		gridConfig = {
 			headers: gridHeaders.map((text) => <div className={s.header}>{text}</div>),
 			content: data.map((item) => [
 				<JInput
@@ -229,52 +230,50 @@ export function AccountManager() {
 			]),
 			defaultColumnWidths: ['122px', '133px'],
 		}
-
-		return (
-			<div className={s.main}>
-				<h2>Account Manager</h2>
-				<div className={s.jgrid_container}>
-					<JGrid {...gridConfig} className={s.jgrid} />
-				</div>
-				<div className={s.buttons_container}>
-					<JButton
-						jstyle='primary'
-						className={s.create_new}
-						disabled={pendingChanges.length !== 0}
-						title={
-							pendingChanges.length !== 0
-								? 'Save or discard changes to create a new account'
-								: ''
-						}
-						onClick={handleCreateAccountButton}
-					>
-						Create new account
-					</JButton>
-					<JButton
-						jstyle='primary'
-						className={s.discard}
-						disabled={pendingChanges.length === 0}
-						onClick={discardChanges}
-					>
-						Discard changes
-					</JButton>
-					<JButton
-						jstyle='primary'
-						className={s.save}
-						disabled={pendingChanges.length === 0}
-						loading={isSavingChanges}
-						onClick={saveChanges}
-					>
-						Save changes
-					</JButton>
-				</div>
-			</div>
-		)
-	} else {
-		return (
-			<div className={s.main}>
-				<LoadingAnim className={s.loading_anim} />
-			</div>
-		)
 	}
+
+	return (
+		<div className={s.main}>
+			<h2>Account Manager</h2>
+			<div className={s.jgrid_container}>
+				{isLoading ? (
+					<LoadingAnim className={s.loading_anim} />
+				) : (
+					<JGrid {...gridConfig!} className={s.jgrid} />
+				)}
+			</div>
+			<div className={s.buttons_container}>
+				<JButton
+					jstyle='primary'
+					className={s.create_new}
+					disabled={pendingChanges.length !== 0}
+					title={
+						pendingChanges.length !== 0
+							? 'Save or discard changes to create a new account'
+							: ''
+					}
+					onClick={handleCreateAccountButton}
+				>
+					Create new account
+				</JButton>
+				<JButton
+					jstyle='primary'
+					className={s.discard}
+					disabled={pendingChanges.length === 0}
+					onClick={discardChanges}
+				>
+					Discard changes
+				</JButton>
+				<JButton
+					jstyle='primary'
+					className={s.save}
+					disabled={pendingChanges.length === 0}
+					loading={isSavingChanges}
+					onClick={saveChanges}
+				>
+					Save changes
+				</JButton>
+			</div>
+		</div>
+	)
 }
