@@ -17,6 +17,7 @@ export default function JNumberAccounting(props: JNumberAccountingProps) {
 	const [showParenthesis, setShowParenthesis] = useState(false)
 	const [isFocused, setIsFocused] = useState(false)
 	const [isHovering, setIsHovering] = useState(false)
+	const [prevVal, setPrevVal] = useState(props.value ? (props.value as string) : '')
 
 	useEffect(() => {
 		updateDisplayText()
@@ -24,19 +25,24 @@ export default function JNumberAccounting(props: JNumberAccountingProps) {
 
 	function updateDisplayText() {
 		const valFloat = parseFloat(inputRef.current!.value)
-		const valRounded = valFloat.toFixed(2)
-		inputRef.current!.value = valRounded
-
-		let newDisplayVal = addCommas(valRounded)
-
-		if (valFloat < 0) {
-			newDisplayVal = newDisplayVal.slice(1)
-			setShowParenthesis(true)
+		if (isNaN(valFloat)) {
+			inputRef.current!.value = prevVal
+			updateDisplayText()
 		} else {
-			setShowParenthesis(false)
-		}
+			const valRounded = valFloat.toFixed(2)
+			inputRef.current!.value = valRounded
 
-		displayRef.current!.innerText = newDisplayVal
+			let newDisplayVal = addCommas(valRounded)
+
+			if (valFloat < 0) {
+				newDisplayVal = newDisplayVal.slice(1)
+				setShowParenthesis(true)
+			} else {
+				setShowParenthesis(false)
+			}
+
+			displayRef.current!.innerText = newDisplayVal
+		}
 	}
 
 	function handleMouseEnter(e: MouseEvent<HTMLInputElement>) {
@@ -60,6 +66,7 @@ export default function JNumberAccounting(props: JNumberAccountingProps) {
 	}
 	function handleFocus(e: FocusEvent<HTMLInputElement>) {
 		setIsFocused(true)
+		setPrevVal(e.target.value)
 		if (props.onFocus) {
 			props.onFocus(e)
 		}
