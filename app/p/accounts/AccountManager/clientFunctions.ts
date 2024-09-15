@@ -79,3 +79,16 @@ export async function upsertData(accountUpdates: Account[]) {
 
 	return
 }
+
+export async function insertAccount(name: string, starting_amount: string) {
+	const user_id = await getUserID()
+
+	const { error } = await supabase
+		.from('accounts')
+		.insert([{ name: name, starting_amount: starting_amount, user_id: user_id }])
+
+	if (error) {
+		throw new Error(error.message)
+	}
+	return
+}

@@ -3,7 +3,8 @@ import s from './NewAccountForm.module.scss'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { JInput } from '@/components/JForm/JInput/JInput'
 import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccounting'
-import { insertAccount } from './insertAccount'
+import { insertAccount } from '../clientFunctions'
+import { isStandardError } from '@/utils/errors/isStandardError'
 
 interface Errors {
 	name: string
@@ -52,14 +53,16 @@ export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
 		if (formValid) {
 			setIsSubmitting(true)
 
-			const res = await insertAccount(formData.name.trim(), formData.starting_amount)
-			if (res?.error !== undefined) {
-				setErrors((prev) => ({
-					...prev,
-					general: res.error,
-				}))
-			} else {
+			try {
+				await insertAccount(formData.name.trim(), formData.starting_amount)
 				afterSubmit()
+			} catch (e) {
+				if (isStandardError(e)) {
+					setErrors((prev) => ({
+						...prev,
+						general: e.message,
+					}))
+				}
 			}
 		}
 	}
