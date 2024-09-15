@@ -298,7 +298,7 @@ export function AccountManager() {
 					jstyle='primary'
 					className={s.save}
 					disabled={pendingChanges.length === 0}
-					loading={isSavingChanges}
+					loading={true}
 					onClick={saveChanges}
 				>
 					Save changes

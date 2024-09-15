@@ -7,10 +7,9 @@ interface JButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	loading?: boolean
 }
 
-export function JButton(props: JButtonProps) {
-	console.log('JButton Props:', props.loading, typeof props.loading)
+export function JButton({ jstyle, loading, ...props }: JButtonProps) {
 	let jstyleClass = ''
-	switch (props.jstyle) {
+	switch (jstyle) {
 		case 'primary':
 			jstyleClass = s.primary
 			break
@@ -23,10 +22,10 @@ export function JButton(props: JButtonProps) {
 		<button
 			{...props}
 			className={`${props.className} ${s.jbutton} ${jstyleClass} ${
-				props.loading ? s.loading : ''
+				loading ? s.loading : ''
 			}`}
 		>
-			{props.loading ? <LoadingAnim /> : props.children}
+			{loading ? <LoadingAnim /> : props.children}
 		</button>
 	)
 }
