@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
-import { clientCreateClient } from '@/utils'
+import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 
 export default async function Home() {
-	const supabase = clientCreateClient()
+	const supabase = createClient()
 
 	const { data, error } = await supabase.auth.getUser()
 	if (!(error || !data?.user)) {
