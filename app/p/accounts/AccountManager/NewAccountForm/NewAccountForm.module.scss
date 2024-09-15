@@ -4,6 +4,9 @@
 	text-align: left;
 
 	div {
+		.accounting_input {
+			color: var(--font-color);
+		}
 		&.error {
 			input {
 				outline-color: var(--font-color-error);

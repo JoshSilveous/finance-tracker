@@ -118,10 +118,11 @@ export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
 					<JNumberAccounting
 						id='starting_amount'
 						name='starting_amount'
+						className={s.accounting_input}
 						required
 						onChange={handleInputChange}
 						onBlur={handleBlur}
-						placeholder='0.00'
+						defaultValue={0}
 					/>
 					<div className={s.error_container}>
 						{errors.starting_amount && <div>{errors.starting_amount}</div>}
