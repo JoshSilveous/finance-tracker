@@ -106,8 +106,7 @@ export function AccountManager() {
 		}
 
 		setIsLoading(true)
-		const data = await fetchData()
-		setData(data)
+		setData(await fetchData())
 		setIsLoading(false)
 		setIsSavingChanges(false)
 		setPendingChanges([])
