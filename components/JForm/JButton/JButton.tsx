@@ -8,6 +8,7 @@ interface JButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function JButton(props: JButtonProps) {
+	console.log('JButton Props:', props.loading, typeof props.loading)
 	let jstyleClass = ''
 	switch (props.jstyle) {
 		case 'primary':

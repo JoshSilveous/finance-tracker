@@ -6,3 +6,6 @@ interface Account {
 interface AccountFull extends Account {
 	user_id: string
 }
+interface StandardError {
+	message: string
+}

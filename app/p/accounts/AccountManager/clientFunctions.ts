@@ -1,7 +1,6 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
-import { getUserID } from '@/utils/supabase/clientFunctions'
+import { createClient, getUserID } from '@/utils/supabase/client'
 
 const supabase = createClient()
 
@@ -23,7 +22,7 @@ export async function fetchPreferredColumnWidths() {
 	const { data, error } = await supabase
 		.from('preferences')
 		.select(
-			'account_name_width:accounts-account_name_column_width, starting_amount_width:accounts-starting_amount_column_width'
+			'account_name_width:AccountManager_account_name_column_width, starting_amount_width:AccountManager_starting_amount_column_width'
 		)
 	if (error) {
 		throw new Error(error.message)
@@ -31,7 +30,6 @@ export async function fetchPreferredColumnWidths() {
 	if (data.length === 0) {
 		throw new Error('Preferences not found!')
 	}
-
 	const preferences: unknown = data[0]
 	return preferences as AccountManagerPreferences
 }
@@ -40,10 +38,10 @@ export async function updatePreferredColumnWidth(columnIndex: number, newWidth: 
 	let columnName: string
 	switch (columnIndex) {
 		case 0:
-			columnName = 'accounts-account_name_column_width'
+			columnName = 'AccountManager_account_name_column_width'
 			break
 		case 1:
-			columnName = 'accounts-starting_amount_column_width'
+			columnName = 'AccountManager_starting_amount_column_width'
 			break
 		default:
 			throw new Error(`columnIndex "${columnIndex}" is not valid.`)

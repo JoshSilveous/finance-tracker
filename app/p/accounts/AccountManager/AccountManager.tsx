@@ -15,6 +15,9 @@ import {
 	fetchPreferredColumnWidths,
 	upsertData,
 } from './clientFunctions'
+import { isStandardError } from '@/utils/errors/isStandardError'
+import { createPreferencesEntry } from '@/utils/supabase/newUserPropegation'
+import { createErrorPopup } from '@/utils/errors/createErrorPopup'
 
 interface Change {
 	account_id: string
@@ -31,22 +34,44 @@ export function AccountManager() {
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 
-	useEffect(() => {
-		async function loadInitData() {
-			try {
-				setIsLoading(true)
-				const data = await fetchData()
-				setData(data)
-				const columnWidths = await fetchPreferredColumnWidths()
-				setDefaultColumnWidths([
-					`${columnWidths.account_name_width}px`,
-					`${columnWidths.starting_amount_width}px`,
-				])
-				setIsLoading(false)
-			} catch (e) {
-				console.log('ERROR!', e)
+	async function loadInitData() {
+		setIsLoading(true)
+		try {
+			const columnWidths = await fetchPreferredColumnWidths()
+			setDefaultColumnWidths([
+				`${columnWidths.account_name_width}px`,
+				`${columnWidths.starting_amount_width}px`,
+			])
+		} catch (e) {
+			if (isStandardError(e)) {
+				if (e.message === 'Preferences not found!') {
+					try {
+						await createPreferencesEntry()
+						const columnWidths = await fetchPreferredColumnWidths()
+						setDefaultColumnWidths([
+							`${columnWidths.account_name_width}px`,
+							`${columnWidths.starting_amount_width}px`,
+						])
+					} catch (e) {
+						if (isStandardError(e)) {
+							createErrorPopup(e.message)
+						}
+					}
+				} else {
+					createErrorPopup(e.message)
+				}
 			}
 		}
+		try {
+			const data = await fetchData()
+			setData(data)
+			setIsLoading(false)
+		} catch (e) {
+			console.log('ERROR!', e)
+		}
+	}
+
+	useEffect(() => {
 		loadInitData()
 	}, [])
 

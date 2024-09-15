@@ -12,7 +12,7 @@ export async function insertAccount(name: string, starting_amount: string) {
 		return { error: `User error: ${userError}` }
 	}
 
-	const { data, error } = await supabase
+	const { error } = await supabase
 		.from('accounts')
 		.insert([{ name: name, starting_amount: starting_amount, user_id: user!.id }])
 
