@@ -1,8 +1,7 @@
 'use client'
 import { ChangeEvent, useEffect, useState } from 'react'
 import s from './AccountManager.module.scss'
-import { createClient } from '@/utils/supabase/client'
-import { JGrid, JGridProps } from '@/components/JGrid/JGrid'
+import { ColumnResizeEventHandler, JGrid, JGridProps } from '@/components/JGrid/JGrid'
 import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccounting'
 import { JInput } from '@/components/JForm/JInput/JInput'
 import { JButton } from '@/components/JForm/JButton/JButton'
@@ -10,6 +9,12 @@ import { default as LoadingAnim } from '@/public/loading.svg'
 import { createPopup } from '@/utils/createPopup/createPopup'
 import { NewAccountForm } from './NewAccountForm/NewAccountForm'
 import { removeFromArray } from '@/utils/removeFromArray/removeFromArray'
+import {
+	updatePreferredColumnWidth,
+	fetchData,
+	fetchPreferredColumnWidths,
+	upsertData,
+} from './clientFunctions'
 
 interface Change {
 	account_id: string
@@ -21,48 +26,39 @@ interface Change {
 
 export function AccountManager() {
 	const [isLoading, setIsLoading] = useState(true)
+	const [defaultColumnWidths, setDefaultColumnWidths] = useState<string[] | null>(null)
 	const [data, setData] = useState<Account[]>()
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 
-	const supabase = createClient()
-
-	async function fetchData() {
-		setIsLoading(true)
-		const { data, error } = await supabase
-			.from('accounts')
-			.select('id, name, starting_amount')
-		if (error) {
-			console.log('error!', error)
-		} else {
-			setData(data)
-			setIsLoading(false)
+	useEffect(() => {
+		async function loadInitData() {
+			try {
+				setIsLoading(true)
+				const data = await fetchData()
+				setData(data)
+				const columnWidths = await fetchPreferredColumnWidths()
+				setDefaultColumnWidths([
+					`${columnWidths.account_name_width}px`,
+					`${columnWidths.starting_amount_width}px`,
+				])
+				setIsLoading(false)
+			} catch (e) {
+				console.log('ERROR!', e)
+			}
 		}
-	}
-
-	useEffect(() => {
-		console.log(pendingChanges)
-	}, [pendingChanges])
-
-	useEffect(() => {
-		fetchData()
+		loadInitData()
 	}, [])
 
 	async function saveChanges() {
 		setIsSavingChanges(true)
-		const getUserRes = await supabase.auth.getUser()
-		if (getUserRes.error) {
-			console.log('User error:', getUserRes.error)
-			return
-		}
 
-		const accountUpdates: AccountFull[] = pendingChanges.map((change) => {
+		const accountUpdates: Account[] = pendingChanges.map((change) => {
 			const thisAccount = data!.find(
 				(item) => item.id === change.account_id
 			) as Account
 			return {
 				id: change.account_id,
-				user_id: getUserRes.data.user.id,
 				name: change.new.name === undefined ? thisAccount.name : change.new.name,
 				starting_amount:
 					change.new.starting_amount === undefined
@@ -70,20 +66,18 @@ export function AccountManager() {
 						: Math.round(parseFloat(change.new.starting_amount) * 100) / 100,
 			}
 		})
-
-		const upsertRes = await supabase.from('accounts').upsert(accountUpdates, {
-			defaultToNull: false,
-			onConflict: 'id',
-			ignoreDuplicates: false,
-		})
-		if (upsertRes.error) {
-			console.log('ERROR!', upsertRes.error)
-			setIsSavingChanges(false)
-		} else {
-			fetchData()
-			setIsSavingChanges(false)
-			setPendingChanges([])
+		try {
+			await upsertData(accountUpdates)
+		} catch (e) {
+			console.log('ERROR!', e)
 		}
+
+		setIsLoading(true)
+		const data = await fetchData()
+		setData(data)
+		setIsLoading(false)
+		setIsSavingChanges(false)
+		setPendingChanges([])
 	}
 
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -196,9 +190,12 @@ export function AccountManager() {
 	function handleCreateAccountButton() {
 		const myPopup = createPopup(
 			<NewAccountForm
-				afterSubmit={() => {
+				afterSubmit={async () => {
 					myPopup.close()
-					fetchData()
+					setIsLoading(true)
+					const data = await fetchData()
+					setData(data)
+					setIsLoading(false)
 				}}
 			/>
 		)
@@ -206,6 +203,11 @@ export function AccountManager() {
 	}
 
 	const gridHeaders = ['Account Name', 'Starting Amount']
+
+	const updateDefaultColumnWidth: ColumnResizeEventHandler = async (e) => {
+		await updatePreferredColumnWidth(e.columnIndex, e.newWidth)
+	}
+
 	let gridConfig: JGridProps | undefined
 
 	if (!isLoading && data) {
@@ -228,7 +230,10 @@ export function AccountManager() {
 					defaultValue={item.starting_amount.toFixed(2)}
 				/>,
 			]),
-			defaultColumnWidths: ['122px', '133px'],
+			defaultColumnWidths: defaultColumnWidths
+				? defaultColumnWidths
+				: ['122px', '133px'],
+			onResize: updateDefaultColumnWidth,
 		}
 	}
 
