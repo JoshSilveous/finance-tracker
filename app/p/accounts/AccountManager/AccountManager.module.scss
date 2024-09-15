@@ -1,25 +1,10 @@
-.item_row {
-	display: flex;
-	gap: 50px;
-}
-
-.buttons_container {
-	display: flex;
-	gap: 20px;
-	width: 100%;
-	padding: 0 20px;
-	button {
-		width: calc(50% - 10px);
-	}
-}
-
 svg.loading_anim {
 	height: 100px;
 }
 
 .main {
 	max-width: 90vw;
-	min-width: 600px;
+	width: 600px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -28,6 +13,22 @@ svg.loading_anim {
 	padding: 20px;
 	border-radius: 20px;
 	background-color: var(--bg-color-lighter-1);
+	.buttons_container {
+		display: flex;
+		gap: 20px;
+		width: 100%;
+		padding: 0 20px;
+		button {
+			width: calc(50% - 10px);
+		}
+		@media (max-width: 678px) {
+			flex-direction: column-reverse;
+			align-items: center;
+			button {
+				width: 100%;
+			}
+		}
+	}
 	.jgrid_container {
 		max-width: 100%;
 		.jgrid {
