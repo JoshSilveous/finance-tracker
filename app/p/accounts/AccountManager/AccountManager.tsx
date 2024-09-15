@@ -67,7 +67,11 @@ export function AccountManager() {
 			setData(data)
 			setIsLoading(false)
 		} catch (e) {
-			console.log('ERROR!', e)
+			if (isStandardError(e)) {
+				createErrorPopup(e.message)
+			} else {
+				console.error(e)
+			}
 		}
 	}
 
@@ -94,7 +98,11 @@ export function AccountManager() {
 		try {
 			await upsertData(accountUpdates)
 		} catch (e) {
-			console.log('ERROR!', e)
+			if (isStandardError(e)) {
+				createErrorPopup(e.message)
+			} else {
+				console.error(e)
+			}
 		}
 
 		setIsLoading(true)
