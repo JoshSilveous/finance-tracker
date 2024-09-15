@@ -1,12 +1,12 @@
 'use client'
-import { createClient } from '@/utils/supabase/client'
+import { clientCreateClient } from '@/utils'
 import { useRouter } from 'next/navigation'
-import { JButton } from '../JForm/JButton/JButton'
+import { JButton } from '../JForm'
 
 export function SignOutButton() {
 	const router = useRouter()
 	async function signOut() {
-		const supabase = createClient()
+		const supabase = clientCreateClient()
 		const { error } = await supabase.auth.signOut()
 		if (error) {
 			router.push(`/error?message=${encodeURIComponent(error.message)}`)

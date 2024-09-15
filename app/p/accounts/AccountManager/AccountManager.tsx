@@ -2,22 +2,22 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import s from './AccountManager.module.scss'
 import { ColumnResizeEventHandler, JGrid, JGridProps } from '@/components/JGrid/JGrid'
-import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccounting'
-import { JInput } from '@/components/JForm/JInput/JInput'
-import { JButton } from '@/components/JForm/JButton/JButton'
+import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import { createPopup } from '@/utils/createPopup/createPopup'
 import { NewAccountForm } from './NewAccountForm/NewAccountForm'
-import { removeFromArray } from '@/utils/removeFromArray/removeFromArray'
+import {
+	removeFromArray,
+	createPopup,
+	isStandardError,
+	createPreferencesEntry,
+	createErrorPopup,
+} from '@/utils'
 import {
 	updatePreferredColumnWidth,
 	fetchData,
 	fetchPreferredColumnWidths,
 	upsertData,
 } from './clientFunctions'
-import { isStandardError } from '@/utils/errors/isStandardError'
-import { createPreferencesEntry } from '@/utils/supabase/newUserPropegation'
-import { createErrorPopup } from '@/utils/errors/createErrorPopup'
 
 interface Change {
 	account_id: string

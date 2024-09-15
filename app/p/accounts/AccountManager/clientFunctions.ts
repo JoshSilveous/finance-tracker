@@ -1,8 +1,8 @@
 'use client'
 
-import { createClient, getUserID } from '@/utils/supabase/client'
+import { clientCreateClient, clientGetUserID } from '@/utils'
 
-const supabase = createClient()
+const supabase = clientCreateClient()
 
 export async function fetchData() {
 	const { data, error } = await supabase
@@ -46,7 +46,7 @@ export async function updatePreferredColumnWidth(columnIndex: number, newWidth: 
 		default:
 			throw new Error(`columnIndex "${columnIndex}" is not valid.`)
 	}
-	const user_id = await getUserID()
+	const user_id = await clientGetUserID()
 
 	const { error } = await supabase
 		.from('preferences')
@@ -59,7 +59,7 @@ export async function updatePreferredColumnWidth(columnIndex: number, newWidth: 
 }
 
 export async function upsertData(accountUpdates: Account[]) {
-	const user_id = await getUserID()
+	const user_id = await clientGetUserID()
 
 	const accountUpdatesWithUserID: AccountFull[] = accountUpdates.map((item) => {
 		return {
@@ -81,7 +81,7 @@ export async function upsertData(accountUpdates: Account[]) {
 }
 
 export async function insertAccount(name: string, starting_amount: string) {
-	const user_id = await getUserID()
+	const user_id = await clientGetUserID()
 
 	const { error } = await supabase
 		.from('accounts')

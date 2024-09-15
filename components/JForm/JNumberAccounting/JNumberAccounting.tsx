@@ -11,7 +11,7 @@ import s from './JNumberAccounting.module.scss'
 
 interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {}
 
-export default function JNumberAccounting(props: JNumberAccountingProps) {
+export function JNumberAccounting(props: JNumberAccountingProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
 	const displayRef = useRef<HTMLDivElement>(null)
 	const [showParenthesis, setShowParenthesis] = useState(false)

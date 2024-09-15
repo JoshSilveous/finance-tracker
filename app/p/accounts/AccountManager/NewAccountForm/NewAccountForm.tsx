@@ -1,10 +1,9 @@
-import { JButton } from '@/components/JForm/JButton/JButton'
+import { JButton } from '@/components/JForm'
 import s from './NewAccountForm.module.scss'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { JInput } from '@/components/JForm/JInput/JInput'
-import JNumberAccounting from '@/components/JForm/JNumberAccounting/JNumberAccounting'
+import { JInput, JNumberAccounting } from '@/components/JForm'
 import { insertAccount } from '../clientFunctions'
-import { isStandardError } from '@/utils/errors/isStandardError'
+import { isStandardError } from '@/utils'
 
 interface Errors {
 	name: string

@@ -1,8 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { signup } from './signup'
 import s from './SignupForm.module.scss'
-import { JInput } from '../JForm/JInput/JInput'
-import { JButton } from '../JForm/JButton/JButton'
+import { JButton, JInput } from '../JForm'
 
 interface Errors {
 	email: string
