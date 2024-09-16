@@ -4,7 +4,7 @@ import styles from './JGrid.module.scss'
 export interface JGridProps {
 	headers: JSX.Element[]
 	content: JSX.Element[][]
-	defaultColumnWidths: string[]
+	defaultColumnWidths: number[]
 	style?: React.CSSProperties
 	className?: string
 	noOuterBorders?: boolean
@@ -74,29 +74,29 @@ export function JGrid({
 						if (colIndex === index) {
 							curTableWidth += newWidth
 						} else {
-							curTableWidth += parseInt(colWidth)
+							curTableWidth += colWidth
 						}
 					})
 					if (curTableWidth <= maxTableWidth) {
 						setColumnWidths((prev) => {
 							const newArr = [...prev]
-							newArr[index] = `${newWidth}px`
+							newArr[index] = newWidth
 							return newArr
 						})
 					} else if (index !== columnWidths.length - 1) {
 						setColumnWidths((prev) => {
 							const newArr = [...prev]
 
-							const trueDiff = parseInt(prev[index]) - newWidth
-							const nextNodePrevWidth = parseInt(prev[index + 1])
+							const trueDiff = prev[index] - newWidth
+							const nextNodePrevWidth = prev[index + 1]
 							const nextNodeNewWidth = nextNodePrevWidth + trueDiff
 							if (
 								minColumnWidth
 									? nextNodeNewWidth > minColumnWidth
 									: nextNodeNewWidth > 50
 							) {
-								newArr[index] = `${newWidth}px`
-								newArr[index + 1] = `${nextNodeNewWidth}px`
+								newArr[index] = newWidth
+								newArr[index + 1] = nextNodeNewWidth
 							}
 							return newArr
 						})
@@ -104,7 +104,7 @@ export function JGrid({
 				} else {
 					setColumnWidths((prev) => {
 						const newArr = [...prev]
-						newArr[index] = `${newWidth}px`
+						newArr[index] = newWidth
 						return newArr
 					})
 				}
@@ -172,7 +172,7 @@ export function JGrid({
 			<div
 				className={styles.grid}
 				style={{
-					gridTemplateColumns: columnWidths.join(' '),
+					gridTemplateColumns: columnWidths.map((val) => `${val}px`).join(' '),
 					userSelect: isResizing ? 'none' : 'auto',
 					cursor: isResizing ? 'e-resize' : '',
 					borderWidth: noOuterBorders ? '0px' : '',

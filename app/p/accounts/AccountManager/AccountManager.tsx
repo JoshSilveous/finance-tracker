@@ -31,7 +31,7 @@ interface Change {
 export function AccountManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
-	const [defaultColumnWidths, setDefaultColumnWidths] = useState<string[] | null>(null)
+	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[] | null>(null)
 	const [data, setData] = useState<Account[]>()
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
@@ -47,8 +47,8 @@ export function AccountManager() {
 		try {
 			const columnWidths = await fetchPreferredColumnWidths()
 			setDefaultColumnWidths([
-				`${columnWidths.account_name_width}px`,
-				`${columnWidths.starting_amount_width}px`,
+				columnWidths.account_name_width,
+				columnWidths.starting_amount_width,
 			])
 		} catch (e) {
 			if (isStandardError(e)) {
@@ -57,8 +57,8 @@ export function AccountManager() {
 						await createPreferencesEntry()
 						const columnWidths = await fetchPreferredColumnWidths()
 						setDefaultColumnWidths([
-							`${columnWidths.account_name_width}px`,
-							`${columnWidths.starting_amount_width}px`,
+							columnWidths.account_name_width,
+							columnWidths.starting_amount_width,
 						])
 					} catch (e) {
 						if (isStandardError(e)) {
@@ -295,9 +295,7 @@ export function AccountManager() {
 					defaultValue={item.starting_amount.toFixed(2)}
 				/>,
 			]),
-			defaultColumnWidths: defaultColumnWidths
-				? defaultColumnWidths
-				: ['122px', '133px'],
+			defaultColumnWidths: defaultColumnWidths ? defaultColumnWidths : [122, 133],
 			maxTableWidth: 500,
 			onResize: updateDefaultColumnWidth,
 		}
