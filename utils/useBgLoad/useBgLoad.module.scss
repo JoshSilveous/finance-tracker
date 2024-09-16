@@ -1,0 +1,12 @@
+.main {
+	position: absolute;
+	height: 40px;
+	width: 40px;
+	bottom: 10px;
+	right: 10px;
+	color: transparent;
+	transition: 0.1s color ease;
+	&.visible {
+		color: var(--font-color);
+	}
+}

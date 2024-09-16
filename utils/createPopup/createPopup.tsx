@@ -19,7 +19,6 @@ export function createPopup(content: JSX.Element, handleClose?: () => void) {
 
 	body.appendChild(popupContainer)
 	const popupDomLocation = ReactDOM.createRoot(popupContainer)
-	console.log(popupContainer)
 
 	return {
 		trigger() {
