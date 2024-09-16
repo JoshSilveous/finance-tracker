@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './JGrid.module.scss'
 export interface JGridProps {
 	headers: JSX.Element[]
@@ -31,7 +31,11 @@ export function JGrid({
 	onResize,
 }: JGridProps) {
 	const [columnWidths, setColumnWidths] = useState(defaultColumnWidths)
+	const columnWidthsRef = useRef(columnWidths)
 	const [isResizing, setIsResizing] = useState(false)
+	useEffect(() => {
+		columnWidthsRef.current = columnWidths
+	}, columnWidths)
 
 	const headersJSX = (
 		<div className={styles.row}>
@@ -60,12 +64,15 @@ export function JGrid({
 
 			const startX = e.screenX
 			const startWidth = (e.target as HTMLDivElement).parentElement!.clientWidth
-			let newWidth: number
+			let prevColWidths = [...columnWidths]
 
 			function handleMouseMove(e: MouseEvent) {
 				const curX = e.screenX
 				const diffX = curX - startX
-				newWidth = Math.max(minColumnWidth ? minColumnWidth : 50, startWidth + diffX)
+				let newWidth = Math.max(
+					minColumnWidth ? minColumnWidth : 50,
+					startWidth + diffX
+				)
 
 				if (maxTableWidth !== undefined) {
 					// get current table width
@@ -114,7 +121,11 @@ export function JGrid({
 
 			function handleMouseUp() {
 				if (onResize !== undefined) {
-					onResize({ columnIndex: index, newWidth: newWidth })
+					columnWidthsRef.current.forEach((colWidth, index) => {
+						if (colWidth !== prevColWidths[index]) {
+							onResize({ columnIndex: index, newWidth: colWidth })
+						}
+					})
 				}
 
 				;(e.target as HTMLDivElement).classList.remove(styles.resizing)
