@@ -9,6 +9,7 @@ export interface JGridProps {
 	className?: string
 	noOuterBorders?: boolean
 	minColumnWidth?: number
+	maxTableWidth?: number
 	onResize?: ColumnResizeEventHandler
 }
 
@@ -26,6 +27,7 @@ export function JGrid({
 	className,
 	noOuterBorders,
 	minColumnWidth,
+	maxTableWidth,
 	onResize,
 }: JGridProps) {
 	const [columnWidths, setColumnWidths] = useState(defaultColumnWidths)
@@ -65,11 +67,47 @@ export function JGrid({
 				const diffX = curX - startX
 				newWidth = Math.max(minColumnWidth ? minColumnWidth : 50, startWidth + diffX)
 
-				setColumnWidths((prev) => {
-					const newArr = [...prev]
-					newArr[index] = `${newWidth}px`
-					return newArr
-				})
+				if (maxTableWidth !== undefined) {
+					// get current table width
+					let curTableWidth = 0
+					columnWidths.forEach((colWidth, colIndex) => {
+						if (colIndex === index) {
+							curTableWidth += newWidth
+						} else {
+							curTableWidth += parseInt(colWidth)
+						}
+					})
+					if (curTableWidth <= maxTableWidth) {
+						setColumnWidths((prev) => {
+							const newArr = [...prev]
+							newArr[index] = `${newWidth}px`
+							return newArr
+						})
+					} else if (index !== columnWidths.length - 1) {
+						setColumnWidths((prev) => {
+							const newArr = [...prev]
+
+							const trueDiff = parseInt(prev[index]) - newWidth
+							const nextNodePrevWidth = parseInt(prev[index + 1])
+							const nextNodeNewWidth = nextNodePrevWidth + trueDiff
+							if (
+								minColumnWidth
+									? nextNodeNewWidth > minColumnWidth
+									: nextNodeNewWidth > 50
+							) {
+								newArr[index] = `${newWidth}px`
+								newArr[index + 1] = `${nextNodeNewWidth}px`
+							}
+							return newArr
+						})
+					}
+				} else {
+					setColumnWidths((prev) => {
+						const newArr = [...prev]
+						newArr[index] = `${newWidth}px`
+						return newArr
+					})
+				}
 
 				window.addEventListener('mouseup', handleMouseUp)
 			}

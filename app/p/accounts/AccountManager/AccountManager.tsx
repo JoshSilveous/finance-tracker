@@ -298,6 +298,7 @@ export function AccountManager() {
 			defaultColumnWidths: defaultColumnWidths
 				? defaultColumnWidths
 				: ['122px', '133px'],
+			maxTableWidth: 500,
 			onResize: updateDefaultColumnWidth,
 		}
 	}
