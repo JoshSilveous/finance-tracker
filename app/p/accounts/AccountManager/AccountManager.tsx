@@ -1,5 +1,5 @@
 'use client'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import s from './AccountManager.module.scss'
 import { ColumnResizeEventHandler, JGrid, JGridProps } from '@/components/JGrid/JGrid'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
@@ -11,6 +11,7 @@ import {
 	isStandardError,
 	createPreferencesEntry,
 	createErrorPopup,
+	useBgLoad,
 } from '@/utils'
 import {
 	updatePreferredColumnWidth,
@@ -28,11 +29,18 @@ interface Change {
 }
 
 export function AccountManager() {
+	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<string[] | null>(null)
 	const [data, setData] = useState<Account[]>()
-	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
+	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
+
+	/* pendingChangesRef is needed due to the handleKeyDown listener not pulling the current pendingChanges in the saveChanges function. useRef ensures we always have the latest pendingChanges value, even inside event listeners or async functions. I <3 DOM */
+	const pendingChangesRef = useRef<Change[]>(pendingChanges)
+	useEffect(() => {
+		pendingChangesRef.current = pendingChanges
+	}, [pendingChanges])
 
 	async function loadInitData() {
 		setIsLoading(true)
@@ -75,41 +83,55 @@ export function AccountManager() {
 		}
 	}
 
+	function handleKeyDown(e: KeyboardEvent) {
+		if (e.ctrlKey && e.key === 's') {
+			e.preventDefault()
+			saveChanges()
+		}
+	}
 	useEffect(() => {
 		loadInitData()
+
+		window.addEventListener('keydown', handleKeyDown)
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown)
+		}
 	}, [])
 
 	async function saveChanges() {
-		setIsSavingChanges(true)
+		const pendingChanges = pendingChangesRef.current
+		if (pendingChanges.length !== 0) {
+			setIsSavingChanges(true)
 
-		const accountUpdates: Account[] = pendingChanges.map((change) => {
-			const thisAccount = data!.find(
-				(item) => item.id === change.account_id
-			) as Account
-			return {
-				id: change.account_id,
-				name: change.new.name === undefined ? thisAccount.name : change.new.name,
-				starting_amount:
-					change.new.starting_amount === undefined
-						? thisAccount.starting_amount
-						: Math.round(parseFloat(change.new.starting_amount) * 100) / 100,
+			const accountUpdates: Account[] = pendingChanges.map((change) => {
+				const thisAccount = data!.find(
+					(item) => item.id === change.account_id
+				) as Account
+				return {
+					id: change.account_id,
+					name: change.new.name === undefined ? thisAccount.name : change.new.name,
+					starting_amount:
+						change.new.starting_amount === undefined
+							? thisAccount.starting_amount
+							: Math.round(parseFloat(change.new.starting_amount) * 100) / 100,
+				}
+			})
+			try {
+				await upsertData(accountUpdates)
+			} catch (e) {
+				if (isStandardError(e)) {
+					createErrorPopup(e.message)
+				} else {
+					console.error(e)
+				}
 			}
-		})
-		try {
-			await upsertData(accountUpdates)
-		} catch (e) {
-			if (isStandardError(e)) {
-				createErrorPopup(e.message)
-			} else {
-				console.error(e)
-			}
+
+			setIsLoading(true)
+			setData(await fetchData())
+			setIsLoading(false)
+			setIsSavingChanges(false)
+			setPendingChanges([])
 		}
-
-		setIsLoading(true)
-		setData(await fetchData())
-		setIsLoading(false)
-		setIsSavingChanges(false)
-		setPendingChanges([])
 	}
 
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -237,7 +259,17 @@ export function AccountManager() {
 	const gridHeaders = ['Account Name', 'Starting Amount']
 
 	const updateDefaultColumnWidth: ColumnResizeEventHandler = async (e) => {
-		await updatePreferredColumnWidth(e.columnIndex, e.newWidth)
+		bgLoad.start()
+		try {
+			await updatePreferredColumnWidth(e.columnIndex, e.newWidth)
+		} catch (e) {
+			if (isStandardError(e)) {
+				console.error(
+					`Minor error occured when updating preferredColumnWidth: ${e.message}`
+				)
+			}
+		}
+		bgLoad.stop()
 	}
 
 	let gridConfig: JGridProps | undefined
