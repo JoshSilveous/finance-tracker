@@ -32,14 +32,16 @@ export function AccountManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[] | null>(null)
-	const [data, setData] = useState<Account[]>()
+	const [data, setData] = useState<Account.Full[]>()
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
+	const [sortOrder, setSortOrder] = useState<Account.ID[] | null>(null)
 
 	/* pendingChangesRef is needed due to the handleKeyDown listener not pulling the current pendingChanges in the saveChanges function. useRef ensures we always have the latest pendingChanges value, even inside event listeners or async functions. I <3 DOM */
 	const pendingChangesRef = useRef<Change[]>(pendingChanges)
 	useEffect(() => {
 		pendingChangesRef.current = pendingChanges
+		console.log('pendingChanges', pendingChanges)
 	}, [pendingChanges])
 
 	async function loadInitData() {
@@ -47,6 +49,7 @@ export function AccountManager() {
 		try {
 			const columnWidths = await fetchPreferredColumnWidths()
 			setDefaultColumnWidths([
+				50,
 				columnWidths.account_name_width,
 				columnWidths.starting_amount_width,
 			])
@@ -57,6 +60,7 @@ export function AccountManager() {
 						await createPreferencesEntry()
 						const columnWidths = await fetchPreferredColumnWidths()
 						setDefaultColumnWidths([
+							50,
 							columnWidths.account_name_width,
 							columnWidths.starting_amount_width,
 						])
@@ -74,6 +78,7 @@ export function AccountManager() {
 			const data = await fetchData()
 			setData(data)
 			setIsLoading(false)
+			setSortOrder(data.map((item) => item.id))
 		} catch (e) {
 			if (isStandardError(e)) {
 				createErrorPopup(e.message)
@@ -103,13 +108,14 @@ export function AccountManager() {
 		if (pendingChanges.length !== 0) {
 			setIsSavingChanges(true)
 
-			const accountUpdates: Account[] = pendingChanges.map((change) => {
+			const accountUpdates: Account.WithPropsAndID[] = pendingChanges.map((change) => {
 				const thisAccount = data!.find(
 					(item) => item.id === change.account_id
-				) as Account
+				) as Account.Full
 				return {
 					id: change.account_id,
 					name: change.new.name === undefined ? thisAccount.name : change.new.name,
+					order_position: 1,
 					starting_amount:
 						change.new.starting_amount === undefined
 							? thisAccount.starting_amount
@@ -140,10 +146,12 @@ export function AccountManager() {
 			e.target.value = e.target.value.trimStart()
 		}
 
-		const account_id = e.target.dataset['id'] as Account['id']
+		const account_id = e.target.dataset['id'] as Account.ID
 		const key = e.target.dataset['key'] as keyof Change['new']
 		const startingValue = e.target.defaultValue
 		const currentValue = e.target.value
+
+		console.log('handleChange for', account_id)
 
 		const currentChangeIndex = pendingChanges.findIndex(
 			(change) => change.account_id === account_id
@@ -198,7 +206,7 @@ export function AccountManager() {
 		// this will remove those spaces and the Change
 		if (startingValue === currentValue) {
 			e.target.parentElement!.classList.remove(s.changed)
-			const account_id = e.target.dataset['id'] as Account['id']
+			const account_id = e.target.dataset['id'] as Account.ID
 			const key = e.target.dataset['key'] as keyof Change['new']
 
 			const currentChangeIndex = pendingChanges.findIndex(
@@ -256,12 +264,12 @@ export function AccountManager() {
 		myPopup.trigger()
 	}
 
-	const gridHeaders = ['Account Name', 'Starting Amount']
+	const gridHeaders = ['#', 'Account Name', 'Starting Amount']
 
 	const updateDefaultColumnWidth: ColumnResizeEventHandler = async (e) => {
 		bgLoad.start()
 		try {
-			await updatePreferredColumnWidth(e.columnIndex, e.newWidth)
+			await updatePreferredColumnWidth(e.columnIndex - 1, e.newWidth)
 		} catch (e) {
 			if (isStandardError(e)) {
 				console.error(
@@ -274,30 +282,86 @@ export function AccountManager() {
 
 	let gridConfig: JGridProps | undefined
 
-	if (!isLoading && data) {
+	if (!isLoading && data && sortOrder) {
 		gridConfig = {
 			headers: gridHeaders.map((text) => <div className={s.header}>{text}</div>),
-			content: data.map((item) => [
-				<JInput
-					onChange={handleChange}
-					onBlur={handleBlur}
-					className={s.account_name_input}
-					data-id={item.id}
-					data-key='name'
-					defaultValue={item.name}
-				/>,
-				<JNumberAccounting
-					onChange={handleChange}
-					onBlur={handleBlur}
-					className={s.starting_amount_input}
-					data-id={item.id}
-					data-key='starting_amount'
-					defaultValue={item.starting_amount.toFixed(2)}
-				/>,
-			]),
-			defaultColumnWidths: defaultColumnWidths ? defaultColumnWidths : [122, 133],
+			content: sortOrder.map((sortId, sortIndex) => {
+				const thisData = data.find((item) => item.id === sortId)!
+				const thisPendingChangeIndex = pendingChanges.findIndex(
+					(change) => (change.account_id = sortId)
+				)
+				const thisPendingChange =
+					thisPendingChangeIndex === -1
+						? null
+						: pendingChanges[thisPendingChangeIndex]
+
+				function moveUp() {
+					setSortOrder((prev) => {
+						const newArr = [...prev!]
+						newArr[sortIndex] = prev![sortIndex - 1]
+						newArr[sortIndex - 1] = prev![sortIndex]
+						return newArr
+					})
+				}
+				function moveDown() {
+					setSortOrder((prev) => {
+						const newArr = [...prev!]
+						newArr[sortIndex] = prev![sortIndex + 1]
+						newArr[sortIndex + 1] = prev![sortIndex]
+						return newArr
+					})
+				}
+				function handleNameChange(e: ChangeEvent<HTMLInputElement>) {
+					// prevent leading spaces
+					if (e.target.value !== e.target.value.trimStart()) {
+						e.target.value = e.target.value.trimStart()
+					}
+					const startingValue = e.target.defaultValue
+					const currentValue = e.target.value
+
+					if (startingValue === currentValue) {
+						e.target.parentElement!.classList.remove(s.changed)
+					}
+				}
+				return [
+					<div key={`1-${thisData.id}`} className={s.reorder_container}>
+						{sortIndex !== 0 && (
+							<div className={s.up} onClick={moveUp}>
+								↑
+							</div>
+						)}
+						{sortIndex !== data.length - 1 && (
+							<div className={s.down} onClick={moveDown}>
+								↓
+							</div>
+						)}
+					</div>,
+					<JInput
+						key={`2-${thisData.id}`}
+						onChange={handleChange}
+						onBlur={handleBlur}
+						className={`${s.account_name_input}
+						}`}
+						data-id={thisData.id}
+						data-key='name'
+						defaultValue={thisData.name}
+					/>,
+					<JNumberAccounting
+						key={`3-${thisData.id}`}
+						onChange={handleChange}
+						onBlur={handleBlur}
+						className={`${s.starting_amount_input}
+						}`}
+						data-id={thisData.id}
+						data-key='starting_amount'
+						defaultValue={thisData.starting_amount.toFixed(2)}
+					/>,
+				]
+			}),
+			defaultColumnWidths: defaultColumnWidths ? defaultColumnWidths : [50, 122, 133],
 			maxTableWidth: 500,
 			onResize: updateDefaultColumnWidth,
+			minColumnWidth: 30,
 		}
 	}
 
