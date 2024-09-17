@@ -7,11 +7,12 @@ const supabase = createClient()
 export async function fetchData() {
 	const { data, error } = await supabase
 		.from('accounts')
-		.select('id, name, starting_amount')
+		.select('*')
+		.order('order_position')
 	if (error) {
 		throw new Error(error.message)
 	}
-	return data as Account[]
+	return data as Account.Full[]
 }
 
 interface AccountManagerPreferences {
@@ -58,10 +59,10 @@ export async function updatePreferredColumnWidth(columnIndex: number, newWidth: 
 	return
 }
 
-export async function upsertData(accountUpdates: Account[]) {
+export async function upsertData(accountUpdates: Account.WithPropsAndID[]) {
 	const user_id = await getUserID()
 
-	const accountUpdatesWithUserID: AccountFull[] = accountUpdates.map((item) => {
+	const accountUpdatesWithUserID: Account.Full[] = accountUpdates.map((item) => {
 		return {
 			...item,
 			user_id: user_id,
@@ -80,15 +81,33 @@ export async function upsertData(accountUpdates: Account[]) {
 	return
 }
 
-export async function insertAccount(name: string, starting_amount: string) {
+export async function insertAccount(account: Account.Bare) {
 	const user_id = await getUserID()
 
-	const { error } = await supabase
-		.from('accounts')
-		.insert([{ name: name, starting_amount: starting_amount, user_id: user_id }])
+	const numOfAccounts = await getAccountsCount()
+	console.log('numOfAccounts', numOfAccounts)
+
+	const newAccount: Account.WithPropsAndUser = {
+		name: account.name,
+		starting_amount: account.starting_amount,
+		user_id: user_id,
+		order_position: numOfAccounts! + 1,
+	}
+
+	const { error } = await supabase.from('accounts').insert([newAccount])
 
 	if (error) {
 		throw new Error(error.message)
 	}
 	return
+}
+
+export async function getAccountsCount() {
+	const { count, error } = await supabase
+		.from('accounts')
+		.select('*', { count: 'exact', head: true })
+	if (error) {
+		throw new Error(error.message)
+	}
+	return count
 }

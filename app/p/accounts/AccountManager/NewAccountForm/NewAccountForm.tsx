@@ -12,7 +12,7 @@ interface Errors {
 }
 
 export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
-	const [formData, setFormData] = useState({ name: '', starting_amount: '' })
+	const [formData, setFormData] = useState<Account.Bare>({ name: '', starting_amount: 0 })
 	const [errors, setErrors] = useState<Errors>({
 		name: '',
 		starting_amount: '',
@@ -40,20 +40,15 @@ export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
 			formValid = false
 		}
 
-		// check that "starting_amount" isn't blank
-		if (formData.starting_amount === '') {
-			setErrors((prev) => ({
-				...prev,
-				starting_amount: 'You must enter a starting balance',
-			}))
-			formValid = false
-		}
-
 		if (formValid) {
 			setIsSubmitting(true)
+			const newAccount: Account.Bare = {
+				name: formData.name.trim(),
+				starting_amount: formData.starting_amount,
+			}
 
 			try {
-				await insertAccount(formData.name.trim(), formData.starting_amount)
+				await insertAccount(newAccount)
 				afterSubmit()
 			} catch (e) {
 				if (isStandardError(e)) {

@@ -1,11 +1,23 @@
-interface Account {
-	id: string
-	name: string
-	starting_amount: number
-}
-interface AccountFull extends Account {
-	user_id: string
-}
-interface StandardError {
-	message: string
+type UID = string
+namespace Account {
+	type ID = string
+	interface Bare {
+		name: string
+		starting_amount: number
+	}
+	interface WithProps extends Bare {
+		order_position: number
+	}
+	interface BareWithID extends Bare {
+		id: ID
+	}
+	interface WithPropsAndUser extends WithProps {
+		user_id: UID
+	}
+	interface WithPropsAndID extends WithProps {
+		id: ID
+	}
+	interface Full extends WithPropsAndUser {
+		id: ID
+	}
 }
