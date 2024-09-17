@@ -311,6 +311,11 @@ export function AccountManager() {
 						return newArr
 					})
 				}
+				/*
+				remember, this entire section re-renders.
+				handleNameChange DOES NOT need to handle adding/removing classes. Make those style attributes separate from the handlers, but instead derive from pendingChanges.
+				This'll allow re-ordering, and be cleaner.
+				*/
 				function handleNameChange(e: ChangeEvent<HTMLInputElement>) {
 					// prevent leading spaces
 					if (e.target.value !== e.target.value.trimStart()) {
@@ -319,10 +324,39 @@ export function AccountManager() {
 					const startingValue = e.target.defaultValue
 					const currentValue = e.target.value
 
-					if (startingValue === currentValue) {
-						e.target.parentElement!.classList.remove(s.changed)
+					if (startingValue === currentValue && thisPendingChange) {
+						if (thisPendingChange.new.starting_amount === undefined) {
+							// remove thisChange from pendingChanges
+							setPendingChanges((prev) =>
+								removeFromArray(prev, thisPendingChangeIndex)
+							)
+						} else {
+							// remove only the 'name' key
+							setPendingChanges((prev) => {
+								const newArr = [...prev]
+								delete newArr[thisPendingChangeIndex].new.name
+								return newArr
+							})
+						}
+					} else if (!thisPendingChange) {
+						// change isn't already present in pendingChanges
+						setPendingChanges((prev) => [
+							...prev,
+							{
+								account_id: thisData.id,
+								new: { name: currentValue },
+							},
+						])
+					} else {
+						// change is already present in pendingChanges
+						setPendingChanges((prev) => {
+							const newArr = [...prev]
+							newArr[thisPendingChangeIndex].new.name = currentValue
+							return newArr
+						})
 					}
 				}
+				function handleNameBlur(e: ChangeEvent<HTMLInputElement>) {}
 				return [
 					<div key={`1-${thisData.id}`} className={s.reorder_container}>
 						{sortIndex !== 0 && (
