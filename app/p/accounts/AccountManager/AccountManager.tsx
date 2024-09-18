@@ -346,7 +346,7 @@ export function AccountManager() {
 					<div
 						key={`1-${thisData.id}`}
 						className={`${s.reorder_container} ${
-							arraysAreEqual(sortOrder, defaultSortOrder!) ? '' : s.changed
+							sortId !== defaultSortOrder![sortIndex] ? s.changed : ''
 						}`}
 					>
 						{sortIndex !== 0 && (
