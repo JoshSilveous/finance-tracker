@@ -3,11 +3,15 @@ import { useEffect, useRef, useState } from 'react'
 import styles from './JGrid.module.scss'
 
 export namespace JGridTypes {
+	/**
+	 * Content for the first row of the JGrid, and width properties for each column
+	 */
 	export interface Header {
 		content: JSX.Element
-		minWidth: number
-		maxWidth: number
+		minWidth?: number
+		maxWidth?: number
 		defaultWidth: number
+		noResize?: boolean
 	}
 	export interface Props {
 		headers: JSX.Element[]
