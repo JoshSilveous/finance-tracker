@@ -69,16 +69,15 @@ export function JGrid({
 	)
 
 	const measurementSelectorsJSX = headers.map((header, index) => {
-		function handleMouseDown(e: React.MouseEvent) {
+		function beginResize(startX: number, target: HTMLDivElement) {
 			setIsResizing(true)
-			;(e.target as HTMLDivElement).classList.add(styles.resizing)
 
-			const startX = e.screenX
-			const startWidth = (e.target as HTMLDivElement).parentElement!.clientWidth
+			target.classList.add(styles.resizing)
+
+			const startWidth = target.parentElement!.clientWidth
 			let prevColWidths = [...columnWidths]
 
-			function handleMouseMove(e: MouseEvent) {
-				const curX = e.screenX
+			function resize(curX: number) {
 				const diffX = curX - startX
 				const newAttemptedWidth = startWidth + diffX
 				console.log('newAttemptedWidth', newAttemptedWidth)
@@ -137,11 +136,16 @@ export function JGrid({
 					newArr[index] = newAttemptedWidth
 					return newArr
 				})
-
-				window.addEventListener('mouseup', handleMouseUp)
 			}
 
-			function handleMouseUp() {
+			function handleMouseMove(e: MouseEvent) {
+				resize(e.screenX)
+			}
+			function handleTouchMove(e: TouchEvent) {
+				resize(e.touches[0].screenX)
+			}
+
+			function endResize() {
 				if (onResize !== undefined) {
 					columnWidthsRef.current.forEach((colWidth, index) => {
 						if (colWidth !== prevColWidths[index]) {
@@ -150,15 +154,31 @@ export function JGrid({
 					})
 				}
 
-				;(e.target as HTMLDivElement).classList.remove(styles.resizing)
+				target.classList.remove(styles.resizing)
 				setIsResizing(false)
 
 				window.removeEventListener('mousemove', handleMouseMove)
-				window.removeEventListener('mouseup', handleMouseUp)
+				window.removeEventListener('touchmove', handleTouchMove)
+				window.removeEventListener('mouseup', endResize)
+				window.removeEventListener('touchend', endResize)
+				window.removeEventListener('touchcancel', endResize)
 			}
 
 			window.addEventListener('mousemove', handleMouseMove)
-			window.addEventListener('mouseup', handleMouseUp)
+			window.addEventListener('touchmove', handleTouchMove)
+			window.addEventListener('mouseup', endResize)
+			window.addEventListener('touchend', endResize)
+			window.addEventListener('touchcancel', endResize)
+		}
+		function handleTouchDown(e: React.TouchEvent) {
+			const startX = e.touches[0].screenX
+			const target = e.target as HTMLDivElement
+			beginResize(startX, target)
+		}
+		function handleMouseDown(e: React.MouseEvent) {
+			const startX = e.screenX
+			const target = e.target as HTMLDivElement
+			beginResize(startX, target)
 		}
 
 		return (
@@ -167,7 +187,11 @@ export function JGrid({
 				key={index}
 				style={{ gridColumn: `${index + 1} / ${index + 2}` }}
 			>
-				<div className={styles.grabber} onMouseDown={handleMouseDown}></div>
+				<div
+					className={styles.grabber}
+					onMouseDown={handleMouseDown}
+					onTouchStart={handleTouchDown}
+				></div>
 			</div>
 		)
 	})
