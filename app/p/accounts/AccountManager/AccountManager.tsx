@@ -312,9 +312,26 @@ export function AccountManager() {
 
 	let gridConfig: JGridTypes.Props | undefined
 
-	if (!isLoading && data && sortOrder) {
+	if (!isLoading && data && sortOrder && defaultColumnWidths) {
+		const headers: JGridTypes.Header[] = [
+			{
+				content: <div className={s.header}>#</div>,
+				defaultWidth: defaultColumnWidths[0],
+			},
+			{
+				content: <div className={s.header}>Account Name</div>,
+				defaultWidth: defaultColumnWidths[1],
+				minWidth: 50,
+			},
+			{
+				content: <div className={s.header}>Starting Amount</div>,
+				defaultWidth: defaultColumnWidths[2],
+				minWidth: 50,
+				maxWidth: 250,
+			},
+		]
 		gridConfig = {
-			headers: gridHeaders.map((text) => <div className={s.header}>{text}</div>),
+			headers: headers,
 			content: sortOrder.map((sortId, sortIndex) => {
 				const thisData = data.find((item) => item.id === sortId)!
 				const thisPendingChangeIndex = pendingChanges.findIndex(
@@ -394,7 +411,6 @@ export function AccountManager() {
 					/>,
 				]
 			}),
-			defaultColumnWidths: defaultColumnWidths ? defaultColumnWidths : [50, 122, 133],
 			maxTableWidth: 500,
 			onResize: updateDefaultColumnWidth,
 			minColumnWidth: 30,

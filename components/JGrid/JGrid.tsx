@@ -14,9 +14,8 @@ export namespace JGridTypes {
 		noResize?: boolean
 	}
 	export interface Props {
-		headers: JSX.Element[]
+		headers: Header[]
 		content: JSX.Element[][]
-		defaultColumnWidths: number[]
 		style?: React.CSSProperties
 		className?: string
 		noOuterBorders?: boolean
@@ -34,15 +33,15 @@ export namespace JGridTypes {
 export function JGrid({
 	headers,
 	content,
-	defaultColumnWidths,
 	style,
 	className,
 	noOuterBorders,
-	minColumnWidth,
 	maxTableWidth,
 	onResize,
 }: JGridTypes.Props) {
-	const [columnWidths, setColumnWidths] = useState(defaultColumnWidths)
+	const [columnWidths, setColumnWidths] = useState(
+		headers.map((header) => header.defaultWidth)
+	)
 	const columnWidthsRef = useRef(columnWidths)
 	const [isResizing, setIsResizing] = useState(false)
 	useEffect(() => {
@@ -51,7 +50,7 @@ export function JGrid({
 
 	const headersJSX = (
 		<div className={styles.row}>
-			{headers.map((itemCell, index) => {
+			{headers.map((header, index) => {
 				const isRightColumn = index === headers.length - 1
 				return (
 					<div
@@ -62,14 +61,14 @@ export function JGrid({
 							borderRightWidth: isRightColumn && noOuterBorders ? '0px' : '',
 						}}
 					>
-						{itemCell}
+						{header.content}
 					</div>
 				)
 			})}
 		</div>
 	)
 
-	const measurementSelectorsJSX = headers.map((_item, index) => {
+	const measurementSelectorsJSX = headers.map((header, index) => {
 		function handleMouseDown(e: React.MouseEvent) {
 			setIsResizing(true)
 			;(e.target as HTMLDivElement).classList.add(styles.resizing)
@@ -81,52 +80,63 @@ export function JGrid({
 			function handleMouseMove(e: MouseEvent) {
 				const curX = e.screenX
 				const diffX = curX - startX
-				let newWidth = Math.max(
-					minColumnWidth ? minColumnWidth : 50,
-					startWidth + diffX
-				)
+				const newAttemptedWidth = startWidth + diffX
+				console.log('newAttemptedWidth', newAttemptedWidth)
 
+				// prevent resizing column above header.maxWidth (if defined)
+				if (header.maxWidth !== undefined && newAttemptedWidth > header.maxWidth) {
+					return
+				}
+
+				// prevent resizing column below header.minWidth (if defined)
+				if (header.minWidth !== undefined && newAttemptedWidth < header.minWidth) {
+					return
+				}
+
+				// if maxTableWidth is defined...
 				if (maxTableWidth !== undefined) {
-					// get current table width
-					let curTableWidth = 0
+					let newAttemptedTableWidth = 0
 					columnWidths.forEach((colWidth, colIndex) => {
 						if (colIndex === index) {
-							curTableWidth += newWidth
+							newAttemptedTableWidth += newAttemptedWidth
 						} else {
-							curTableWidth += colWidth
+							newAttemptedTableWidth += colWidth
 						}
 					})
-					if (curTableWidth <= maxTableWidth) {
-						setColumnWidths((prev) => {
-							const newArr = [...prev]
-							newArr[index] = newWidth
-							return newArr
-						})
-					} else if (index !== columnWidths.length - 1) {
-						setColumnWidths((prev) => {
-							const newArr = [...prev]
+					// if user is trying to exceed maxTableWidth...
+					if (newAttemptedTableWidth > maxTableWidth) {
+						// if there's a column to the right, shrink it
+						if (index !== columnWidths.length - 1) {
+							setColumnWidths((prev) => {
+								const newArr = [...prev]
 
-							const trueDiff = prev[index] - newWidth
-							const nextNodePrevWidth = prev[index + 1]
-							const nextNodeNewWidth = nextNodePrevWidth + trueDiff
-							if (
-								minColumnWidth
-									? nextNodeNewWidth > minColumnWidth
-									: nextNodeNewWidth > 50
-							) {
-								newArr[index] = newWidth
-								newArr[index + 1] = nextNodeNewWidth
-							}
-							return newArr
-						})
+								const trueDiff = prev[index] - newAttemptedWidth
+								const nextNodePrevWidth = prev[index + 1]
+								const nextNodeNewWidth = nextNodePrevWidth + trueDiff
+								if (
+									headers[index].minWidth
+										? nextNodeNewWidth > headers[index].minWidth
+										: nextNodeNewWidth > 50
+								) {
+									newArr[index] = newAttemptedWidth
+									newArr[index + 1] = nextNodeNewWidth
+								}
+								return newArr
+							})
+						}
+						// if there's no column to the right, prevent resizing beyond maxTableWidth
+						else {
+							return
+						}
 					}
-				} else {
-					setColumnWidths((prev) => {
-						const newArr = [...prev]
-						newArr[index] = newWidth
-						return newArr
-					})
 				}
+
+				// if no restrictions are being exceeded...
+				setColumnWidths((prev) => {
+					const newArr = [...prev]
+					newArr[index] = newAttemptedWidth
+					return newArr
+				})
 
 				window.addEventListener('mouseup', handleMouseUp)
 			}
