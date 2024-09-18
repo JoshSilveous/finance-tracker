@@ -64,6 +64,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 			props.onBlur(e)
 		}
 	}
+
 	function handleFocus(e: FocusEvent<HTMLInputElement>) {
 		setIsFocused(true)
 		setPrevVal(e.target.value)

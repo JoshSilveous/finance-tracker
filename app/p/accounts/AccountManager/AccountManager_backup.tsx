@@ -1,5 +1,5 @@
 'use client'
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import s from './AccountManager.module.scss'
 import { ColumnResizeEventHandler, JGrid, JGridProps } from '@/components/JGrid/JGrid'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
@@ -19,7 +19,6 @@ import {
 	fetchPreferredColumnWidths,
 	upsertData,
 } from './clientFunctions'
-import { arraysAreEqual } from '@/utils/arraysEqual/arraysEqual'
 
 interface Change {
 	account_id: string
@@ -35,29 +34,14 @@ export function AccountManager() {
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[] | null>(null)
 	const [data, setData] = useState<Account.Full[]>()
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
-	const [pendingChanges, setPendingChangesFiltered] = useState<Change[]>([])
+	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 	const [sortOrder, setSortOrder] = useState<Account.ID[] | null>(null)
-	const [defaultSortOrder, setDefaultSortOrder] = useState<Account.ID[] | null>(null)
-
-	const setPendingChanges = (callback: SetStateAction<Change[]>) => {
-		setPendingChangesFiltered(callback)
-	}
 
 	/* pendingChangesRef is needed due to the handleKeyDown listener not pulling the current pendingChanges in the saveChanges function. useRef ensures we always have the latest pendingChanges value, even inside event listeners or async functions. I <3 DOM */
 	const pendingChangesRef = useRef<Change[]>(pendingChanges)
 	useEffect(() => {
 		pendingChangesRef.current = pendingChanges
-		console.log(
-			'pendingChanges',
-			pendingChanges.map((change) => {
-				const newChange = {
-					new: { ...change.new },
-					account_id: change.account_id,
-					name: data?.find((item) => item.id === change.account_id)?.name,
-				}
-				return newChange
-			})
-		)
+		console.log('pendingChanges', pendingChanges)
 	}, [pendingChanges])
 
 	async function loadInitData() {
@@ -94,9 +78,7 @@ export function AccountManager() {
 			const data = await fetchData()
 			setData(data)
 			setIsLoading(false)
-			const sortOrder = data.map((item) => item.id)
-			setSortOrder(sortOrder)
-			setDefaultSortOrder(sortOrder)
+			setSortOrder(data.map((item) => item.id))
 		} catch (e) {
 			if (isStandardError(e)) {
 				createErrorPopup(e.message)
@@ -166,39 +148,38 @@ export function AccountManager() {
 
 		const account_id = e.target.dataset['id'] as Account.ID
 		const key = e.target.dataset['key'] as keyof Change['new']
-		const defaultValue = e.target.dataset['default'] as string
+		const startingValue = e.target.defaultValue
 		const currentValue = e.target.value
 
 		console.log('handleChange for', account_id)
 
-		const thisPendingChangeIndex = pendingChanges.findIndex(
+		const currentChangeIndex = pendingChanges.findIndex(
 			(change) => change.account_id === account_id
 		)
-		const thisPendingChange =
-			thisPendingChangeIndex !== -1
-				? pendingChanges[thisPendingChangeIndex]
-				: undefined
 
-		if (defaultValue === currentValue) {
-			// if new val equals starting value, remove change item
+		if (startingValue === currentValue) {
+			// if new val equals starting value, remove change item and class
+			e.target.parentElement!.classList.remove(s.changed)
 
-			if (thisPendingChange === undefined) {
+			const thisChange = pendingChanges[currentChangeIndex]
+			if (thisChange === undefined) {
 				return
 			}
 
-			if (Object.keys(thisPendingChange.new).length > 1) {
+			if (Object.keys(thisChange.new).length > 1) {
 				// remove this key from thisChange.new
 				setPendingChanges((prev) => {
-					const newArr = structuredClone(prev)
-					delete newArr[thisPendingChangeIndex].new[key]
+					const newArr = [...prev]
+					delete newArr[currentChangeIndex].new[key]
 					return newArr
 				})
 			} else {
 				// remove thisChange from pendingChanges
-				setPendingChanges((prev) => removeFromArray(prev, thisPendingChangeIndex))
+				setPendingChanges((prev) => removeFromArray(prev, currentChangeIndex))
 			}
-		} else if (thisPendingChangeIndex === -1) {
+		} else if (currentChangeIndex === -1) {
 			// if change isn't already present in pendingChanges
+			e.target.parentElement!.classList.add(s.changed)
 			setPendingChanges((prev) => [
 				...prev,
 				{
@@ -208,9 +189,10 @@ export function AccountManager() {
 			])
 		} else {
 			// if change is already present in pendingChanges
+			e.target.parentElement!.classList.add(s.changed)
 			setPendingChanges((prev) => {
 				const newArr = [...prev]
-				newArr[thisPendingChangeIndex].new[key] = currentValue
+				newArr[currentChangeIndex].new[key] = currentValue
 				return newArr
 			})
 		}
@@ -218,36 +200,33 @@ export function AccountManager() {
 
 	function handleBlur(e: ChangeEvent<HTMLInputElement>) {
 		e.target.value = e.target.value.trimEnd()
-		const defaultValue = e.target.dataset['default'] as string
+		const startingValue = e.target.defaultValue
 		const currentValue = e.target.value
 		// handles edge case where the user just adds spaces to the end of the value
 		// this will remove those spaces and the Change
-		if (defaultValue === currentValue) {
+		if (startingValue === currentValue) {
+			e.target.parentElement!.classList.remove(s.changed)
 			const account_id = e.target.dataset['id'] as Account.ID
 			const key = e.target.dataset['key'] as keyof Change['new']
 
-			const thisPendingChangeIndex = pendingChanges.findIndex(
+			const currentChangeIndex = pendingChanges.findIndex(
 				(change) => change.account_id === account_id
 			)
-			const thisPendingChange = pendingChanges[thisPendingChangeIndex]
-			if (thisPendingChange?.new[key] === undefined) {
+			const thisChange = pendingChanges[currentChangeIndex]
+			if (thisChange === undefined) {
 				return
+			}
+
+			if (Object.keys(thisChange.new).length > 1) {
+				// remove this key from thisChange.new
+				setPendingChanges((prev) => {
+					const newArr = [...prev]
+					delete newArr[currentChangeIndex].new[key]
+					return newArr
+				})
 			} else {
-				if (Object.keys(thisPendingChange.new).length >= 1) {
-					// remove this key from thisChange.new
-					console.log('A')
-					setPendingChanges((prev) => {
-						const newArr = structuredClone(prev)
-						delete newArr[thisPendingChangeIndex].new[key]
-						return newArr
-					})
-				} else {
-					// remove thisChange from pendingChanges
-					console.log('B')
-					setPendingChanges((prev) =>
-						removeFromArray(prev, thisPendingChangeIndex)
-					)
-				}
+				// remove thisChange from pendingChanges
+				setPendingChanges((prev) => removeFromArray(prev, currentChangeIndex))
 			}
 		}
 	}
@@ -309,7 +288,7 @@ export function AccountManager() {
 			content: sortOrder.map((sortId, sortIndex) => {
 				const thisData = data.find((item) => item.id === sortId)!
 				const thisPendingChangeIndex = pendingChanges.findIndex(
-					(change) => change.account_id === sortId
+					(change) => (change.account_id = sortId)
 				)
 				const thisPendingChange =
 					thisPendingChangeIndex === -1
@@ -332,23 +311,54 @@ export function AccountManager() {
 						return newArr
 					})
 				}
+				/*
+				remember, this entire section re-renders.
+				handleNameChange DOES NOT need to handle adding/removing classes. Make those style attributes separate from the handlers, but instead derive from pendingChanges.
+				This'll allow re-ordering, and be cleaner.
+				*/
+				function handleNameChange(e: ChangeEvent<HTMLInputElement>) {
+					// prevent leading spaces
+					if (e.target.value !== e.target.value.trimStart()) {
+						e.target.value = e.target.value.trimStart()
+					}
+					const startingValue = e.target.defaultValue
+					const currentValue = e.target.value
 
-				console.log(
-					'!!!\n    name:',
-					thisData.name,
-					'\n    id:',
-					thisData.id,
-					'\n    pendingChange:',
-					thisPendingChange
-				)
-
+					if (startingValue === currentValue && thisPendingChange) {
+						if (thisPendingChange.new.starting_amount === undefined) {
+							// remove thisChange from pendingChanges
+							setPendingChanges((prev) =>
+								removeFromArray(prev, thisPendingChangeIndex)
+							)
+						} else {
+							// remove only the 'name' key
+							setPendingChanges((prev) => {
+								const newArr = [...prev]
+								delete newArr[thisPendingChangeIndex].new.name
+								return newArr
+							})
+						}
+					} else if (!thisPendingChange) {
+						// change isn't already present in pendingChanges
+						setPendingChanges((prev) => [
+							...prev,
+							{
+								account_id: thisData.id,
+								new: { name: currentValue },
+							},
+						])
+					} else {
+						// change is already present in pendingChanges
+						setPendingChanges((prev) => {
+							const newArr = [...prev]
+							newArr[thisPendingChangeIndex].new.name = currentValue
+							return newArr
+						})
+					}
+				}
+				function handleNameBlur(e: ChangeEvent<HTMLInputElement>) {}
 				return [
-					<div
-						key={`1-${thisData.id}`}
-						className={`${s.reorder_container} ${
-							arraysAreEqual(sortOrder, defaultSortOrder!) ? '' : s.changed
-						}`}
-					>
+					<div key={`1-${thisData.id}`} className={s.reorder_container}>
 						{sortIndex !== 0 && (
 							<div className={s.up} onClick={moveUp}>
 								↑
@@ -364,33 +374,21 @@ export function AccountManager() {
 						key={`2-${thisData.id}`}
 						onChange={handleChange}
 						onBlur={handleBlur}
-						className={`${s.account_name_input} ${
-							thisPendingChange?.new.name ? s.changed : ''
+						className={`${s.account_name_input}
 						}`}
 						data-id={thisData.id}
 						data-key='name'
-						data-default={thisData.name}
-						value={
-							thisPendingChange?.new.name
-								? thisPendingChange.new.name
-								: thisData.name
-						}
+						defaultValue={thisData.name}
 					/>,
 					<JNumberAccounting
 						key={`3-${thisData.id}`}
 						onChange={handleChange}
 						onBlur={handleBlur}
-						className={`${s.account_name_input} ${
-							thisPendingChange?.new.starting_amount ? s.changed : ''
+						className={`${s.starting_amount_input}
 						}`}
 						data-id={thisData.id}
 						data-key='starting_amount'
-						data-default={thisData.starting_amount.toFixed(2)}
-						value={
-							thisPendingChange?.new.starting_amount
-								? thisPendingChange.new.starting_amount
-								: thisData.starting_amount
-						}
+						defaultValue={thisData.starting_amount.toFixed(2)}
 					/>,
 				]
 			}),
@@ -400,12 +398,6 @@ export function AccountManager() {
 			minColumnWidth: 30,
 		}
 	}
-
-	const changesArePending =
-		pendingChanges.length !== 0 ||
-		(sortOrder !== null &&
-			defaultSortOrder !== null &&
-			!arraysAreEqual(sortOrder, defaultSortOrder))
 
 	return (
 		<div className={s.main}>
@@ -421,9 +413,9 @@ export function AccountManager() {
 				<JButton
 					jstyle='primary'
 					className={s.create_new}
-					disabled={changesArePending}
+					disabled={pendingChanges.length !== 0}
 					title={
-						changesArePending
+						pendingChanges.length !== 0
 							? 'Save or discard changes to create a new account'
 							: ''
 					}
@@ -434,7 +426,7 @@ export function AccountManager() {
 				<JButton
 					jstyle='primary'
 					className={s.discard}
-					disabled={!changesArePending}
+					disabled={pendingChanges.length === 0}
 					onClick={discardChanges}
 				>
 					Discard changes
@@ -442,7 +434,7 @@ export function AccountManager() {
 				<JButton
 					jstyle='primary'
 					className={s.save}
-					disabled={!changesArePending}
+					disabled={pendingChanges.length === 0}
 					loading={isSavingChanges}
 					onClick={saveChanges}
 				>

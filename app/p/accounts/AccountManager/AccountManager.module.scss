@@ -49,6 +49,9 @@ svg.loading_anim {
 						scale: 110%;
 					}
 				}
+				&.changed > div {
+					color: var(--font-color-changed);
+				}
 			}
 
 			input {
