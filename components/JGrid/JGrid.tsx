@@ -1,22 +1,30 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import styles from './JGrid.module.scss'
-export interface JGridProps {
-	headers: JSX.Element[]
-	content: JSX.Element[][]
-	defaultColumnWidths: number[]
-	style?: React.CSSProperties
-	className?: string
-	noOuterBorders?: boolean
-	minColumnWidth?: number
-	maxTableWidth?: number
-	onResize?: ColumnResizeEventHandler
-}
 
-export type ColumnResizeEventHandler = (e: ColumnResizeEvent) => void
-export interface ColumnResizeEvent {
-	columnIndex: number
-	newWidth: number
+export namespace JGridTypes {
+	export interface Header {
+		content: JSX.Element
+		minWidth: number
+		maxWidth: number
+		defaultWidth: number
+	}
+	export interface Props {
+		headers: JSX.Element[]
+		content: JSX.Element[][]
+		defaultColumnWidths: number[]
+		style?: React.CSSProperties
+		className?: string
+		noOuterBorders?: boolean
+		minColumnWidth?: number
+		maxTableWidth?: number
+		onResize?: ColumnResizeEventHandler
+	}
+	export type ColumnResizeEventHandler = (e: ColumnResizeEvent) => void
+	export interface ColumnResizeEvent {
+		columnIndex: number
+		newWidth: number
+	}
 }
 
 export function JGrid({
@@ -29,7 +37,7 @@ export function JGrid({
 	minColumnWidth,
 	maxTableWidth,
 	onResize,
-}: JGridProps) {
+}: JGridTypes.Props) {
 	const [columnWidths, setColumnWidths] = useState(defaultColumnWidths)
 	const columnWidthsRef = useRef(columnWidths)
 	const [isResizing, setIsResizing] = useState(false)

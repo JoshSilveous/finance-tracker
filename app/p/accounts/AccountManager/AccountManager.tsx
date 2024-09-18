@@ -1,7 +1,7 @@
 'use client'
 import { ChangeEvent, Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import s from './AccountManager.module.scss'
-import { ColumnResizeEventHandler, JGrid, JGridProps } from '@/components/JGrid/JGrid'
+import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { NewAccountForm } from './NewAccountForm/NewAccountForm'
@@ -12,6 +12,7 @@ import {
 	createPreferencesEntry,
 	createErrorPopup,
 	useBgLoad,
+	arraysAreEqual,
 } from '@/utils'
 import {
 	updatePreferredColumnWidth,
@@ -19,7 +20,6 @@ import {
 	fetchPreferredColumnWidths,
 	upsertData,
 } from './clientFunctions'
-import { arraysAreEqual } from '@/utils/arraysEqual/arraysEqual'
 
 interface Change {
 	account_id: string
@@ -278,6 +278,7 @@ export function AccountManager() {
 			node.focus()
 			node.blur()
 		})
+		setSortOrder(defaultSortOrder)
 		setPendingChanges([])
 	}
 
@@ -295,7 +296,7 @@ export function AccountManager() {
 
 	const gridHeaders = ['#', 'Account Name', 'Starting Amount']
 
-	const updateDefaultColumnWidth: ColumnResizeEventHandler = async (e) => {
+	const updateDefaultColumnWidth: JGridTypes.ColumnResizeEventHandler = async (e) => {
 		bgLoad.start()
 		try {
 			await updatePreferredColumnWidth(e.columnIndex - 1, e.newWidth)
@@ -309,7 +310,7 @@ export function AccountManager() {
 		bgLoad.stop()
 	}
 
-	let gridConfig: JGridProps | undefined
+	let gridConfig: JGridTypes.Props | undefined
 
 	if (!isLoading && data && sortOrder) {
 		gridConfig = {
