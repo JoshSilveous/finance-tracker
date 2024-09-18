@@ -39,6 +39,12 @@ export function AccountManager() {
 	const [sortOrder, setSortOrder] = useState<Account.ID[] | null>(null)
 	const [defaultSortOrder, setDefaultSortOrder] = useState<Account.ID[] | null>(null)
 
+	const changesArePending =
+		pendingChanges.length !== 0 ||
+		(sortOrder !== null &&
+			defaultSortOrder !== null &&
+			!arraysAreEqual(sortOrder, defaultSortOrder))
+
 	const setPendingChanges = (callback: SetStateAction<Change[]>) => {
 		setPendingChangesFiltered(callback)
 	}
@@ -47,17 +53,6 @@ export function AccountManager() {
 	const pendingChangesRef = useRef<Change[]>(pendingChanges)
 	useEffect(() => {
 		pendingChangesRef.current = pendingChanges
-		console.log(
-			'pendingChanges',
-			pendingChanges.map((change) => {
-				const newChange = {
-					new: { ...change.new },
-					account_id: change.account_id,
-					name: data?.find((item) => item.id === change.account_id)?.name,
-				}
-				return newChange
-			})
-		)
 	}, [pendingChanges])
 
 	async function loadInitData() {
@@ -123,9 +118,10 @@ export function AccountManager() {
 
 	async function saveChanges() {
 		const pendingChanges = pendingChangesRef.current
-		if (pendingChanges.length !== 0) {
+		if (changesArePending) {
 			setIsSavingChanges(true)
 
+			// apply data changes
 			const accountUpdates: Account.WithPropsAndID[] = pendingChanges.map((change) => {
 				const thisAccount = data!.find(
 					(item) => item.id === change.account_id
@@ -133,13 +129,34 @@ export function AccountManager() {
 				return {
 					id: change.account_id,
 					name: change.new.name === undefined ? thisAccount.name : change.new.name,
-					order_position: 1,
+					order_position: thisAccount.order_position,
 					starting_amount:
 						change.new.starting_amount === undefined
 							? thisAccount.starting_amount
 							: Math.round(parseFloat(change.new.starting_amount) * 100) / 100,
 				}
 			})
+
+			// apply re-ordering
+			sortOrder!.forEach((sortAccountID, sortIndex) => {
+				if (defaultSortOrder![sortIndex] !== sortAccountID) {
+					const thisUpdate = accountUpdates.find(
+						(update) => update.id === sortAccountID
+					)
+					if (thisUpdate === undefined) {
+						const thisAccount = data!.find((item) => item.id === sortAccountID)!
+						accountUpdates.push({
+							id: sortAccountID,
+							name: thisAccount.name,
+							starting_amount: thisAccount.starting_amount,
+							order_position: sortIndex,
+						})
+					} else {
+						thisUpdate.order_position = sortIndex
+					}
+				}
+			})
+
 			try {
 				await upsertData(accountUpdates)
 			} catch (e) {
@@ -150,9 +167,7 @@ export function AccountManager() {
 				}
 			}
 
-			setIsLoading(true)
-			setData(await fetchData())
-			setIsLoading(false)
+			loadInitData()
 			setIsSavingChanges(false)
 			setPendingChanges([])
 		}
@@ -168,8 +183,6 @@ export function AccountManager() {
 		const key = e.target.dataset['key'] as keyof Change['new']
 		const defaultValue = e.target.dataset['default'] as string
 		const currentValue = e.target.value
-
-		console.log('handleChange for', account_id)
 
 		const thisPendingChangeIndex = pendingChanges.findIndex(
 			(change) => change.account_id === account_id
@@ -235,7 +248,6 @@ export function AccountManager() {
 			} else {
 				if (Object.keys(thisPendingChange.new).length >= 1) {
 					// remove this key from thisChange.new
-					console.log('A')
 					setPendingChanges((prev) => {
 						const newArr = structuredClone(prev)
 						delete newArr[thisPendingChangeIndex].new[key]
@@ -243,7 +255,6 @@ export function AccountManager() {
 					})
 				} else {
 					// remove thisChange from pendingChanges
-					console.log('B')
 					setPendingChanges((prev) =>
 						removeFromArray(prev, thisPendingChangeIndex)
 					)
@@ -275,10 +286,7 @@ export function AccountManager() {
 			<NewAccountForm
 				afterSubmit={async () => {
 					myPopup.close()
-					setIsLoading(true)
-					const data = await fetchData()
-					setData(data)
-					setIsLoading(false)
+					loadInitData()
 				}}
 			/>
 		)
@@ -332,15 +340,6 @@ export function AccountManager() {
 						return newArr
 					})
 				}
-
-				console.log(
-					'!!!\n    name:',
-					thisData.name,
-					'\n    id:',
-					thisData.id,
-					'\n    pendingChange:',
-					thisPendingChange
-				)
 
 				return [
 					<div
@@ -400,12 +399,6 @@ export function AccountManager() {
 			minColumnWidth: 30,
 		}
 	}
-
-	const changesArePending =
-		pendingChanges.length !== 0 ||
-		(sortOrder !== null &&
-			defaultSortOrder !== null &&
-			!arraysAreEqual(sortOrder, defaultSortOrder))
 
 	return (
 		<div className={s.main}>

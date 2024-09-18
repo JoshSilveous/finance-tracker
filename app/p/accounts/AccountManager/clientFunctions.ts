@@ -85,13 +85,12 @@ export async function insertAccount(account: Account.Bare) {
 	const user_id = await getUserID()
 
 	const numOfAccounts = await getAccountsCount()
-	console.log('numOfAccounts', numOfAccounts)
 
 	const newAccount: Account.WithPropsAndUser = {
 		name: account.name,
 		starting_amount: account.starting_amount,
 		user_id: user_id,
-		order_position: numOfAccounts! + 1,
+		order_position: numOfAccounts!,
 	}
 
 	const { error } = await supabase.from('accounts').insert([newAccount])
