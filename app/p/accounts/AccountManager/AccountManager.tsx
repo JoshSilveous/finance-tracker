@@ -212,7 +212,6 @@ export function AccountManager() {
 		currentSortOrder !== null &&
 		defaultColumnWidths !== null
 	) {
-		console.log('data', data, data.length)
 		if (data.length === 0) {
 			grid = (
 				<p>
@@ -373,17 +372,61 @@ export function AccountManager() {
 				}
 				const handleReorderMouseDown = (e: React.MouseEvent<HTMLInputElement>) => {
 					document.body.style.cursor = 'grabbing'
-					const breakpoints = gridRowRefs.current.map(
-						(row) => row.offsetTop + row.offsetHeight / 2
+					const breakpoints = gridRowRefs.current.map((row) => row.offsetTop)
+
+					// add breakpoint below last row
+					breakpoints.push(
+						breakpoints.at(-1)! + gridRowRefs.current.at(-1)!.offsetHeight
 					)
-					console.log('breakpoints', breakpoints)
-					console.log('mousedown at clientY:', e.clientY)
+
+					const rowElem =
+						gridRowRefs.current[sortIndex].parentElement!.parentElement!
+					const tableElem = rowElem.parentElement!
+					const tableWidth = tableElem.offsetWidth
+					const tableLeft = tableElem.offsetLeft
+					const controlWidth =
+						e.currentTarget.parentElement!.parentElement!.offsetWidth
+
+					rowElem.classList.add(s.highlighted)
+					const highlightDiv = document.createElement('div')
+					document.body.appendChild(highlightDiv)
+
+					function putHighlightOnRow(rowIndex: number) {
+						highlightDiv.className = s.highlighter
+						highlightDiv.style.top = `${breakpoints[rowIndex]}px`
+						highlightDiv.style.left = `${tableLeft + controlWidth - 5}px`
+						highlightDiv.style.width = `${tableWidth - controlWidth + 10}px`
+					}
+					let closestBreakpointIndex = 0
 
 					function handleReorderMouseMove(e: MouseEvent) {
-						// console.log('mousemove at clientY:', e.clientY)
+						closestBreakpointIndex = breakpoints.reduce(
+							(closestIndex, currentValue, currentIndex) => {
+								return Math.abs(currentValue - e.clientY) <
+									Math.abs(breakpoints[closestIndex] - e.clientY)
+									? currentIndex
+									: closestIndex
+							},
+							0
+						)
+						putHighlightOnRow(closestBreakpointIndex)
 					}
-					function handleReorderMouseUp(e: MouseEvent) {
-						console.log('mouseup at clientY:', e.clientY)
+					function handleReorderMouseUp() {
+						console.log('chosen index:', closestBreakpointIndex)
+						highlightDiv.remove()
+						rowElem.classList.remove(s.highlighted)
+
+						setCurrentSortOrder((prev) => {
+							const newArr = [...prev!]
+							const [item] = newArr.splice(sortIndex, 1)
+							const insertIndex =
+								sortIndex < closestBreakpointIndex
+									? closestBreakpointIndex - 1
+									: closestBreakpointIndex
+							newArr.splice(insertIndex, 0, item)
+							return newArr
+						})
+
 						document.body.style.cursor = ''
 						window.removeEventListener('mousemove', handleReorderMouseMove)
 						window.removeEventListener('mouseup', handleReorderMouseUp)
