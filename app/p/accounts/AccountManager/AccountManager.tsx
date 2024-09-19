@@ -1,5 +1,5 @@
 'use client'
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import s from './AccountManager.module.scss'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
@@ -35,25 +35,28 @@ export function AccountManager() {
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[] | null>(null)
 	const [data, setData] = useState<Account.Full[]>()
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
-	const [pendingChanges, setPendingChangesFiltered] = useState<Change[]>([])
+	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 	const [sortOrder, setSortOrder] = useState<Account.ID[] | null>(null)
 	const [defaultSortOrder, setDefaultSortOrder] = useState<Account.ID[] | null>(null)
 
-	const changesArePending =
-		pendingChanges.length !== 0 ||
-		(sortOrder !== null &&
-			defaultSortOrder !== null &&
-			!arraysAreEqual(sortOrder, defaultSortOrder))
-
-	const setPendingChanges = (callback: SetStateAction<Change[]>) => {
-		setPendingChangesFiltered(callback)
-	}
-
-	/* pendingChangesRef is needed due to the handleKeyDown listener not pulling the current pendingChanges in the saveChanges function. useRef ensures we always have the latest pendingChanges value, even inside event listeners or async functions. I <3 DOM */
+	/**
+	 * use instead of `pendingChanges` in event listeners to ensure you're pulling the latest data
+	 */
 	const pendingChangesRef = useRef<Change[]>(pendingChanges)
 	useEffect(() => {
 		pendingChangesRef.current = pendingChanges
 	}, [pendingChanges])
+
+	/**
+	 * used to enable/disable "save" buttons and functions, since there's two different types of changes to be saved
+	 *
+	 * (data changes in `pendingChanges`, and changes to `sortOrder`)
+	 */
+	const saveOptionIsAvailable =
+		pendingChanges.length !== 0 ||
+		(sortOrder !== null &&
+			defaultSortOrder !== null &&
+			!arraysAreEqual(sortOrder, defaultSortOrder))
 
 	async function loadInitData() {
 		setIsLoading(true)
@@ -98,13 +101,6 @@ export function AccountManager() {
 			}
 		}
 	}
-
-	function handleKeyDown(e: KeyboardEvent) {
-		if (e.ctrlKey && e.key === 's') {
-			e.preventDefault()
-			saveChanges()
-		}
-	}
 	useEffect(() => {
 		loadInitData()
 
@@ -114,9 +110,17 @@ export function AccountManager() {
 		}
 	}, [])
 
-	async function saveChanges() {
+	let grid: ReactNode
+
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.ctrlKey && e.key === 's') {
+			e.preventDefault()
+			saveChanges()
+		}
+	}
+	const saveChanges = async () => {
 		const pendingChanges = pendingChangesRef.current
-		if (changesArePending) {
+		if (saveOptionIsAvailable) {
 			setIsSavingChanges(true)
 
 			// apply data changes
@@ -170,98 +174,7 @@ export function AccountManager() {
 			setPendingChanges([])
 		}
 	}
-
-	function handleChange(e: ChangeEvent<HTMLInputElement>) {
-		// prevent leading spaces
-		if (e.target.value !== e.target.value.trimStart()) {
-			e.target.value = e.target.value.trimStart()
-		}
-
-		const account_id = e.target.dataset['id'] as Account.ID
-		const key = e.target.dataset['key'] as keyof Change['new']
-		const defaultValue = e.target.dataset['default'] as string
-		const currentValue = e.target.value
-
-		const thisPendingChangeIndex = pendingChanges.findIndex(
-			(change) => change.account_id === account_id
-		)
-		const thisPendingChange =
-			thisPendingChangeIndex !== -1
-				? pendingChanges[thisPendingChangeIndex]
-				: undefined
-
-		if (defaultValue === currentValue) {
-			// if new val equals starting value, remove change item
-
-			if (thisPendingChange === undefined) {
-				return
-			}
-
-			if (Object.keys(thisPendingChange.new).length > 1) {
-				// remove this key from thisChange.new
-				setPendingChanges((prev) => {
-					const newArr = structuredClone(prev)
-					delete newArr[thisPendingChangeIndex].new[key]
-					return newArr
-				})
-			} else {
-				// remove thisChange from pendingChanges
-				setPendingChanges((prev) => removeFromArray(prev, thisPendingChangeIndex))
-			}
-		} else if (thisPendingChangeIndex === -1) {
-			// if change isn't already present in pendingChanges
-			setPendingChanges((prev) => [
-				...prev,
-				{
-					account_id,
-					new: { [key]: currentValue },
-				},
-			])
-		} else {
-			// if change is already present in pendingChanges
-			setPendingChanges((prev) => {
-				const newArr = [...prev]
-				newArr[thisPendingChangeIndex].new[key] = currentValue
-				return newArr
-			})
-		}
-	}
-
-	function handleBlur(e: ChangeEvent<HTMLInputElement>) {
-		e.target.value = e.target.value.trimEnd()
-		const defaultValue = e.target.dataset['default'] as string
-		const currentValue = e.target.value
-		// handles edge case where the user just adds spaces to the end of the value
-		// this will remove those spaces and the Change
-		if (defaultValue === currentValue) {
-			const account_id = e.target.dataset['id'] as Account.ID
-			const key = e.target.dataset['key'] as keyof Change['new']
-
-			const thisPendingChangeIndex = pendingChanges.findIndex(
-				(change) => change.account_id === account_id
-			)
-			const thisPendingChange = pendingChanges[thisPendingChangeIndex]
-			if (thisPendingChange?.new[key] === undefined) {
-				return
-			} else {
-				if (Object.keys(thisPendingChange.new).length >= 1) {
-					// remove this key from thisChange.new
-					setPendingChanges((prev) => {
-						const newArr = structuredClone(prev)
-						delete newArr[thisPendingChangeIndex].new[key]
-						return newArr
-					})
-				} else {
-					// remove thisChange from pendingChanges
-					setPendingChanges((prev) =>
-						removeFromArray(prev, thisPendingChangeIndex)
-					)
-				}
-			}
-		}
-	}
-
-	function discardChanges() {
+	const discardChanges = () => {
 		const changedContainers = document.querySelectorAll(
 			`.${s.changed}`
 		) as NodeListOf<HTMLDivElement>
@@ -280,7 +193,7 @@ export function AccountManager() {
 		setPendingChanges([])
 	}
 
-	function handleCreateAccountButton() {
+	const handleCreateAccountButton = () => {
 		const myPopup = createPopup(
 			<NewAccountForm
 				afterSubmit={async () => {
@@ -291,26 +204,110 @@ export function AccountManager() {
 		)
 		myPopup.trigger()
 	}
+	if (!isLoading && data && sortOrder && defaultColumnWidths) {
+		const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+			// prevent leading spaces
+			if (e.target.value !== e.target.value.trimStart()) {
+				e.target.value = e.target.value.trimStart()
+			}
 
-	const gridHeaders = ['#', 'Account Name', 'Starting Amount']
+			const account_id = e.target.dataset['id'] as Account.ID
+			const key = e.target.dataset['key'] as keyof Change['new']
+			const defaultValue = e.target.dataset['default'] as string
+			const currentValue = e.target.value
 
-	const updateDefaultColumnWidth: JGridTypes.ColumnResizeEventHandler = async (e) => {
-		bgLoad.start()
-		try {
-			await updatePreferredColumnWidth(e.columnIndex - 1, e.newWidth)
-		} catch (e) {
-			if (isStandardError(e)) {
-				console.error(
-					`Minor error occured when updating preferredColumnWidth: ${e.message}`
-				)
+			const thisPendingChangeIndex = pendingChanges.findIndex(
+				(change) => change.account_id === account_id
+			)
+			const thisPendingChange =
+				thisPendingChangeIndex !== -1
+					? pendingChanges[thisPendingChangeIndex]
+					: undefined
+
+			if (defaultValue === currentValue) {
+				// if new val equals starting value, remove change item
+
+				if (thisPendingChange === undefined) {
+					return
+				}
+
+				if (Object.keys(thisPendingChange.new).length > 1) {
+					// remove this key from thisChange.new
+					setPendingChanges((prev) => {
+						const newArr = structuredClone(prev)
+						delete newArr[thisPendingChangeIndex].new[key]
+						return newArr
+					})
+				} else {
+					// remove thisChange from pendingChanges
+					setPendingChanges((prev) =>
+						removeFromArray(prev, thisPendingChangeIndex)
+					)
+				}
+			} else if (thisPendingChangeIndex === -1) {
+				// if change isn't already present in pendingChanges
+				setPendingChanges((prev) => [
+					...prev,
+					{
+						account_id,
+						new: { [key]: currentValue },
+					},
+				])
+			} else {
+				// if change is already present in pendingChanges
+				setPendingChanges((prev) => {
+					const newArr = [...prev]
+					newArr[thisPendingChangeIndex].new[key] = currentValue
+					return newArr
+				})
 			}
 		}
-		bgLoad.stop()
-	}
+		const handleBlur = (e: ChangeEvent<HTMLInputElement>) => {
+			e.target.value = e.target.value.trimEnd()
+			const defaultValue = e.target.dataset['default'] as string
+			const currentValue = e.target.value
+			// handles edge case where the user just adds spaces to the end of the value
+			// this will remove those spaces and the Change
+			if (defaultValue === currentValue) {
+				const account_id = e.target.dataset['id'] as Account.ID
+				const key = e.target.dataset['key'] as keyof Change['new']
 
-	let gridConfig: JGridTypes.Props | undefined
-
-	if (!isLoading && data && sortOrder && defaultColumnWidths) {
+				const thisPendingChangeIndex = pendingChanges.findIndex(
+					(change) => change.account_id === account_id
+				)
+				const thisPendingChange = pendingChanges[thisPendingChangeIndex]
+				if (thisPendingChange?.new[key] === undefined) {
+					return
+				} else {
+					if (Object.keys(thisPendingChange.new).length >= 1) {
+						// remove this key from thisChange.new
+						setPendingChanges((prev) => {
+							const newArr = structuredClone(prev)
+							delete newArr[thisPendingChangeIndex].new[key]
+							return newArr
+						})
+					} else {
+						// remove thisChange from pendingChanges
+						setPendingChanges((prev) =>
+							removeFromArray(prev, thisPendingChangeIndex)
+						)
+					}
+				}
+			}
+		}
+		const updateDefaultColumnWidth: JGridTypes.ColumnResizeEventHandler = async (e) => {
+			bgLoad.start()
+			try {
+				await updatePreferredColumnWidth(e.columnIndex - 1, e.newWidth)
+			} catch (e) {
+				if (isStandardError(e)) {
+					console.error(
+						`Minor error occured when updating preferredColumnWidth: ${e.message}`
+					)
+				}
+			}
+			bgLoad.stop()
+		}
 		const headers: JGridTypes.Header[] = [
 			{
 				content: <div className={s.header}>#</div>,
@@ -330,7 +327,7 @@ export function AccountManager() {
 				maxWidth: 230,
 			},
 		]
-		gridConfig = {
+		const gridConfig = {
 			headers: headers,
 			content: sortOrder.map((sortId, sortIndex) => {
 				const thisData = data.find((item) => item.id === sortId)!
@@ -415,25 +412,22 @@ export function AccountManager() {
 			onResize: updateDefaultColumnWidth,
 			minColumnWidth: 30,
 		}
+		grid = <JGrid {...gridConfig!} className={s.jgrid} />
 	}
 
 	return (
 		<div className={s.main}>
 			<h2>Account Manager</h2>
 			<div className={s.jgrid_container}>
-				{isLoading ? (
-					<LoadingAnim className={s.loading_anim} />
-				) : (
-					<JGrid {...gridConfig!} className={s.jgrid} />
-				)}
+				{isLoading ? <LoadingAnim className={s.loading_anim} /> : grid}
 			</div>
 			<div className={s.buttons_container}>
 				<JButton
 					jstyle='primary'
 					className={s.create_new}
-					disabled={changesArePending}
+					disabled={saveOptionIsAvailable}
 					title={
-						changesArePending
+						saveOptionIsAvailable
 							? 'Save or discard changes to create a new account'
 							: ''
 					}
@@ -444,7 +438,7 @@ export function AccountManager() {
 				<JButton
 					jstyle='primary'
 					className={s.discard}
-					disabled={!changesArePending}
+					disabled={!saveOptionIsAvailable}
 					onClick={discardChanges}
 				>
 					Discard changes
@@ -452,7 +446,7 @@ export function AccountManager() {
 				<JButton
 					jstyle='primary'
 					className={s.save}
-					disabled={!changesArePending}
+					disabled={!saveOptionIsAvailable}
 					loading={isSavingChanges}
 					onClick={saveChanges}
 				>
