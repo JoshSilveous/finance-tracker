@@ -33,11 +33,12 @@ export function AccountManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[] | null>(null)
-	const [data, setData] = useState<Account.Full[]>()
+	const [data, setData] = useState<Account.Full[] | null>(null)
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
-	const [sortOrder, setSortOrder] = useState<Account.ID[] | null>(null)
+	const [currentSortOrder, setCurrentSortOrder] = useState<Account.ID[] | null>(null)
 	const [defaultSortOrder, setDefaultSortOrder] = useState<Account.ID[] | null>(null)
+	const gridRowRefs = useRef<HTMLDivElement[]>([])
 
 	/**
 	 * use instead of `pendingChanges` in event listeners to ensure you're pulling the latest data
@@ -54,9 +55,9 @@ export function AccountManager() {
 	 */
 	const saveOptionIsAvailable =
 		pendingChanges.length !== 0 ||
-		(sortOrder !== null &&
+		(currentSortOrder !== null &&
 			defaultSortOrder !== null &&
-			!arraysAreEqual(sortOrder, defaultSortOrder))
+			!arraysAreEqual(currentSortOrder, defaultSortOrder))
 
 	async function loadInitData() {
 		setIsLoading(true)
@@ -91,7 +92,7 @@ export function AccountManager() {
 			setData(data)
 			setIsLoading(false)
 			const sortOrder = data.map((item) => item.id)
-			setSortOrder(sortOrder)
+			setCurrentSortOrder(sortOrder)
 			setDefaultSortOrder(sortOrder)
 		} catch (e) {
 			if (isStandardError(e)) {
@@ -104,6 +105,13 @@ export function AccountManager() {
 	useEffect(() => {
 		loadInitData()
 
+		// CTRL+S to save
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.ctrlKey && e.key === 's') {
+				e.preventDefault()
+				saveChanges()
+			}
+		}
 		window.addEventListener('keydown', handleKeyDown)
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown)
@@ -112,13 +120,7 @@ export function AccountManager() {
 
 	let grid: ReactNode
 
-	const handleKeyDown = (e: KeyboardEvent) => {
-		if (e.ctrlKey && e.key === 's') {
-			e.preventDefault()
-			saveChanges()
-		}
-	}
-	const saveChanges = async () => {
+	async function saveChanges() {
 		const pendingChanges = pendingChangesRef.current
 		if (saveOptionIsAvailable) {
 			setIsSavingChanges(true)
@@ -140,7 +142,7 @@ export function AccountManager() {
 			})
 
 			// apply re-ordering
-			sortOrder!.forEach((sortAccountID, sortIndex) => {
+			currentSortOrder!.forEach((sortAccountID, sortIndex) => {
 				if (defaultSortOrder![sortIndex] !== sortAccountID) {
 					const thisUpdate = accountUpdates.find(
 						(update) => update.id === sortAccountID
@@ -174,7 +176,7 @@ export function AccountManager() {
 			setPendingChanges([])
 		}
 	}
-	const discardChanges = () => {
+	function discardChanges() {
 		const changedContainers = document.querySelectorAll(
 			`.${s.changed}`
 		) as NodeListOf<HTMLDivElement>
@@ -189,11 +191,11 @@ export function AccountManager() {
 			node.focus()
 			node.blur()
 		})
-		setSortOrder(defaultSortOrder)
+		setCurrentSortOrder(defaultSortOrder)
 		setPendingChanges([])
 	}
 
-	const handleCreateAccountButton = () => {
+	function handleCreateAccountButton() {
 		const myPopup = createPopup(
 			<NewAccountForm
 				afterSubmit={async () => {
@@ -204,82 +206,48 @@ export function AccountManager() {
 		)
 		myPopup.trigger()
 	}
-	if (!isLoading && data && sortOrder && defaultColumnWidths) {
-		const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-			// prevent leading spaces
-			if (e.target.value !== e.target.value.trimStart()) {
-				e.target.value = e.target.value.trimStart()
-			}
-
-			const account_id = e.target.dataset['id'] as Account.ID
-			const key = e.target.dataset['key'] as keyof Change['new']
-			const defaultValue = e.target.dataset['default'] as string
-			const currentValue = e.target.value
-
-			const thisPendingChangeIndex = pendingChanges.findIndex(
-				(change) => change.account_id === account_id
+	if (
+		!isLoading &&
+		data !== null &&
+		currentSortOrder !== null &&
+		defaultColumnWidths !== null
+	) {
+		console.log('data', data, data.length)
+		if (data.length === 0) {
+			grid = (
+				<p>
+					You do not have any accounts, click "Create new account" below to get
+					started!
+				</p>
 			)
-			const thisPendingChange =
-				thisPendingChangeIndex !== -1
-					? pendingChanges[thisPendingChangeIndex]
-					: undefined
-
-			if (defaultValue === currentValue) {
-				// if new val equals starting value, remove change item
-
-				if (thisPendingChange === undefined) {
-					return
+		} else {
+			const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+				// prevent leading spaces
+				if (e.target.value !== e.target.value.trimStart()) {
+					e.target.value = e.target.value.trimStart()
 				}
 
-				if (Object.keys(thisPendingChange.new).length > 1) {
-					// remove this key from thisChange.new
-					setPendingChanges((prev) => {
-						const newArr = structuredClone(prev)
-						delete newArr[thisPendingChangeIndex].new[key]
-						return newArr
-					})
-				} else {
-					// remove thisChange from pendingChanges
-					setPendingChanges((prev) =>
-						removeFromArray(prev, thisPendingChangeIndex)
-					)
-				}
-			} else if (thisPendingChangeIndex === -1) {
-				// if change isn't already present in pendingChanges
-				setPendingChanges((prev) => [
-					...prev,
-					{
-						account_id,
-						new: { [key]: currentValue },
-					},
-				])
-			} else {
-				// if change is already present in pendingChanges
-				setPendingChanges((prev) => {
-					const newArr = [...prev]
-					newArr[thisPendingChangeIndex].new[key] = currentValue
-					return newArr
-				})
-			}
-		}
-		const handleBlur = (e: ChangeEvent<HTMLInputElement>) => {
-			e.target.value = e.target.value.trimEnd()
-			const defaultValue = e.target.dataset['default'] as string
-			const currentValue = e.target.value
-			// handles edge case where the user just adds spaces to the end of the value
-			// this will remove those spaces and the Change
-			if (defaultValue === currentValue) {
 				const account_id = e.target.dataset['id'] as Account.ID
 				const key = e.target.dataset['key'] as keyof Change['new']
+				const defaultValue = e.target.dataset['default'] as string
+				const currentValue = e.target.value
 
 				const thisPendingChangeIndex = pendingChanges.findIndex(
 					(change) => change.account_id === account_id
 				)
-				const thisPendingChange = pendingChanges[thisPendingChangeIndex]
-				if (thisPendingChange?.new[key] === undefined) {
-					return
-				} else {
-					if (Object.keys(thisPendingChange.new).length >= 1) {
+				const thisPendingChange =
+					thisPendingChangeIndex !== -1
+						? pendingChanges[thisPendingChangeIndex]
+						: undefined
+
+				if (defaultValue === currentValue) {
+					// if new val equals starting value, remove change item
+
+					if (thisPendingChange === undefined) {
+						return
+					}
+
+					if (Object.keys(thisPendingChange.new).length > 1) {
 						// remove this key from thisChange.new
 						setPendingChanges((prev) => {
 							const newArr = structuredClone(prev)
@@ -292,44 +260,92 @@ export function AccountManager() {
 							removeFromArray(prev, thisPendingChangeIndex)
 						)
 					}
+				} else if (thisPendingChangeIndex === -1) {
+					// if change isn't already present in pendingChanges
+					setPendingChanges((prev) => [
+						...prev,
+						{
+							account_id,
+							new: { [key]: currentValue },
+						},
+					])
+				} else {
+					// if change is already present in pendingChanges
+					setPendingChanges((prev) => {
+						const newArr = [...prev]
+						newArr[thisPendingChangeIndex].new[key] = currentValue
+						return newArr
+					})
 				}
 			}
-		}
-		const updateDefaultColumnWidth: JGridTypes.ColumnResizeEventHandler = async (e) => {
-			bgLoad.start()
-			try {
-				await updatePreferredColumnWidth(e.columnIndex - 1, e.newWidth)
-			} catch (e) {
-				if (isStandardError(e)) {
-					console.error(
-						`Minor error occured when updating preferredColumnWidth: ${e.message}`
+			const handleBlur = (e: ChangeEvent<HTMLInputElement>) => {
+				e.target.value = e.target.value.trimEnd()
+				const defaultValue = e.target.dataset['default'] as string
+				const currentValue = e.target.value
+				// handles edge case where the user just adds spaces to the end of the value
+				// this will remove those spaces and the Change
+				if (defaultValue === currentValue) {
+					const account_id = e.target.dataset['id'] as Account.ID
+					const key = e.target.dataset['key'] as keyof Change['new']
+
+					const thisPendingChangeIndex = pendingChanges.findIndex(
+						(change) => change.account_id === account_id
 					)
+					const thisPendingChange = pendingChanges[thisPendingChangeIndex]
+					if (thisPendingChange?.new[key] === undefined) {
+						return
+					} else {
+						if (Object.keys(thisPendingChange.new).length >= 1) {
+							// remove this key from thisChange.new
+							setPendingChanges((prev) => {
+								const newArr = structuredClone(prev)
+								delete newArr[thisPendingChangeIndex].new[key]
+								return newArr
+							})
+						} else {
+							// remove thisChange from pendingChanges
+							setPendingChanges((prev) =>
+								removeFromArray(prev, thisPendingChangeIndex)
+							)
+						}
+					}
 				}
 			}
-			bgLoad.stop()
-		}
-		const headers: JGridTypes.Header[] = [
-			{
-				content: <div className={s.header}>#</div>,
-				defaultWidth: 40,
-				noResize: true,
-			},
-			{
-				content: <div className={s.header}>Account Name</div>,
-				defaultWidth: defaultColumnWidths[0],
-				minWidth: 100,
-				maxWidth: 230,
-			},
-			{
-				content: <div className={s.header}>Starting Amount</div>,
-				defaultWidth: defaultColumnWidths[1],
-				minWidth: 100,
-				maxWidth: 230,
-			},
-		]
-		const gridConfig = {
-			headers: headers,
-			content: sortOrder.map((sortId, sortIndex) => {
+			const updateDefaultColumnWidth: JGridTypes.ColumnResizeEventHandler = async (
+				e
+			) => {
+				bgLoad.start()
+				try {
+					await updatePreferredColumnWidth(e.columnIndex - 1, e.newWidth)
+				} catch (e) {
+					if (isStandardError(e)) {
+						console.error(
+							`Minor error occured when updating preferredColumnWidth: ${e.message}`
+						)
+					}
+				}
+				bgLoad.stop()
+			}
+			const headers: JGridTypes.Header[] = [
+				{
+					content: <div className={s.header_controls}>#</div>,
+					defaultWidth: 30,
+					noResize: true,
+				},
+				{
+					content: <div className={s.header}>Account Name</div>,
+					defaultWidth: defaultColumnWidths[0],
+					minWidth: 100,
+					maxWidth: 230,
+				},
+				{
+					content: <div className={s.header}>Starting Amount</div>,
+					defaultWidth: defaultColumnWidths[1],
+					minWidth: 100,
+					maxWidth: 230,
+				},
+			]
+			const content = currentSortOrder.map((sortId, sortIndex) => {
 				const thisData = data.find((item) => item.id === sortId)!
 				const thisPendingChangeIndex = pendingChanges.findIndex(
 					(change) => change.account_id === sortId
@@ -340,7 +356,7 @@ export function AccountManager() {
 						: pendingChanges[thisPendingChangeIndex]
 
 				function moveUp() {
-					setSortOrder((prev) => {
+					setCurrentSortOrder((prev) => {
 						const newArr = [...prev!]
 						newArr[sortIndex] = prev![sortIndex - 1]
 						newArr[sortIndex - 1] = prev![sortIndex]
@@ -348,22 +364,45 @@ export function AccountManager() {
 					})
 				}
 				function moveDown() {
-					setSortOrder((prev) => {
+					setCurrentSortOrder((prev) => {
 						const newArr = [...prev!]
 						newArr[sortIndex] = prev![sortIndex + 1]
 						newArr[sortIndex + 1] = prev![sortIndex]
 						return newArr
 					})
 				}
+				const handleReorderMouseDown = (e: React.MouseEvent<HTMLInputElement>) => {
+					document.body.style.cursor = 'grabbing'
+					const breakpoints = gridRowRefs.current.map(
+						(row) => row.offsetTop + row.offsetHeight / 2
+					)
+					console.log('breakpoints', breakpoints)
+					console.log('mousedown at clientY:', e.clientY)
+
+					function handleReorderMouseMove(e: MouseEvent) {
+						// console.log('mousemove at clientY:', e.clientY)
+					}
+					function handleReorderMouseUp(e: MouseEvent) {
+						console.log('mouseup at clientY:', e.clientY)
+						document.body.style.cursor = ''
+						window.removeEventListener('mousemove', handleReorderMouseMove)
+						window.removeEventListener('mouseup', handleReorderMouseUp)
+					}
+					window.addEventListener('mousemove', handleReorderMouseMove)
+					window.addEventListener('mouseup', handleReorderMouseUp)
+				}
 
 				return [
 					<div
 						key={`1-${thisData.id}`}
-						className={`${s.reorder_container} ${
+						className={`${s.row_controls_container} ${
 							sortId !== defaultSortOrder![sortIndex] ? s.changed : ''
 						}`}
+						ref={(elem) => {
+							gridRowRefs.current[sortIndex] = elem as HTMLDivElement
+						}}
 					>
-						{sortIndex !== 0 && (
+						{/* {sortIndex !== 0 && (
 							<div className={s.up} onClick={moveUp}>
 								↑
 							</div>
@@ -372,7 +411,13 @@ export function AccountManager() {
 							<div className={s.down} onClick={moveDown}>
 								↓
 							</div>
-						)}
+						)} */}
+						<div
+							className={s.reorder_grabber}
+							onMouseDown={handleReorderMouseDown}
+						>
+							#
+						</div>
 					</div>,
 					<JInput
 						key={`2-${thisData.id}`}
@@ -407,12 +452,16 @@ export function AccountManager() {
 						}
 					/>,
 				]
-			}),
-			maxTableWidth: 500,
-			onResize: updateDefaultColumnWidth,
-			minColumnWidth: 30,
+			})
+			const gridConfig = {
+				headers: headers,
+				content: content,
+				maxTableWidth: 500,
+				onResize: updateDefaultColumnWidth,
+				minColumnWidth: 30,
+			}
+			grid = <JGrid {...gridConfig!} className={s.jgrid} />
 		}
-		grid = <JGrid {...gridConfig!} className={s.jgrid} />
 	}
 
 	return (
