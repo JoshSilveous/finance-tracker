@@ -60,7 +60,6 @@ export function AccountManager() {
 		try {
 			const columnWidths = await fetchPreferredColumnWidths()
 			setDefaultColumnWidths([
-				50,
 				columnWidths.account_name_width,
 				columnWidths.starting_amount_width,
 			])
@@ -71,7 +70,6 @@ export function AccountManager() {
 						await createPreferencesEntry()
 						const columnWidths = await fetchPreferredColumnWidths()
 						setDefaultColumnWidths([
-							50,
 							columnWidths.account_name_width,
 							columnWidths.starting_amount_width,
 						])
@@ -316,18 +314,20 @@ export function AccountManager() {
 		const headers: JGridTypes.Header[] = [
 			{
 				content: <div className={s.header}>#</div>,
-				defaultWidth: defaultColumnWidths[0],
+				defaultWidth: 40,
+				noResize: true,
 			},
 			{
 				content: <div className={s.header}>Account Name</div>,
-				defaultWidth: defaultColumnWidths[1],
-				minWidth: 50,
+				defaultWidth: defaultColumnWidths[0],
+				minWidth: 100,
+				maxWidth: 230,
 			},
 			{
 				content: <div className={s.header}>Starting Amount</div>,
-				defaultWidth: defaultColumnWidths[2],
-				minWidth: 50,
-				maxWidth: 250,
+				defaultWidth: defaultColumnWidths[1],
+				minWidth: 100,
+				maxWidth: 230,
 			},
 		]
 		gridConfig = {

@@ -69,6 +69,16 @@ export function JGrid({
 	)
 
 	const measurementSelectorsJSX = headers.map((header, index) => {
+		if (header.noResize) {
+			return (
+				<div
+					className={styles.measurer}
+					key={index}
+					style={{ gridColumn: `${index + 1} / ${index + 2}` }}
+				/>
+			)
+		}
+
 		function beginResize(startX: number, target: HTMLDivElement) {
 			setIsResizing(true)
 
@@ -80,7 +90,6 @@ export function JGrid({
 			function resize(curX: number) {
 				const diffX = curX - startX
 				const newAttemptedWidth = startWidth + diffX
-				console.log('newAttemptedWidth', newAttemptedWidth)
 
 				// prevent resizing column above header.maxWidth (if defined)
 				if (header.maxWidth !== undefined && newAttemptedWidth > header.maxWidth) {
@@ -104,24 +113,28 @@ export function JGrid({
 					})
 					// if user is trying to exceed maxTableWidth...
 					if (newAttemptedTableWidth > maxTableWidth) {
-						// if there's a column to the right, shrink it
+						// if there's a column to the right, shrink it (if available)
 						if (index !== columnWidths.length - 1) {
 							setColumnWidths((prev) => {
 								const newArr = [...prev]
-
-								const trueDiff = prev[index] - newAttemptedWidth
-								const nextNodePrevWidth = prev[index + 1]
-								const nextNodeNewWidth = nextNodePrevWidth + trueDiff
-								if (
-									headers[index].minWidth
-										? nextNodeNewWidth > headers[index].minWidth
-										: nextNodeNewWidth > 50
-								) {
-									newArr[index] = newAttemptedWidth
-									newArr[index + 1] = nextNodeNewWidth
+								if (headers[index + 1].noResize !== true) {
+									const trueDiff = prev[index] - newAttemptedWidth
+									const nextNodePrevWidth = prev[index + 1]
+									const nextNodeNewWidth = nextNodePrevWidth + trueDiff
+									const nextNodeMinWidth = headers[index + 1].minWidth
+									if (
+										!(
+											nextNodeMinWidth !== undefined &&
+											nextNodeNewWidth < nextNodeMinWidth
+										)
+									) {
+										newArr[index] = newAttemptedWidth
+										newArr[index + 1] = nextNodeNewWidth
+									}
 								}
 								return newArr
 							})
+							return
 						}
 						// if there's no column to the right, prevent resizing beyond maxTableWidth
 						else {
