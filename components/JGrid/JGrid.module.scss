@@ -53,7 +53,7 @@
 
 			.grabber {
 				pointer-events: all;
-				width: 10px;
+				width: 12px;
 				height: 100%;
 				position: relative;
 				overflow: hidden;
@@ -68,13 +68,13 @@
 					bottom: 0;
 					left: 100%;
 					border-left-color: inherit;
-					border-left-width: 10px;
+					border-left-width: 12px;
 					border-left-style: solid;
 					transition: left 0.2s;
 				}
 				&:hover::before,
 				&.resizing::before {
-					left: 6px;
+					left: 8px;
 				}
 			}
 		}
