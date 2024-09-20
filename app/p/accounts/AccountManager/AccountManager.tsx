@@ -439,11 +439,11 @@ export function AccountManager() {
 							tableWidth - grabberContainerWidth + 2
 						}px`
 					}
-					function getClosestBreakpointIndex() {
+					function getClosestBreakpointIndex(yPos: number) {
 						return breakpoints.reduce(
 							(closestIndex, currentValue, currentIndex) => {
-								return Math.abs(currentValue - e.clientY) <
-									Math.abs(breakpoints[closestIndex] - e.clientY)
+								return Math.abs(currentValue - yPos) <
+									Math.abs(breakpoints[closestIndex] - yPos)
 									? currentIndex
 									: closestIndex
 							},
@@ -451,21 +451,21 @@ export function AccountManager() {
 						)
 					}
 
-					let closestBreakpointIndex = getClosestBreakpointIndex()
+					let closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
 					let firstRun = true
 					function handleReorderMouseMove(e: MouseEvent) {
-						firstRun = false
 						rowNode.style.left = `${e.clientX - offsetX}px`
 						rowNode.style.top = `${e.clientY - offsetY}px`
 
 						const prevClosestBreakpointIndex = closestBreakpointIndex
-						closestBreakpointIndex = getClosestBreakpointIndex()
+						closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
 						if (
-							!firstRun &&
+							firstRun ||
 							prevClosestBreakpointIndex !== closestBreakpointIndex
 						) {
 							putHighlightOnRow(closestBreakpointIndex)
 						}
+						firstRun = false
 					}
 					function handleReorderMouseUp() {
 						rowNode.childNodes.forEach((childNode) => {
