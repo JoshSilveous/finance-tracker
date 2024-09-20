@@ -354,31 +354,10 @@ export function AccountManager() {
 						? null
 						: pendingChanges[thisPendingChangeIndex]
 
-				function moveUp() {
-					setCurrentSortOrder((prev) => {
-						const newArr = [...prev!]
-						newArr[sortIndex] = prev![sortIndex - 1]
-						newArr[sortIndex - 1] = prev![sortIndex]
-						return newArr
-					})
-				}
-				function moveDown() {
-					setCurrentSortOrder((prev) => {
-						const newArr = [...prev!]
-						newArr[sortIndex] = prev![sortIndex + 1]
-						newArr[sortIndex + 1] = prev![sortIndex]
-						return newArr
-					})
-				}
 				const handleReorderMouseDown = (e: React.MouseEvent<HTMLInputElement>) => {
 					document.body.style.cursor = 'grabbing'
-					const breakpoints = gridRowRefs.current.map((row) => row.offsetTop)
 
-					// add breakpoint below last row
-					breakpoints.push(
-						breakpoints.at(-1)! + gridRowRefs.current.at(-1)!.offsetHeight
-					)
-
+					// pop out row
 					const rowElem =
 						gridRowRefs.current[sortIndex].parentElement!.parentElement!
 					const tableElem = rowElem.parentElement!
@@ -386,8 +365,36 @@ export function AccountManager() {
 					const tableLeft = tableElem.offsetLeft
 					const controlWidth =
 						e.currentTarget.parentElement!.parentElement!.offsetWidth
+					rowElem.childNodes.forEach((childNode) => {
+						const node = childNode as HTMLDivElement
+						node.style.width = `${node.offsetWidth}px`
+					})
+					const grabberNode = e.currentTarget as HTMLDivElement
+					const grabberContainerNode = rowElem.childNodes[0] as HTMLDivElement
+					const grabberPosX = grabberNode.offsetLeft + grabberNode.offsetWidth / 2
+					const grabberPosY = grabberNode.offsetTop + grabberNode.offsetHeight / 2
+					const offsetX = grabberPosX - grabberContainerNode.offsetLeft
+					const offsetY = grabberPosY - grabberContainerNode.offsetTop
 
-					rowElem.classList.add(s.highlighted)
+					rowElem.style.display = 'flex'
+					rowElem.style.position = 'absolute'
+					rowElem.style.left = `${e.clientX - offsetX}px`
+					rowElem.style.top = `${e.clientY - offsetY}px`
+					rowElem.style.zIndex = '999'
+
+					// add highlight effect
+
+					const breakpoints: number[] = []
+					gridRowRefs.current.forEach((row, index) => {
+						if (index !== sortIndex) {
+							breakpoints.push(row.offsetTop)
+						}
+					})
+
+					breakpoints.push(
+						breakpoints.at(-1)! + gridRowRefs.current.at(-1)!.offsetHeight
+					)
+
 					const highlightDiv = document.createElement('div')
 					document.body.appendChild(highlightDiv)
 
@@ -400,6 +407,8 @@ export function AccountManager() {
 					let closestBreakpointIndex = 0
 
 					function handleReorderMouseMove(e: MouseEvent) {
+						rowElem.style.left = `${e.clientX - offsetX}px`
+						rowElem.style.top = `${e.clientY - offsetY}px`
 						closestBreakpointIndex = breakpoints.reduce(
 							(closestIndex, currentValue, currentIndex) => {
 								return Math.abs(currentValue - e.clientY) <
@@ -412,20 +421,26 @@ export function AccountManager() {
 						putHighlightOnRow(closestBreakpointIndex)
 					}
 					function handleReorderMouseUp() {
-						console.log('chosen index:', closestBreakpointIndex)
+						rowElem.childNodes.forEach((childNode) => {
+							const node = childNode as HTMLDivElement
+							node.style.width = ''
+						})
+						// console.clear()
+						rowElem.style.display = ''
+						rowElem.style.top = ''
+						rowElem.style.left = ''
+						rowElem.style.zIndex = ''
 						highlightDiv.remove()
 						rowElem.classList.remove(s.highlighted)
 
-						setCurrentSortOrder((prev) => {
-							const newArr = [...prev!]
-							const [item] = newArr.splice(sortIndex, 1)
-							const insertIndex =
-								sortIndex < closestBreakpointIndex
-									? closestBreakpointIndex - 1
-									: closestBreakpointIndex
-							newArr.splice(insertIndex, 0, item)
-							return newArr
-						})
+						if (closestBreakpointIndex !== sortIndex) {
+							setCurrentSortOrder((prev) => {
+								const newArr = [...prev!]
+								const [item] = newArr.splice(sortIndex, 1)
+								newArr.splice(closestBreakpointIndex, 0, item)
+								return newArr
+							})
+						}
 
 						document.body.style.cursor = ''
 						window.removeEventListener('mousemove', handleReorderMouseMove)
@@ -482,7 +497,7 @@ export function AccountManager() {
 						key={`3-${thisData.id}`}
 						onChange={handleChange}
 						onBlur={handleBlur}
-						className={`${s.account_name_input} ${
+						className={`${s.starting_amount_input} ${
 							thisPendingChange?.new.starting_amount ? s.changed : ''
 						}`}
 						data-id={thisData.id}
@@ -496,12 +511,13 @@ export function AccountManager() {
 					/>,
 				]
 			})
-			const gridConfig = {
+			const gridConfig: JGridTypes.Props = {
 				headers: headers,
 				content: content,
 				maxTableWidth: 500,
 				onResize: updateDefaultColumnWidth,
 				minColumnWidth: 30,
+				noBorders: true,
 			}
 			grid = <JGrid {...gridConfig!} className={s.jgrid} />
 		}

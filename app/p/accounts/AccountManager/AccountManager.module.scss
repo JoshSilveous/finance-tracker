@@ -4,7 +4,7 @@ svg.loading_anim {
 
 .highlighter {
 	position: absolute;
-	z-index: 999;
+	z-index: 998;
 	height: 10px;
 	background-color: rgba(255, 107, 107, 0.326);
 	transform: translateY(-5px);
@@ -49,6 +49,10 @@ svg.loading_anim {
 		.jgrid {
 			max-width: 100%;
 			border-color: transparent;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: transparent;
 
 			.row_controls_container {
 				width: 100%;
@@ -89,21 +93,18 @@ svg.loading_anim {
 			.header_controls {
 				display: none;
 			}
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: var(--bg-color);
-		}
 
-		.starting_amount_input,
-		.account_name_input {
-			&:not(.changed) {
-				color: var(--font-color);
-			}
-			&.changed {
-				color: var(--font-color-changed);
-				& > input {
+			.starting_amount_input,
+			.account_name_input {
+				// box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 1); /* Inset shadow */
+				&:not(.changed) {
+					color: var(--font-color);
+				}
+				&.changed {
 					color: var(--font-color-changed);
+					& > input {
+						color: var(--font-color-changed);
+					}
 				}
 			}
 		}
