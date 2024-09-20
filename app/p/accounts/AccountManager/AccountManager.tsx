@@ -512,11 +512,7 @@ export function AccountManager() {
 							data-id={thisData.id}
 							data-key='starting_amount'
 							data-default={thisData.starting_amount.toFixed(2)}
-							value={
-								thisPendingChange?.new.starting_amount
-									? thisPendingChange.new.starting_amount
-									: thisData.starting_amount
-							}
+							defaultValue={thisData.starting_amount}
 						/>
 					</div>,
 				]
