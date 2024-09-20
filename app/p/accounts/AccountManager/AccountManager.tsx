@@ -343,7 +343,7 @@ export function AccountManager() {
 					),
 					defaultWidth: defaultColumnWidths[0],
 					minWidth: 100,
-					maxWidth: 230,
+					maxWidth: 330,
 				},
 				{
 					content: (
