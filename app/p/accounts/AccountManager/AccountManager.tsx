@@ -391,7 +391,7 @@ export function AccountManager() {
 					const offsetY = grabberPosY - grabberContainerNode.offsetTop
 
 					rowElem.style.display = 'flex'
-					rowElem.style.position = 'absolute'
+					rowElem.style.position = 'fixed'
 					rowElem.style.left = `${e.clientX - offsetX}px`
 					rowElem.style.top = `${e.clientY - offsetY}px`
 					rowElem.style.zIndex = '999'
@@ -404,6 +404,7 @@ export function AccountManager() {
 							breakpoints.push(row.offsetTop)
 						}
 					})
+					console.log(gridRowRefs.current)
 
 					breakpoints.push(
 						breakpoints.at(-1)! + gridRowRefs.current.at(-1)!.offsetHeight
@@ -414,9 +415,20 @@ export function AccountManager() {
 
 					function putHighlightOnRow(rowIndex: number) {
 						highlightDiv.className = s.highlighter
-						highlightDiv.style.top = `${breakpoints[rowIndex]}px`
-						highlightDiv.style.left = `${tableLeft + controlWidth - 5}px`
-						highlightDiv.style.width = `${tableWidth - controlWidth + 10}px`
+
+						switch (rowIndex) {
+							case 0:
+								highlightDiv.style.top = `${breakpoints[rowIndex]}px`
+								break
+							case currentSortOrder!.length - 1:
+								highlightDiv.style.top = `${breakpoints[rowIndex] + 2}px`
+								break
+							default:
+								highlightDiv.style.top = `${breakpoints[rowIndex] - 0.7}px`
+								break
+						}
+						highlightDiv.style.left = `${tableLeft + controlWidth - 1}px`
+						highlightDiv.style.width = `${tableWidth - controlWidth + 2}px`
 					}
 					let closestBreakpointIndex = 0
 
@@ -432,6 +444,7 @@ export function AccountManager() {
 							},
 							0
 						)
+						console.log('closestBreakpointIndex', closestBreakpointIndex)
 						putHighlightOnRow(closestBreakpointIndex)
 					}
 					function handleReorderMouseUp() {
@@ -444,6 +457,7 @@ export function AccountManager() {
 						rowElem.style.top = ''
 						rowElem.style.left = ''
 						rowElem.style.zIndex = ''
+						rowElem.style.position = ''
 						highlightDiv.remove()
 						rowElem.classList.remove(s.highlighted)
 
@@ -465,9 +479,8 @@ export function AccountManager() {
 				}
 
 				return [
-					<div className={s.cell_container}>
+					<div key={`1-${thisData.id}`} className={s.cell_container}>
 						<div
-							key={`1-${thisData.id}`}
 							className={`${s.row_controls_container} ${
 								sortId !== defaultSortOrder![sortIndex] ? s.changed : ''
 							}`}
@@ -483,9 +496,8 @@ export function AccountManager() {
 							</div>
 						</div>
 					</div>,
-					<div className={s.cell_container}>
+					<div key={`2-${thisData.id}`} className={s.cell_container}>
 						<JInput
-							key={`2-${thisData.id}`}
 							onChange={handleChange}
 							onBlur={handleBlur}
 							className={`${s.account_name_input} ${
@@ -501,9 +513,8 @@ export function AccountManager() {
 							}
 						/>
 					</div>,
-					<div className={s.cell_container}>
+					<div key={`3-${thisData.id}`} className={s.cell_container}>
 						<JNumberAccounting
-							key={`3-${thisData.id}`}
 							onChange={handleChange}
 							onBlur={handleBlur}
 							className={`${s.starting_amount_input} ${

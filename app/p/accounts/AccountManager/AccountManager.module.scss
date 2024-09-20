@@ -5,9 +5,10 @@ svg.loading_anim {
 .highlighter {
 	position: absolute;
 	z-index: 998;
-	height: 10px;
+	height: 8px;
 	background-color: rgba(255, 107, 107, 0.326);
 	transform: translateY(-5px);
+	border-radius: 10px;
 }
 .highlighted input {
 	background-color: rgba(255, 107, 107, 0.326) !important;
