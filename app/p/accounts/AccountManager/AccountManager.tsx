@@ -370,34 +370,39 @@ export function AccountManager() {
 					document.body.style.cursor = 'grabbing'
 
 					// pop out row
-					const rowElem =
+					const rowNode =
 						gridRowRefs.current[sortIndex].parentElement!.parentElement!
 							.parentElement!
-					const tableElem = rowElem.parentElement!
-					const tableWidth = tableElem.offsetWidth
-					const tableLeft = tableElem.offsetLeft
-					const controlWidth =
-						e.currentTarget.parentElement!.parentElement!.parentElement!
-							.offsetWidth
-					rowElem.childNodes.forEach((childNode) => {
+					const tableNode = rowNode.parentElement!
+					const grabberNode = e.currentTarget as HTMLDivElement
+					const grabberContainerNode = rowNode.childNodes[0] as HTMLDivElement
+
+					const tableWidth = tableNode.offsetWidth
+					const tableLeft = tableNode.offsetLeft
+					const grabberContainerWidth = grabberContainerNode.offsetWidth
+
+					rowNode.childNodes.forEach((childNode) => {
 						const node = childNode as HTMLDivElement
 						node.style.width = `${node.offsetWidth}px`
 					})
-					const grabberNode = e.currentTarget as HTMLDivElement
-					const grabberContainerNode = rowElem.childNodes[0] as HTMLDivElement
-					const grabberPosX = grabberNode.offsetLeft + grabberNode.offsetWidth / 2
-					const grabberPosY = grabberNode.offsetTop + grabberNode.offsetHeight / 2
-					const offsetX = grabberPosX - grabberContainerNode.offsetLeft
-					const offsetY = grabberPosY - grabberContainerNode.offsetTop
 
-					rowElem.style.display = 'flex'
-					rowElem.style.position = 'fixed'
-					rowElem.style.left = `${e.clientX - offsetX}px`
-					rowElem.style.top = `${e.clientY - offsetY}px`
-					rowElem.style.zIndex = '999'
+					const offsetX =
+						grabberNode.offsetLeft +
+						grabberNode.offsetWidth / 2 -
+						grabberContainerNode.offsetLeft
+					const offsetY =
+						grabberNode.offsetTop +
+						grabberNode.offsetHeight / 2 -
+						grabberContainerNode.offsetTop
+
+					rowNode.style.left = `${e.clientX - offsetX}px`
+					rowNode.style.top = `${e.clientY - offsetY}px`
+
+					rowNode.style.display = 'flex'
+					rowNode.style.position = 'fixed'
+					rowNode.style.zIndex = '999'
 
 					// add highlight effect
-
 					const breakpoints: number[] = []
 					gridRowRefs.current.forEach((row, index) => {
 						if (index !== sortIndex) {
@@ -427,14 +432,20 @@ export function AccountManager() {
 								highlightDiv.style.top = `${breakpoints[rowIndex] - 0.7}px`
 								break
 						}
-						highlightDiv.style.left = `${tableLeft + controlWidth - 1}px`
-						highlightDiv.style.width = `${tableWidth - controlWidth + 2}px`
+						highlightDiv.style.left = `${
+							tableLeft + grabberContainerWidth - 1
+						}px`
+						highlightDiv.style.width = `${
+							tableWidth - grabberContainerWidth + 2
+						}px`
 					}
-					let closestBreakpointIndex = 0
 
+					let closestBreakpointIndex = -1
 					function handleReorderMouseMove(e: MouseEvent) {
-						rowElem.style.left = `${e.clientX - offsetX}px`
-						rowElem.style.top = `${e.clientY - offsetY}px`
+						rowNode.style.left = `${e.clientX - offsetX}px`
+						rowNode.style.top = `${e.clientY - offsetY}px`
+
+						const prevClosestBreakpointIndex = closestBreakpointIndex
 						closestBreakpointIndex = breakpoints.reduce(
 							(closestIndex, currentValue, currentIndex) => {
 								return Math.abs(currentValue - e.clientY) <
@@ -444,22 +455,23 @@ export function AccountManager() {
 							},
 							0
 						)
-						console.log('closestBreakpointIndex', closestBreakpointIndex)
-						putHighlightOnRow(closestBreakpointIndex)
+						if (prevClosestBreakpointIndex !== closestBreakpointIndex) {
+							putHighlightOnRow(closestBreakpointIndex)
+						}
 					}
 					function handleReorderMouseUp() {
-						rowElem.childNodes.forEach((childNode) => {
+						rowNode.childNodes.forEach((childNode) => {
 							const node = childNode as HTMLDivElement
 							node.style.width = ''
 						})
 						// console.clear()
-						rowElem.style.display = ''
-						rowElem.style.top = ''
-						rowElem.style.left = ''
-						rowElem.style.zIndex = ''
-						rowElem.style.position = ''
+						rowNode.style.display = ''
+						rowNode.style.top = ''
+						rowNode.style.left = ''
+						rowNode.style.zIndex = ''
+						rowNode.style.position = ''
 						highlightDiv.remove()
-						rowElem.classList.remove(s.highlighted)
+						rowNode.classList.remove(s.highlighted)
 
 						if (closestBreakpointIndex !== sortIndex) {
 							setCurrentSortOrder((prev) => {
