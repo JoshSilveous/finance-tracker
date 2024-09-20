@@ -327,18 +327,30 @@ export function AccountManager() {
 			}
 			const headers: JGridTypes.Header[] = [
 				{
-					content: <div className={s.header_controls}>#</div>,
+					content: (
+						<div className={s.header_container}>
+							<div className={s.header_controls}>#</div>
+						</div>
+					),
 					defaultWidth: 30,
 					noResize: true,
 				},
 				{
-					content: <div className={s.header}>Account Name</div>,
+					content: (
+						<div className={s.header_container}>
+							<div className={s.header}>Account Name</div>
+						</div>
+					),
 					defaultWidth: defaultColumnWidths[0],
 					minWidth: 100,
 					maxWidth: 230,
 				},
 				{
-					content: <div className={s.header}>Starting Amount</div>,
+					content: (
+						<div className={s.header_container}>
+							<div className={s.header}>Starting Amount</div>
+						</div>
+					),
 					defaultWidth: defaultColumnWidths[1],
 					minWidth: 100,
 					maxWidth: 230,
@@ -360,11 +372,13 @@ export function AccountManager() {
 					// pop out row
 					const rowElem =
 						gridRowRefs.current[sortIndex].parentElement!.parentElement!
+							.parentElement!
 					const tableElem = rowElem.parentElement!
 					const tableWidth = tableElem.offsetWidth
 					const tableLeft = tableElem.offsetLeft
 					const controlWidth =
-						e.currentTarget.parentElement!.parentElement!.offsetWidth
+						e.currentTarget.parentElement!.parentElement!.parentElement!
+							.offsetWidth
 					rowElem.childNodes.forEach((childNode) => {
 						const node = childNode as HTMLDivElement
 						node.style.width = `${node.offsetWidth}px`
@@ -451,64 +465,60 @@ export function AccountManager() {
 				}
 
 				return [
-					<div
-						key={`1-${thisData.id}`}
-						className={`${s.row_controls_container} ${
-							sortId !== defaultSortOrder![sortIndex] ? s.changed : ''
-						}`}
-						ref={(elem) => {
-							gridRowRefs.current[sortIndex] = elem as HTMLDivElement
-						}}
-					>
-						{/* {sortIndex !== 0 && (
-							<div className={s.up} onClick={moveUp}>
-								↑
-							</div>
-						)}
-						{sortIndex !== data.length - 1 && (
-							<div className={s.down} onClick={moveDown}>
-								↓
-							</div>
-						)} */}
+					<div className={s.cell_container}>
 						<div
-							className={s.reorder_grabber}
-							onMouseDown={handleReorderMouseDown}
+							key={`1-${thisData.id}`}
+							className={`${s.row_controls_container} ${
+								sortId !== defaultSortOrder![sortIndex] ? s.changed : ''
+							}`}
+							ref={(elem) => {
+								gridRowRefs.current[sortIndex] = elem as HTMLDivElement
+							}}
 						>
-							#
+							<div
+								className={s.reorder_grabber}
+								onMouseDown={handleReorderMouseDown}
+							>
+								#
+							</div>
 						</div>
 					</div>,
-					<JInput
-						key={`2-${thisData.id}`}
-						onChange={handleChange}
-						onBlur={handleBlur}
-						className={`${s.account_name_input} ${
-							thisPendingChange?.new.name ? s.changed : ''
-						}`}
-						data-id={thisData.id}
-						data-key='name'
-						data-default={thisData.name}
-						value={
-							thisPendingChange?.new.name
-								? thisPendingChange.new.name
-								: thisData.name
-						}
-					/>,
-					<JNumberAccounting
-						key={`3-${thisData.id}`}
-						onChange={handleChange}
-						onBlur={handleBlur}
-						className={`${s.starting_amount_input} ${
-							thisPendingChange?.new.starting_amount ? s.changed : ''
-						}`}
-						data-id={thisData.id}
-						data-key='starting_amount'
-						data-default={thisData.starting_amount.toFixed(2)}
-						value={
-							thisPendingChange?.new.starting_amount
-								? thisPendingChange.new.starting_amount
-								: thisData.starting_amount
-						}
-					/>,
+					<div className={s.cell_container}>
+						<JInput
+							key={`2-${thisData.id}`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							className={`${s.account_name_input} ${
+								thisPendingChange?.new.name ? s.changed : ''
+							}`}
+							data-id={thisData.id}
+							data-key='name'
+							data-default={thisData.name}
+							value={
+								thisPendingChange?.new.name
+									? thisPendingChange.new.name
+									: thisData.name
+							}
+						/>
+					</div>,
+					<div className={s.cell_container}>
+						<JNumberAccounting
+							key={`3-${thisData.id}`}
+							onChange={handleChange}
+							onBlur={handleBlur}
+							className={`${s.starting_amount_input} ${
+								thisPendingChange?.new.starting_amount ? s.changed : ''
+							}`}
+							data-id={thisData.id}
+							data-key='starting_amount'
+							data-default={thisData.starting_amount.toFixed(2)}
+							value={
+								thisPendingChange?.new.starting_amount
+									? thisPendingChange.new.starting_amount
+									: thisData.starting_amount
+							}
+						/>
+					</div>,
 				]
 			})
 			const gridConfig: JGridTypes.Props = {

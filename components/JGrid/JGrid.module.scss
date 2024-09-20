@@ -8,7 +8,7 @@
 
 	.grid {
 		display: grid;
-		grid-auto-rows: 35px;
+		grid-auto-rows: auto;
 		align-self: flex-start;
 		border-color: inherit;
 		border-width: 1px;
@@ -28,7 +28,7 @@
 				overflow: hidden;
 				text-overflow: ellipsis;
 				width: 100%;
-				height: 100%;
+				height: auto;
 
 				&.header {
 					user-select: none;
@@ -76,6 +76,18 @@
 				&.resizing::before {
 					left: 8px;
 				}
+			}
+		}
+
+		&.no_borders {
+			border-width: 0px;
+			border-color: transparent;
+			.cell {
+				border-right-width: 0px;
+				border-bottom-width: 0px;
+				border-color: transparent;
+				border: none;
+				background-color: transparent;
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import styles from './JGrid.module.scss'
+import s from './JGrid.module.scss'
 
 export namespace JGridTypes {
 	/**
@@ -19,6 +19,7 @@ export namespace JGridTypes {
 		style?: React.CSSProperties
 		className?: string
 		noOuterBorders?: boolean
+		noBorders?: boolean
 		minColumnWidth?: number
 		maxTableWidth?: number
 		onResize?: ColumnResizeEventHandler
@@ -36,6 +37,7 @@ export function JGrid({
 	style,
 	className,
 	noOuterBorders,
+	noBorders,
 	maxTableWidth,
 	onResize,
 }: JGridTypes.Props) {
@@ -49,13 +51,13 @@ export function JGrid({
 	}, columnWidths)
 
 	const headersJSX = (
-		<div className={styles.row}>
+		<div className={s.row}>
 			{headers.map((header, index) => {
 				const isRightColumn = index === headers.length - 1
 				return (
 					<div
 						key={index}
-						className={`${styles.cell} ${styles.header}`}
+						className={`${s.cell} ${s.header}`}
 						style={{
 							gridColumn: `${index + 1} / ${index + 2}`,
 							borderRightWidth: isRightColumn && noOuterBorders ? '0px' : '',
@@ -72,7 +74,7 @@ export function JGrid({
 		if (header.noResize) {
 			return (
 				<div
-					className={styles.measurer}
+					className={s.measurer}
 					key={index}
 					style={{ gridColumn: `${index + 1} / ${index + 2}` }}
 				/>
@@ -82,7 +84,7 @@ export function JGrid({
 		function beginResize(startX: number, target: HTMLDivElement) {
 			setIsResizing(true)
 
-			target.classList.add(styles.resizing)
+			target.classList.add(s.resizing)
 
 			const startWidth = target.parentElement!.clientWidth
 			let prevColWidths = [...columnWidths]
@@ -167,7 +169,7 @@ export function JGrid({
 					})
 				}
 
-				target.classList.remove(styles.resizing)
+				target.classList.remove(s.resizing)
 				setIsResizing(false)
 
 				window.removeEventListener('mousemove', handleMouseMove)
@@ -196,12 +198,12 @@ export function JGrid({
 
 		return (
 			<div
-				className={styles.measurer}
+				className={s.measurer}
 				key={index}
 				style={{ gridColumn: `${index + 1} / ${index + 2}` }}
 			>
 				<div
-					className={styles.grabber}
+					className={s.grabber}
 					onMouseDown={handleMouseDown}
 					onTouchStart={handleTouchDown}
 				></div>
@@ -211,13 +213,13 @@ export function JGrid({
 
 	const contentJSX = content.map((itemRow, itemRowIndex) => {
 		return (
-			<div className={styles.row} key={itemRowIndex}>
+			<div className={s.row} key={itemRowIndex}>
 				{itemRow.map((itemCell, itemCellIndex) => {
 					const isBottomRow = itemRowIndex === content.length - 1
 					const isRightColumn = itemCellIndex === itemRow.length - 1
 					return (
 						<div
-							className={styles.cell}
+							className={s.cell}
 							key={itemCellIndex}
 							style={{
 								gridColumn: `${itemCellIndex + 1} / ${itemCellIndex + 2}`,
@@ -236,11 +238,11 @@ export function JGrid({
 	})
 	return (
 		<div
-			className={`${styles.container} ${className ? className : ''}`}
+			className={`${s.container} ${className ? className : ''}`}
 			style={style ? style : {}}
 		>
 			<div
-				className={styles.grid}
+				className={`${s.grid} ${noBorders ? s.no_borders : ''}`}
 				style={{
 					gridTemplateColumns: columnWidths.map((val) => `${val}px`).join(' '),
 					userSelect: isResizing ? 'none' : 'auto',

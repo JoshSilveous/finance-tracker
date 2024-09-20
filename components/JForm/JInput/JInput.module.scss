@@ -9,15 +9,15 @@
 		width: 100%;
 		padding: 8px 12px;
 		border-radius: 3px;
-		outline: solid rgba(229, 229, 229, 0.2);
+		outline: none;
+		box-shadow: inset 0 0 0 0.5px rgba(229, 229, 229, 0.2);
 		border: 0;
-		outline-width: 1px;
 		background-color: var(--bg-color-lighter-1);
-		transition: outline-width 0.15s ease;
+		transition: box-shadow 0.15s ease;
 
 		&:focus,
 		&:active {
-			outline-width: 3px;
+			box-shadow: inset 0 0 0 2px rgba(229, 229, 229, 0.2);
 		}
 
 		&:disabled {
@@ -25,7 +25,7 @@
 			cursor: not-allowed;
 			&:focus,
 			&:active {
-				outline-width: 1px;
+				box-shadow: inset 0 0 0 0.5px rgba(229, 229, 229, 0.2);
 			}
 		}
 	}
