@@ -4,6 +4,8 @@ import s from './AccountManager.module.scss'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { default as LoadingAnim } from '@/public/loading.svg'
+import { default as ReorderIcon } from '@/public/reorder.svg'
+import { default as DeleteIcon } from '@/public/delete.svg'
 import { NewAccountForm } from './NewAccountForm/NewAccountForm'
 import {
 	removeFromArray,
@@ -327,12 +329,8 @@ export function AccountManager() {
 			}
 			const headers: JGridTypes.Header[] = [
 				{
-					content: (
-						<div className={s.header_container}>
-							<div className={s.header_controls}>#</div>
-						</div>
-					),
-					defaultWidth: 30,
+					content: <div className={s.header_container} />,
+					defaultWidth: 55,
 					noResize: true,
 				},
 				{
@@ -508,11 +506,14 @@ export function AccountManager() {
 								gridRowRefs.current[sortIndex] = elem as HTMLDivElement
 							}}
 						>
+							<div className={s.delete_button}>
+								<DeleteIcon />
+							</div>
 							<div
 								className={s.reorder_grabber}
 								onMouseDown={handleReorderMouseDown}
 							>
-								#
+								<ReorderIcon />
 							</div>
 						</div>
 					</div>,
