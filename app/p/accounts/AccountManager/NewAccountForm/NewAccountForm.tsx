@@ -2,7 +2,7 @@ import { JButton } from '@/components/JForm'
 import s from './NewAccountForm.module.scss'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { JInput, JNumberAccounting } from '@/components/JForm'
-import { insertAccount } from '../clientFunctions'
+import { insertAccount } from '../func'
 import { isStandardError } from '@/utils'
 
 interface Errors {

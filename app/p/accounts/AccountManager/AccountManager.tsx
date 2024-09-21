@@ -1,14 +1,11 @@
 'use client'
-import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import s from './AccountManager.module.scss'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import { default as ReorderIcon } from '@/public/reorder.svg'
-import { default as DeleteIcon } from '@/public/delete.svg'
 import { NewAccountForm } from './NewAccountForm/NewAccountForm'
 import {
-	removeFromArray,
 	createPopup,
 	isStandardError,
 	createPreferencesEntry,
@@ -20,11 +17,13 @@ import {
 	updatePreferredColumnWidth,
 	fetchData,
 	fetchPreferredColumnWidths,
-	upsertData,
-} from './clientFunctions'
+	saveChanges,
+	handleInputChange,
+	handleInputBlur,
+} from './func'
 import { RowController } from './RowController/RowController'
 
-interface Change {
+export interface Change {
 	account_id: string
 	new: {
 		name?: string
@@ -109,10 +108,10 @@ export function AccountManager() {
 		loadInitData()
 
 		// CTRL+S to save
-		const handleKeyDown = (e: KeyboardEvent) => {
+		const handleKeyDown = async (e: KeyboardEvent) => {
 			if (e.ctrlKey && e.key === 's') {
 				e.preventDefault()
-				saveChanges()
+				await handleSaveChanges()
 			}
 		}
 		window.addEventListener('keydown', handleKeyDown)
@@ -123,49 +122,16 @@ export function AccountManager() {
 
 	let grid: ReactNode
 
-	async function saveChanges() {
-		const pendingChanges = pendingChangesRef.current
+	async function handleSaveChanges() {
 		if (saveOptionIsAvailable) {
 			setIsSavingChanges(true)
-
-			// apply data changes
-			const accountUpdates: Account.WithPropsAndID[] = pendingChanges.map((change) => {
-				const thisAccount = data!.find(
-					(item) => item.id === change.account_id
-				) as Account.Full
-				return {
-					id: change.account_id,
-					name: change.new.name === undefined ? thisAccount.name : change.new.name,
-					order_position: thisAccount.order_position,
-					starting_amount:
-						change.new.starting_amount === undefined
-							? thisAccount.starting_amount
-							: Math.round(parseFloat(change.new.starting_amount) * 100) / 100,
-				}
-			})
-
-			// apply re-ordering
-			currentSortOrder!.forEach((sortAccountID, sortIndex) => {
-				if (defaultSortOrder![sortIndex] !== sortAccountID) {
-					const thisUpdate = accountUpdates.find(
-						(update) => update.id === sortAccountID
-					)
-					if (thisUpdate === undefined) {
-						const thisAccount = data!.find((item) => item.id === sortAccountID)!
-						accountUpdates.push({
-							id: sortAccountID,
-							name: thisAccount.name,
-							starting_amount: thisAccount.starting_amount,
-							order_position: sortIndex,
-						})
-					} else {
-						thisUpdate.order_position = sortIndex
-					}
-				}
-			})
-
 			try {
-				await upsertData(accountUpdates)
+				await saveChanges(
+					data,
+					currentSortOrder,
+					defaultSortOrder,
+					pendingChangesRef
+				)
 			} catch (e) {
 				if (isStandardError(e)) {
 					createErrorPopup(e.message)
@@ -173,9 +139,8 @@ export function AccountManager() {
 					console.error(e)
 				}
 			}
-
-			loadInitData()
 			setIsSavingChanges(false)
+			loadInitData()
 			setPendingChanges([])
 		}
 	}
@@ -223,96 +188,6 @@ export function AccountManager() {
 				</p>
 			)
 		} else {
-			const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-				// prevent leading spaces
-				if (e.target.value !== e.target.value.trimStart()) {
-					e.target.value = e.target.value.trimStart()
-				}
-
-				const account_id = e.target.dataset['id'] as Account.ID
-				const key = e.target.dataset['key'] as keyof Change['new']
-				const defaultValue = e.target.dataset['default'] as string
-				const currentValue = e.target.value
-
-				const thisPendingChangeIndex = pendingChanges.findIndex(
-					(change) => change.account_id === account_id
-				)
-				const thisPendingChange =
-					thisPendingChangeIndex !== -1
-						? pendingChanges[thisPendingChangeIndex]
-						: undefined
-
-				if (defaultValue === currentValue) {
-					// if new val equals starting value, remove change item
-
-					if (thisPendingChange === undefined) {
-						return
-					}
-
-					if (Object.keys(thisPendingChange.new).length > 1) {
-						// remove this key from thisChange.new
-						setPendingChanges((prev) => {
-							const newArr = structuredClone(prev)
-							delete newArr[thisPendingChangeIndex].new[key]
-							return newArr
-						})
-					} else {
-						// remove thisChange from pendingChanges
-						setPendingChanges((prev) =>
-							removeFromArray(prev, thisPendingChangeIndex)
-						)
-					}
-				} else if (thisPendingChangeIndex === -1) {
-					// if change isn't already present in pendingChanges
-					setPendingChanges((prev) => [
-						...prev,
-						{
-							account_id,
-							new: { [key]: currentValue },
-						},
-					])
-				} else {
-					// if change is already present in pendingChanges
-					setPendingChanges((prev) => {
-						const newArr = [...prev]
-						newArr[thisPendingChangeIndex].new[key] = currentValue
-						return newArr
-					})
-				}
-			}
-			const handleBlur = (e: ChangeEvent<HTMLInputElement>) => {
-				e.target.value = e.target.value.trimEnd()
-				const defaultValue = e.target.dataset['default'] as string
-				const currentValue = e.target.value
-				// handles edge case where the user just adds spaces to the end of the value
-				// this will remove those spaces and the Change
-				if (defaultValue === currentValue) {
-					const account_id = e.target.dataset['id'] as Account.ID
-					const key = e.target.dataset['key'] as keyof Change['new']
-
-					const thisPendingChangeIndex = pendingChanges.findIndex(
-						(change) => change.account_id === account_id
-					)
-					const thisPendingChange = pendingChanges[thisPendingChangeIndex]
-					if (thisPendingChange?.new[key] === undefined) {
-						return
-					} else {
-						if (Object.keys(thisPendingChange.new).length >= 1) {
-							// remove this key from thisChange.new
-							setPendingChanges((prev) => {
-								const newArr = structuredClone(prev)
-								delete newArr[thisPendingChangeIndex].new[key]
-								return newArr
-							})
-						} else {
-							// remove thisChange from pendingChanges
-							setPendingChanges((prev) =>
-								removeFromArray(prev, thisPendingChangeIndex)
-							)
-						}
-					}
-				}
-			}
 			const updateDefaultColumnWidth: JGridTypes.ColumnResizeEventHandler = async (
 				e
 			) => {
@@ -378,8 +253,12 @@ export function AccountManager() {
 					</div>,
 					<div key={`2-${thisData.id}`} className={s.cell_container}>
 						<JInput
-							onChange={handleChange}
-							onBlur={handleBlur}
+							onChange={(e) =>
+								handleInputChange(e, pendingChanges, setPendingChanges)
+							}
+							onBlur={(e) =>
+								handleInputBlur(e, pendingChanges, setPendingChanges)
+							}
 							className={`${s.account_name_input} ${
 								thisPendingChange?.new.name ? s.changed : ''
 							}`}
@@ -395,8 +274,12 @@ export function AccountManager() {
 					</div>,
 					<div key={`3-${thisData.id}`} className={s.cell_container}>
 						<JNumberAccounting
-							onChange={handleChange}
-							onBlur={handleBlur}
+							onChange={(e) =>
+								handleInputChange(e, pendingChanges, setPendingChanges)
+							}
+							onBlur={(e) =>
+								handleInputBlur(e, pendingChanges, setPendingChanges)
+							}
 							className={`${s.starting_amount_input} ${
 								thisPendingChange?.new.starting_amount ? s.changed : ''
 							}`}
@@ -453,7 +336,7 @@ export function AccountManager() {
 					className={s.save}
 					disabled={!saveOptionIsAvailable}
 					loading={isSavingChanges}
-					onClick={saveChanges}
+					onClick={handleSaveChanges}
 				>
 					Save changes
 				</JButton>
