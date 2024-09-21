@@ -375,10 +375,6 @@ export function AccountManager() {
 					const grabberNode = e.currentTarget as HTMLDivElement
 					const grabberContainerNode = rowNode.childNodes[0] as HTMLDivElement
 
-					const tableWidth = tableNode.offsetWidth
-					const tableLeft = tableNode.offsetLeft
-					const grabberContainerWidth = grabberContainerNode.offsetWidth
-
 					rowNode.childNodes.forEach((childNode) => {
 						const node = childNode as HTMLDivElement
 						node.style.width = `${node.offsetWidth}px`
@@ -400,42 +396,53 @@ export function AccountManager() {
 					rowNode.style.position = 'fixed'
 					rowNode.style.zIndex = '999'
 
-					// add highlight effect
+					// get
 					const breakpoints: number[] = []
 					gridRowRefs.current.forEach((row, index) => {
 						if (index !== sortIndex) {
 							breakpoints.push(row.offsetTop)
 						}
 					})
-					console.log(gridRowRefs.current)
 
 					breakpoints.push(
 						breakpoints.at(-1)! + gridRowRefs.current.at(-1)!.offsetHeight
 					)
 
-					const highlightDiv = document.createElement('div')
-					document.body.appendChild(highlightDiv)
-
-					function putHighlightOnRow(rowIndex: number) {
-						highlightDiv.className = s.highlighter
-
-						switch (rowIndex) {
-							case 0:
-								highlightDiv.style.top = `${breakpoints[rowIndex]}px`
-								break
-							case currentSortOrder!.length - 1:
-								highlightDiv.style.top = `${breakpoints[rowIndex] + 2}px`
-								break
-							default:
-								highlightDiv.style.top = `${breakpoints[rowIndex] - 0.7}px`
-								break
+					function putHighlightOnRow(rowIndex: number | 'none') {
+						gridRowRefs.current.forEach((item) => {
+							item.parentElement!.style.marginTop = ''
+							item.parentElement!.parentElement!.parentElement!.parentElement!.parentElement!.style.marginBottom =
+								''
+						})
+						if (rowIndex === 'none') {
+							return
 						}
-						highlightDiv.style.left = `${
-							tableLeft + grabberContainerWidth - 1
-						}px`
-						highlightDiv.style.width = `${
-							tableWidth - grabberContainerWidth + 2
-						}px`
+						if (rowIndex < sortIndex) {
+							rowIndex--
+						}
+						if (rowIndex === currentSortOrder!.length - 1) {
+							gridRowRefs.current[
+								rowIndex
+							].parentElement!.parentElement!.parentElement!.parentElement!.parentElement!.style.marginBottom =
+								'20px'
+							console.log(
+								'expanding marginBottom of',
+								rowIndex,
+								'\n',
+								gridRowRefs.current[rowIndex].parentElement!.parentElement!
+									.parentElement!.parentElement!.parentElement!
+							)
+						} else {
+							gridRowRefs.current[
+								rowIndex + 1
+							].parentElement!.style.marginTop = '20px'
+							console.log(
+								'expanding marginTop of',
+								rowIndex,
+								'\n',
+								gridRowRefs.current[rowIndex + 1].parentElement!
+							)
+						}
 					}
 					function getClosestBreakpointIndex(yPos: number) {
 						return breakpoints.reduce(
@@ -466,17 +473,16 @@ export function AccountManager() {
 						firstRun = false
 					}
 					function handleReorderMouseUp() {
+						putHighlightOnRow('none')
 						rowNode.childNodes.forEach((childNode) => {
 							const node = childNode as HTMLDivElement
 							node.style.width = ''
 						})
-						// console.clear()
 						rowNode.style.display = ''
 						rowNode.style.top = ''
 						rowNode.style.left = ''
 						rowNode.style.zIndex = ''
 						rowNode.style.position = ''
-						highlightDiv.remove()
 						rowNode.classList.remove(s.highlighted)
 
 						if (closestBreakpointIndex !== sortIndex) {
