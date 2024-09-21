@@ -367,19 +367,17 @@ export function AccountManager() {
 				const handleReorderMouseDown = (e: React.MouseEvent<HTMLInputElement>) => {
 					document.body.style.cursor = 'grabbing'
 
-					// pop out row
-					const rowNode =
+					const thisRowNode =
 						gridRowRefs.current[sortIndex].parentElement!.parentElement!
 							.parentElement!
-					const tableNode = rowNode.parentElement!
-					const grabberNode = e.currentTarget as HTMLDivElement
-					const grabberContainerNode = rowNode.childNodes[0] as HTMLDivElement
 
-					rowNode.childNodes.forEach((childNode) => {
+					const grabberNode = e.currentTarget as HTMLDivElement
+					const grabberContainerNode = thisRowNode.childNodes[0] as HTMLDivElement
+
+					thisRowNode.childNodes.forEach((childNode) => {
 						const node = childNode as HTMLDivElement
 						node.style.width = `${node.offsetWidth}px`
 					})
-
 					const offsetX =
 						grabberNode.offsetLeft +
 						grabberNode.offsetWidth / 2 -
@@ -389,14 +387,16 @@ export function AccountManager() {
 						grabberNode.offsetHeight / 2 -
 						grabberContainerNode.offsetTop
 
-					rowNode.style.left = `${e.clientX - offsetX}px`
-					rowNode.style.top = `${e.clientY - offsetY}px`
+					thisRowNode.style.left = `${e.clientX - offsetX}px`
+					thisRowNode.style.top = `${e.clientY - offsetY}px`
 
-					rowNode.style.display = 'flex'
-					rowNode.style.position = 'fixed'
-					rowNode.style.zIndex = '999'
+					thisRowNode.style.display = 'flex'
+					thisRowNode.style.position = 'fixed'
+					thisRowNode.style.zIndex = '999'
 
-					// get
+					const rowsWithoutCurrentRow = gridRowRefs.current.filter(
+						(_, i) => i !== sortIndex
+					)
 					const breakpoints: number[] = []
 					gridRowRefs.current.forEach((row, index) => {
 						if (index !== sortIndex) {
@@ -407,41 +407,59 @@ export function AccountManager() {
 					breakpoints.push(
 						breakpoints.at(-1)! + gridRowRefs.current.at(-1)!.offsetHeight
 					)
-
-					function putHighlightOnRow(rowIndex: number | 'none') {
-						gridRowRefs.current.forEach((item) => {
-							item.parentElement!.style.marginTop = ''
-							item.parentElement!.parentElement!.parentElement!.parentElement!.parentElement!.style.marginBottom =
-								''
+					let firstRun = true
+					function putMarginGapOnRow(rowIndex: number | 'none') {
+						rowsWithoutCurrentRow[0].parentElement!.parentElement!.parentElement!.classList.remove(
+							s.margin_top_double
+						)
+						rowsWithoutCurrentRow.forEach((item) => {
+							item.parentElement!.parentElement!.parentElement!.classList.remove(
+								s.margin_top
+							)
+							item.parentElement!.parentElement!.parentElement!.classList.remove(
+								s.margin_bottom
+							)
+							item.parentElement!.parentElement!.parentElement!.parentElement!.parentElement!.classList.remove(
+								s.margin_bottom_double
+							)
 						})
 						if (rowIndex === 'none') {
 							return
 						}
-						if (rowIndex < sortIndex) {
-							rowIndex--
-						}
-						if (rowIndex === currentSortOrder!.length - 1) {
+
+						rowIndex--
+						if (rowIndex === -1) {
+							rowsWithoutCurrentRow[0].parentElement!.parentElement!.parentElement!.classList.add(
+								s.margin_top_double
+							)
+						} else if (rowIndex === currentSortOrder!.length - 2) {
 							gridRowRefs.current[
 								rowIndex
-							].parentElement!.parentElement!.parentElement!.parentElement!.parentElement!.style.marginBottom =
-								'20px'
-							console.log(
-								'expanding marginBottom of',
-								rowIndex,
-								'\n',
-								gridRowRefs.current[rowIndex].parentElement!.parentElement!
-									.parentElement!.parentElement!.parentElement!
+							].parentElement!.parentElement!.parentElement!.parentElement!.parentElement!.classList.add(
+								s.margin_bottom_double
 							)
 						} else {
-							gridRowRefs.current[
-								rowIndex + 1
-							].parentElement!.style.marginTop = '20px'
-							console.log(
-								'expanding marginTop of',
-								rowIndex,
-								'\n',
-								gridRowRefs.current[rowIndex + 1].parentElement!
+							rowsWithoutCurrentRow[
+								rowIndex
+							].parentElement!.parentElement!.parentElement!.classList.add(
+								s.margin_bottom
 							)
+							rowsWithoutCurrentRow[
+								rowIndex + 1
+							].parentElement!.parentElement!.parentElement!.classList.add(
+								s.margin_top
+							)
+						}
+
+						if (firstRun) {
+							const delay = setTimeout(() => {
+								rowsWithoutCurrentRow.forEach((item) => {
+									item.parentElement!.parentElement!.parentElement!.classList.add(
+										s.margin_transition
+									)
+								})
+								clearTimeout(delay)
+							}, 10)
 						}
 					}
 					function getClosestBreakpointIndex(yPos: number) {
@@ -457,10 +475,11 @@ export function AccountManager() {
 					}
 
 					let closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
-					let firstRun = true
+
+					putMarginGapOnRow(sortIndex)
 					function handleReorderMouseMove(e: MouseEvent) {
-						rowNode.style.left = `${e.clientX - offsetX}px`
-						rowNode.style.top = `${e.clientY - offsetY}px`
+						thisRowNode.style.left = `${e.clientX - offsetX}px`
+						thisRowNode.style.top = `${e.clientY - offsetY}px`
 
 						const prevClosestBreakpointIndex = closestBreakpointIndex
 						closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
@@ -468,22 +487,27 @@ export function AccountManager() {
 							firstRun ||
 							prevClosestBreakpointIndex !== closestBreakpointIndex
 						) {
-							putHighlightOnRow(closestBreakpointIndex)
+							putMarginGapOnRow(closestBreakpointIndex)
 						}
 						firstRun = false
 					}
 					function handleReorderMouseUp() {
-						putHighlightOnRow('none')
-						rowNode.childNodes.forEach((childNode) => {
+						gridRowRefs.current.forEach((item) => {
+							item.parentElement!.parentElement!.parentElement!.classList.remove(
+								s.margin_transition
+							)
+						})
+						putMarginGapOnRow('none')
+						thisRowNode.childNodes.forEach((childNode) => {
 							const node = childNode as HTMLDivElement
 							node.style.width = ''
 						})
-						rowNode.style.display = ''
-						rowNode.style.top = ''
-						rowNode.style.left = ''
-						rowNode.style.zIndex = ''
-						rowNode.style.position = ''
-						rowNode.classList.remove(s.highlighted)
+						thisRowNode.style.display = ''
+						thisRowNode.style.top = ''
+						thisRowNode.style.left = ''
+						thisRowNode.style.zIndex = ''
+						thisRowNode.style.position = ''
+						thisRowNode.classList.remove(s.highlighted)
 
 						if (closestBreakpointIndex !== sortIndex) {
 							setCurrentSortOrder((prev) => {

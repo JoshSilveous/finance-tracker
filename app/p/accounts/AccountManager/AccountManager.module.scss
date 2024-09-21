@@ -144,9 +144,27 @@ svg.loading_anim {
 			}
 		}
 
-		.jgrid,
-		.cell_container {
-			transition: margin-bottom 0.2s ease, margin-top 0.2s ease;
+		.jgrid {
+			transition: margin-bottom 0.2s ease;
+			&.margin_bottom_double {
+				margin-bottom: 30px;
+			}
+		}
+
+		div.margin_transition {
+			& > div {
+				transition: margin-bottom 0.2s ease, margin-top 0.2s ease;
+			}
+		}
+
+		.margin_bottom > div {
+			margin-bottom: 17.5px;
+		}
+		.margin_top > div {
+			margin-top: 17.5px;
+		}
+		.margin_top_double > div {
+			margin-top: 30px;
 		}
 	}
 }
