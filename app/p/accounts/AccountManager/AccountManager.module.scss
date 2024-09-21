@@ -144,11 +144,14 @@ svg.loading_anim {
 			}
 		}
 
-		.jgrid {
+		.jgrid.margin_transition {
 			transition: margin-bottom 0.2s ease;
 			&.margin_bottom_double {
 				margin-bottom: 30px;
 			}
+		}
+		.jgrid.margin_bottom_double {
+			margin-bottom: 30px;
 		}
 
 		div.margin_transition {

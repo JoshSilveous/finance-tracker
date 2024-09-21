@@ -409,6 +409,16 @@ export function AccountManager() {
 					)
 					let firstRun = true
 					function putMarginGapOnRow(rowIndex: number | 'none') {
+						if (rowIndex === 'none') {
+							rowsWithoutCurrentRow.forEach((item) => {
+								item.parentElement!.parentElement!.parentElement!.classList.remove(
+									s.margin_transition
+								)
+							})
+							gridRowRefs.current[0].parentElement!.parentElement!.parentElement!.parentElement!.parentElement!.classList.remove(
+								s.margin_transition
+							)
+						}
 						rowsWithoutCurrentRow[0].parentElement!.parentElement!.parentElement!.classList.remove(
 							s.margin_top_double
 						)
@@ -458,6 +468,9 @@ export function AccountManager() {
 										s.margin_transition
 									)
 								})
+								gridRowRefs.current[0].parentElement!.parentElement!.parentElement!.parentElement!.parentElement!.classList.add(
+									s.margin_transition
+								)
 								clearTimeout(delay)
 							}, 10)
 						}
@@ -492,11 +505,6 @@ export function AccountManager() {
 						firstRun = false
 					}
 					function handleReorderMouseUp() {
-						gridRowRefs.current.forEach((item) => {
-							item.parentElement!.parentElement!.parentElement!.classList.remove(
-								s.margin_transition
-							)
-						})
 						putMarginGapOnRow('none')
 						thisRowNode.childNodes.forEach((childNode) => {
 							const node = childNode as HTMLDivElement
