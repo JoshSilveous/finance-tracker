@@ -243,7 +243,9 @@ export function AccountManager() {
 				return [
 					<div key={`1-${thisData.id}`} className={s.cell_container}>
 						<RowController
-							sortId={sortId}
+							account_id={sortId}
+							account_name={thisData.name}
+							deleteDisabled={saveOptionIsAvailable}
 							sortIndex={sortIndex}
 							currentSortOrder={currentSortOrder}
 							defaultSortOrder={defaultSortOrder}

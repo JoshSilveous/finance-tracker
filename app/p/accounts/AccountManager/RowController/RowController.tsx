@@ -2,9 +2,13 @@ import { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import s from './RowController.module.scss'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
+import { createPopup } from '@/utils'
+import { DeleteForm } from './DeleteForm/DeleteForm'
 
 interface RowControllerProps {
-	sortId: string
+	account_id: string
+	account_name: string
+	deleteDisabled: boolean
 	sortIndex: number
 	currentSortOrder: string[]
 	defaultSortOrder: string[] | null
@@ -12,14 +16,16 @@ interface RowControllerProps {
 	setCurrentSortOrder: Dispatch<SetStateAction<string[] | null>>
 }
 export function RowController({
-	sortId,
+	account_id,
+	account_name,
+	deleteDisabled,
 	sortIndex,
 	currentSortOrder,
 	defaultSortOrder,
 	gridRowRefs,
 	setCurrentSortOrder,
 }: RowControllerProps) {
-	const handleReorderMouseDown = (e: React.MouseEvent<HTMLInputElement>) => {
+	function handleReorderMouseDown(e: React.MouseEvent<HTMLInputElement>) {
 		document.body.style.cursor = 'grabbing'
 
 		const thisRowNode =
@@ -173,18 +179,38 @@ export function RowController({
 		window.addEventListener('mouseup', handleReorderMouseUp)
 	}
 
+	async function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
+		;(e.target as HTMLButtonElement).blur()
+		console.log('delete!', account_id)
+		const myPopup = createPopup(
+			<DeleteForm
+				account_id={account_id}
+				account_name={account_name}
+				afterDelete={() => {
+					console.log('deleted!')
+				}}
+			/>
+		)
+		myPopup.trigger()
+	}
+
 	return (
 		<div
 			className={`${s.row_controls_container} ${
-				sortId !== defaultSortOrder![sortIndex] ? s.changed : ''
+				account_id !== defaultSortOrder![sortIndex] ? s.changed : ''
 			}`}
 			ref={(elem) => {
 				gridRowRefs.current[sortIndex] = elem as HTMLDivElement
 			}}
 		>
-			<div className={s.delete_button}>
+			<button
+				className={s.delete_button}
+				onClick={handleDelete}
+				disabled={deleteDisabled}
+				title={deleteDisabled ? 'Save or discard changes before deleting' : ''}
+			>
 				<DeleteIcon />
-			</div>
+			</button>
 			<div className={s.reorder_grabber} onMouseDown={handleReorderMouseDown}>
 				<ReorderIcon />
 			</div>
