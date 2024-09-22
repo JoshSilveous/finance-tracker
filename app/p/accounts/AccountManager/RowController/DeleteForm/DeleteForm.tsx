@@ -4,6 +4,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { fetchData } from '../../func'
 import { JButton } from '@/components/JForm'
+import { createPopup } from '@/utils'
 
 interface DeleteFormProps {
 	account_name: string
@@ -47,7 +48,48 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 			setAccountToChangeTo(e.target.value)
 		}
 	}
-	console.log('accountsAreLoaded', accountsAreLoaded, 'otherAccounts', otherAccounts)
+	function handleConfirm() {
+		console.log('deleteMethod:', deleteMethod)
+		if (deleteMethod === 'replace') {
+			console.log('replacing with', accountToChangeTo)
+		}
+
+		let confirmMessage = <></>
+		switch (deleteMethod) {
+			case 'delete':
+				confirmMessage = (
+					<p>
+						Are you sure you want to delete <strong>{account_name}</strong> and
+						any transactions associated with it?
+					</p>
+				)
+				break
+			case 'set_null':
+				confirmMessage = (
+					<p>
+						Are you sure you want to delete <strong>{account_name}</strong> and
+						set the account attribute of associated transactions to Empty?
+					</p>
+				)
+				break
+			case 'replace':
+				const newAccountName = otherAccounts!.find(
+					(act) => act.id === accountToChangeTo
+				)!.name
+				console.log(newAccountName)
+				confirmMessage = (
+					<p>
+						Are you sure you want to delete <strong>{account_name}</strong> and
+						set the account attribute of associated transactions to{' '}
+						<strong>{newAccountName}</strong>?
+					</p>
+				)
+				break
+		}
+
+		const myPopup = createPopup(<div className={s.confirm_popup}>{confirmMessage}</div>)
+		myPopup.trigger()
+	}
 	return (
 		<div className={s.main}>
 			<h1>Delete "{account_name}"</h1>
@@ -88,7 +130,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 				jstyle='primary'
 				className={s.confirm_button}
 				disabled={!readyToConfirm}
-				onClick={() => console.log('confirmed', accountToChangeTo)}
+				onClick={handleConfirm}
 			>
 				Confirm
 			</JButton>
