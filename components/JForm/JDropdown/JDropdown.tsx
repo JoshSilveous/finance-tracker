@@ -1,6 +1,7 @@
 import { ChangeEvent } from 'react'
 import s from './JDropdown.module.scss'
 import { default as DropdownArrow } from '@/public/dropdown_arrow.svg'
+import { default as LoadingAnim } from '@/public/loading.svg'
 
 export namespace JDropdownTypes {
 	export interface Props {
@@ -9,6 +10,7 @@ export namespace JDropdownTypes {
 		defaultValue?: string | number
 		placeholder?: string
 		className?: string
+		loading?: boolean
 	}
 	export interface Option {
 		name: string
@@ -18,20 +20,22 @@ export namespace JDropdownTypes {
 }
 
 export function JDropdown(props: JDropdownTypes.Props) {
-	if (props.defaultValue === undefined && props.placeholder === undefined) {
-		throw new Error(
-			'You must provide either a defaultValue or placeholder for JDropdown components.'
-		)
-	}
 	const optionsDisplay = props.options.map((option) => {
 		return <option value={option.value}>{option.name}</option>
 	})
 	if (props.defaultValue === undefined) {
-		optionsDisplay.unshift(<option value=''>{props.placeholder!}</option>)
+		optionsDisplay.unshift(
+			<option value=''>{props.placeholder ? props.placeholder : ''}</option>
+		)
 	}
 	return (
 		<div className={`${s.main} ${props.className ? props.className : ''}`}>
-			<select onChange={props.onChange}>{optionsDisplay}</select>
+			{props.loading && (
+				<div className={s.loading}>
+					<LoadingAnim />
+				</div>
+			)}
+			<select onChange={props.onChange}>{props.loading ? '' : optionsDisplay}</select>
 			<div className={s.custom_arrow}>
 				<DropdownArrow />
 			</div>

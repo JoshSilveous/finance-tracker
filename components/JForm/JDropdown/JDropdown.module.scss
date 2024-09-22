@@ -25,6 +25,17 @@
 			box-shadow: inset 0 0 0 2px var(--input-border-color);
 		}
 	}
+	.loading {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		svg {
+			height: 25px;
+		}
+	}
 
 	.custom_arrow {
 		position: absolute;
