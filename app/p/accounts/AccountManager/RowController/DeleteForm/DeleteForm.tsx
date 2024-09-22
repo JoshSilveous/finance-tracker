@@ -3,6 +3,7 @@ import s from './DeleteForm.module.scss'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { fetchData } from '../../func'
+import { JButton } from '@/components/JForm'
 
 interface DeleteFormProps {
 	account_name: string
@@ -14,28 +15,37 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 	const [deleteMethod, setDeleteMethod] = useState<DeleteMethods>()
 	const [otherAccounts, setOtherAccounts] = useState<{ name: string; id: string }[]>()
 	const [accountsAreLoaded, setAccountsAreLoaded] = useState(false)
-
-	async function fetchAccounts() {
-		const data = await fetchData()
-		console.log('loaded:', data)
-		setOtherAccounts(
-			data
-				.filter((thisData) => thisData.id !== account_id)
-				.map((item) => ({ name: item.name, id: item.id }))
-		)
-		setAccountsAreLoaded(true)
-	}
+	const [readyToConfirm, setReadyToConfirm] = useState(false)
+	const [accountToChangeTo, setAccountToChangeTo] = useState<string>()
 
 	function handleRadioChange(e: ChangeEvent<HTMLInputElement>) {
 		const selectedMethod = e.target.id as DeleteMethods
 		setDeleteMethod(selectedMethod)
-		if (selectedMethod === 'replace' && !accountsAreLoaded) {
-			console.log('loading accounts')
-			fetchAccounts()
+		setReadyToConfirm(true)
+		setAccountToChangeTo(undefined)
+		if (selectedMethod === 'replace') {
+			setReadyToConfirm(false)
+			setAccountToChangeTo(undefined)
+			if (!accountsAreLoaded) {
+				fetchData().then((data) => {
+					setOtherAccounts(
+						data
+							.filter((thisData) => thisData.id !== account_id)
+							.map((item) => ({ name: item.name, id: item.id }))
+					)
+					setAccountsAreLoaded(true)
+				})
+			}
 		}
 	}
 	const handleDropdownChange: JDropdownTypes.ChangeEventHandler = (e) => {
-		console.log('deleteform level', e.target.value)
+		if (e.target.value === '') {
+			setReadyToConfirm(false)
+			setAccountToChangeTo(undefined)
+		} else {
+			setReadyToConfirm(true)
+			setAccountToChangeTo(e.target.value)
+		}
 	}
 	console.log('accountsAreLoaded', accountsAreLoaded, 'otherAccounts', otherAccounts)
 	return (
@@ -74,6 +84,14 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 					/>
 				</div>
 			)}
+			<JButton
+				jstyle='primary'
+				className={s.confirm_button}
+				disabled={!readyToConfirm}
+				onClick={() => console.log('confirmed', accountToChangeTo)}
+			>
+				Confirm
+			</JButton>
 		</div>
 	)
 }
