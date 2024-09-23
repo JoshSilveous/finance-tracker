@@ -196,10 +196,8 @@ export function RowController({
 				account_id={account_id}
 				account_name={account_name}
 				afterDelete={() => {
-					loadInitData()
-				}}
-				forceClose={() => {
 					myPopup.close()
+					loadInitData()
 				}}
 			/>
 		)

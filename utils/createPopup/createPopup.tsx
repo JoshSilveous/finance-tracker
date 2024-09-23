@@ -42,6 +42,7 @@ export function createPopup(content: JSX.Element, handleClose?: () => void) {
 			)
 		},
 		close() {
+			console.log('closing', !!popupDomLocation, popupDomLocation)
 			popupDomLocation.render(<></>)
 			popupDomLocation.unmount()
 			popupContainer.remove()

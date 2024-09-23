@@ -17,18 +17,13 @@ interface DeleteFormProps {
 	account_name: string
 	account_id: string
 	afterDelete: () => void
-	forceClose: () => void
 }
 type DeleteMethods = 'delete' | 'set_null' | 'replace'
-export function DeleteForm({
-	account_name,
-	account_id,
-	afterDelete,
-	forceClose,
-}: DeleteFormProps) {
+export function DeleteForm({ account_name, account_id, afterDelete }: DeleteFormProps) {
 	const [deleteMethod, setDeleteMethod] = useState<DeleteMethods>()
 	const [otherAccounts, setOtherAccounts] = useState<{ name: string; id: string }[]>()
 	const [readyToConfirm, setReadyToConfirm] = useState(false)
+	const [isProcessing, setIsProcessing] = useState(false)
 	const [accountToChangeTo, setAccountToChangeTo] = useState<string>()
 	const [associatedTransactionCount, setAssociatedTransactionCount] = useState<number>()
 
@@ -64,14 +59,13 @@ export function DeleteForm({
 		)
 	} else if (associatedTransactionCount === 0) {
 		const handleConfirm = () => {
+			setIsProcessing(true)
 			deleteAccountAndTransactions(account_id)
 				.then(() => {
-					forceClose()
 					afterDelete()
 				})
 				.catch((e) => {
 					if (isStandardError(e)) {
-						forceClose()
 						afterDelete()
 						createErrorPopup(e.message)
 					} else {
@@ -92,6 +86,7 @@ export function DeleteForm({
 						jstyle='primary'
 						className={s.confirm_button}
 						onClick={handleConfirm}
+						loading={isProcessing}
 					>
 						Confirm
 					</JButton>
@@ -175,7 +170,11 @@ export function DeleteForm({
 						>
 							Go Back
 						</JButton>
-						<JButton onClick={handleConfirm} jstyle='primary'>
+						<JButton
+							onClick={handleConfirm}
+							jstyle='primary'
+							loading={isProcessing}
+						>
 							Confirm
 						</JButton>
 					</div>
@@ -184,16 +183,17 @@ export function DeleteForm({
 			myPopup.trigger()
 
 			function handleConfirm() {
+				setIsProcessing(true)
 				switch (deleteMethod) {
 					case 'delete':
 						deleteAccountAndTransactions(account_id)
 							.then(() => {
-								forceClose()
+								myPopup.close()
 								afterDelete()
 							})
 							.catch((e) => {
 								if (isStandardError(e)) {
-									forceClose()
+									myPopup.close()
 									afterDelete()
 									createErrorPopup(e.message)
 								} else {
@@ -204,12 +204,12 @@ export function DeleteForm({
 					case 'set_null':
 						deleteAccountAndSetNull(account_id)
 							.then(() => {
-								forceClose()
+								myPopup.close()
 								afterDelete()
 							})
 							.catch((e) => {
 								if (isStandardError(e)) {
-									forceClose()
+									myPopup.close()
 									afterDelete()
 									createErrorPopup(e.message)
 								} else {
@@ -220,12 +220,12 @@ export function DeleteForm({
 					case 'replace':
 						deleteAccountAndReplace(account_id, accountToChangeTo!)
 							.then(() => {
-								forceClose()
+								myPopup.close()
 								afterDelete()
 							})
 							.catch((e) => {
 								if (isStandardError(e)) {
-									forceClose()
+									myPopup.close()
 									afterDelete()
 									createErrorPopup(e.message)
 								} else {
@@ -234,9 +234,6 @@ export function DeleteForm({
 							})
 						break
 				}
-				myPopup.close()
-				forceClose()
-				afterDelete()
 			}
 		}
 		return (
