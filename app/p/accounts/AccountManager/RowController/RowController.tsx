@@ -210,7 +210,9 @@ export function RowController({
 				account_id !== defaultSortOrder![sortIndex] ? s.changed : ''
 			}`}
 			ref={(elem) => {
-				gridRowRefs.current[sortIndex] = elem as HTMLDivElement
+				if (elem !== null) {
+					gridRowRefs.current[sortIndex] = elem as HTMLDivElement
+				}
 			}}
 		>
 			<button

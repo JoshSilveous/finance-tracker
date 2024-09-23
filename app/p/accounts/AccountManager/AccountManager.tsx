@@ -63,6 +63,7 @@ export function AccountManager() {
 
 	async function loadInitData() {
 		setIsLoading(true)
+		gridRowRefs.current = []
 		try {
 			const columnWidths = await fetchPreferredColumnWidths()
 			setDefaultColumnWidths([
