@@ -14,6 +14,7 @@ interface RowControllerProps {
 	defaultSortOrder: string[] | null
 	gridRowRefs: MutableRefObject<HTMLDivElement[]>
 	setCurrentSortOrder: Dispatch<SetStateAction<string[] | null>>
+	loadInitData: () => Promise<void>
 }
 export function RowController({
 	account_id,
@@ -24,6 +25,7 @@ export function RowController({
 	defaultSortOrder,
 	gridRowRefs,
 	setCurrentSortOrder,
+	loadInitData,
 }: RowControllerProps) {
 	function handleReorderMouseDown(e: React.MouseEvent<HTMLInputElement>) {
 		document.body.style.cursor = 'grabbing'
@@ -194,7 +196,7 @@ export function RowController({
 				account_id={account_id}
 				account_name={account_name}
 				afterDelete={() => {
-					console.log('deleted!')
+					loadInitData()
 				}}
 				forceClose={() => {
 					myPopup.close()

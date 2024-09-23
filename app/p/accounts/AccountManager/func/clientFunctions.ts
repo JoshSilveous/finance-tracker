@@ -121,3 +121,58 @@ export async function getAssociatedTransactionCount(account_id: Account.ID) {
 	}
 	return count as number
 }
+
+export async function deleteAccountAndTransactions(account_id: Account.ID) {
+	console.log('deleting account', account_id)
+
+	const transactionsUpdate = await supabase
+		.from('transactions')
+		.delete()
+		.eq('account_id', account_id)
+
+	if (transactionsUpdate.error) {
+		throw new Error(transactionsUpdate.error.message)
+	} else {
+		console.log('Updated rows:', transactionsUpdate.data)
+	}
+
+	const accountDeleteRes = await supabase.from('accounts').delete().eq('id', account_id)
+	if (accountDeleteRes.error) {
+		throw new Error(accountDeleteRes.error.message)
+	} else {
+		console.log('Deleted Account:', account_id)
+	}
+}
+export async function deleteAccountAndSetNull(account_id: Account.ID) {
+	// by default, transactions account_id are set null when associated account is
+	const res = await supabase.from('accounts').delete().eq('id', account_id)
+
+	if (res.error) {
+		throw new Error(res.error.message)
+	} else {
+		console.log('Deleted Account:', account_id)
+	}
+}
+export async function deleteAccountAndReplace(
+	account_id: Account.ID,
+	new_account_id: Account.ID
+) {
+	const transactionsUpdate = await supabase
+		.from('transactions')
+		.update({ account_id: new_account_id })
+		.eq('account_id', account_id)
+
+	if (transactionsUpdate.error) {
+		throw new Error(transactionsUpdate.error.message)
+	} else {
+		console.log('Updated rows:', transactionsUpdate.data)
+	}
+
+	const accountDelete = await supabase.from('accounts').delete().eq('id', account_id)
+
+	if (accountDelete.error) {
+		throw new Error(accountDelete.error.message)
+	} else {
+		console.log('Deleted Account:', account_id)
+	}
+}

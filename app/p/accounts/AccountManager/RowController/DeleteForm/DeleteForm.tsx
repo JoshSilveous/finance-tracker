@@ -2,7 +2,13 @@ import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import s from './DeleteForm.module.scss'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { fetchData, getAssociatedTransactionCount } from '../../func'
+import {
+	deleteAccountAndTransactions,
+	deleteAccountAndReplace,
+	deleteAccountAndSetNull,
+	fetchData,
+	getAssociatedTransactionCount,
+} from '../../func'
 import { JButton } from '@/components/JForm'
 import { addCommas, createErrorPopup, createPopup, isStandardError } from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
@@ -31,7 +37,7 @@ export function DeleteForm({
 			.then((values) => {
 				const count = values[0]
 				const accounts = values[1]
-				setAssociatedTransactionCount(count)
+				setAssociatedTransactionCount(421)
 				setOtherAccounts(
 					accounts
 						.filter((account) => account.id !== account_id)
@@ -58,8 +64,20 @@ export function DeleteForm({
 		)
 	} else if (associatedTransactionCount === 0) {
 		const handleConfirm = () => {
-			console.log('deleting account', account_name, '- no transactions')
-			forceClose()
+			deleteAccountAndTransactions(account_id)
+				.then(() => {
+					forceClose()
+					afterDelete()
+				})
+				.catch((e) => {
+					if (isStandardError(e)) {
+						forceClose()
+						afterDelete()
+						createErrorPopup(e.message)
+					} else {
+						console.error(e)
+					}
+				})
 		}
 		return (
 			<div className={s.main}>
@@ -168,30 +186,57 @@ export function DeleteForm({
 			function handleConfirm() {
 				switch (deleteMethod) {
 					case 'delete':
-						console.log(
-							'deleting',
-							account_name,
-							'and deleting associated transactions'
-						)
+						deleteAccountAndTransactions(account_id)
+							.then(() => {
+								forceClose()
+								afterDelete()
+							})
+							.catch((e) => {
+								if (isStandardError(e)) {
+									forceClose()
+									afterDelete()
+									createErrorPopup(e.message)
+								} else {
+									console.error(e)
+								}
+							})
 						break
 					case 'set_null':
-						console.log(
-							'deleting',
-							account_name,
-							'and setting associated transactions to NULL'
-						)
+						deleteAccountAndSetNull(account_id)
+							.then(() => {
+								forceClose()
+								afterDelete()
+							})
+							.catch((e) => {
+								if (isStandardError(e)) {
+									forceClose()
+									afterDelete()
+									createErrorPopup(e.message)
+								} else {
+									console.error(e)
+								}
+							})
 						break
 					case 'replace':
-						console.log(
-							'deleting',
-							account_name,
-							'and setting associated transactions to',
-							newAccountName!
-						)
+						deleteAccountAndReplace(account_id, accountToChangeTo!)
+							.then(() => {
+								forceClose()
+								afterDelete()
+							})
+							.catch((e) => {
+								if (isStandardError(e)) {
+									forceClose()
+									afterDelete()
+									createErrorPopup(e.message)
+								} else {
+									console.error(e)
+								}
+							})
 						break
 				}
 				myPopup.close()
 				forceClose()
+				afterDelete()
 			}
 		}
 		return (

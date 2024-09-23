@@ -251,6 +251,7 @@ export function AccountManager() {
 							defaultSortOrder={defaultSortOrder}
 							gridRowRefs={gridRowRefs}
 							setCurrentSortOrder={setCurrentSortOrder}
+							loadInitData={loadInitData}
 						/>
 					</div>,
 					<div key={`2-${thisData.id}`} className={s.cell_container}>
@@ -308,9 +309,15 @@ export function AccountManager() {
 	return (
 		<div className={s.main}>
 			<h2>Account Manager</h2>
-			<div className={s.jgrid_container}>
-				{isLoading ? <LoadingAnim className={s.loading_anim} /> : grid}
-			</div>
+
+			{isLoading ? (
+				<div className={s.loading_container}>
+					<LoadingAnim />
+				</div>
+			) : (
+				<div className={s.jgrid_container}>{grid}</div>
+			)}
+
 			<div className={s.buttons_container}>
 				<JButton
 					jstyle='primary'
