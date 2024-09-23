@@ -247,6 +247,7 @@ export function AccountManager() {
 							account_id={sortId}
 							account_name={thisData.name}
 							deleteDisabled={saveOptionIsAvailable}
+							sortDisabled={data.length <= 1}
 							sortIndex={sortIndex}
 							currentSortOrder={currentSortOrder}
 							defaultSortOrder={defaultSortOrder}

@@ -9,6 +9,7 @@ interface RowControllerProps {
 	account_id: string
 	account_name: string
 	deleteDisabled: boolean
+	sortDisabled: boolean
 	sortIndex: number
 	currentSortOrder: string[]
 	defaultSortOrder: string[] | null
@@ -20,6 +21,7 @@ export function RowController({
 	account_id,
 	account_name,
 	deleteDisabled,
+	sortDisabled,
 	sortIndex,
 	currentSortOrder,
 	defaultSortOrder,
@@ -223,9 +225,11 @@ export function RowController({
 			>
 				<DeleteIcon />
 			</button>
-			<div className={s.reorder_grabber} onMouseDown={handleReorderMouseDown}>
-				<ReorderIcon />
-			</div>
+			{!sortDisabled && (
+				<div className={s.reorder_grabber} onMouseDown={handleReorderMouseDown}>
+					<ReorderIcon />
+				</div>
+			)}
 		</div>
 	)
 }
