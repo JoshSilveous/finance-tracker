@@ -108,5 +108,16 @@ export async function getAccountsCount() {
 	if (error) {
 		throw new Error(error.message)
 	}
-	return count
+	return count as number
+}
+
+export async function getAssociatedTransactionCount(account_id: Account.ID) {
+	const { count, error } = await supabase
+		.from('transactions')
+		.select('*', { count: 'exact', head: true })
+		.eq('account_id', account_id)
+	if (error) {
+		throw new Error(error.message)
+	}
+	return count as number
 }

@@ -181,13 +181,15 @@ export function RowController({
 
 	async function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
 		;(e.target as HTMLButtonElement).blur()
-		console.log('delete!', account_id)
 		const myPopup = createPopup(
 			<DeleteForm
 				account_id={account_id}
 				account_name={account_name}
 				afterDelete={() => {
 					console.log('deleted!')
+				}}
+				forceClose={() => {
+					myPopup.close()
 				}}
 			/>
 		)

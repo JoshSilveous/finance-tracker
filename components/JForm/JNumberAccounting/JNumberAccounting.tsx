@@ -7,6 +7,7 @@ import {
 	useRef,
 	useState,
 } from 'react'
+import { addCommas } from '@/utils'
 import s from './JNumberAccounting.module.scss'
 
 interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {}
@@ -76,12 +77,6 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 		if (props.onChange) {
 			props.onChange(e)
 		}
-	}
-
-	function addCommas(numberString: string) {
-		let [wholePart, decimalPart] = numberString.split('.')
-		wholePart = wholePart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-		return decimalPart ? `${wholePart}.${decimalPart}` : wholePart
 	}
 
 	const showFormatted = !(isHovering || isFocused)

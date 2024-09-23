@@ -2,22 +2,44 @@ import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import s from './DeleteForm.module.scss'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { fetchData } from '../../func'
+import { fetchData, getAssociatedTransactionCount } from '../../func'
 import { JButton } from '@/components/JForm'
-import { createPopup } from '@/utils'
+import { addCommas, createErrorPopup, createPopup, isStandardError } from '@/utils'
+import { default as LoadingIcon } from '@/public/loading.svg'
 
 interface DeleteFormProps {
 	account_name: string
 	account_id: string
 	afterDelete: () => void
+	forceClose: () => void
 }
 type DeleteMethods = 'delete' | 'set_null' | 'replace'
-export function DeleteForm({ account_name, account_id, afterDelete }: DeleteFormProps) {
+export function DeleteForm({
+	account_name,
+	account_id,
+	afterDelete,
+	forceClose,
+}: DeleteFormProps) {
 	const [deleteMethod, setDeleteMethod] = useState<DeleteMethods>()
 	const [otherAccounts, setOtherAccounts] = useState<{ name: string; id: string }[]>()
 	const [accountsAreLoaded, setAccountsAreLoaded] = useState(false)
 	const [readyToConfirm, setReadyToConfirm] = useState(false)
 	const [accountToChangeTo, setAccountToChangeTo] = useState<string>()
+	const [associatedTransactionCount, setAssociatedTransactionCount] = useState<number>()
+
+	useEffect(() => {
+		try {
+			getAssociatedTransactionCount(account_id).then((count) => {
+				setAssociatedTransactionCount(count)
+			})
+		} catch (e) {
+			if (isStandardError(e)) {
+				createErrorPopup(e.message)
+			} else {
+				console.error(e)
+			}
+		}
+	}, [])
 
 	function handleRadioChange(e: ChangeEvent<HTMLInputElement>) {
 		const selectedMethod = e.target.id as DeleteMethods
@@ -55,6 +77,10 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 		}
 
 		let confirmMessage = <></>
+		let newAccountName: string | undefined = undefined
+		if (deleteMethod === 'replace') {
+			newAccountName = otherAccounts!.find((act) => act.id === accountToChangeTo)!.name
+		}
 		switch (deleteMethod) {
 			case 'delete':
 				confirmMessage = (
@@ -73,29 +99,80 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 				)
 				break
 			case 'replace':
-				const newAccountName = otherAccounts!.find(
-					(act) => act.id === accountToChangeTo
-				)!.name
-				console.log(newAccountName)
 				confirmMessage = (
 					<p>
 						Are you sure you want to delete <strong>{account_name}</strong> and
 						set the account attribute of associated transactions to{' '}
-						<strong>{newAccountName}</strong>?
+						<strong>{newAccountName!}</strong>?
 					</p>
 				)
 				break
 		}
 
-		const myPopup = createPopup(<div className={s.confirm_popup}>{confirmMessage}</div>)
+		const myPopup = createPopup(
+			<div className={s.confirm_popup}>
+				{confirmMessage}
+				<div className={s.warning}>THIS CANNOT BE UNDONE</div>
+				<div className={s.button_container}>
+					<JButton
+						onClick={() => {
+							myPopup.close()
+						}}
+						jstyle='secondary'
+					>
+						Go Back
+					</JButton>
+					<JButton onClick={handleConfirm} jstyle='primary'>
+						Confirm
+					</JButton>
+				</div>
+			</div>
+		)
 		myPopup.trigger()
+
+		function handleConfirm() {
+			switch (deleteMethod) {
+				case 'delete':
+					console.log(
+						'deleting',
+						account_name,
+						'and deleting associated transactions'
+					)
+					break
+				case 'set_null':
+					console.log(
+						'deleting',
+						account_name,
+						'and setting associated transactions to NULL'
+					)
+					break
+				case 'replace':
+					console.log(
+						'deleting',
+						account_name,
+						'and setting associated transactions to',
+						newAccountName!
+					)
+					break
+			}
+			myPopup.close()
+			forceClose()
+		}
 	}
 	return (
 		<div className={s.main}>
 			<h1>Delete "{account_name}"</h1>
 			<p>
-				There are x transactions associated with this account. How would you like to
-				handle those transactions?
+				There are{' '}
+				<div className={s.count_container}>
+					{associatedTransactionCount === undefined ? (
+						<LoadingIcon />
+					) : (
+						<strong>{addCommas(`${associatedTransactionCount}`)}</strong>
+					)}
+				</div>{' '}
+				transactions associated with this account. How would you like to handle those
+				transactions?
 			</p>
 			<div className={s.radio_options}>
 				<JRadio id='delete' name='handle_delete' onChange={handleRadioChange}>
