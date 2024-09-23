@@ -23,7 +23,6 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 	const [deleteMethod, setDeleteMethod] = useState<DeleteMethods>()
 	const [otherAccounts, setOtherAccounts] = useState<{ name: string; id: string }[]>()
 	const [readyToConfirm, setReadyToConfirm] = useState(false)
-	const [isProcessing, setIsProcessing] = useState(false)
 	const [accountToChangeTo, setAccountToChangeTo] = useState<string>()
 	const [associatedTransactionCount, setAssociatedTransactionCount] = useState<number>()
 
@@ -32,7 +31,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 			.then((values) => {
 				const count = values[0]
 				const accounts = values[1]
-				setAssociatedTransactionCount(421)
+				setAssociatedTransactionCount(count)
 				setOtherAccounts(
 					accounts
 						.filter((account) => account.id !== account_id)
@@ -59,7 +58,6 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 		)
 	} else if (associatedTransactionCount === 0) {
 		const handleConfirm = () => {
-			setIsProcessing(true)
 			deleteAccountAndTransactions(account_id)
 				.then(() => {
 					afterDelete()
@@ -82,14 +80,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 						account. Are you sure you want to delete "{account_name}"?
 					</p>
 					<div className={s.warning}>THIS CANNOT BE UNDONE</div>
-					<JButton
-						jstyle='primary'
-						className={s.confirm_button}
-						onClick={handleConfirm}
-						loading={isProcessing}
-					>
-						Confirm
-					</JButton>
+					<ConfirmButton onClick={handleConfirm} />
 				</div>
 			</div>
 		)
@@ -170,20 +161,13 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 						>
 							Go Back
 						</JButton>
-						<JButton
-							onClick={handleConfirm}
-							jstyle='primary'
-							loading={isProcessing}
-						>
-							Confirm
-						</JButton>
+						<ConfirmButton onClick={handleConfirm} />
 					</div>
 				</div>
 			)
 			myPopup.trigger()
 
 			function handleConfirm() {
-				setIsProcessing(true)
 				switch (deleteMethod) {
 					case 'delete':
 						deleteAccountAndTransactions(account_id)
@@ -314,4 +298,19 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 			</div>
 		)
 	}
+}
+function ConfirmButton({ onClick }: { onClick: () => void }) {
+	const [isProcessing, setIsProcessing] = useState(false)
+	return (
+		<JButton
+			onClick={() => {
+				setIsProcessing(true)
+				onClick()
+			}}
+			jstyle='primary'
+			loading={isProcessing}
+		>
+			Confirm
+		</JButton>
+	)
 }
