@@ -66,7 +66,7 @@ export function RowController({
 		let firstRun = true
 		function putMarginGapOnRow(rowIndex: number | 'none') {
 			if (rowIndex === 'none') {
-				rowsWithoutCurrentRow.forEach((item) => {
+				gridRowRefs.current!.forEach((item) => {
 					item.parentElement!.parentElement!.parentElement!.classList.remove(
 						s.margin_transition
 					)
@@ -174,9 +174,17 @@ export function RowController({
 			document.body.style.cursor = ''
 			window.removeEventListener('mousemove', handleReorderMouseMove)
 			window.removeEventListener('mouseup', handleReorderMouseUp)
+			window.removeEventListener('contextmenu', handleRightClick)
 		}
 		window.addEventListener('mousemove', handleReorderMouseMove)
 		window.addEventListener('mouseup', handleReorderMouseUp)
+		window.addEventListener('contextmenu', handleRightClick)
+		function handleRightClick(e: MouseEvent) {
+			e.preventDefault()
+			window.removeEventListener('mousemove', handleReorderMouseMove)
+			window.removeEventListener('mouseup', handleReorderMouseUp)
+			window.removeEventListener('contextmenu', handleRightClick)
+		}
 	}
 
 	async function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {

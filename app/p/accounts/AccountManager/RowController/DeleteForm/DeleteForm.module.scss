@@ -1,44 +1,59 @@
 .main {
 	width: 300px;
-	height: 435px;
-	display: flex;
-	flex-direction: column;
 
-	.radio_options {
+	.content {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
-	}
-	.replace_dropdown {
-		margin: 20px 0;
-		p {
-			margin: 5px 0;
-		}
-	}
+		max-height: 80vh;
+		&.loading {
+			height: 220px;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 
-	.confirm_button {
-		margin-top: auto;
-	}
-	.count_container {
-		display: inline-block;
-		min-width: 15px;
-		text-align: center;
-		svg {
-			height: 14px;
-			width: 14px;
+			svg {
+				height: 50px;
+				width: 50px;
+			}
+		}
+		&.zero_transactions {
+			height: 220px;
+		}
+		&.has_transactions {
+			height: 356px;
+			&.no_other_accounts {
+				height: 200px;
+			}
+			.radio_options {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			.replace_dropdown {
+				margin: 20px 0;
+				p {
+					margin: 5px 0;
+				}
+			}
+		}
+		.confirm_button {
+			margin-top: auto;
 		}
 	}
 }
 
+.warning {
+	color: var(--font-color-error);
+	text-decoration: underline;
+	font-size: 20px;
+	font-weight: 700;
+	text-align: center;
+	margin: 30px 0 50px 0;
+}
+
 .confirm_popup {
-	.warning {
-		color: var(--font-color-error);
-		text-decoration: underline;
-		font-size: 20px;
-		font-weight: 700;
-		text-align: center;
-		margin: 30px 0 50px 0;
-	}
 	.name {
 		font-weight: 700;
 	}
