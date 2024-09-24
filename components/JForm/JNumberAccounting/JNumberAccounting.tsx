@@ -9,13 +9,9 @@ import {
 } from 'react'
 import { addCommas } from '@/utils'
 import s from './JNumberAccounting.module.scss'
+import { evaluate } from 'mathjs'
 
-interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {
-	/**
-	 * Maximum number of digits to the LEFT of the decimal
-	 */
-	maxDigits?: number
-}
+interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {}
 
 export function JNumberAccounting(props: JNumberAccountingProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -24,7 +20,6 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 	const [isFocused, setIsFocused] = useState(false)
 	const [isHovering, setIsHovering] = useState(false)
 	const [prevVal, setPrevVal] = useState(props.value ? (props.value as string) : '')
-	const { maxDigits, ...otherProps } = props
 	useEffect(() => {
 		updateDisplayText()
 	}, [])
@@ -65,6 +60,8 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 	}
 	function handleBlur(e: FocusEvent<HTMLInputElement>) {
 		setIsFocused(false)
+		console.log('input:', e.target.value, 'output:', evaluate(e.target.value))
+		e.target.value = parseFloat(evaluate(e.target.value)).toFixed(2)
 		updateDisplayText()
 		if (props.onBlur) {
 			props.onBlur(e)
@@ -79,25 +76,8 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 		}
 	}
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
-		// make sure input doesn't exceed maxDigits
-		const splitOnDecimal = e.target.value.split('.')
-		if (maxDigits !== undefined) {
-			splitOnDecimal[0] = splitOnDecimal[0].replace('-', '')
-			if (splitOnDecimal[0].length > maxDigits) {
-				let newVal = splitOnDecimal[0].slice(0, maxDigits)
-				if (splitOnDecimal[1]) {
-					newVal += '.' + splitOnDecimal[1]
-				}
-				e.target.value = newVal
-			}
-		}
-
-		// make sure decimal input isn't too long
-		if (splitOnDecimal[1] !== undefined && splitOnDecimal[1].length > 2) {
-			e.target.value =
-				splitOnDecimal[0] + '.' + splitOnDecimal[1][0] + splitOnDecimal[1][2]
-		}
-
+		const sanitizedInput = e.target.value.replace(/[^0-9+\-./*()]/g, '')
+		e.target.value = sanitizedInput
 		if (props.onChange) {
 			props.onChange(e)
 		}
@@ -113,10 +93,9 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 			</div>
 			<div className={s.formatted} hidden={!showFormatted} ref={displayRef} />
 			<input
-				{...otherProps}
+				{...props}
 				ref={inputRef}
-				type='number'
-				step={0.01}
+				type='text'
 				onChange={handleChange}
 				onBlur={handleBlur}
 				onFocus={handleFocus}

@@ -257,7 +257,7 @@ export function AccountManager() {
 					thisPendingChangeIndex === -1
 						? null
 						: pendingChanges[thisPendingChangeIndex]
-
+				console.log('rerendering', sortIndex, thisPendingChange)
 				return [
 					<div key={`1-${thisData.id}`} className={s.cell_container}>
 						<RowController
@@ -309,8 +309,11 @@ export function AccountManager() {
 							data-id={thisData.id}
 							data-key='starting_amount'
 							data-default={thisData.starting_amount.toFixed(2)}
-							defaultValue={thisData.starting_amount}
-							maxDigits={8}
+							value={
+								thisPendingChange?.new.starting_amount !== undefined
+									? thisPendingChange.new.starting_amount
+									: thisData.starting_amount
+							}
 						/>
 					</div>,
 				]
