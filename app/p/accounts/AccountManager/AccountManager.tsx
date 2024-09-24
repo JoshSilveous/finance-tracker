@@ -270,8 +270,9 @@ export function AccountManager() {
 							data-id={thisData.id}
 							data-key='name'
 							data-default={thisData.name}
+							maxLength={24}
 							value={
-								thisPendingChange?.new.name
+								thisPendingChange?.new.name !== undefined
 									? thisPendingChange.new.name
 									: thisData.name
 							}
