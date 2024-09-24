@@ -79,8 +79,9 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 		}
 	}
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
+		// make sure input doesn't exceed maxDigits
+		const splitOnDecimal = e.target.value.split('.')
 		if (maxDigits !== undefined) {
-			const splitOnDecimal = e.target.value.split('.')
 			splitOnDecimal[0] = splitOnDecimal[0].replace('-', '')
 			if (splitOnDecimal[0].length > maxDigits) {
 				let newVal = splitOnDecimal[0].slice(0, maxDigits)
@@ -89,6 +90,12 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 				}
 				e.target.value = newVal
 			}
+		}
+
+		// make sure decimal input isn't too long
+		if (splitOnDecimal[1] !== undefined && splitOnDecimal[1].length > 2) {
+			e.target.value =
+				splitOnDecimal[0] + '.' + splitOnDecimal[1][0] + splitOnDecimal[1][2]
 		}
 
 		if (props.onChange) {
