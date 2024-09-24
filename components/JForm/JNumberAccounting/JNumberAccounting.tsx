@@ -10,7 +10,12 @@ import {
 import { addCommas } from '@/utils'
 import s from './JNumberAccounting.module.scss'
 
-interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {}
+interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {
+	/**
+	 * Maximum number of digits to the LEFT of the decimal
+	 */
+	maxDigits?: number
+}
 
 export function JNumberAccounting(props: JNumberAccountingProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -19,7 +24,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 	const [isFocused, setIsFocused] = useState(false)
 	const [isHovering, setIsHovering] = useState(false)
 	const [prevVal, setPrevVal] = useState(props.value ? (props.value as string) : '')
-
+	const { maxDigits, ...otherProps } = props
 	useEffect(() => {
 		updateDisplayText()
 	}, [])
@@ -74,6 +79,18 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 		}
 	}
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
+		if (maxDigits !== undefined) {
+			const splitOnDecimal = e.target.value.split('.')
+			splitOnDecimal[0] = splitOnDecimal[0].replace('-', '')
+			if (splitOnDecimal[0].length > maxDigits) {
+				let newVal = splitOnDecimal[0].slice(0, maxDigits)
+				if (splitOnDecimal[1]) {
+					newVal += '.' + splitOnDecimal[1]
+				}
+				e.target.value = newVal
+			}
+		}
+
 		if (props.onChange) {
 			props.onChange(e)
 		}
@@ -89,7 +106,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 			</div>
 			<div className={s.formatted} hidden={!showFormatted} ref={displayRef} />
 			<input
-				{...props}
+				{...otherProps}
 				ref={inputRef}
 				type='number'
 				step={0.01}
