@@ -126,23 +126,40 @@ export function AccountManager() {
 	async function handleSaveChanges() {
 		if (saveOptionIsAvailable) {
 			setIsSavingChanges(true)
-			try {
-				await saveChanges(
-					data,
-					currentSortOrder,
-					defaultSortOrder,
-					pendingChangesRef
-				)
-			} catch (e) {
-				if (isStandardError(e)) {
-					createErrorPopup(e.message)
-				} else {
-					console.error(e)
+			// check for empty names
+			let isErrors = false
+			pendingChangesRef.current.forEach((change) => {
+				if (change.new.name !== undefined && change.new.name === '') {
+					isErrors = true
+					const errorNode = document.querySelector(
+						`.${s.account_name_input}[data-id="${change.account_id}"]`
+					)
+					errorNode?.classList.add(s.error)
+					const thisTimeout = setTimeout(() => {
+						errorNode?.classList.remove(s.error)
+						clearTimeout(thisTimeout)
+					}, 1000)
 				}
+			})
+			if (!isErrors) {
+				try {
+					await saveChanges(
+						data,
+						currentSortOrder,
+						defaultSortOrder,
+						pendingChangesRef
+					)
+				} catch (e) {
+					if (isStandardError(e)) {
+						createErrorPopup(e.message)
+					} else {
+						console.error(e)
+					}
+				}
+				loadInitData()
+				setPendingChanges([])
 			}
 			setIsSavingChanges(false)
-			loadInitData()
-			setPendingChanges([])
 		}
 	}
 	function discardChanges() {
