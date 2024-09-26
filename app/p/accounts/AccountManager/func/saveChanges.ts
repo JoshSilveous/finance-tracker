@@ -1,6 +1,7 @@
 import { MutableRefObject } from 'react'
 import { Change } from '../AccountManager'
 import { upsertData } from './clientFunctions'
+import { evaluate } from 'mathjs'
 
 export async function saveChanges(
 	data: Account.Full[] | null,
@@ -22,7 +23,8 @@ export async function saveChanges(
 			starting_amount:
 				change.new.starting_amount === undefined
 					? thisAccount.starting_amount
-					: Math.round(parseFloat(change.new.starting_amount) * 100) / 100,
+					: Math.round(parseFloat(evaluate(change.new.starting_amount)) * 100) /
+					  100,
 		}
 	})
 
