@@ -1,8 +1,9 @@
 -   add global css variables for highlights
 -   add global css variables for box-shadow colors in JForm items
--   add error handling for AccountManager
--   add inline math to JAccountingInput using math.js
+-   **add error handling for AccountManager**
+-   Create CategoryManager
 
+-   add inline math to JAccountingInput using math.js
 -   Fix highlights for moving around items in AccountManager
 -   Figure out a refactor system for AccountManager to isolate the code into smaller files
     -   Maybe make each resorter into a component?
