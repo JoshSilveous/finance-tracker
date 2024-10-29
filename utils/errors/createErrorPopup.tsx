@@ -9,6 +9,7 @@ export function createErrorPopup(error: string) {
 				Try refreshing the page. Eventually I'll put in better error handling
 				instructions here :)
 			</p>
-		</div>
+		</div>,
+		'error'
 	).trigger()
 }

@@ -188,7 +188,8 @@ export function AccountManager() {
 					myPopup.close()
 					loadInitData()
 				}}
-			/>
+			/>,
+			'error'
 		)
 		myPopup.trigger()
 	}

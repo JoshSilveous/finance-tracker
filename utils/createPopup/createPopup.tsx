@@ -13,7 +13,11 @@ import s from './createPopup.module.scss'
  * @param handleClose A callback function that is ran when the popup is closed by the user pressing the `x` button (not when closed via `this.close()`).
  * @returns an object containing the `trigger()` and `close()` functions
  */
-export function createPopup(content: JSX.Element, handleClose?: () => void) {
+export function createPopup(
+	content: JSX.Element,
+	type: 'normal' | 'error' = 'normal',
+	handleClose?: () => void
+) {
 	const body = document.body
 	const popupContainer = document.createElement('div')
 
@@ -23,7 +27,7 @@ export function createPopup(content: JSX.Element, handleClose?: () => void) {
 	return {
 		trigger() {
 			popupDomLocation.render(
-				<div className={s.popup_background}>
+				<div className={`${s.popup_background} ${s[type]}`}>
 					<div className={s.popup_container}>
 						<div
 							className={s.popup_exit}

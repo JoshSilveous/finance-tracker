@@ -4,7 +4,6 @@
 	left: 0;
 	height: 100vh;
 	width: 100vw;
-	background-color: rgba(0, 0, 0, 0.6);
 	backdrop-filter: blur(2px);
 	z-index: 19;
 
@@ -15,7 +14,6 @@
 		transform: translate(-50%, -50%);
 		width: auto;
 		height: auto;
-		background-color: var(--bg-color-lighter-2);
 		border-radius: 20px;
 		z-index: 20;
 		color: var(--font-color);
@@ -27,6 +25,18 @@
 			position: absolute;
 			cursor: pointer;
 			user-select: none;
+		}
+	}
+	&.normal {
+		background-color: rgba(0, 0, 0, 0.6);
+		.popup_container {
+			background-color: var(--bg-color-lighter-2);
+		}
+	}
+	&.error {
+		background-color: rgba(34, 0, 0, 0.6);
+		.popup_container {
+			background-color: #5d0000;
 		}
 	}
 }
