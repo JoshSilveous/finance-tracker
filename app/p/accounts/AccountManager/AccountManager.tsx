@@ -9,7 +9,7 @@ import {
 	createPopup,
 	isStandardError,
 	createPreferencesEntry,
-	createErrorPopup,
+	promptError,
 	useBgLoad,
 	arraysAreEqual,
 } from '@/utils'
@@ -82,11 +82,14 @@ export function AccountManager() {
 						])
 					} catch (e) {
 						if (isStandardError(e)) {
-							createErrorPopup(e.message)
+							promptError(
+								e.message,
+								'Try refreshing the page to resolve this issue.'
+							)
 						}
 					}
 				} else {
-					createErrorPopup(e.message)
+					promptError(e.message, 'Try refreshing the page to resolve this issue.')
 				}
 			}
 		}
@@ -99,7 +102,7 @@ export function AccountManager() {
 			setDefaultSortOrder(sortOrder)
 		} catch (e) {
 			if (isStandardError(e)) {
-				createErrorPopup(e.message)
+				promptError(e.message, 'Try refreshing the page to resolve this issue.')
 			} else {
 				console.error(e)
 			}
@@ -151,7 +154,10 @@ export function AccountManager() {
 					)
 				} catch (e) {
 					if (isStandardError(e)) {
-						createErrorPopup(e.message)
+						promptError(
+							e.message,
+							'Try refreshing the page to resolve this issue.'
+						)
 					} else {
 						console.error(e)
 					}

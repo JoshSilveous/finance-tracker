@@ -10,7 +10,7 @@ import {
 	getAssociatedTransactionCount,
 } from '../../func'
 import { JButton } from '@/components/JForm'
-import { addCommas, createErrorPopup, createPopup, isStandardError } from '@/utils'
+import { addCommas, promptError, createPopup, isStandardError } from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
 
 interface DeleteFormProps {
@@ -40,7 +40,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 			})
 			.catch((e) => {
 				if (isStandardError(e)) {
-					createErrorPopup(e.message)
+					promptError(e.message, 'Try refreshing the page to resolve this issue.')
 				} else {
 					console.error(e)
 				}
@@ -65,7 +65,10 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 				.catch((e) => {
 					if (isStandardError(e)) {
 						afterDelete()
-						createErrorPopup(e.message)
+						promptError(
+							e.message,
+							'Try refreshing the page to resolve this issue.'
+						)
 					} else {
 						console.error(e)
 					}
@@ -179,7 +182,10 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 								if (isStandardError(e)) {
 									myPopup.close()
 									afterDelete()
-									createErrorPopup(e.message)
+									promptError(
+										e.message,
+										'Try refreshing the page to resolve this issue.'
+									)
 								} else {
 									console.error(e)
 								}
@@ -195,7 +201,10 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 								if (isStandardError(e)) {
 									myPopup.close()
 									afterDelete()
-									createErrorPopup(e.message)
+									promptError(
+										e.message,
+										'Try refreshing the page to resolve this issue.'
+									)
 								} else {
 									console.error(e)
 								}
@@ -211,7 +220,10 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 								if (isStandardError(e)) {
 									myPopup.close()
 									afterDelete()
-									createErrorPopup(e.message)
+									promptError(
+										e.message,
+										'Try refreshing the page to resolve this issue.'
+									)
 								} else {
 									console.error(e)
 								}
