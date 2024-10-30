@@ -1,18 +1,19 @@
 import { createPopup } from '../createPopup/createPopup'
 
-export function promptError(errorMsg: string, instructions: string) {
+export function promptError(
+	context: string,
+	errorMsg: string,
+	instructions: string,
+	onClose?: () => void
+) {
 	createPopup(
 		<div>
-			<h2>An unexpected error has occured.</h2>
-			<h4>Error: "{errorMsg}"</h4>
-			<p>
-				Try refreshing the page. Eventually I'll put in better error handling
-				instructions here :)
-			</p>
+			<h2>{context}</h2>
+			<h4>{errorMsg.toUpperCase()}</h4>
+			<hr />
+			<p>{instructions}</p>
 		</div>,
 		'error',
-		() => {
-			location.reload()
-		}
+		onClose
 	).trigger()
 }

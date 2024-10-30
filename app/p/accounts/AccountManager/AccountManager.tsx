@@ -83,13 +83,18 @@ export function AccountManager() {
 					} catch (e) {
 						if (isStandardError(e)) {
 							promptError(
+								'An unexpected error has occured while propegating table layout preferences in the database:',
 								e.message,
 								'Try refreshing the page to resolve this issue.'
 							)
 						}
 					}
 				} else {
-					promptError(e.message, 'Try refreshing the page to resolve this issue.')
+					promptError(
+						'An unexpected error has occured while fetching table layout preferences in the database:',
+						e.message,
+						'Try refreshing the page to resolve this issue.'
+					)
 				}
 			}
 		}
@@ -102,7 +107,11 @@ export function AccountManager() {
 			setDefaultSortOrder(sortOrder)
 		} catch (e) {
 			if (isStandardError(e)) {
-				promptError(e.message, 'Try refreshing the page to resolve this issue.')
+				promptError(
+					'An unexpected error has occured while fetching your data:',
+					e.message,
+					'Try refreshing the page to resolve this issue.'
+				)
 			} else {
 				console.error(e)
 			}
@@ -155,6 +164,7 @@ export function AccountManager() {
 				} catch (e) {
 					if (isStandardError(e)) {
 						promptError(
+							'An unexpected error has occured while saving your changes:',
 							e.message,
 							'Try refreshing the page to resolve this issue.'
 						)
@@ -194,8 +204,7 @@ export function AccountManager() {
 					myPopup.close()
 					loadInitData()
 				}}
-			/>,
-			'error'
+			/>
 		)
 		myPopup.trigger()
 	}
