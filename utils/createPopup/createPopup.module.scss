@@ -28,15 +28,15 @@
 		}
 	}
 	&.normal {
-		background-color: rgba(0, 0, 0, 0.6);
+		background-color: var(--popup-backdrop-color);
 		.popup_container {
-			background-color: var(--bg-color-lighter-2);
+			background-color: var(--popup-bg-color);
 		}
 	}
 	&.error {
-		background-color: rgba(34, 0, 0, 0.6);
+		background-color: var(--popup-error-backdrop-color);
 		.popup_container {
-			background-color: #5d0000;
+			background-color: var(--popup-error-bg-color);
 		}
 	}
 }
