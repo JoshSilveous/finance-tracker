@@ -30,6 +30,19 @@ export interface Change {
 		starting_amount?: string
 	}
 }
+interface HistoryItemReorder {
+	action: 'reorder'
+	oldIndex: number
+	newIndex: number
+}
+interface HistoryItemValueChange {
+	action: 'value_change'
+	account_id: string
+	key: string
+	oldVal: string
+	newVal: string
+}
+export type HistoryItem = HistoryItemReorder | HistoryItemValueChange
 
 export function AccountManager() {
 	const bgLoad = useBgLoad()
@@ -38,17 +51,40 @@ export function AccountManager() {
 	const [data, setData] = useState<Account.Full[] | null>(null)
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
-	const [currentSortOrder, setCurrentSortOrder] = useState<Account.ID[] | null>(null)
-	const [defaultSortOrder, setDefaultSortOrder] = useState<Account.ID[] | null>(null)
+	const [currentSortOrder, setCurrentSortOrder] = useState<Account.ID[]>([])
+	const [defaultSortOrder, setDefaultSortOrder] = useState<Account.ID[]>([])
+	const [undoHistoryStack, setUndoHistoryStack] = useState<HistoryItem[]>([])
+	const [redoHistoryStack, setRedoHistoryStack] = useState<HistoryItem[]>([])
 	const gridRowRefs = useRef<HTMLDivElement[]>([])
 
 	/**
-	 * use instead of `pendingChanges` in event listeners to ensure you're pulling the latest data
+	 * use below refs in event listeners to ensure you're pulling the latest data, as event handlers don't always get updated on re-renders
 	 */
 	const pendingChangesRef = useRef<Change[]>(pendingChanges)
+	const currentSortOrderRef = useRef<Account.ID[]>(currentSortOrder)
+	const defaultSortOrderRef = useRef<Account.ID[]>(defaultSortOrder)
+	const isLoadingRef = useRef<boolean>(isLoading)
+	const undoHistoryStackRef = useRef<HistoryItem[]>(undoHistoryStack)
+	const redoHistoryStackRef = useRef<HistoryItem[]>(redoHistoryStack)
 	useEffect(() => {
 		pendingChangesRef.current = pendingChanges
 	}, [pendingChanges])
+	useEffect(() => {
+		currentSortOrderRef.current = currentSortOrder
+	}, [currentSortOrder])
+	useEffect(() => {
+		defaultSortOrderRef.current = defaultSortOrder
+	}, [defaultSortOrder])
+	useEffect(() => {
+		isLoadingRef.current = isLoading
+	}, [isLoading])
+	useEffect(() => {
+		undoHistoryStackRef.current = undoHistoryStack
+		console.log('undoHistoryStack', undoHistoryStack)
+	}, [undoHistoryStack])
+	useEffect(() => {
+		redoHistoryStackRef.current = redoHistoryStack
+	}, [redoHistoryStack])
 
 	/**
 	 * used to enable/disable "save" buttons and functions, since there's two different types of changes to be saved
@@ -56,10 +92,7 @@ export function AccountManager() {
 	 * (data changes in `pendingChanges`, and changes to `sortOrder`)
 	 */
 	const saveOptionIsAvailable =
-		pendingChanges.length !== 0 ||
-		(currentSortOrder !== null &&
-			defaultSortOrder !== null &&
-			!arraysAreEqual(currentSortOrder, defaultSortOrder))
+		pendingChanges.length !== 0 || !arraysAreEqual(currentSortOrder, defaultSortOrder)
 
 	async function loadInitData() {
 		setIsLoading(true)
@@ -120,11 +153,96 @@ export function AccountManager() {
 	useEffect(() => {
 		loadInitData()
 
-		// CTRL+S to save
 		const handleKeyDown = async (e: KeyboardEvent) => {
-			if (e.ctrlKey && e.key === 's') {
-				e.preventDefault()
-				await handleSaveChanges()
+			if (!isLoadingRef.current) {
+				// CTRL+S to save
+				if (e.ctrlKey && e.key.toUpperCase() === 'S') {
+					e.preventDefault()
+					if (
+						pendingChangesRef.current.length !== 0 ||
+						!arraysAreEqual(
+							currentSortOrderRef.current!,
+							defaultSortOrderRef.current!
+						)
+					) {
+						await handleSaveChanges()
+					}
+					return
+				}
+
+				// CTRL+Z to undo
+				if (e.ctrlKey && !e.shiftKey && e.key.toUpperCase() === 'Z') {
+					e.preventDefault()
+					if (undoHistoryStackRef.current.length !== 0) {
+						const mostRecentAction = undoHistoryStackRef.current.at(-1)!
+						// need to update pendingChanges when ran
+
+						if (mostRecentAction.action === 'reorder') {
+							setCurrentSortOrder((prev) => {
+								const newArr = [...prev!]
+								const [item] = newArr.splice(mostRecentAction.newIndex, 1)
+								newArr.splice(mostRecentAction.oldIndex, 0, item)
+								return newArr
+							})
+						} else {
+							const node = document.querySelector(
+								`[data-id="${mostRecentAction.account_id}"][data-key="${mostRecentAction.key}"]`
+							) as HTMLInputElement
+							console.log(
+								'SETTING THIS NODE VAL TO',
+								mostRecentAction.oldVal,
+								node
+							)
+							node.value = mostRecentAction.oldVal
+							console.log('BEFORE REFOCUSING, VAL IS', node.value)
+							node.focus()
+							node.blur()
+							console.log('BEFORE WAITING, VAL IS', node.value)
+							const test = setTimeout(() => {
+								console.log('AFTER WAITING, VAL IS', node.value)
+								clearTimeout(test)
+							}, 1500)
+						}
+						setRedoHistoryStack((prev) => [...prev, mostRecentAction])
+						setUndoHistoryStack((prev) => prev.slice(0, -1))
+					}
+					return
+				}
+
+				// CTRL+SHIFT+Z to redo
+				if (e.ctrlKey && e.shiftKey && e.key.toUpperCase() === 'Z') {
+					console.log('pendingChanges:', pendingChanges)
+					e.preventDefault()
+					if (redoHistoryStackRef.current.length !== 0) {
+						const mostRecentUndoAction = redoHistoryStackRef.current.at(-1)!
+						if (mostRecentUndoAction?.action === 'reorder') {
+							setCurrentSortOrder((prev) => {
+								const newArr = [...prev!]
+								const [item] = newArr.splice(
+									mostRecentUndoAction.oldIndex,
+									1
+								)
+								newArr.splice(mostRecentUndoAction.newIndex, 0, item)
+								return newArr
+							})
+						} else {
+							const node = document.querySelector(
+								`[data-id="${mostRecentUndoAction.account_id}"][data-key="${mostRecentUndoAction.key}"]`
+							) as HTMLInputElement
+							console.log(
+								'SETTING THIS NODE VAL TO',
+								mostRecentUndoAction.newVal,
+								node
+							)
+							node.value = mostRecentUndoAction.newVal
+							node.focus()
+							node.blur()
+						}
+						setUndoHistoryStack((prev) => [...prev, mostRecentUndoAction])
+						setRedoHistoryStack((prev) => prev.slice(0, -1))
+					}
+					return
+				}
 			}
 		}
 		window.addEventListener('keydown', handleKeyDown)
@@ -208,12 +326,7 @@ export function AccountManager() {
 		)
 		myPopup.trigger()
 	}
-	if (
-		!isLoading &&
-		data !== null &&
-		currentSortOrder !== null &&
-		defaultColumnWidths !== null
-	) {
+	if (!isLoading && data !== null && defaultColumnWidths !== null) {
 		if (data.length === 0) {
 			grid = (
 				<p>
@@ -273,7 +386,6 @@ export function AccountManager() {
 					thisPendingChangeIndex === -1
 						? null
 						: pendingChanges[thisPendingChangeIndex]
-				console.log('rerendering', sortIndex, thisPendingChange)
 				return [
 					<div key={`1-${thisData.id}`} className={s.cell_container}>
 						<RowController
@@ -287,16 +399,28 @@ export function AccountManager() {
 							gridRowRefs={gridRowRefs}
 							setCurrentSortOrder={setCurrentSortOrder}
 							loadInitData={loadInitData}
+							setUndoHistoryStack={setUndoHistoryStack}
+							setRedoHistoryStack={setRedoHistoryStack}
 						/>
 					</div>,
 					<div key={`2-${thisData.id}`} className={s.cell_container}>
 						<JInput
 							onChange={(e) =>
-								handleInputChange(e, pendingChanges, setPendingChanges)
+								handleInputChange(
+									e,
+									pendingChanges,
+									setPendingChanges,
+									undoHistoryStack,
+									setUndoHistoryStack,
+									setRedoHistoryStack
+								)
 							}
 							onBlur={(e) =>
 								handleInputBlur(e, pendingChanges, setPendingChanges)
 							}
+							onFocus={(e) => {
+								e.target.dataset['value_on_focus'] = e.target.value
+							}}
 							className={`${s.account_name_input} ${
 								thisPendingChange?.new.name ? s.changed : ''
 							}`}
@@ -314,11 +438,21 @@ export function AccountManager() {
 					<div key={`3-${thisData.id}`} className={s.cell_container}>
 						<JNumberAccounting
 							onChange={(e) =>
-								handleInputChange(e, pendingChanges, setPendingChanges)
+								handleInputChange(
+									e,
+									pendingChanges,
+									setPendingChanges,
+									undoHistoryStack,
+									setUndoHistoryStack,
+									setRedoHistoryStack
+								)
 							}
 							onBlur={(e) =>
 								handleInputBlur(e, pendingChanges, setPendingChanges)
 							}
+							onFocus={(e) => {
+								e.target.dataset['value_on_focus'] = e.target.value
+							}}
 							className={`${s.starting_amount_input} ${
 								thisPendingChange?.new.starting_amount ? s.changed : ''
 							}`}

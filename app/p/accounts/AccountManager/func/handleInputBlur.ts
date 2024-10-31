@@ -10,6 +10,7 @@ export function handleInputBlur(
 	e.target.value = e.target.value.trimEnd()
 	const defaultValue = e.target.dataset['default'] as string
 	const currentValue = e.target.value
+	console.log('blurring with currentValue:', currentValue)
 	// handles edge case where the user just adds spaces to the end of the value
 	// this will remove those spaces and the Change
 	if (defaultValue === currentValue) {

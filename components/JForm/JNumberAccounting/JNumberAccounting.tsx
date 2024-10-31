@@ -60,7 +60,6 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 	}
 	function handleBlur(e: FocusEvent<HTMLInputElement>) {
 		setIsFocused(false)
-		console.log('input:', e.target.value, 'output:', evaluate(e.target.value))
 		e.target.value = parseFloat(evaluate(e.target.value)).toFixed(2)
 		updateDisplayText()
 		if (props.onBlur) {

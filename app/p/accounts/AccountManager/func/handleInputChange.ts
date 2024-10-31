@@ -1,11 +1,14 @@
 import { ChangeEvent, Dispatch, SetStateAction } from 'react'
-import { Change } from '../AccountManager'
+import { Change, HistoryItem } from '../AccountManager'
 import { removeFromArray } from '@/utils'
 
 export function handleInputChange(
 	e: ChangeEvent<HTMLInputElement>,
 	pendingChanges: Change[],
-	setPendingChanges: Dispatch<SetStateAction<Change[]>>
+	setPendingChanges: Dispatch<SetStateAction<Change[]>>,
+	undoHistoryStack: HistoryItem[],
+	setUndoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>,
+	setRedoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>
 ) {
 	// prevent leading spaces
 	if (e.target.value !== e.target.value.trimStart()) {
@@ -16,6 +19,57 @@ export function handleInputChange(
 	const key = e.target.dataset['key'] as keyof Change['new']
 	const defaultValue = e.target.dataset['default'] as string
 	const currentValue = e.target.value
+
+	// undo/redo history logic
+	setUndoHistoryStack((prev) => {
+		if (prev.length !== 0) {
+			const mostRecentAction = prev.at(-1)!
+			if (
+				mostRecentAction.action === 'value_change' &&
+				mostRecentAction.account_id === account_id &&
+				mostRecentAction.key === key
+			) {
+				const newArr = [...prev]
+				newArr[newArr.length - 1] = {
+					action: 'value_change',
+					account_id: account_id,
+					key: key,
+					oldVal: mostRecentAction.oldVal,
+					newVal: currentValue,
+				}
+				return newArr
+			} else {
+				return [
+					...prev,
+					{
+						action: 'value_change',
+						account_id: account_id,
+						key: key,
+						oldVal:
+							e.target.dataset['value_on_focus'] !== undefined
+								? e.target.dataset['value_on_focus']
+								: defaultValue,
+						newVal: currentValue,
+					},
+				]
+			}
+		} else {
+			return [
+				{
+					action: 'value_change',
+					account_id: account_id,
+					key: key,
+					oldVal:
+						e.target.dataset['value_on_focus'] !== undefined
+							? e.target.dataset['value_on_focus']
+							: defaultValue,
+					newVal: currentValue,
+				},
+			]
+		}
+	})
+	console.log('inputChange ran')
+	setRedoHistoryStack([])
 
 	const thisPendingChangeIndex = pendingChanges.findIndex(
 		(change) => change.account_id === account_id

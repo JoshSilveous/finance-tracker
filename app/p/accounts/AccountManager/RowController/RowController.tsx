@@ -4,6 +4,7 @@ import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
 import { createPopup } from '@/utils'
 import { DeleteForm } from './DeleteForm/DeleteForm'
+import { HistoryItem } from '../AccountManager'
 
 interface RowControllerProps {
 	account_id: string
@@ -12,10 +13,12 @@ interface RowControllerProps {
 	sortDisabled: boolean
 	sortIndex: number
 	currentSortOrder: string[]
-	defaultSortOrder: string[] | null
+	defaultSortOrder: string[]
 	gridRowRefs: MutableRefObject<HTMLDivElement[]>
-	setCurrentSortOrder: Dispatch<SetStateAction<string[] | null>>
+	setCurrentSortOrder: Dispatch<SetStateAction<string[]>>
 	loadInitData: () => Promise<void>
+	setUndoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>
+	setRedoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>
 }
 export function RowController({
 	account_id,
@@ -28,6 +31,8 @@ export function RowController({
 	gridRowRefs,
 	setCurrentSortOrder,
 	loadInitData,
+	setUndoHistoryStack,
+	setRedoHistoryStack,
 }: RowControllerProps) {
 	function handleReorderMouseDown(e: React.MouseEvent<HTMLInputElement>) {
 		document.body.style.cursor = 'grabbing'
@@ -167,6 +172,15 @@ export function RowController({
 			thisRowNode.style.position = ''
 
 			if (closestBreakpointIndex !== sortIndex) {
+				setUndoHistoryStack((prev) => [
+					...prev,
+					{
+						action: 'reorder',
+						oldIndex: sortIndex,
+						newIndex: closestBreakpointIndex,
+					},
+				])
+				setRedoHistoryStack([])
 				setCurrentSortOrder((prev) => {
 					const newArr = [...prev!]
 					const [item] = newArr.splice(sortIndex, 1)
