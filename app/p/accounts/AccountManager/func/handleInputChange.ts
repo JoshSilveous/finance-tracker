@@ -19,6 +19,7 @@ export function handleInputChange(
 	const key = e.target.dataset['key'] as keyof Change['new']
 	const defaultValue = e.target.dataset['default'] as string
 	const currentValue = e.target.value
+	const valueOnFocus = e.target.dataset['value_on_focus']
 
 	// undo/redo history logic
 	setUndoHistoryStack((prev) => {
@@ -45,10 +46,7 @@ export function handleInputChange(
 						action: 'value_change',
 						account_id: account_id,
 						key: key,
-						oldVal:
-							e.target.dataset['value_on_focus'] !== undefined
-								? e.target.dataset['value_on_focus']
-								: defaultValue,
+						oldVal: valueOnFocus !== undefined ? valueOnFocus : defaultValue,
 						newVal: currentValue,
 					},
 				]
@@ -59,10 +57,7 @@ export function handleInputChange(
 					action: 'value_change',
 					account_id: account_id,
 					key: key,
-					oldVal:
-						e.target.dataset['value_on_focus'] !== undefined
-							? e.target.dataset['value_on_focus']
-							: defaultValue,
+					oldVal: valueOnFocus !== undefined ? valueOnFocus : defaultValue,
 					newVal: currentValue,
 				},
 			]

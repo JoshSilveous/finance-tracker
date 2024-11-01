@@ -38,7 +38,7 @@ interface HistoryItemReorder {
 interface HistoryItemValueChange {
 	action: 'value_change'
 	account_id: string
-	key: string
+	key: keyof Account.Bare
 	oldVal: string
 	newVal: string
 }
@@ -68,6 +68,7 @@ export function AccountManager() {
 	const redoHistoryStackRef = useRef<HistoryItem[]>(redoHistoryStack)
 	useEffect(() => {
 		pendingChangesRef.current = pendingChanges
+		console.log('pendingChanges changed!', pendingChangesRef.current)
 	}, [pendingChanges])
 	useEffect(() => {
 		currentSortOrderRef.current = currentSortOrder
@@ -176,39 +177,89 @@ export function AccountManager() {
 					if (undoHistoryStackRef.current.length !== 0) {
 						const mostRecentAction = undoHistoryStackRef.current.at(-1)!
 						// need to update pendingChanges when ran
-
 						if (mostRecentAction.action === 'reorder') {
+							const { newIndex, oldIndex } = mostRecentAction
 							setCurrentSortOrder((prev) => {
 								const newArr = [...prev!]
-								const [item] = newArr.splice(mostRecentAction.newIndex, 1)
-								newArr.splice(mostRecentAction.oldIndex, 0, item)
+								const [item] = newArr.splice(newIndex, 1)
+								newArr.splice(oldIndex, 0, item)
 								return newArr
 							})
 						} else {
+							const { account_id, key, oldVal, newVal } = mostRecentAction
+
 							const node = document.querySelector(
-								`[data-id="${mostRecentAction.account_id}"][data-key="${mostRecentAction.key}"]`
+								`[data-id="${account_id}"][data-key="${key}"]`
 							) as HTMLInputElement
-							console.log(
-								'SETTING THIS NODE VAL TO',
-								mostRecentAction.oldVal,
-								node
-							)
-							node.value = mostRecentAction.oldVal
-							console.log('BEFORE REFOCUSING, VAL IS', node.value)
+
+							const thisPendingChangeIndex =
+								pendingChangesRef.current.findIndex(
+									(item) => item.account_id === account_id
+								)
+							if (thisPendingChangeIndex !== -1) {
+								// if there is a pendingChange for the entry we are undo'ing
+								const thisPendingChange =
+									pendingChangesRef.current[thisPendingChangeIndex]
+
+								let defaultVal = node.dataset['default'] as string
+								let returningToDefault = false
+								if (
+									(!isNaN(parseInt(defaultVal)) &&
+										!isNaN(parseInt(oldVal)) &&
+										parseInt(defaultVal) === parseInt(oldVal)) ||
+									defaultVal === oldVal
+								) {
+									returningToDefault = true
+								}
+
+								if (returningToDefault) {
+									// if we are returning to the default value
+									if (
+										(key === 'name' &&
+											thisPendingChange.new.starting_amount ===
+												undefined) ||
+										(key === 'starting_amount' &&
+											thisPendingChange.new.name === undefined)
+									) {
+										// if other keys don't exist on pendingChange, remove change
+										setPendingChanges((prev) =>
+											prev.filter(
+												(_, index) =>
+													index !== thisPendingChangeIndex
+											)
+										)
+									} else {
+										// if other keys DO exist on pendingChange, set key to undefined
+										setPendingChanges((prev) => {
+											const newArr = structuredClone(prev)
+											newArr[thisPendingChangeIndex].new[key] =
+												undefined
+											return newArr
+										})
+									}
+								} else {
+									// set pendingChange to reflect the old value
+									setPendingChanges((prev) => {
+										const newArr = structuredClone(prev)
+										newArr[thisPendingChangeIndex].new[key] = oldVal
+										return newArr
+									})
+								}
+							} else {
+								// add a pendingChange
+								setPendingChanges((prev) => [
+									...prev,
+									{ account_id: account_id, new: { [key]: oldVal } },
+								])
+							}
 							node.focus()
-							node.blur()
-							console.log('BEFORE WAITING, VAL IS', node.value)
-							const test = setTimeout(() => {
-								console.log('AFTER WAITING, VAL IS', node.value)
-								clearTimeout(test)
-							}, 1500)
 						}
 						setRedoHistoryStack((prev) => [...prev, mostRecentAction])
 						setUndoHistoryStack((prev) => prev.slice(0, -1))
 					}
 					return
 				}
-
+				// NEXT: ADD REDO LOGIC
 				// CTRL+SHIFT+Z to redo
 				if (e.ctrlKey && e.shiftKey && e.key.toUpperCase() === 'Z') {
 					console.log('pendingChanges:', pendingChanges)

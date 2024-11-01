@@ -26,6 +26,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 
 	function updateDisplayText() {
 		const valFloat = parseFloat(inputRef.current!.value)
+		console.log('updating display text!', valFloat)
 		if (isNaN(valFloat)) {
 			inputRef.current!.value = prevVal
 			updateDisplayText()
@@ -46,6 +47,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 		}
 	}
 
+	console.log('re-rendering JNumberAccounting!')
 	function handleMouseEnter(e: MouseEvent<HTMLInputElement>) {
 		setIsHovering(true)
 		if (props.onMouseEnter) {
