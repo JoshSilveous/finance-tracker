@@ -72,8 +72,6 @@ export function LoginForm() {
 				setIsSubmitting(false)
 			}
 		}
-
-		console.log(formData)
 	}
 	return (
 		<form className={s.form} onSubmit={handleSubmit} noValidate>

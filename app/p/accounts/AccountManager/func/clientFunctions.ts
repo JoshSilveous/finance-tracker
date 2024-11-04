@@ -123,8 +123,6 @@ export async function getAssociatedTransactionCount(account_id: Account.ID) {
 }
 
 export async function deleteAccountAndTransactions(account_id: Account.ID) {
-	console.log('deleting account', account_id)
-
 	const transactionsUpdate = await supabase
 		.from('transactions')
 		.delete()
@@ -132,15 +130,11 @@ export async function deleteAccountAndTransactions(account_id: Account.ID) {
 
 	if (transactionsUpdate.error) {
 		throw new Error(transactionsUpdate.error.message)
-	} else {
-		console.log('Updated rows:', transactionsUpdate.data)
 	}
 
 	const accountDeleteRes = await supabase.from('accounts').delete().eq('id', account_id)
 	if (accountDeleteRes.error) {
 		throw new Error(accountDeleteRes.error.message)
-	} else {
-		console.log('Deleted Account:', account_id)
 	}
 }
 export async function deleteAccountAndSetNull(account_id: Account.ID) {
@@ -149,8 +143,6 @@ export async function deleteAccountAndSetNull(account_id: Account.ID) {
 
 	if (res.error) {
 		throw new Error(res.error.message)
-	} else {
-		console.log('Deleted Account:', account_id)
 	}
 }
 export async function deleteAccountAndReplace(
@@ -164,15 +156,11 @@ export async function deleteAccountAndReplace(
 
 	if (transactionsUpdate.error) {
 		throw new Error(transactionsUpdate.error.message)
-	} else {
-		console.log('Updated rows:', transactionsUpdate.data)
 	}
 
 	const accountDelete = await supabase.from('accounts').delete().eq('id', account_id)
 
 	if (accountDelete.error) {
 		throw new Error(accountDelete.error.message)
-	} else {
-		console.log('Deleted Account:', account_id)
 	}
 }

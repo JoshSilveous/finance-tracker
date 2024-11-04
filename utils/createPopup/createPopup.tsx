@@ -46,7 +46,6 @@ export function createPopup(
 			)
 		},
 		close() {
-			console.log('closing', !!popupDomLocation, popupDomLocation)
 			popupDomLocation.render(<></>)
 			popupDomLocation.unmount()
 			popupContainer.remove()

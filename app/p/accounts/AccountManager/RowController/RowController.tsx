@@ -4,7 +4,7 @@ import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
 import { createPopup } from '@/utils'
 import { DeleteForm } from './DeleteForm/DeleteForm'
-import { HistoryItem } from '../AccountManager'
+import { HistoryItem } from '../func'
 
 interface RowControllerProps {
 	account_id: string
@@ -16,7 +16,7 @@ interface RowControllerProps {
 	defaultSortOrder: string[]
 	gridRowRefs: MutableRefObject<HTMLDivElement[]>
 	setCurrentSortOrder: Dispatch<SetStateAction<string[]>>
-	loadInitData: () => Promise<void>
+	fetchAndLoadData: () => Promise<void>
 	setUndoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>
 	setRedoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>
 }
@@ -30,7 +30,7 @@ export function RowController({
 	defaultSortOrder,
 	gridRowRefs,
 	setCurrentSortOrder,
-	loadInitData,
+	fetchAndLoadData,
 	setUndoHistoryStack,
 	setRedoHistoryStack,
 }: RowControllerProps) {
@@ -213,7 +213,7 @@ export function RowController({
 				account_name={account_name}
 				afterDelete={() => {
 					myPopup.close()
-					loadInitData()
+					fetchAndLoadData()
 				}}
 			/>
 		)

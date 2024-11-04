@@ -5,7 +5,6 @@ interface ErrorPageParams {
 }
 
 export default function ErrorPage({ searchParams }: { searchParams: ErrorPageParams }) {
-	console.log(searchParams)
 	const message = searchParams?.message || 'Unknown error'
 
 	return (

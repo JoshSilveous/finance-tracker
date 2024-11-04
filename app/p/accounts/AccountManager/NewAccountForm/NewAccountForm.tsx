@@ -84,10 +84,6 @@ export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
 		})
 	}
 
-	useEffect(() => {
-		console.log(formData)
-	}, [formData])
-
 	return (
 		<div>
 			<h1>Create New Account</h1>

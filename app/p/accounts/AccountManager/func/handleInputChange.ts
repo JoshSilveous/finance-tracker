@@ -1,12 +1,12 @@
-import { ChangeEvent, Dispatch, SetStateAction } from 'react'
-import { Change, HistoryItem } from '../AccountManager'
+import { ChangeEvent, Dispatch, MutableRefObject, SetStateAction } from 'react'
+import { Change } from '../AccountManager'
 import { removeFromArray } from '@/utils'
+import { HistoryItem } from './history'
 
 export function handleInputChange(
 	e: ChangeEvent<HTMLInputElement>,
-	pendingChanges: Change[],
+	pendingChangesRef: MutableRefObject<Change[]>,
 	setPendingChanges: Dispatch<SetStateAction<Change[]>>,
-	undoHistoryStack: HistoryItem[],
 	setUndoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>,
 	setRedoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>
 ) {
@@ -63,14 +63,15 @@ export function handleInputChange(
 			]
 		}
 	})
-	console.log('inputChange ran')
 	setRedoHistoryStack([])
 
-	const thisPendingChangeIndex = pendingChanges.findIndex(
+	const thisPendingChangeIndex = pendingChangesRef.current.findIndex(
 		(change) => change.account_id === account_id
 	)
 	const thisPendingChange =
-		thisPendingChangeIndex !== -1 ? pendingChanges[thisPendingChangeIndex] : undefined
+		thisPendingChangeIndex !== -1
+			? pendingChangesRef.current[thisPendingChangeIndex]
+			: undefined
 
 	if (defaultValue === currentValue) {
 		// if new val equals starting value, remove change item

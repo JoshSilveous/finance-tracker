@@ -115,11 +115,6 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 			}
 		}
 		const handleConfirm = () => {
-			console.log('deleteMethod:', deleteMethod)
-			if (deleteMethod === 'replace') {
-				console.log('replacing with', accountToChangeTo)
-			}
-
 			let confirmMessage = <></>
 			let newAccountName: string | undefined = undefined
 			if (deleteMethod === 'replace') {

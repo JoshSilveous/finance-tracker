@@ -1,26 +1,25 @@
 import { removeFromArray } from '@/utils'
-import { ChangeEvent, Dispatch, SetStateAction } from 'react'
+import { ChangeEvent, Dispatch, MutableRefObject, SetStateAction } from 'react'
 import { Change } from '../AccountManager'
 
 export function handleInputBlur(
 	e: ChangeEvent<HTMLInputElement>,
-	pendingChanges: Change[],
+	pendingChangesRef: MutableRefObject<Change[]>,
 	setPendingChanges: Dispatch<SetStateAction<Change[]>>
 ) {
 	e.target.value = e.target.value.trimEnd()
 	const defaultValue = e.target.dataset['default'] as string
 	const currentValue = e.target.value
-	console.log('blurring with currentValue:', currentValue)
 	// handles edge case where the user just adds spaces to the end of the value
 	// this will remove those spaces and the Change
 	if (defaultValue === currentValue) {
 		const account_id = e.target.dataset['id'] as Account.ID
 		const key = e.target.dataset['key'] as keyof Change['new']
 
-		const thisPendingChangeIndex = pendingChanges.findIndex(
+		const thisPendingChangeIndex = pendingChangesRef.current.findIndex(
 			(change) => change.account_id === account_id
 		)
-		const thisPendingChange = pendingChanges[thisPendingChangeIndex]
+		const thisPendingChange = pendingChangesRef.current[thisPendingChangeIndex]
 		if (thisPendingChange?.new[key] === undefined) {
 			return
 		} else {

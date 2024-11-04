@@ -1,5 +1,13 @@
 'use client'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import {
+	ChangeEvent,
+	FocusEvent,
+	ReactNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from 'react'
 import s from './AccountManager.module.scss'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
@@ -15,14 +23,13 @@ import {
 } from '@/utils'
 import {
 	updatePreferredColumnWidth,
-	fetchData,
-	fetchPreferredColumnWidths,
 	saveChanges,
-	handleInputChange,
-	handleInputBlur,
-	undoMostRecentAction,
+	handleInputChange as handleInputChangeDef,
+	handleInputBlur as handleInputBlurDef,
+	undoMostRecentAction as undoMostRecentActionDef,
 	HistoryItem,
-	redoMostRecentAction,
+	redoMostRecentAction as redoMostRecentActionDef,
+	fetchAndLoadData as fetchAndLoadDataDef,
 } from './func'
 import { RowController } from './RowController/RowController'
 
@@ -47,12 +54,7 @@ export function AccountManager() {
 	const [redoHistoryStack, setRedoHistoryStack] = useState<HistoryItem[]>([])
 	const gridRowRefs = useRef<HTMLDivElement[]>([])
 
-	/**
-	 * use below refs in event listeners to ensure you're pulling the latest data.
-	 * event listeners are only defined once, so if you reference the state directly it will
-	 * pull old data from when the function was defined.
-	 * by referencing a ref instead, you get updated data every time.
-	 */
+	// below refs are used in event listeners and memoized functions to ensure we are pulling the most recent data while maintaining performance
 	const pendingChangesRef = useRef<Change[]>(pendingChanges)
 	const currentSortOrderRef = useRef<Account.ID[]>(currentSortOrder)
 	const defaultSortOrderRef = useRef<Account.ID[]>(defaultSortOrder)
@@ -78,72 +80,155 @@ export function AccountManager() {
 		redoHistoryStackRef.current = redoHistoryStack
 	}, [redoHistoryStack])
 
-	/**
-	 * used to enable/disable "save" buttons and functions, since there's two different types of changes to be saved
-	 *
-	 * (data changes in `pendingChanges`, and changes to `sortOrder`)
-	 */
+	// used to enable/disable "save" buttons and functions, since there's two different types of changes to be saved (data changes and sort order changes)
 	const saveOptionIsAvailable =
 		pendingChanges.length !== 0 || !arraysAreEqual(currentSortOrder, defaultSortOrder)
 
-	async function loadInitData() {
-		setIsLoading(true)
-		gridRowRefs.current = []
-		try {
-			const columnWidths = await fetchPreferredColumnWidths()
-			setDefaultColumnWidths([
-				columnWidths.account_name_width,
-				columnWidths.starting_amount_width,
-			])
-		} catch (e) {
-			if (isStandardError(e)) {
-				if (e.message === 'Preferences not found!') {
-					try {
-						await createPreferencesEntry()
-						const columnWidths = await fetchPreferredColumnWidths()
-						setDefaultColumnWidths([
-							columnWidths.account_name_width,
-							columnWidths.starting_amount_width,
-						])
-					} catch (e) {
-						if (isStandardError(e)) {
-							promptError(
-								'An unexpected error has occured while propegating table layout preferences in the database:',
-								e.message,
-								'Try refreshing the page to resolve this issue.'
-							)
-						}
+	// memoizing and redefining imported functions for simplicity and performance
+	const fetchAndLoadData = useCallback(() => {
+		setUndoHistoryStack([])
+		setRedoHistoryStack([])
+		return fetchAndLoadDataDef(
+			setIsLoading,
+			gridRowRefs,
+			setDefaultColumnWidths,
+			setData,
+			setCurrentSortOrder,
+			setDefaultSortOrder
+		)
+	}, [])
+	const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+		handleInputChangeDef(
+			e,
+			pendingChangesRef,
+			setPendingChanges,
+			setUndoHistoryStack,
+			setRedoHistoryStack
+		)
+	}, [])
+	const undoMostRecentAction = useCallback(() => {
+		undoMostRecentActionDef(
+			undoHistoryStackRef,
+			setCurrentSortOrder,
+			pendingChangesRef,
+			setPendingChanges,
+			setUndoHistoryStack,
+			setRedoHistoryStack
+		)
+	}, [])
+	const redoMostRecentAction = useCallback(() => {
+		redoMostRecentActionDef(
+			redoHistoryStackRef,
+			setCurrentSortOrder,
+			pendingChangesRef,
+			setPendingChanges,
+			setUndoHistoryStack,
+			setRedoHistoryStack
+		)
+	}, [])
+	const handleInputBlur = useCallback((e: FocusEvent<HTMLInputElement, Element>) => {
+		handleInputBlurDef(e, pendingChangesRef, setPendingChanges)
+	}, [])
+
+	// other memoized functions
+	const handleSaveChanges = useCallback(async () => {
+		if (saveOptionIsAvailable) {
+			setIsSavingChanges(true)
+			// check for empty names
+			let isErrors = false
+			pendingChangesRef.current.forEach((change) => {
+				if (change.new.name !== undefined && change.new.name === '') {
+					isErrors = true
+					const errorNode = document.querySelector(
+						`.${s.account_name_input}[data-id="${change.account_id}"]`
+					)
+					errorNode?.classList.add(s.error)
+					const thisTimeout = setTimeout(() => {
+						errorNode?.classList.remove(s.error)
+						clearTimeout(thisTimeout)
+					}, 1000)
+				}
+			})
+			if (!isErrors) {
+				try {
+					await saveChanges(
+						data,
+						currentSortOrderRef,
+						defaultSortOrderRef,
+						pendingChangesRef
+					)
+				} catch (e) {
+					if (isStandardError(e)) {
+						promptError(
+							'An unexpected error has occurred while saving your changes:',
+							e.message,
+							'Try refreshing the page to resolve this issue.'
+						)
+					} else {
+						console.error(e)
 					}
-				} else {
-					promptError(
-						'An unexpected error has occured while fetching table layout preferences in the database:',
-						e.message,
-						'Try refreshing the page to resolve this issue.'
+				}
+				fetchAndLoadData()
+				setPendingChanges([])
+				setUndoHistoryStack([])
+				setRedoHistoryStack([])
+			}
+			setIsSavingChanges(false)
+		}
+	}, [saveOptionIsAvailable, data])
+	const discardChanges = useCallback(() => {
+		const changedContainers = document.querySelectorAll(
+			`.${s.changed}`
+		) as NodeListOf<HTMLDivElement>
+		const changedInputs = document.querySelectorAll(
+			`.${s.changed} > input`
+		) as NodeListOf<HTMLInputElement>
+		changedContainers.forEach((node) => {
+			node.classList.remove(s.changed)
+		})
+		changedInputs.forEach((node) => {
+			node.value = node.defaultValue
+			node.focus()
+			node.blur()
+		})
+		setCurrentSortOrder(defaultSortOrderRef.current)
+		setPendingChanges([])
+		setUndoHistoryStack([])
+		setRedoHistoryStack([])
+	}, [])
+	const handleCreateAccountButton = useCallback(() => {
+		const myPopup = createPopup(
+			<NewAccountForm
+				afterSubmit={async () => {
+					myPopup.close()
+					fetchAndLoadData()
+				}}
+			/>
+		)
+		myPopup.trigger()
+	}, [])
+	const handleInputFocus = useCallback((e: FocusEvent<HTMLInputElement, Element>) => {
+		e.target.dataset['value_on_focus'] = e.target.value
+	}, [])
+	const updateDefaultColumnWidth: JGridTypes.ColumnResizeEventHandler = useCallback(
+		async (e) => {
+			bgLoad.start()
+			try {
+				await updatePreferredColumnWidth(e.columnIndex - 1, e.newWidth)
+			} catch (e) {
+				if (isStandardError(e)) {
+					console.error(
+						`Minor error occurred when updating preferredColumnWidth: ${e.message}`
 					)
 				}
 			}
-		}
-		try {
-			const data = await fetchData()
-			setData(data)
-			setIsLoading(false)
-			const sortOrder = data.map((item) => item.id)
-			setCurrentSortOrder(sortOrder)
-			setDefaultSortOrder(sortOrder)
-		} catch (e) {
-			if (isStandardError(e)) {
-				promptError(
-					'An unexpected error has occured while fetching your data:',
-					e.message,
-					'Try refreshing the page to resolve this issue.'
-				)
-			} else {
-				console.error(e)
-			}
-		}
-	}
+			bgLoad.stop()
+		},
+		[]
+	)
+
 	useEffect(() => {
-		loadInitData()
+		fetchAndLoadData()
 
 		const handleKeyDown = async (e: KeyboardEvent) => {
 			if (!isLoadingRef.current) {
@@ -166,14 +251,7 @@ export function AccountManager() {
 				else if (e.ctrlKey && !e.shiftKey && e.key.toUpperCase() === 'Z') {
 					e.preventDefault()
 					if (undoHistoryStackRef.current.length !== 0) {
-						undoMostRecentAction(
-							undoHistoryStackRef,
-							setCurrentSortOrder,
-							pendingChangesRef,
-							setPendingChanges,
-							setUndoHistoryStack,
-							setRedoHistoryStack
-						)
+						undoMostRecentAction()
 					}
 					return
 				}
@@ -182,14 +260,7 @@ export function AccountManager() {
 				else if (e.ctrlKey && e.shiftKey && e.key.toUpperCase() === 'Z') {
 					e.preventDefault()
 					if (redoHistoryStackRef.current.length !== 0) {
-						redoMostRecentAction(
-							redoHistoryStackRef,
-							setCurrentSortOrder,
-							pendingChangesRef,
-							setPendingChanges,
-							setUndoHistoryStack,
-							setRedoHistoryStack
-						)
+						redoMostRecentAction()
 					}
 					return
 				}
@@ -202,80 +273,6 @@ export function AccountManager() {
 	}, [])
 
 	let grid: ReactNode
-
-	async function handleSaveChanges() {
-		if (saveOptionIsAvailable) {
-			setIsSavingChanges(true)
-			// check for empty names
-			let isErrors = false
-			pendingChangesRef.current.forEach((change) => {
-				if (change.new.name !== undefined && change.new.name === '') {
-					isErrors = true
-					const errorNode = document.querySelector(
-						`.${s.account_name_input}[data-id="${change.account_id}"]`
-					)
-					errorNode?.classList.add(s.error)
-					const thisTimeout = setTimeout(() => {
-						errorNode?.classList.remove(s.error)
-						clearTimeout(thisTimeout)
-					}, 1000)
-				}
-			})
-			if (!isErrors) {
-				try {
-					await saveChanges(
-						data,
-						currentSortOrder,
-						defaultSortOrder,
-						pendingChangesRef
-					)
-				} catch (e) {
-					if (isStandardError(e)) {
-						promptError(
-							'An unexpected error has occured while saving your changes:',
-							e.message,
-							'Try refreshing the page to resolve this issue.'
-						)
-					} else {
-						console.error(e)
-					}
-				}
-				loadInitData()
-				setPendingChanges([])
-			}
-			setIsSavingChanges(false)
-		}
-	}
-	function discardChanges() {
-		const changedContainers = document.querySelectorAll(
-			`.${s.changed}`
-		) as NodeListOf<HTMLDivElement>
-		const changedInputs = document.querySelectorAll(
-			`.${s.changed} > input`
-		) as NodeListOf<HTMLInputElement>
-		changedContainers.forEach((node) => {
-			node.classList.remove(s.changed)
-		})
-		changedInputs.forEach((node) => {
-			node.value = node.defaultValue
-			node.focus()
-			node.blur()
-		})
-		setCurrentSortOrder(defaultSortOrder)
-		setPendingChanges([])
-	}
-
-	function handleCreateAccountButton() {
-		const myPopup = createPopup(
-			<NewAccountForm
-				afterSubmit={async () => {
-					myPopup.close()
-					loadInitData()
-				}}
-			/>
-		)
-		myPopup.trigger()
-	}
 	if (!isLoading && data !== null && defaultColumnWidths !== null) {
 		if (data.length === 0) {
 			grid = (
@@ -285,21 +282,6 @@ export function AccountManager() {
 				</p>
 			)
 		} else {
-			const updateDefaultColumnWidth: JGridTypes.ColumnResizeEventHandler = async (
-				e
-			) => {
-				bgLoad.start()
-				try {
-					await updatePreferredColumnWidth(e.columnIndex - 1, e.newWidth)
-				} catch (e) {
-					if (isStandardError(e)) {
-						console.error(
-							`Minor error occured when updating preferredColumnWidth: ${e.message}`
-						)
-					}
-				}
-				bgLoad.stop()
-			}
 			const headers: JGridTypes.Header[] = [
 				{
 					content: <div className={s.header_container} />,
@@ -336,6 +318,7 @@ export function AccountManager() {
 					thisPendingChangeIndex === -1
 						? null
 						: pendingChanges[thisPendingChangeIndex]
+
 				return [
 					<div key={`1-${thisData.id}`} className={s.cell_container}>
 						<RowController
@@ -348,29 +331,16 @@ export function AccountManager() {
 							defaultSortOrder={defaultSortOrder}
 							gridRowRefs={gridRowRefs}
 							setCurrentSortOrder={setCurrentSortOrder}
-							loadInitData={loadInitData}
+							fetchAndLoadData={fetchAndLoadData}
 							setUndoHistoryStack={setUndoHistoryStack}
 							setRedoHistoryStack={setRedoHistoryStack}
 						/>
 					</div>,
 					<div key={`2-${thisData.id}`} className={s.cell_container}>
 						<JInput
-							onChange={(e) =>
-								handleInputChange(
-									e,
-									pendingChanges,
-									setPendingChanges,
-									undoHistoryStack,
-									setUndoHistoryStack,
-									setRedoHistoryStack
-								)
-							}
-							onBlur={(e) =>
-								handleInputBlur(e, pendingChanges, setPendingChanges)
-							}
-							onFocus={(e) => {
-								e.target.dataset['value_on_focus'] = e.target.value
-							}}
+							onChange={handleInputChange}
+							onBlur={handleInputBlur}
+							onFocus={handleInputFocus}
 							className={`${s.account_name_input} ${
 								thisPendingChange?.new.name ? s.changed : ''
 							}`}
@@ -387,22 +357,9 @@ export function AccountManager() {
 					</div>,
 					<div key={`3-${thisData.id}`} className={s.cell_container}>
 						<JNumberAccounting
-							onChange={(e) =>
-								handleInputChange(
-									e,
-									pendingChanges,
-									setPendingChanges,
-									undoHistoryStack,
-									setUndoHistoryStack,
-									setRedoHistoryStack
-								)
-							}
-							onBlur={(e) =>
-								handleInputBlur(e, pendingChanges, setPendingChanges)
-							}
-							onFocus={(e) => {
-								e.target.dataset['value_on_focus'] = e.target.value
-							}}
+							onChange={handleInputChange}
+							onBlur={handleInputBlur}
+							onFocus={handleInputFocus}
 							className={`${s.starting_amount_input} ${
 								thisPendingChange?.new.starting_amount ? s.changed : ''
 							}`}

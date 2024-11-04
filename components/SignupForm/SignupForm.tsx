@@ -141,8 +141,6 @@ export function SignupForm() {
 				setIsSubmitting(false)
 			}
 		}
-
-		console.log(formData)
 	}
 	return (
 		<form className={s.form} onSubmit={handleSubmit} noValidate>

@@ -5,8 +5,8 @@ import { evaluate } from 'mathjs'
 
 export async function saveChanges(
 	data: Account.Full[] | null,
-	currentSortOrder: string[] | null,
-	defaultSortOrder: string[] | null,
+	currentSortOrderRef: MutableRefObject<string[]>,
+	defaultSortOrderRef: MutableRefObject<string[]>,
 	pendingChangesRef: MutableRefObject<Change[]>
 ) {
 	const pendingChanges = pendingChangesRef.current
@@ -29,8 +29,8 @@ export async function saveChanges(
 	})
 
 	// apply re-ordering
-	currentSortOrder!.forEach((sortAccountID, sortIndex) => {
-		if (defaultSortOrder![sortIndex] !== sortAccountID) {
+	currentSortOrderRef.current.forEach((sortAccountID, sortIndex) => {
+		if (defaultSortOrderRef.current[sortIndex] !== sortAccountID) {
 			const thisUpdate = accountUpdates.find((update) => update.id === sortAccountID)
 			if (thisUpdate === undefined) {
 				const thisAccount = data!.find((item) => item.id === sortAccountID)!
