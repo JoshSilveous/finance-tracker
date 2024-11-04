@@ -1,6 +1,6 @@
 -   Create CategoryManager
--   add proper CTRL+Z system for tables
 
+-   add proper CTRL+Z system for tables
 -   add global css variables for highlights
 -   add global css variables for box-shadow colors in JForm items
 -   **add error handling for AccountManager**
