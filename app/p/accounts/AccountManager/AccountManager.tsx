@@ -5,6 +5,7 @@ import {
 	ReactNode,
 	useCallback,
 	useEffect,
+	useMemo,
 	useRef,
 	useState,
 } from 'react'
@@ -81,8 +82,12 @@ export function AccountManager() {
 	}, [redoHistoryStack])
 
 	// used to enable/disable "save" buttons and functions, since there's two different types of changes to be saved (data changes and sort order changes)
-	const saveOptionIsAvailable =
-		pendingChanges.length !== 0 || !arraysAreEqual(currentSortOrder, defaultSortOrder)
+	const saveOptionIsAvailable = useMemo(() => {
+		return (
+			pendingChanges.length !== 0 ||
+			!arraysAreEqual(currentSortOrder, defaultSortOrder)
+		)
+	}, [pendingChanges, currentSortOrder, defaultSortOrder])
 
 	// memoizing and redefining imported functions for simplicity and performance
 	const fetchAndLoadData = useCallback(() => {
