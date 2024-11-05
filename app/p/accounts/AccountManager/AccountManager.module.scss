@@ -83,6 +83,18 @@
 				padding: 1.5px 2px;
 				height: 35px;
 				overflow: hidden;
+
+				&.history_control {
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					button {
+						background-color: transparent;
+						outline: none;
+						border: none;
+						color: var(--font-color);
+					}
+				}
 			}
 			.starting_amount_input,
 			.account_name_input {

@@ -1,3 +1,5 @@
+-   Add undo/redo buttons in AccountManager
+-   Add 'invisible' JButton style
 -   Create CategoryManager
 
 -   add proper CTRL+Z system for tables

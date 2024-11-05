@@ -288,7 +288,12 @@ export function AccountManager() {
 		} else {
 			const headers: JGridTypes.Header[] = [
 				{
-					content: <div className={s.header_container} />,
+					content: (
+						<div className={`${s.header_container} ${s.history_control}`}>
+							<button>&lsaquo;</button>
+							<button>&rsaquo;</button>
+						</div>
+					),
 					defaultWidth: 55,
 					noResize: true,
 				},
