@@ -13,6 +13,7 @@ import s from './AccountManager.module.scss'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { default as LoadingAnim } from '@/public/loading.svg'
+import { default as UndoRedoIcon } from '@/public/undo_redo.svg'
 import { NewAccountForm } from './NewAccountForm/NewAccountForm'
 import {
 	createPopup,
@@ -289,9 +290,15 @@ export function AccountManager() {
 			const headers: JGridTypes.Header[] = [
 				{
 					content: (
-						<div className={`${s.header_container} ${s.history_control}`}>
-							<button>&lsaquo;</button>
-							<button>&rsaquo;</button>
+						<div className={s.header_container}>
+							<div className={s.history_control_container}>
+								<button className={s.undo}>
+									<UndoRedoIcon />
+								</button>
+								<button className={s.redo}>
+									<UndoRedoIcon />
+								</button>
+							</div>
 						</div>
 					),
 					defaultWidth: 55,
