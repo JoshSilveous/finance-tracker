@@ -90,7 +90,8 @@
 					justify-content: space-between;
 					height: 100%;
 					width: 42px;
-					button {
+					.undo,
+					.redo {
 						background-color: transparent;
 						height: 20px;
 						width: 20px;
@@ -98,12 +99,32 @@
 						border: none;
 						color: var(--font-color);
 						padding: 0;
+						cursor: pointer;
+						transition: scale 0.1s ease;
 						svg {
 							height: 100%;
 							width: 100%;
 						}
 						&.redo {
-							scale: -100% 100%;
+							transform: scaleX(-1);
+						}
+						&:hover,
+						&:focus {
+							scale: 120%;
+						}
+						&:active {
+							scale: 110%;
+						}
+						&:disabled {
+							color: var(--font-color-disabled);
+							opacity: 50%;
+							cursor: not-allowed;
+
+							&:hover,
+							&:focus,
+							&:active {
+								scale: 100%;
+							}
 						}
 					}
 				}

@@ -35,6 +35,10 @@
 			transform: translateY(0px);
 		}
 	}
+	&.invisible {
+		background-color: transparent;
+		outline-width: 0px;
+	}
 
 	&.primary:not(:disabled) {
 		background-color: var(--prim-bg);

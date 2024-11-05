@@ -5,7 +5,7 @@ import { createPreferencesEntry, isStandardError, promptError } from '@/utils'
 export async function fetchAndLoadData(
 	setIsLoading: (value: SetStateAction<boolean>) => void,
 	gridRowRefs: MutableRefObject<HTMLDivElement[]>,
-	setDefaultColumnWidths: (value: SetStateAction<number[] | null>) => void,
+	setDefaultColumnWidths: (value: SetStateAction<number[]>) => void,
 	setData: (value: SetStateAction<Account.Full[] | null>) => void,
 	setCurrentSortOrder: (value: SetStateAction<string[]>) => void,
 	setDefaultSortOrder: (value: SetStateAction<string[]>) => void

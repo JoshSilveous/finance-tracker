@@ -45,7 +45,7 @@ export interface Change {
 export function AccountManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
-	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[] | null>(null)
+	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[]>([150, 200])
 	const [data, setData] = useState<Account.Full[] | null>(null)
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
@@ -277,6 +277,65 @@ export function AccountManager() {
 		}
 	}, [])
 
+	// memoizing headers as this doesn't change much between renders
+
+	const historyButtons: JGridTypes.Header['content'] = useMemo(
+		() => (
+			<div className={s.header_container}>
+				<div className={s.history_control_container}>
+					<button
+						className={s.undo}
+						onClick={undoMostRecentAction}
+						disabled={undoHistoryStack.length === 0}
+						title='Undo most recent change'
+					>
+						<UndoRedoIcon />
+					</button>
+					<button
+						className={s.redo}
+						onClick={redoMostRecentAction}
+						disabled={redoHistoryStack.length === 0}
+						title='Redo most recent change'
+					>
+						<UndoRedoIcon />
+					</button>
+				</div>
+			</div>
+		),
+		[undoHistoryStack, redoHistoryStack]
+	)
+
+	const gridHeaders: JGridTypes.Header[] = useMemo(
+		() => [
+			{
+				content: historyButtons,
+				defaultWidth: 55,
+				noResize: true,
+			},
+			{
+				content: (
+					<div className={s.header_container}>
+						<div className={s.header}>Account Name</div>
+					</div>
+				),
+				defaultWidth: defaultColumnWidths[0],
+				minWidth: 100,
+				maxWidth: 330,
+			},
+			{
+				content: (
+					<div className={s.header_container}>
+						<div className={s.header}>Starting Amount</div>
+					</div>
+				),
+				defaultWidth: defaultColumnWidths[1],
+				minWidth: 100,
+				maxWidth: 230,
+			},
+		],
+		[historyButtons, defaultColumnWidths]
+	)
+
 	let grid: ReactNode
 	if (!isLoading && data !== null && defaultColumnWidths !== null) {
 		if (data.length === 0) {
@@ -287,44 +346,6 @@ export function AccountManager() {
 				</p>
 			)
 		} else {
-			const headers: JGridTypes.Header[] = [
-				{
-					content: (
-						<div className={s.header_container}>
-							<div className={s.history_control_container}>
-								<button className={s.undo}>
-									<UndoRedoIcon />
-								</button>
-								<button className={s.redo}>
-									<UndoRedoIcon />
-								</button>
-							</div>
-						</div>
-					),
-					defaultWidth: 55,
-					noResize: true,
-				},
-				{
-					content: (
-						<div className={s.header_container}>
-							<div className={s.header}>Account Name</div>
-						</div>
-					),
-					defaultWidth: defaultColumnWidths[0],
-					minWidth: 100,
-					maxWidth: 330,
-				},
-				{
-					content: (
-						<div className={s.header_container}>
-							<div className={s.header}>Starting Amount</div>
-						</div>
-					),
-					defaultWidth: defaultColumnWidths[1],
-					minWidth: 100,
-					maxWidth: 230,
-				},
-			]
 			const content = currentSortOrder.map((sortId, sortIndex) => {
 				const thisData = data.find((item) => item.id === sortId)!
 				const thisPendingChangeIndex = pendingChanges.findIndex(
@@ -392,7 +413,7 @@ export function AccountManager() {
 				]
 			})
 			const gridConfig: JGridTypes.Props = {
-				headers: headers,
+				headers: gridHeaders,
 				content: content,
 				maxTableWidth: 500,
 				onResize: updateDefaultColumnWidth,
