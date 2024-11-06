@@ -95,8 +95,8 @@
 						background-color: transparent;
 						height: 20px;
 						width: 20px;
-						outline: none;
 						border: none;
+						border-radius: 2px;
 						color: var(--font-color);
 						padding: 0;
 						cursor: pointer;
@@ -108,8 +108,11 @@
 						&.redo {
 							transform: scaleX(-1);
 						}
-						&:hover,
 						&:focus {
+							scale: 120%;
+							border: 2px solid var(--font-color);
+						}
+						&:hover {
 							scale: 120%;
 						}
 						&:active {
