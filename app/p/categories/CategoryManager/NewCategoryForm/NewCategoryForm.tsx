@@ -1,5 +1,5 @@
 import { JButton } from '@/components/JForm'
-import s from './NewAccountForm.module.scss'
+import s from './NewCategoryForm.module.scss'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { insertAccount } from '../func'
@@ -11,7 +11,7 @@ interface Errors {
 	general: string
 }
 
-export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
+export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
 	const [formData, setFormData] = useState<Account.Bare>({ name: '', starting_amount: 0 })
 	const [errors, setErrors] = useState<Errors>({
 		name: '',

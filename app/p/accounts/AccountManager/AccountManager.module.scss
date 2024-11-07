@@ -100,7 +100,7 @@
 						color: var(--font-color);
 						padding: 0;
 						cursor: pointer;
-						transition: scale 0.1s ease;
+						transition: scale 0.1s ease, color 0.1s ease;
 						svg {
 							height: 100%;
 							width: 100%;

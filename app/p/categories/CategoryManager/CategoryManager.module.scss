@@ -83,6 +83,54 @@
 				padding: 1.5px 2px;
 				height: 35px;
 				overflow: hidden;
+
+				.history_control_container {
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					height: 100%;
+					width: 42px;
+					.undo,
+					.redo {
+						background-color: transparent;
+						height: 20px;
+						width: 20px;
+						border: none;
+						border-radius: 2px;
+						color: var(--font-color);
+						padding: 0;
+						cursor: pointer;
+						transition: scale 0.1s ease, color 0.1s ease;
+						svg {
+							height: 100%;
+							width: 100%;
+						}
+						&.redo {
+							transform: scaleX(-1);
+						}
+						&:focus {
+							scale: 120%;
+							border: 2px solid var(--font-color);
+						}
+						&:hover {
+							scale: 120%;
+						}
+						&:active {
+							scale: 110%;
+						}
+						&:disabled {
+							color: var(--font-color-disabled);
+							opacity: 50%;
+							cursor: not-allowed;
+
+							&:hover,
+							&:focus,
+							&:active {
+								scale: 100%;
+							}
+						}
+					}
+				}
 			}
 			.starting_amount_input,
 			.account_name_input {
