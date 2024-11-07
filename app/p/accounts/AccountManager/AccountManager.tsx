@@ -35,7 +35,7 @@ import {
 import { RowController } from './RowController/RowController'
 
 export interface Change {
-	account_id: string
+	account_id: Account.ID
 	new: {
 		name?: string
 		starting_amount?: string

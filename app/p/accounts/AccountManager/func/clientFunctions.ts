@@ -158,9 +158,9 @@ export async function deleteAccountAndReplace(
 		throw new Error(transactionsUpdate.error.message)
 	}
 
-	const accountDelete = await supabase.from('accounts').delete().eq('id', account_id)
+	const accountDeleteRes = await supabase.from('accounts').delete().eq('id', account_id)
 
-	if (accountDelete.error) {
-		throw new Error(accountDelete.error.message)
+	if (accountDeleteRes.error) {
+		throw new Error(accountDeleteRes.error.message)
 	}
 }
