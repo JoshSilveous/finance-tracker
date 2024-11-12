@@ -132,8 +132,7 @@
 					}
 				}
 			}
-			.starting_amount_input,
-			.account_name_input {
+			.category_name_input {
 				&:not(.changed) {
 					color: var(--font-color);
 				}

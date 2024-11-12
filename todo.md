@@ -1,5 +1,6 @@
--   Create CategoryManager
+-   Model how the transaction log will look / work
 
+-   Create CategoryManager
 -   Add undo/redo buttons in AccountManager
 -   Add 'invisible' JButton style
 -   add proper CTRL+Z system for tables

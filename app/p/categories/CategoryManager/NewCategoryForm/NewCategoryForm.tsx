@@ -2,20 +2,18 @@ import { JButton } from '@/components/JForm'
 import s from './NewCategoryForm.module.scss'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { JInput, JNumberAccounting } from '@/components/JForm'
-import { insertAccount } from '../func'
+import { insertCategory } from '../func'
 import { isStandardError } from '@/utils'
 
 interface Errors {
 	name: string
-	starting_amount: string
 	general: string
 }
 
 export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
-	const [formData, setFormData] = useState<Account.Bare>({ name: '', starting_amount: 0 })
+	const [formData, setFormData] = useState<Category.Bare>({ name: '' })
 	const [errors, setErrors] = useState<Errors>({
 		name: '',
-		starting_amount: '',
 		general: '',
 	})
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -25,7 +23,6 @@ export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
 
 		setErrors({
 			name: '',
-			starting_amount: '',
 			general: '',
 		})
 
@@ -35,20 +32,19 @@ export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
 		if (formData.name === '') {
 			setErrors((prev) => ({
 				...prev,
-				name: 'You must enter an account name',
+				name: 'You must enter an category name',
 			}))
 			formValid = false
 		}
 
 		if (formValid) {
 			setIsSubmitting(true)
-			const newAccount: Account.Bare = {
+			const newCategory: Category.Bare = {
 				name: formData.name.trim(),
-				starting_amount: formData.starting_amount,
 			}
 
 			try {
-				await insertAccount(newAccount)
+				await insertCategory(newCategory)
 				afterSubmit()
 			} catch (e) {
 				if (isStandardError(e)) {
@@ -65,9 +61,6 @@ export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
 		e.target.value = e.target.value.trimStart()
 
 		let { name, value } = e.target
-		if (name === 'starting_amount') {
-			value = parseFloat(value).toFixed(2)
-		}
 		setFormData({
 			...formData,
 			[name]: value,
@@ -86,10 +79,10 @@ export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
 
 	return (
 		<div>
-			<h1>Create New Account</h1>
+			<h1>Create New Category</h1>
 			<form className={s.form} onSubmit={handleSubmit} noValidate>
 				<div className={errors.name ? s.error : ''}>
-					<label htmlFor='name'>Account Name</label>
+					<label htmlFor='name'>Category Name</label>
 					<JInput
 						id='name'
 						name='name'
@@ -101,21 +94,6 @@ export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
 					/>
 					<div className={s.error_container}>
 						{errors.name && <div>{errors.name}</div>}
-					</div>
-				</div>
-				<div className={errors.starting_amount ? s.error : ''}>
-					<label htmlFor='starting_amount'>Starting Amount</label>
-					<JNumberAccounting
-						id='starting_amount'
-						name='starting_amount'
-						className={s.accounting_input}
-						required
-						onChange={handleInputChange}
-						onBlur={handleBlur}
-						defaultValue={0}
-					/>
-					<div className={s.error_container}>
-						{errors.starting_amount && <div>{errors.starting_amount}</div>}
 					</div>
 				</div>
 				<div>

@@ -7,8 +7,8 @@ import { DeleteForm } from './DeleteForm/DeleteForm'
 import { HistoryItem } from '../func'
 
 interface RowControllerProps {
-	account_id: string
-	account_name: string
+	category_id: string
+	category_name: string
 	deleteDisabled: boolean
 	sortDisabled: boolean
 	sortIndex: number
@@ -21,8 +21,8 @@ interface RowControllerProps {
 	setRedoHistoryStack: Dispatch<SetStateAction<HistoryItem[]>>
 }
 export function RowController({
-	account_id,
-	account_name,
+	category_id,
+	category_name,
 	deleteDisabled,
 	sortDisabled,
 	sortIndex,
@@ -209,8 +209,8 @@ export function RowController({
 		;(e.target as HTMLButtonElement).blur()
 		const myPopup = createPopup(
 			<DeleteForm
-				account_id={account_id}
-				account_name={account_name}
+				category_id={category_id}
+				category_name={category_name}
 				afterDelete={() => {
 					myPopup.close()
 					fetchAndLoadData()
@@ -223,7 +223,7 @@ export function RowController({
 	return (
 		<div
 			className={`${s.row_controls_container} ${
-				account_id !== defaultSortOrder![sortIndex] ? s.changed : ''
+				category_id !== defaultSortOrder![sortIndex] ? s.changed : ''
 			}`}
 			ref={(elem) => {
 				if (elem !== null) {

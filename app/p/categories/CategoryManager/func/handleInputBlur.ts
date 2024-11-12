@@ -1,6 +1,6 @@
 import { removeFromArray } from '@/utils'
 import { ChangeEvent, Dispatch, MutableRefObject, SetStateAction } from 'react'
-import { Change } from '../AccountManager'
+import { Change } from '../CategoryManager'
 
 export function handleInputBlur(
 	e: ChangeEvent<HTMLInputElement>,
@@ -13,11 +13,11 @@ export function handleInputBlur(
 	// handles edge case where the user just adds spaces to the end of the value
 	// this will remove those spaces and the Change
 	if (defaultValue === currentValue) {
-		const account_id = e.target.dataset['id'] as Account.ID
+		const category_id = e.target.dataset['id'] as Category.ID
 		const key = e.target.dataset['key'] as keyof Change['new']
 
 		const thisPendingChangeIndex = pendingChangesRef.current.findIndex(
-			(change) => change.account_id === account_id
+			(change) => change.category_id === category_id
 		)
 		const thisPendingChange = pendingChangesRef.current[thisPendingChangeIndex]
 		if (thisPendingChange?.new[key] === undefined) {

@@ -3,9 +3,9 @@ import s from './DeleteForm.module.scss'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import {
-	deleteAccountAndTransactions,
-	deleteAccountAndReplace,
-	deleteAccountAndSetNull,
+	deleteCategoryAndTransactions,
+	deleteCategoryAndReplace,
+	deleteCategoryAndSetNull,
 	fetchData,
 	getAssociatedTransactionCount,
 } from '../../func'
@@ -14,34 +14,34 @@ import { addCommas, promptError, createPopup, isStandardError } from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
 
 interface DeleteFormProps {
-	account_name: string
-	account_id: string
+	category_name: string
+	category_id: string
 	afterDelete: () => void
 }
 type DeleteMethods = 'delete' | 'set_null' | 'replace'
-export function DeleteForm({ account_name, account_id, afterDelete }: DeleteFormProps) {
+export function DeleteForm({ category_name, category_id, afterDelete }: DeleteFormProps) {
 	const [deleteMethod, setDeleteMethod] = useState<DeleteMethods>()
-	const [otherAccounts, setOtherAccounts] = useState<{ name: string; id: string }[]>()
+	const [otherCategories, setOtherCategories] = useState<{ name: string; id: string }[]>()
 	const [readyToConfirm, setReadyToConfirm] = useState(false)
-	const [accountToChangeTo, setAccountToChangeTo] = useState<string>()
+	const [categoryToChangeTo, setCategoryToChangeTo] = useState<string>()
 	const [associatedTransactionCount, setAssociatedTransactionCount] = useState<number>()
 
 	useEffect(() => {
-		Promise.all([getAssociatedTransactionCount(account_id), fetchData()])
+		Promise.all([getAssociatedTransactionCount(category_id), fetchData()])
 			.then((values) => {
 				const count = values[0]
-				const accounts = values[1]
+				const categories = values[1]
 				setAssociatedTransactionCount(count)
-				setOtherAccounts(
-					accounts
-						.filter((account) => account.id !== account_id)
-						.map((account) => ({ name: account.name, id: account.id }))
+				setOtherCategories(
+					categories
+						.filter((category) => category.id !== category_id)
+						.map((category) => ({ name: category.name, id: category.id }))
 				)
 			})
 			.catch((e) => {
 				if (isStandardError(e)) {
 					promptError(
-						'An unexpected error has occured while trying to fetch the transactions associated with this account:',
+						'An unexpected error has occurred while trying to fetch the transactions associated with this category:',
 						e.message,
 						'Try refreshing the page to resolve this issue.'
 					)
@@ -54,7 +54,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 	if (associatedTransactionCount === undefined) {
 		return (
 			<div className={s.main}>
-				<h1>Delete "{account_name}"</h1>
+				<h1>Delete "{category_name}"</h1>
 				<div className={`${s.content} ${s.loading}`}>
 					<LoadingIcon />
 				</div>
@@ -62,7 +62,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 		)
 	} else if (associatedTransactionCount === 0) {
 		const handleConfirm = () => {
-			deleteAccountAndTransactions(account_id)
+			deleteCategoryAndTransactions(category_id)
 				.then(() => {
 					afterDelete()
 				})
@@ -70,7 +70,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 					if (isStandardError(e)) {
 						afterDelete()
 						promptError(
-							'An unexpected error has occured while deleting this account:',
+							'An unexpected error has occurred while deleting this category:',
 							e.message,
 							'Try refreshing the page to resolve this issue.'
 						)
@@ -81,11 +81,11 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 		}
 		return (
 			<div className={s.main}>
-				<h1>Delete "{account_name}"</h1>
+				<h1>Delete "{category_name}"</h1>
 				<div className={`${s.content} ${s.zero_transactions}`}>
 					<p>
 						There are <strong>0</strong> transactions associated with this
-						account. Are you sure you want to delete "{account_name}"?
+						category. Are you sure you want to delete "{category_name}"?
 					</p>
 					<div className={s.warning}>THIS CANNOT BE UNDONE</div>
 					<ConfirmButton onClick={handleConfirm} />
@@ -97,36 +97,36 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 			const selectedMethod = e.target.id as DeleteMethods
 			setDeleteMethod(selectedMethod)
 			setReadyToConfirm(true)
-			setAccountToChangeTo(undefined)
+			setCategoryToChangeTo(undefined)
 			if (selectedMethod === 'replace') {
 				setReadyToConfirm(false)
-				setAccountToChangeTo(undefined)
-				if (otherAccounts !== undefined) {
+				setCategoryToChangeTo(undefined)
+				if (otherCategories !== undefined) {
 				}
 			}
 		}
 		const handleDropdownChange: JDropdownTypes.ChangeEventHandler = (e) => {
 			if (e.target.value === '') {
 				setReadyToConfirm(false)
-				setAccountToChangeTo(undefined)
+				setCategoryToChangeTo(undefined)
 			} else {
 				setReadyToConfirm(true)
-				setAccountToChangeTo(e.target.value)
+				setCategoryToChangeTo(e.target.value)
 			}
 		}
 		const handleConfirm = () => {
 			let confirmMessage = <></>
-			let newAccountName: string | undefined = undefined
+			let newCategoryName: string | undefined = undefined
 			if (deleteMethod === 'replace') {
-				newAccountName = otherAccounts!.find(
-					(act) => act.id === accountToChangeTo
+				newCategoryName = otherCategories!.find(
+					(act) => act.id === categoryToChangeTo
 				)!.name
 			}
 			switch (deleteMethod) {
 				case 'delete':
 					confirmMessage = (
 						<p>
-							Are you sure you want to delete <strong>{account_name}</strong>{' '}
+							Are you sure you want to delete <strong>{category_name}</strong>{' '}
 							and any transactions associated with it?
 						</p>
 					)
@@ -134,8 +134,8 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 				case 'set_null':
 					confirmMessage = (
 						<p>
-							Are you sure you want to delete <strong>{account_name}</strong>{' '}
-							and set the account attribute of associated transactions to
+							Are you sure you want to delete <strong>{category_name}</strong>{' '}
+							and set the category attribute of associated transactions to
 							Empty?
 						</p>
 					)
@@ -143,9 +143,9 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 				case 'replace':
 					confirmMessage = (
 						<p>
-							Are you sure you want to delete <strong>{account_name}</strong>{' '}
-							and set the account attribute of associated transactions to{' '}
-							<strong>{newAccountName!}</strong>?
+							Are you sure you want to delete <strong>{category_name}</strong>{' '}
+							and set the category attribute of associated transactions to{' '}
+							<strong>{newCategoryName!}</strong>?
 						</p>
 					)
 					break
@@ -173,7 +173,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 			function handleConfirm() {
 				switch (deleteMethod) {
 					case 'delete':
-						deleteAccountAndTransactions(account_id)
+						deleteCategoryAndTransactions(category_id)
 							.then(() => {
 								myPopup.close()
 								afterDelete()
@@ -183,7 +183,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 									myPopup.close()
 									afterDelete()
 									promptError(
-										"An unexpected error has occured while deleting this account and it's associated transactions:",
+										"An unexpected error has occurred while deleting this category and it's associated transactions:",
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)
@@ -193,7 +193,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 							})
 						break
 					case 'set_null':
-						deleteAccountAndSetNull(account_id)
+						deleteCategoryAndSetNull(category_id)
 							.then(() => {
 								myPopup.close()
 								afterDelete()
@@ -203,7 +203,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 									myPopup.close()
 									afterDelete()
 									promptError(
-										"An unexpected error has occured while deleting this account and setting it's associated transactions to empty:",
+										"An unexpected error has occurred while deleting this category and setting it's associated transactions to empty:",
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)
@@ -213,7 +213,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 							})
 						break
 					case 'replace':
-						deleteAccountAndReplace(account_id, accountToChangeTo!)
+						deleteCategoryAndReplace(category_id, categoryToChangeTo!)
 							.then(() => {
 								myPopup.close()
 								afterDelete()
@@ -223,7 +223,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 									myPopup.close()
 									afterDelete()
 									promptError(
-										"An unexpected error has occured while deleting this account and replacing the account of it's associated transactions:",
+										"An unexpected error has occurred while deleting this category and replacing the category of it's associated transactions:",
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)
@@ -237,10 +237,10 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 		}
 		return (
 			<div className={s.main}>
-				<h1>Delete "{account_name}"</h1>
+				<h1>Delete "{category_name}"</h1>
 				<div
 					className={`${s.content} ${s.has_transactions} ${
-						otherAccounts!.length === 0 ? s.no_other_accounts : ''
+						otherCategories!.length === 0 ? s.no_other_categories : ''
 					}`}
 				>
 					<p>
@@ -256,7 +256,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 								transactions{' '}
 							</>
 						)}
-						associated with this account. How would you like to handle those
+						associated with this category. How would you like to handle those
 						transactions?
 					</p>
 					<div className={s.radio_options}>
@@ -272,26 +272,26 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 							name='handle_delete'
 							onChange={handleRadioChange}
 						>
-							Keep the transactions, and set their account attribute to Empty.
+							Keep the transactions, and set their category attribute to Empty.
 						</JRadio>
-						{otherAccounts!.length !== 0 && (
+						{otherCategories!.length !== 0 && (
 							<JRadio
 								id='replace'
 								name='handle_delete'
 								onChange={handleRadioChange}
 							>
-								Keep the transactions, and change their account attribute to
-								a different account.
+								Keep the transactions, and change their category attribute to
+								a different category.
 							</JRadio>
 						)}
 					</div>
 					{deleteMethod === 'replace' && (
 						<div className={s.replace_dropdown}>
-							<p>Choose an account to replace "{account_name}" with:</p>
+							<p>Choose an category to replace "{category_name}" with:</p>
 							<JDropdown
 								options={
-									otherAccounts !== undefined
-										? otherAccounts.map((item) => ({
+									otherCategories !== undefined
+										? otherCategories.map((item) => ({
 												name: item.name,
 												value: item.id,
 										  }))

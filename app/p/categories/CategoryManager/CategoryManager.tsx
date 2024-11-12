@@ -11,7 +11,7 @@ import {
 } from 'react'
 import s from './CategoryManager.module.scss'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
-import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
+import { JButton, JInput } from '@/components/JForm'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { default as UndoRedoIcon } from '@/public/undo_redo.svg'
 import { NewCategoryForm } from './NewCategoryForm/NewCategoryForm'
@@ -44,7 +44,7 @@ export interface Change {
 export function CategoryManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
-	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[]>([150, 200])
+	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[]>([230])
 	const [data, setData] = useState<Category.Full[] | null>(null)
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
@@ -144,7 +144,7 @@ export function CategoryManager() {
 				if (change.new.name !== undefined && change.new.name === '') {
 					isErrors = true
 					const errorNode = document.querySelector(
-						`.${s.account_name_input}[data-id="${change.account_id}"]`
+						`.${s.category_name_input}[data-id="${change.category_id}"]`
 					)
 					errorNode?.classList.add(s.error)
 					const thisTimeout = setTimeout(() => {
@@ -200,7 +200,7 @@ export function CategoryManager() {
 		setUndoHistoryStack([])
 		setRedoHistoryStack([])
 	}, [])
-	const handleCreateAccountButton = useCallback(() => {
+	const handleCreateCategoryButton = useCallback(() => {
 		const myPopup = createPopup(
 			<NewCategoryForm
 				afterSubmit={async () => {
@@ -314,22 +314,12 @@ export function CategoryManager() {
 			{
 				content: (
 					<div className={s.header_container}>
-						<div className={s.header}>Account Name</div>
+						<div className={s.header}>Category Name</div>
 					</div>
 				),
 				defaultWidth: defaultColumnWidths[0],
 				minWidth: 100,
 				maxWidth: 330,
-			},
-			{
-				content: (
-					<div className={s.header_container}>
-						<div className={s.header}>Starting Amount</div>
-					</div>
-				),
-				defaultWidth: defaultColumnWidths[1],
-				minWidth: 100,
-				maxWidth: 230,
 			},
 		],
 		[historyButtons, defaultColumnWidths]
@@ -340,7 +330,7 @@ export function CategoryManager() {
 		if (data.length === 0) {
 			grid = (
 				<p>
-					You do not have any accounts, click "Create new account" below to get
+					You do not have any categories, click "Create new category" below to get
 					started!
 				</p>
 			)
@@ -348,7 +338,7 @@ export function CategoryManager() {
 			const content = currentSortOrder.map((sortId, sortIndex) => {
 				const thisData = data.find((item) => item.id === sortId)!
 				const thisPendingChangeIndex = pendingChanges.findIndex(
-					(change) => change.account_id === sortId
+					(change) => change.category_id === sortId
 				)
 				const thisPendingChange =
 					thisPendingChangeIndex === -1
@@ -358,8 +348,8 @@ export function CategoryManager() {
 				return [
 					<div key={`1-${thisData.id}`} className={s.cell_container}>
 						<RowController
-							account_id={sortId}
-							account_name={thisData.name}
+							category_id={sortId}
+							category_name={thisData.name}
 							deleteDisabled={saveOptionIsAvailable}
 							sortDisabled={data.length <= 1}
 							sortIndex={sortIndex}
@@ -377,7 +367,7 @@ export function CategoryManager() {
 							onChange={handleInputChange}
 							onBlur={handleInputBlur}
 							onFocus={handleInputFocus}
-							className={`${s.account_name_input} ${
+							className={`${s.category_name_input} ${
 								thisPendingChange?.new.name ? s.changed : ''
 							}`}
 							data-id={thisData.id}
@@ -388,24 +378,6 @@ export function CategoryManager() {
 								thisPendingChange?.new.name !== undefined
 									? thisPendingChange.new.name
 									: thisData.name
-							}
-						/>
-					</div>,
-					<div key={`3-${thisData.id}`} className={s.cell_container}>
-						<JNumberAccounting
-							onChange={handleInputChange}
-							onBlur={handleInputBlur}
-							onFocus={handleInputFocus}
-							className={`${s.starting_amount_input} ${
-								thisPendingChange?.new.starting_amount ? s.changed : ''
-							}`}
-							data-id={thisData.id}
-							data-key='starting_amount'
-							data-default={thisData.starting_amount.toFixed(2)}
-							value={
-								thisPendingChange?.new.starting_amount !== undefined
-									? thisPendingChange.new.starting_amount
-									: thisData.starting_amount
 							}
 						/>
 					</div>,
@@ -425,7 +397,7 @@ export function CategoryManager() {
 
 	return (
 		<div className={s.main}>
-			<h2>Account Manager</h2>
+			<h2>Category Manager</h2>
 
 			{isLoading ? (
 				<div className={s.loading_container}>
@@ -442,12 +414,12 @@ export function CategoryManager() {
 					disabled={saveOptionIsAvailable}
 					title={
 						saveOptionIsAvailable
-							? 'Save or discard changes to create a new account'
+							? 'Save or discard changes to create a new category'
 							: ''
 					}
-					onClick={handleCreateAccountButton}
+					onClick={handleCreateCategoryButton}
 				>
-					Create new account
+					Create new category
 				</JButton>
 				<JButton
 					jstyle='primary'

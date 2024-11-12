@@ -1,10 +1,10 @@
 import { MutableRefObject } from 'react'
-import { Change } from '../AccountManager'
+import { Change } from '../CategoryManager'
 import { upsertData } from './clientFunctions'
 import { evaluate } from 'mathjs'
 
 export async function saveChanges(
-	data: Account.Full[] | null,
+	data: Category.Full[] | null,
 	currentSortOrderRef: MutableRefObject<string[]>,
 	defaultSortOrderRef: MutableRefObject<string[]>,
 	pendingChangesRef: MutableRefObject<Change[]>
@@ -12,32 +12,26 @@ export async function saveChanges(
 	const pendingChanges = pendingChangesRef.current
 
 	// apply data changes
-	const accountUpdates: Account.WithPropsAndID[] = pendingChanges.map((change) => {
-		const thisAccount = data!.find(
-			(item) => item.id === change.account_id
-		) as Account.Full
+	const categoryUpdates: Category.WithPropsAndID[] = pendingChanges.map((change) => {
+		const thisCategory = data!.find(
+			(item) => item.id === change.category_id
+		) as Category.Full
 		return {
-			id: change.account_id,
-			name: change.new.name === undefined ? thisAccount.name : change.new.name,
-			order_position: thisAccount.order_position,
-			starting_amount:
-				change.new.starting_amount === undefined
-					? thisAccount.starting_amount
-					: Math.round(parseFloat(evaluate(change.new.starting_amount)) * 100) /
-					  100,
+			id: change.category_id,
+			name: change.new.name === undefined ? thisCategory.name : change.new.name,
+			order_position: thisCategory.order_position,
 		}
 	})
 
 	// apply re-ordering
-	currentSortOrderRef.current.forEach((sortAccountID, sortIndex) => {
-		if (defaultSortOrderRef.current[sortIndex] !== sortAccountID) {
-			const thisUpdate = accountUpdates.find((update) => update.id === sortAccountID)
+	currentSortOrderRef.current.forEach((sortCategoryID, sortIndex) => {
+		if (defaultSortOrderRef.current[sortIndex] !== sortCategoryID) {
+			const thisUpdate = categoryUpdates.find((update) => update.id === sortCategoryID)
 			if (thisUpdate === undefined) {
-				const thisAccount = data!.find((item) => item.id === sortAccountID)!
-				accountUpdates.push({
-					id: sortAccountID,
-					name: thisAccount.name,
-					starting_amount: thisAccount.starting_amount,
+				const thisCategory = data!.find((item) => item.id === sortCategoryID)!
+				categoryUpdates.push({
+					id: sortCategoryID,
+					name: thisCategory.name,
 					order_position: sortIndex,
 				})
 			} else {
@@ -46,5 +40,5 @@ export async function saveChanges(
 		}
 	})
 
-	await upsertData(accountUpdates)
+	await upsertData(categoryUpdates)
 }

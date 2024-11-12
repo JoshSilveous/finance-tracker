@@ -1,5 +1,5 @@
 import { ChangeEvent, Dispatch, MutableRefObject, SetStateAction } from 'react'
-import { Change } from '../AccountManager'
+import { Change } from '../CategoryManager'
 import { removeFromArray } from '@/utils'
 import { HistoryItem } from './history'
 
@@ -15,7 +15,7 @@ export function handleInputChange(
 		e.target.value = e.target.value.trimStart()
 	}
 
-	const account_id = e.target.dataset['id'] as Account.ID
+	const category_id = e.target.dataset['id'] as Category.ID
 	const key = e.target.dataset['key'] as keyof Change['new']
 	const defaultValue = e.target.dataset['default'] as string
 	const currentValue = e.target.value
@@ -27,13 +27,13 @@ export function handleInputChange(
 			const mostRecentAction = prev.at(-1)!
 			if (
 				mostRecentAction.action === 'value_change' &&
-				mostRecentAction.account_id === account_id &&
+				mostRecentAction.category_id === category_id &&
 				mostRecentAction.key === key
 			) {
 				const newArr = [...prev]
 				newArr[newArr.length - 1] = {
 					action: 'value_change',
-					account_id: account_id,
+					category_id: category_id,
 					key: key,
 					oldVal: mostRecentAction.oldVal,
 					newVal: currentValue,
@@ -44,7 +44,7 @@ export function handleInputChange(
 					...prev,
 					{
 						action: 'value_change',
-						account_id: account_id,
+						category_id: category_id,
 						key: key,
 						oldVal: valueOnFocus !== undefined ? valueOnFocus : defaultValue,
 						newVal: currentValue,
@@ -55,7 +55,7 @@ export function handleInputChange(
 			return [
 				{
 					action: 'value_change',
-					account_id: account_id,
+					category_id: category_id,
 					key: key,
 					oldVal: valueOnFocus !== undefined ? valueOnFocus : defaultValue,
 					newVal: currentValue,
@@ -66,7 +66,7 @@ export function handleInputChange(
 	setRedoHistoryStack([])
 
 	const thisPendingChangeIndex = pendingChangesRef.current.findIndex(
-		(change) => change.account_id === account_id
+		(change) => change.category_id === category_id
 	)
 	const thisPendingChange =
 		thisPendingChangeIndex !== -1
@@ -96,7 +96,7 @@ export function handleInputChange(
 		setPendingChanges((prev) => [
 			...prev,
 			{
-				account_id,
+				category_id: category_id,
 				new: { [key]: currentValue },
 			},
 		])

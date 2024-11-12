@@ -9,7 +9,7 @@ interface HistoryItemReorder {
 interface HistoryItemValueChange {
 	action: 'value_change'
 	account_id: string
-	key: keyof Account.Bare
+	key: keyof Category.Bare
 	oldVal: string
 	newVal: string
 }

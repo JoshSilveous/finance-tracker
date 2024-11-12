@@ -6,7 +6,7 @@ export async function fetchAndLoadData(
 	setIsLoading: (value: SetStateAction<boolean>) => void,
 	gridRowRefs: MutableRefObject<HTMLDivElement[]>,
 	setDefaultColumnWidths: (value: SetStateAction<number[]>) => void,
-	setData: (value: SetStateAction<Account.Full[] | null>) => void,
+	setData: (value: SetStateAction<Category.Full[] | null>) => void,
 	setCurrentSortOrder: (value: SetStateAction<string[]>) => void,
 	setDefaultSortOrder: (value: SetStateAction<string[]>) => void
 ) {
@@ -14,24 +14,18 @@ export async function fetchAndLoadData(
 	gridRowRefs.current = []
 	try {
 		const columnWidths = await fetchPreferredColumnWidths()
-		setDefaultColumnWidths([
-			columnWidths.account_name_width,
-			columnWidths.starting_amount_width,
-		])
+		setDefaultColumnWidths([columnWidths.category_name_width])
 	} catch (e) {
 		if (isStandardError(e)) {
 			if (e.message === 'Preferences not found!') {
 				try {
 					await createPreferencesEntry()
 					const columnWidths = await fetchPreferredColumnWidths()
-					setDefaultColumnWidths([
-						columnWidths.account_name_width,
-						columnWidths.starting_amount_width,
-					])
+					setDefaultColumnWidths([columnWidths.category_name_width])
 				} catch (e) {
 					if (isStandardError(e)) {
 						promptError(
-							'An unexpected error has occured while propegating table layout preferences in the database:',
+							'An unexpected error has occurred while propagating table layout preferences in the database:',
 							e.message,
 							'Try refreshing the page to resolve this issue.'
 						)

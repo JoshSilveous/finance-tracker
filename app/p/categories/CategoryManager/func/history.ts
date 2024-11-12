@@ -1,5 +1,5 @@
 import { MutableRefObject, SetStateAction } from 'react'
-import { Change } from '../AccountManager'
+import { Change } from '../CategoryManager'
 
 interface HistoryItemReorder {
 	action: 'reorder'
@@ -8,8 +8,8 @@ interface HistoryItemReorder {
 }
 interface HistoryItemValueChange {
 	action: 'value_change'
-	account_id: string
-	key: keyof Account.Bare
+	category_id: string
+	key: keyof Category.Bare
 	oldVal: string
 	newVal: string
 }
@@ -35,14 +35,14 @@ export function undoMostRecentAction(
 		})
 	} else {
 		// if we are undoing a value change
-		const { account_id, key, oldVal } = mostRecentAction
+		const { category_id, key, oldVal } = mostRecentAction
 
 		const node = document.querySelector(
-			`[data-id="${account_id}"][data-key="${key}"]`
+			`[data-id="${category_id}"][data-key="${key}"]`
 		) as HTMLInputElement
 
 		const thisPendingChangeIndex = pendingChangesRef.current.findIndex(
-			(item) => item.account_id === account_id
+			(item) => item.category_id === category_id
 		)
 
 		if (thisPendingChangeIndex !== -1) {
@@ -61,24 +61,9 @@ export function undoMostRecentAction(
 			}
 
 			if (returningToDefault) {
-				// if we are returning to the default value
-				if (
-					(key === 'name' &&
-						thisPendingChange.new.starting_amount === undefined) ||
-					(key === 'starting_amount' && thisPendingChange.new.name === undefined)
-				) {
-					// if other keys don't exist on pendingChange, remove change
-					setPendingChanges((prev) =>
-						prev.filter((_, index) => index !== thisPendingChangeIndex)
-					)
-				} else {
-					// if other keys DO exist on pendingChange, set key to undefined
-					setPendingChanges((prev) => {
-						const newArr = structuredClone(prev)
-						newArr[thisPendingChangeIndex].new[key] = undefined
-						return newArr
-					})
-				}
+				setPendingChanges((prev) =>
+					prev.filter((_, index) => index !== thisPendingChangeIndex)
+				)
 			} else {
 				// set pendingChange to reflect the old value
 				setPendingChanges((prev) => {
@@ -91,7 +76,7 @@ export function undoMostRecentAction(
 			// add a pendingChange
 			setPendingChanges((prev) => [
 				...prev,
-				{ account_id: account_id, new: { [key]: oldVal } },
+				{ category_id: category_id, new: { [key]: oldVal } },
 			])
 		}
 		node.focus()
@@ -119,14 +104,14 @@ export function redoMostRecentAction(
 		})
 	} else {
 		// if we are redoing a value change
-		const { account_id, key, newVal } = mostRecentUndoAction
+		const { category_id, key, newVal } = mostRecentUndoAction
 
 		const node = document.querySelector(
-			`[data-id="${account_id}"][data-key="${key}"]`
+			`[data-id="${category_id}"][data-key="${key}"]`
 		) as HTMLInputElement
 
 		const thisPendingChangeIndex = pendingChangesRef.current.findIndex(
-			(item) => item.account_id === account_id
+			(item) => item.category_id === category_id
 		)
 
 		if (thisPendingChangeIndex !== -1) {
@@ -145,24 +130,9 @@ export function redoMostRecentAction(
 			}
 
 			if (returningToDefault) {
-				// if we are returning to the default value
-				if (
-					(key === 'name' &&
-						thisPendingChange.new.starting_amount === undefined) ||
-					(key === 'starting_amount' && thisPendingChange.new.name === undefined)
-				) {
-					// if other keys don't exist on pendingChange, remove change
-					setPendingChanges((prev) =>
-						prev.filter((_, index) => index !== thisPendingChangeIndex)
-					)
-				} else {
-					// if other keys DO exist on pendingChange, set key to undefined
-					setPendingChanges((prev) => {
-						const newArr = structuredClone(prev)
-						newArr[thisPendingChangeIndex].new[key] = undefined
-						return newArr
-					})
-				}
+				setPendingChanges((prev) =>
+					prev.filter((_, index) => index !== thisPendingChangeIndex)
+				)
 			} else {
 				// set pendingChange to reflect the new value
 				setPendingChanges((prev) => {
@@ -175,7 +145,7 @@ export function redoMostRecentAction(
 			// add a pendingChange
 			setPendingChanges((prev) => [
 				...prev,
-				{ account_id: account_id, new: { [key]: newVal } },
+				{ category_id: category_id, new: { [key]: newVal } },
 			])
 		}
 		node.focus()

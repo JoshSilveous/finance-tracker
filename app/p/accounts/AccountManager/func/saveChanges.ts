@@ -4,7 +4,7 @@ import { upsertData } from './clientFunctions'
 import { evaluate } from 'mathjs'
 
 export async function saveChanges(
-	data: Account.Full[] | null,
+	data: Category.Full[] | null,
 	currentSortOrderRef: MutableRefObject<string[]>,
 	defaultSortOrderRef: MutableRefObject<string[]>,
 	pendingChangesRef: MutableRefObject<Change[]>
@@ -12,10 +12,10 @@ export async function saveChanges(
 	const pendingChanges = pendingChangesRef.current
 
 	// apply data changes
-	const accountUpdates: Account.WithPropsAndID[] = pendingChanges.map((change) => {
+	const accountUpdates: Category.WithPropsAndID[] = pendingChanges.map((change) => {
 		const thisAccount = data!.find(
 			(item) => item.id === change.account_id
-		) as Account.Full
+		) as Category.Full
 		return {
 			id: change.account_id,
 			name: change.new.name === undefined ? thisAccount.name : change.new.name,
