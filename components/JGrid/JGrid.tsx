@@ -15,7 +15,7 @@ export namespace JGridTypes {
 	}
 	export interface Props {
 		headers: Header[]
-		content: JSX.Element[][]
+		cells: { content: JSX.Element; cellStyle?: React.CSSProperties }[][]
 		style?: React.CSSProperties
 		className?: string
 		noOuterBorders?: boolean
@@ -33,7 +33,7 @@ export namespace JGridTypes {
 
 export function JGrid({
 	headers,
-	content,
+	cells,
 	style,
 	className,
 	noOuterBorders,
@@ -211,11 +211,11 @@ export function JGrid({
 		)
 	})
 
-	const contentJSX = content.map((itemRow, itemRowIndex) => {
+	const contentJSX = cells.map((itemRow, itemRowIndex) => {
 		return (
 			<div className={s.row} key={itemRowIndex}>
 				{itemRow.map((itemCell, itemCellIndex) => {
-					const isBottomRow = itemRowIndex === content.length - 1
+					const isBottomRow = itemRowIndex === cells.length - 1
 					const isRightColumn = itemCellIndex === itemRow.length - 1
 					return (
 						<div
@@ -227,9 +227,10 @@ export function JGrid({
 									isBottomRow && noOuterBorders ? '0px' : '',
 								borderRightWidth:
 									isRightColumn && noOuterBorders ? '0px' : '',
+								...itemCell.cellStyle,
 							}}
 						>
-							{itemCell}
+							{itemCell.content}
 						</div>
 					)
 				})}

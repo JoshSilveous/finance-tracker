@@ -368,7 +368,7 @@ export function AccountManager() {
 				</p>
 			)
 		} else {
-			const content = currentSortOrder.map((sortId, sortIndex) => {
+			const cells = currentSortOrder.map((sortId, sortIndex) => {
 				const thisData = data.find((item) => item.id === sortId)!
 				const thisPendingChangeIndex = pendingChanges.findIndex(
 					(change) => change.account_id === sortId
@@ -379,64 +379,78 @@ export function AccountManager() {
 						: pendingChanges[thisPendingChangeIndex]
 
 				return [
-					<div key={`1-${thisData.id}`} className={s.cell_container}>
-						<RowController
-							account_id={sortId}
-							account_name={thisData.name}
-							deleteDisabled={saveOptionIsAvailable}
-							sortDisabled={data.length <= 1}
-							sortIndex={sortIndex}
-							currentSortOrder={currentSortOrder}
-							defaultSortOrder={defaultSortOrder}
-							gridRowRefs={gridRowRefs}
-							setCurrentSortOrder={setCurrentSortOrder}
-							fetchAndLoadData={fetchAndLoadData}
-							setUndoHistoryStack={setUndoHistoryStack}
-							setRedoHistoryStack={setRedoHistoryStack}
-						/>
-					</div>,
-					<div key={`2-${thisData.id}`} className={s.cell_container}>
-						<JInput
-							onChange={handleInputChange}
-							onBlur={handleInputBlur}
-							onFocus={handleInputFocus}
-							className={`${s.account_name_input} ${
-								thisPendingChange?.new.name ? s.changed : ''
-							}`}
-							data-id={thisData.id}
-							data-key='name'
-							data-default={thisData.name}
-							maxLength={24}
-							value={
-								thisPendingChange?.new.name !== undefined
-									? thisPendingChange.new.name
-									: thisData.name
-							}
-						/>
-					</div>,
-					<div key={`3-${thisData.id}`} className={s.cell_container}>
-						<JNumberAccounting
-							onChange={handleInputChange}
-							onBlur={handleInputBlur}
-							onFocus={handleInputFocus}
-							className={`${s.starting_amount_input} ${
-								thisPendingChange?.new.starting_amount ? s.changed : ''
-							}`}
-							data-id={thisData.id}
-							data-key='starting_amount'
-							data-default={thisData.starting_amount.toFixed(2)}
-							value={
-								thisPendingChange?.new.starting_amount !== undefined
-									? thisPendingChange.new.starting_amount
-									: thisData.starting_amount
-							}
-						/>
-					</div>,
+					{
+						content: (
+							<div key={`1-${thisData.id}`} className={s.cell_container}>
+								<RowController
+									account_id={sortId}
+									account_name={thisData.name}
+									deleteDisabled={saveOptionIsAvailable}
+									sortDisabled={data.length <= 1}
+									sortIndex={sortIndex}
+									currentSortOrder={currentSortOrder}
+									defaultSortOrder={defaultSortOrder}
+									gridRowRefs={gridRowRefs}
+									setCurrentSortOrder={setCurrentSortOrder}
+									fetchAndLoadData={fetchAndLoadData}
+									setUndoHistoryStack={setUndoHistoryStack}
+									setRedoHistoryStack={setRedoHistoryStack}
+								/>
+							</div>
+						),
+					},
+					{
+						content: (
+							<div key={`2-${thisData.id}`} className={s.cell_container}>
+								<JInput
+									onChange={handleInputChange}
+									onBlur={handleInputBlur}
+									onFocus={handleInputFocus}
+									className={`${s.account_name_input} ${
+										thisPendingChange?.new.name ? s.changed : ''
+									}`}
+									data-id={thisData.id}
+									data-key='name'
+									data-default={thisData.name}
+									maxLength={24}
+									value={
+										thisPendingChange?.new.name !== undefined
+											? thisPendingChange.new.name
+											: thisData.name
+									}
+								/>
+							</div>
+						),
+					},
+					{
+						content: (
+							<div key={`3-${thisData.id}`} className={s.cell_container}>
+								<JNumberAccounting
+									onChange={handleInputChange}
+									onBlur={handleInputBlur}
+									onFocus={handleInputFocus}
+									className={`${s.starting_amount_input} ${
+										thisPendingChange?.new.starting_amount
+											? s.changed
+											: ''
+									}`}
+									data-id={thisData.id}
+									data-key='starting_amount'
+									data-default={thisData.starting_amount.toFixed(2)}
+									value={
+										thisPendingChange?.new.starting_amount !== undefined
+											? thisPendingChange.new.starting_amount
+											: thisData.starting_amount
+									}
+								/>
+							</div>
+						),
+					},
 				]
 			})
 			const gridConfig: JGridTypes.Props = {
 				headers: gridHeaders,
-				content: content,
+				cells: cells,
 				maxTableWidth: 500,
 				onResize: updateDefaultColumnWidth,
 				minColumnWidth: 30,
