@@ -12,7 +12,7 @@ export async function fetchData() {
 	if (error) {
 		throw new Error(error.message)
 	}
-	return data as Category.Full[]
+	return data as Account.Full[]
 }
 
 interface AccountManagerPreferences {
@@ -59,10 +59,10 @@ export async function updatePreferredColumnWidth(columnIndex: number, newWidth: 
 	return
 }
 
-export async function upsertData(accountUpdates: Category.WithPropsAndID[]) {
+export async function upsertData(accountUpdates: Account.WithPropsAndID[]) {
 	const user_id = await getUserID()
 
-	const accountUpdatesWithUserID: Category.Full[] = accountUpdates.map((item) => {
+	const accountUpdatesWithUserID: Account.Full[] = accountUpdates.map((item) => {
 		return {
 			...item,
 			user_id: user_id,
@@ -81,12 +81,12 @@ export async function upsertData(accountUpdates: Category.WithPropsAndID[]) {
 	return
 }
 
-export async function insertAccount(account: Category.Bare) {
+export async function insertAccount(account: Account.Bare) {
 	const user_id = await getUserID()
 
 	const numOfAccounts = await getAccountsCount()
 
-	const newAccount: Category.WithPropsAndUser = {
+	const newAccount: Account.WithPropsAndUser = {
 		name: account.name,
 		starting_amount: account.starting_amount,
 		user_id: user_id,
@@ -111,7 +111,7 @@ export async function getAccountsCount() {
 	return count as number
 }
 
-export async function getAssociatedTransactionCount(account_id: Category.ID) {
+export async function getAssociatedTransactionCount(account_id: Account.ID) {
 	const { count, error } = await supabase
 		.from('transactions')
 		.select('*', { count: 'exact', head: true })
@@ -122,7 +122,7 @@ export async function getAssociatedTransactionCount(account_id: Category.ID) {
 	return count as number
 }
 
-export async function deleteAccountAndTransactions(account_id: Category.ID) {
+export async function deleteAccountAndTransactions(account_id: Account.ID) {
 	const transactionsUpdate = await supabase
 		.from('transactions')
 		.delete()
@@ -137,7 +137,7 @@ export async function deleteAccountAndTransactions(account_id: Category.ID) {
 		throw new Error(accountDeleteRes.error.message)
 	}
 }
-export async function deleteAccountAndSetNull(account_id: Category.ID) {
+export async function deleteAccountAndSetNull(account_id: Account.ID) {
 	// by default, transactions account_id are set null when associated account is
 	const res = await supabase.from('accounts').delete().eq('id', account_id)
 
@@ -146,8 +146,8 @@ export async function deleteAccountAndSetNull(account_id: Category.ID) {
 	}
 }
 export async function deleteAccountAndReplace(
-	account_id: Category.ID,
-	new_account_id: Category.ID
+	account_id: Account.ID,
+	new_account_id: Account.ID
 ) {
 	const transactionsUpdate = await supabase
 		.from('transactions')

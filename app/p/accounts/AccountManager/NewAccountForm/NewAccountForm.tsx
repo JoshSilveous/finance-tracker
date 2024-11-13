@@ -12,7 +12,7 @@ interface Errors {
 }
 
 export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
-	const [formData, setFormData] = useState<Category.Bare>({ name: '', starting_amount: 0 })
+	const [formData, setFormData] = useState<Account.Bare>({ name: '', starting_amount: 0 })
 	const [errors, setErrors] = useState<Errors>({
 		name: '',
 		starting_amount: '',
@@ -42,7 +42,7 @@ export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
 
 		if (formValid) {
 			setIsSubmitting(true)
-			const newAccount: Category.Bare = {
+			const newAccount: Account.Bare = {
 				name: formData.name.trim(),
 				starting_amount: formData.starting_amount,
 			}
