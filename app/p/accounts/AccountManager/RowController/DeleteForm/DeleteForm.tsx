@@ -41,7 +41,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 			.catch((e) => {
 				if (isStandardError(e)) {
 					promptError(
-						'An unexpected error has occured while trying to fetch the transactions associated with this account:',
+						'An unexpected error has occurred while trying to fetch the transactions associated with this account:',
 						e.message,
 						'Try refreshing the page to resolve this issue.'
 					)
@@ -70,7 +70,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 					if (isStandardError(e)) {
 						afterDelete()
 						promptError(
-							'An unexpected error has occured while deleting this account:',
+							'An unexpected error has occurred while deleting this account:',
 							e.message,
 							'Try refreshing the page to resolve this issue.'
 						)
@@ -183,7 +183,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 									myPopup.close()
 									afterDelete()
 									promptError(
-										"An unexpected error has occured while deleting this account and it's associated transactions:",
+										"An unexpected error has occurred while deleting this account and it's associated transactions:",
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)
@@ -203,7 +203,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 									myPopup.close()
 									afterDelete()
 									promptError(
-										"An unexpected error has occured while deleting this account and setting it's associated transactions to empty:",
+										"An unexpected error has occurred while deleting this account and setting it's associated transactions to empty:",
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)
@@ -223,7 +223,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 									myPopup.close()
 									afterDelete()
 									promptError(
-										"An unexpected error has occured while deleting this account and replacing the account of it's associated transactions:",
+										"An unexpected error has occurred while deleting this account and replacing the account of it's associated transactions:",
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)

@@ -31,7 +31,7 @@ export async function fetchAndLoadData(
 				} catch (e) {
 					if (isStandardError(e)) {
 						promptError(
-							'An unexpected error has occured while propegating table layout preferences in the database:',
+							'An unexpected error has occurred while propagating table layout preferences in the database:',
 							e.message,
 							'Try refreshing the page to resolve this issue.'
 						)
@@ -39,7 +39,7 @@ export async function fetchAndLoadData(
 				}
 			} else {
 				promptError(
-					'An unexpected error has occured while fetching table layout preferences in the database:',
+					'An unexpected error has occurred while fetching table layout preferences in the database:',
 					e.message,
 					'Try refreshing the page to resolve this issue.'
 				)
@@ -56,7 +56,7 @@ export async function fetchAndLoadData(
 	} catch (e) {
 		if (isStandardError(e)) {
 			promptError(
-				'An unexpected error has occured while fetching your data:',
+				'An unexpected error has occurred while fetching your data:',
 				e.message,
 				'Try refreshing the page to resolve this issue.'
 			)
