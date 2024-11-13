@@ -268,6 +268,28 @@ export function CategoryManager() {
 					}
 					return
 				}
+
+				// ENTER to focus next item
+				else if (
+					e.key === 'Enter' &&
+					(document.activeElement as HTMLElement).tagName === 'INPUT'
+				) {
+					e.preventDefault()
+					const currentElement = document.activeElement as HTMLInputElement
+
+					const focusableElements = Array.from(
+						document.querySelectorAll<HTMLInputElement>('input')
+					).filter(
+						(elem) =>
+							!elem.disabled && !elem.hidden && elem.offsetParent !== null
+					)
+
+					const currentIndex = focusableElements.indexOf(currentElement)
+
+					if (currentIndex >= 0 && currentIndex < focusableElements.length - 1) {
+						focusableElements[currentIndex + 1].focus()
+					}
+				}
 			}
 		}
 		window.addEventListener('keydown', handleKeyDown)

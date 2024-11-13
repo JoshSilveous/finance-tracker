@@ -35,7 +35,7 @@ import {
 import { RowController } from './RowController/RowController'
 
 export interface Change {
-	account_id: Category.ID
+	account_id: Account.ID
 	new: {
 		name?: string
 		starting_amount?: string
@@ -46,19 +46,19 @@ export function AccountManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[]>([150, 200])
-	const [data, setData] = useState<Category.Full[] | null>(null)
+	const [data, setData] = useState<Account.Full[] | null>(null)
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
-	const [currentSortOrder, setCurrentSortOrder] = useState<Category.ID[]>([])
-	const [defaultSortOrder, setDefaultSortOrder] = useState<Category.ID[]>([])
+	const [currentSortOrder, setCurrentSortOrder] = useState<Account.ID[]>([])
+	const [defaultSortOrder, setDefaultSortOrder] = useState<Account.ID[]>([])
 	const [undoHistoryStack, setUndoHistoryStack] = useState<HistoryItem[]>([])
 	const [redoHistoryStack, setRedoHistoryStack] = useState<HistoryItem[]>([])
 	const gridRowRefs = useRef<HTMLDivElement[]>([])
 
 	// below refs are used in event listeners and memoized functions to ensure we are pulling the most recent data while maintaining performance
 	const pendingChangesRef = useRef<Change[]>(pendingChanges)
-	const currentSortOrderRef = useRef<Category.ID[]>(currentSortOrder)
-	const defaultSortOrderRef = useRef<Category.ID[]>(defaultSortOrder)
+	const currentSortOrderRef = useRef<Account.ID[]>(currentSortOrder)
+	const defaultSortOrderRef = useRef<Account.ID[]>(defaultSortOrder)
 	const isLoadingRef = useRef<boolean>(isLoading)
 	const undoHistoryStackRef = useRef<HistoryItem[]>(undoHistoryStack)
 	const redoHistoryStackRef = useRef<HistoryItem[]>(redoHistoryStack)
@@ -268,6 +268,28 @@ export function AccountManager() {
 						redoMostRecentAction()
 					}
 					return
+				}
+
+				// ENTER to focus next item
+				else if (
+					e.key === 'Enter' &&
+					(document.activeElement as HTMLElement).tagName === 'INPUT'
+				) {
+					e.preventDefault()
+					const currentElement = document.activeElement as HTMLInputElement
+
+					const focusableElements = Array.from(
+						document.querySelectorAll<HTMLInputElement>('input')
+					).filter(
+						(elem) =>
+							!elem.disabled && !elem.hidden && elem.offsetParent !== null
+					)
+
+					const currentIndex = focusableElements.indexOf(currentElement)
+
+					if (currentIndex >= 0 && currentIndex < focusableElements.length - 1) {
+						focusableElements[currentIndex + 1].focus()
+					}
 				}
 			}
 		}
