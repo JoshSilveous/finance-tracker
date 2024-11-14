@@ -4,8 +4,7 @@ import { createClient, getUserID } from '@/utils/supabase/client'
 
 const supabase = createClient()
 
-export async function fetchDataTest() {
-	console.log('fetching transaction data...')
+export async function fetchData() {
 	const { data, error } = await supabase
 		.from('transactions')
 		.select(
@@ -33,7 +32,6 @@ export async function fetchDataTest() {
 	if (error) {
 		throw new Error(error.message)
 	}
-	console.log('fetched! result:')
 	console.log(data)
 	return data as Transaction.Full[]
 }
