@@ -1,4 +1,4 @@
 {
 	"cSpell.words": ["jbutton", "jgrid", "jstyle", "signup", "supabase"],
-	"exportall.config.folderListener": ["/app/p/accounts/AccountManager/func"]
+	"exportall.config.folderListener": ["/app/p/accounts/AccountManager/func", "/database"]
 }

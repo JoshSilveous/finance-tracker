@@ -1,6 +1,7 @@
 import { MutableRefObject, SetStateAction } from 'react'
-import { fetchData, fetchPreferredColumnWidths } from '.'
+import { fetchPreferredColumnWidths } from '.'
 import { createPreferencesEntry, isStandardError, promptError } from '@/utils'
+import { fetchCategoryData } from '@/database'
 
 export async function fetchAndLoadData(
 	setIsLoading: (value: SetStateAction<boolean>) => void,
@@ -41,7 +42,7 @@ export async function fetchAndLoadData(
 		}
 	}
 	try {
-		const data = await fetchData()
+		const data = await fetchCategoryData()
 		setData(data)
 		setIsLoading(false)
 		const sortOrder = data.map((item) => item.id)

@@ -6,12 +6,11 @@ import {
 	deleteCategoryAndTransactions,
 	deleteCategoryAndReplace,
 	deleteCategoryAndSetNull,
-	fetchData,
-	getAssociatedTransactionCount,
-} from '../../func'
+} from '@/database'
 import { JButton } from '@/components/JForm'
 import { addCommas, promptError, createPopup, isStandardError } from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
+import { fetchCategoryData, getCategoryCountAssocWithTransaction } from '@/database'
 
 interface DeleteFormProps {
 	category_name: string
@@ -27,7 +26,7 @@ export function DeleteForm({ category_name, category_id, afterDelete }: DeleteFo
 	const [associatedTransactionCount, setAssociatedTransactionCount] = useState<number>()
 
 	useEffect(() => {
-		Promise.all([getAssociatedTransactionCount(category_id), fetchData()])
+		Promise.all([getCategoryCountAssocWithTransaction(category_id), fetchCategoryData()])
 			.then((values) => {
 				const count = values[0]
 				const categories = values[1]

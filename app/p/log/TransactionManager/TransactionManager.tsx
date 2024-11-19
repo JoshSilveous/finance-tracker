@@ -1,32 +1,46 @@
 'use client'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { fetchData } from './func/clientFunctions'
-import { fetchData as fetchCategories } from '../../categories/CategoryManager/func/clientFunctions'
 import { fetchData as fetchAccounts } from '../../accounts/AccountManager/func/clientFunctions'
 import { isStandardError, promptError } from '@/utils'
-import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
+import {
+	fetchCategoryData,
+	FetchedTransaction,
+	fetchTransactionData,
+	fetchCategoryTotals,
+} from '@/database'
+interface LoadState {
+	loading: boolean
+	message: string
+}
 export function TransactionManager() {
 	const [categories, setCategories] = useState<Category.WithPropsAndID[] | null>(null)
 	const [accounts, setAccounts] = useState<Account.WithPropsAndID[] | null>(null)
-	const [data, setData] = useState<Transaction.Full[] | null>(null)
-	const [isLoading, setIsLoading] = useState(true)
+	const [data, setData] = useState<FetchedTransaction[] | null>(null)
+	const [loadState, setLoadState] = useState<LoadState>({
+		loading: true,
+		message: 'Loading',
+	})
 
-	async function loadData() {
+	async function fetchAndLoadData() {
 		try {
-			const [transactionData, categoryData, accountData] = await Promise.all([
-				fetchData(),
-				fetchCategories(),
-				fetchAccounts(),
-			])
+			setLoadState({ loading: true, message: 'Fetching Transaction Data' })
+			const transactionData = await fetchTransactionData()
 			setData(transactionData)
+
+			setLoadState({ loading: true, message: 'Fetching Category Data' })
+			const categoryData = await fetchCategoryData()
 			setCategories(categoryData)
+
+			setLoadState({ loading: true, message: 'Fetching Account Data' })
+			const accountData = await fetchAccounts()
 			setAccounts(accountData)
-			setIsLoading(false)
+			setLoadState({ loading: false, message: '' })
+			fetchCategoryTotals()
 		} catch (e) {
 			if (isStandardError(e)) {
 				promptError(
-					'An unexpected error has occurred while fetching your transaction data from the database:',
+					'An unexpected error has occurred while fetching your data from the database:',
 					e.message,
 					'Try refreshing the page to resolve this issue.'
 				)
@@ -34,10 +48,14 @@ export function TransactionManager() {
 		}
 	}
 	useEffect(() => {
-		loadData()
+		fetchAndLoadData()
 	}, [])
-	if (!isLoading) {
+	if (!loadState.loading) {
 		console.log('data loaded:\n', categories, '\n', accounts, '\n', data)
 	}
-	return <div>TransactionManager</div>
+	return (
+		<div>
+			TransactionManager<div>{loadState.loading ? loadState.message : 'Loaded!'}</div>
+		</div>
+	)
 }

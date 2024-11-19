@@ -1,7 +1,7 @@
 import { MutableRefObject } from 'react'
 import { Change } from '../CategoryManager'
-import { upsertData } from './clientFunctions'
 import { evaluate } from 'mathjs'
+import { upsertCategories } from '@/database'
 
 export async function saveChanges(
 	data: Category.WithPropsAndID[] | null,
@@ -40,5 +40,5 @@ export async function saveChanges(
 		}
 	})
 
-	await upsertData(categoryUpdates)
+	await upsertCategories(categoryUpdates)
 }

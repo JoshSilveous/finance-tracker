@@ -46,7 +46,7 @@ namespace Transaction {
 	interface Bare {
 		name: string
 		date: string
-		items: TransactionItem.Full[]
+		items: TransactionItem.WithPropsAndID[]
 	}
 	interface WithProps extends Bare {
 		order_position: number

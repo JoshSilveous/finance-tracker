@@ -1,3 +1,4 @@
+-   Phase out namespace type system- accounts
 -   Model how the transaction log will look / work
 
 -   Create CategoryManager

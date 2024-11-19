@@ -2,7 +2,7 @@ import { JButton } from '@/components/JForm'
 import s from './NewCategoryForm.module.scss'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { JInput, JNumberAccounting } from '@/components/JForm'
-import { insertCategory } from '../func'
+import { insertCategory } from '@/database'
 import { isStandardError } from '@/utils'
 
 interface Errors {
