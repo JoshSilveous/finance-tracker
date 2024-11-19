@@ -46,7 +46,7 @@ export function AccountManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[]>([150, 200])
-	const [data, setData] = useState<Account.Full[] | null>(null)
+	const [data, setData] = useState<Account.WithPropsAndID[] | null>(null)
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 	const [currentSortOrder, setCurrentSortOrder] = useState<Account.ID[]>([])

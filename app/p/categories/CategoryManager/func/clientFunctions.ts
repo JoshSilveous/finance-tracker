@@ -7,12 +7,12 @@ const supabase = createClient()
 export async function fetchData() {
 	const { data, error } = await supabase
 		.from('categories')
-		.select('*')
+		.select('id, name, order_position')
 		.order('order_position')
 	if (error) {
 		throw new Error(error.message)
 	}
-	return data as Category.Full[]
+	return data as Category.WithPropsAndID[]
 }
 
 interface CategoryManagerPreferences {

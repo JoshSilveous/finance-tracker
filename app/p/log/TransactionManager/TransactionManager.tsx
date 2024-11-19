@@ -7,8 +7,8 @@ import { fetchData as fetchAccounts } from '../../accounts/AccountManager/func/c
 import { isStandardError, promptError } from '@/utils'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 export function TransactionManager() {
-	const [categories, setCategories] = useState<Category.Full[] | null>(null)
-	const [accounts, setAccounts] = useState<Account.Full[] | null>(null)
+	const [categories, setCategories] = useState<Category.WithPropsAndID[] | null>(null)
+	const [accounts, setAccounts] = useState<Account.WithPropsAndID[] | null>(null)
 	const [data, setData] = useState<Transaction.Full[] | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 

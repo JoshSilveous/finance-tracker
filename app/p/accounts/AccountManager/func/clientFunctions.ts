@@ -7,12 +7,12 @@ const supabase = createClient()
 export async function fetchData() {
 	const { data, error } = await supabase
 		.from('accounts')
-		.select('*')
+		.select('id, name, order_position, starting_amount')
 		.order('order_position')
 	if (error) {
 		throw new Error(error.message)
 	}
-	return data as Account.Full[]
+	return data as Account.WithPropsAndID[]
 }
 
 interface AccountManagerPreferences {
@@ -62,7 +62,7 @@ export async function updatePreferredColumnWidth(columnIndex: number, newWidth: 
 export async function upsertData(accountUpdates: Account.WithPropsAndID[]) {
 	const user_id = await getUserID()
 
-	const accountUpdatesWithUserID: Account.Full[] = accountUpdates.map((item) => {
+	const accountUpdatesWithUserID: Account.WithPropsAndID[] = accountUpdates.map((item) => {
 		return {
 			...item,
 			user_id: user_id,

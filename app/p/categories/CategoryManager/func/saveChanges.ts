@@ -4,7 +4,7 @@ import { upsertData } from './clientFunctions'
 import { evaluate } from 'mathjs'
 
 export async function saveChanges(
-	data: Category.Full[] | null,
+	data: Category.WithPropsAndID[] | null,
 	currentSortOrderRef: MutableRefObject<string[]>,
 	defaultSortOrderRef: MutableRefObject<string[]>,
 	pendingChangesRef: MutableRefObject<Change[]>

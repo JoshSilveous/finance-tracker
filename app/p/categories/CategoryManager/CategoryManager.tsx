@@ -45,7 +45,7 @@ export function CategoryManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[]>([230])
-	const [data, setData] = useState<Category.Full[] | null>(null)
+	const [data, setData] = useState<Category.WithPropsAndID[] | null>(null)
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
 	const [currentSortOrder, setCurrentSortOrder] = useState<Category.ID[]>([])
