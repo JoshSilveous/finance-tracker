@@ -1,7 +1,7 @@
 import { MutableRefObject } from 'react'
 import { Change } from '../AccountManager'
-import { upsertData } from './clientFunctions'
 import { evaluate } from 'mathjs'
+import { upsertAccounts } from '@/database'
 
 export async function saveChanges(
 	data: Account.WithPropsAndID[] | null,
@@ -46,5 +46,5 @@ export async function saveChanges(
 		}
 	})
 
-	await upsertData(accountUpdates)
+	await upsertAccounts(accountUpdates)
 }

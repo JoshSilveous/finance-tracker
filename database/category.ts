@@ -139,12 +139,14 @@ export async function deleteCategoryAndReplace(
 	}
 }
 
+interface CategoryTotal {
+	category_id: Category.ID
+	total_amount: number
+}
 export async function fetchCategoryTotals() {
 	const { data, error } = await supabase.rpc('get_totals_by_category')
-
 	if (error) {
 		throw new Error(error.message)
 	}
-
-	return data
+	return data as CategoryTotal[]
 }

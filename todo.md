@@ -1,5 +1,6 @@
 -   Phase out namespace type system- accounts
 -   Model how the transaction log will look / work
+-   Switch preferred column widths to localStorage instead of DB
 
 -   Create CategoryManager
 -   Add undo/redo buttons in AccountManager
