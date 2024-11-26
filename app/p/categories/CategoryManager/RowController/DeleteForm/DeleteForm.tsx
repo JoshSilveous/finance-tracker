@@ -6,11 +6,12 @@ import {
 	deleteCategoryAndTransactions,
 	deleteCategoryAndReplace,
 	deleteCategoryAndSetNull,
+	fetchCategoryData,
+	getCategoryCountAssocWithTransaction,
 } from '@/database'
 import { JButton } from '@/components/JForm'
 import { addCommas, promptError, createPopup, isStandardError } from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
-import { fetchCategoryData, getCategoryCountAssocWithTransaction } from '@/database'
 
 interface DeleteFormProps {
 	category_name: string

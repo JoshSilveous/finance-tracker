@@ -2,7 +2,7 @@ import { JButton } from '@/components/JForm'
 import s from './NewAccountForm.module.scss'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { JInput, JNumberAccounting } from '@/components/JForm'
-import { insertAccount } from '@/database'
+import { insertAccount, InsertAccountEntry } from '@/database'
 import { isStandardError } from '@/utils'
 
 interface Errors {
@@ -12,7 +12,10 @@ interface Errors {
 }
 
 export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
-	const [formData, setFormData] = useState<Account.Bare>({ name: '', starting_amount: 0 })
+	const [formData, setFormData] = useState<InsertAccountEntry>({
+		name: '',
+		starting_amount: 0,
+	})
 	const [errors, setErrors] = useState<Errors>({
 		name: '',
 		starting_amount: '',
@@ -42,7 +45,7 @@ export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
 
 		if (formValid) {
 			setIsSubmitting(true)
-			const newAccount: Account.Bare = {
+			const newAccount: InsertAccountEntry = {
 				name: formData.name.trim(),
 				starting_amount: formData.starting_amount,
 			}

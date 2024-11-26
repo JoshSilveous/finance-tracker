@@ -6,9 +6,9 @@ import {
 	deleteAccountAndTransactions,
 	deleteAccountAndReplace,
 	deleteAccountAndSetNull,
-	fetchData,
-	getAssociatedTransactionCount,
-} from '../../func'
+	fetchAccountData,
+	getAccountCountAssocWithTransaction,
+} from '@/database'
 import { JButton } from '@/components/JForm'
 import { addCommas, promptError, createPopup, isStandardError } from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
@@ -27,7 +27,7 @@ export function DeleteForm({ account_name, account_id, afterDelete }: DeleteForm
 	const [associatedTransactionCount, setAssociatedTransactionCount] = useState<number>()
 
 	useEffect(() => {
-		Promise.all([getAssociatedTransactionCount(account_id), fetchData()])
+		Promise.all([getAccountCountAssocWithTransaction(account_id), fetchAccountData()])
 			.then((values) => {
 				const count = values[0]
 				const accounts = values[1]

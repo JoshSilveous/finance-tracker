@@ -1,10 +1,10 @@
 import { MutableRefObject } from 'react'
 import { Change } from '../AccountManager'
 import { evaluate } from 'mathjs'
-import { upsertAccounts } from '@/database'
+import { FetchedAccount, upsertAccounts } from '@/database'
 
 export async function saveChanges(
-	data: Account.WithPropsAndID[] | null,
+	data: FetchedAccount[] | null,
 	currentSortOrderRef: MutableRefObject<string[]>,
 	defaultSortOrderRef: MutableRefObject<string[]>,
 	pendingChangesRef: MutableRefObject<Change[]>
@@ -12,10 +12,10 @@ export async function saveChanges(
 	const pendingChanges = pendingChangesRef.current
 
 	// apply data changes
-	const accountUpdates: Account.WithPropsAndID[] = pendingChanges.map((change) => {
+	const accountUpdates: FetchedAccount[] = pendingChanges.map((change) => {
 		const thisAccount = data!.find(
 			(item) => item.id === change.account_id
-		) as Account.WithPropsAndID
+		) as FetchedAccount
 		return {
 			id: change.account_id,
 			name: change.new.name === undefined ? thisAccount.name : change.new.name,

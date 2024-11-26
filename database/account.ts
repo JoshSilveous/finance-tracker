@@ -81,7 +81,7 @@ export async function upsertAccounts(accountUpdates: UpsertAccountEntry[]) {
 	return
 }
 
-export async function getAssociatedTransactionCount(account_id: string) {
+export async function getAccountCountAssocWithTransaction(account_id: string) {
 	const { count, error } = await supabase
 		.from('transactions')
 		.select('*', { count: 'exact', head: true })

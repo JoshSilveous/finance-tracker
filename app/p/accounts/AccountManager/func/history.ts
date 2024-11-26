@@ -1,5 +1,6 @@
 import { MutableRefObject, SetStateAction } from 'react'
 import { Change } from '../AccountManager'
+import { InsertAccountEntry } from '@/database'
 
 interface HistoryItemReorder {
 	action: 'reorder'
@@ -9,7 +10,7 @@ interface HistoryItemReorder {
 interface HistoryItemValueChange {
 	action: 'value_change'
 	account_id: string
-	key: keyof Account.Bare
+	key: keyof InsertAccountEntry
 	oldVal: string
 	newVal: string
 }
