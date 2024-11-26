@@ -33,9 +33,10 @@ import {
 	fetchAndLoadData as fetchAndLoadDataDef,
 } from './func'
 import { RowController } from './RowController/RowController'
+import { FetchedCategory } from '@/database'
 
 export interface Change {
-	category_id: Category.ID
+	category_id: string
 	new: {
 		name?: string
 	}
@@ -45,19 +46,19 @@ export function CategoryManager() {
 	const bgLoad = useBgLoad()
 	const [isLoading, setIsLoading] = useState(true)
 	const [defaultColumnWidths, setDefaultColumnWidths] = useState<number[]>([230])
-	const [data, setData] = useState<Category.WithPropsAndID[] | null>(null)
+	const [data, setData] = useState<FetchedCategory[] | null>(null)
 	const [isSavingChanges, setIsSavingChanges] = useState(false)
 	const [pendingChanges, setPendingChanges] = useState<Change[]>([])
-	const [currentSortOrder, setCurrentSortOrder] = useState<Category.ID[]>([])
-	const [defaultSortOrder, setDefaultSortOrder] = useState<Category.ID[]>([])
+	const [currentSortOrder, setCurrentSortOrder] = useState<string[]>([])
+	const [defaultSortOrder, setDefaultSortOrder] = useState<string[]>([])
 	const [undoHistoryStack, setUndoHistoryStack] = useState<HistoryItem[]>([])
 	const [redoHistoryStack, setRedoHistoryStack] = useState<HistoryItem[]>([])
 	const gridRowRefs = useRef<HTMLDivElement[]>([])
 
 	// below refs are used in event listeners and memoized functions to ensure we are pulling the most recent data while maintaining performance
 	const pendingChangesRef = useRef<Change[]>(pendingChanges)
-	const currentSortOrderRef = useRef<Category.ID[]>(currentSortOrder)
-	const defaultSortOrderRef = useRef<Category.ID[]>(defaultSortOrder)
+	const currentSortOrderRef = useRef<string[]>(currentSortOrder)
+	const defaultSortOrderRef = useRef<string[]>(defaultSortOrder)
 	const isLoadingRef = useRef<boolean>(isLoading)
 	const undoHistoryStackRef = useRef<HistoryItem[]>(undoHistoryStack)
 	const redoHistoryStackRef = useRef<HistoryItem[]>(redoHistoryStack)

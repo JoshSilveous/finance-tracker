@@ -140,7 +140,7 @@ export async function deleteCategoryAndReplace(
 }
 
 interface CategoryTotal {
-	category_id: Category.ID
+	category_id: string
 	total_amount: number
 }
 export async function fetchCategoryTotals() {

@@ -2,7 +2,7 @@ import { JButton } from '@/components/JForm'
 import s from './NewCategoryForm.module.scss'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { JInput, JNumberAccounting } from '@/components/JForm'
-import { insertCategory } from '@/database'
+import { insertCategory, InsertCategoryEntry } from '@/database'
 import { isStandardError } from '@/utils'
 
 interface Errors {
@@ -11,7 +11,7 @@ interface Errors {
 }
 
 export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
-	const [formData, setFormData] = useState<Category.Bare>({ name: '' })
+	const [formData, setFormData] = useState<InsertCategoryEntry>({ name: '' })
 	const [errors, setErrors] = useState<Errors>({
 		name: '',
 		general: '',
@@ -39,7 +39,7 @@ export function NewCategoryForm({ afterSubmit }: { afterSubmit: () => void }) {
 
 		if (formValid) {
 			setIsSubmitting(true)
-			const newCategory: Category.Bare = {
+			const newCategory: InsertCategoryEntry = {
 				name: formData.name.trim(),
 			}
 

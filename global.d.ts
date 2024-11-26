@@ -1,24 +1,3 @@
-namespace Category {
-	type ID = string
-	interface Bare {
-		name: string
-	}
-	interface WithProps extends Bare {
-		order_position: number
-	}
-	interface BareWithID extends Bare {
-		id: ID
-	}
-	interface WithPropsAndUser extends WithProps {
-		user_id: string
-	}
-	interface WithPropsAndID extends WithProps {
-		id: ID
-	}
-	interface Full extends WithPropsAndUser {
-		id: ID
-	}
-}
 namespace Transaction {
 	type ID = string
 	interface Bare {

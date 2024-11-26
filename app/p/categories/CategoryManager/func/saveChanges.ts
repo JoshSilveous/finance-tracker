@@ -1,10 +1,10 @@
 import { MutableRefObject } from 'react'
 import { Change } from '../CategoryManager'
 import { evaluate } from 'mathjs'
-import { upsertCategories } from '@/database'
+import { FetchedCategory, upsertCategories } from '@/database'
 
 export async function saveChanges(
-	data: Category.WithPropsAndID[] | null,
+	data: FetchedCategory[] | null,
 	currentSortOrderRef: MutableRefObject<string[]>,
 	defaultSortOrderRef: MutableRefObject<string[]>,
 	pendingChangesRef: MutableRefObject<Change[]>
@@ -12,10 +12,10 @@ export async function saveChanges(
 	const pendingChanges = pendingChangesRef.current
 
 	// apply data changes
-	const categoryUpdates: Category.WithPropsAndID[] = pendingChanges.map((change) => {
+	const categoryUpdates: FetchedCategory[] = pendingChanges.map((change) => {
 		const thisCategory = data!.find(
 			(item) => item.id === change.category_id
-		) as Category.Full
+		) as FetchedCategory
 		return {
 			id: change.category_id,
 			name: change.new.name === undefined ? thisCategory.name : change.new.name,

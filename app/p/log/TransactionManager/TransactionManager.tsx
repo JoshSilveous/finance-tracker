@@ -1,21 +1,23 @@
 'use client'
 import { useEffect, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { fetchData as fetchAccounts } from '../../accounts/AccountManager/func/clientFunctions'
 import { isStandardError, promptError } from '@/utils'
 import {
 	fetchCategoryData,
 	FetchedTransaction,
 	fetchTransactionData,
 	fetchCategoryTotals,
+	FetchedAccount,
+	FetchedCategory,
+	fetchAccountData,
 } from '@/database'
 interface LoadState {
 	loading: boolean
 	message: string
 }
 export function TransactionManager() {
-	const [categories, setCategories] = useState<Category.WithPropsAndID[] | null>(null)
-	const [accounts, setAccounts] = useState<Account.WithPropsAndID[] | null>(null)
+	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
+	const [accounts, setAccounts] = useState<FetchedAccount[] | null>(null)
 	const [data, setData] = useState<FetchedTransaction[] | null>(null)
 	const [loadState, setLoadState] = useState<LoadState>({
 		loading: true,
@@ -33,7 +35,7 @@ export function TransactionManager() {
 			setCategories(categoryData)
 
 			setLoadState({ loading: true, message: 'Fetching Account Data' })
-			const accountData = await fetchAccounts()
+			const accountData = await fetchAccountData()
 			setAccounts(accountData)
 			setLoadState({ loading: false, message: '' })
 			fetchCategoryTotals()

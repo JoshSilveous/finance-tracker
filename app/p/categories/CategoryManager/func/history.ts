@@ -1,5 +1,6 @@
 import { MutableRefObject, SetStateAction } from 'react'
 import { Change } from '../CategoryManager'
+import { InsertCategoryEntry } from '@/database'
 
 interface HistoryItemReorder {
 	action: 'reorder'
@@ -9,7 +10,7 @@ interface HistoryItemReorder {
 interface HistoryItemValueChange {
 	action: 'value_change'
 	category_id: string
-	key: keyof Category.Bare
+	key: keyof InsertCategoryEntry
 	oldVal: string
 	newVal: string
 }

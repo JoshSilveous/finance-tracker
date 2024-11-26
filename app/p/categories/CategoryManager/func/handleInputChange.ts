@@ -15,7 +15,7 @@ export function handleInputChange(
 		e.target.value = e.target.value.trimStart()
 	}
 
-	const category_id = e.target.dataset['id'] as Category.ID
+	const category_id = e.target.dataset['id'] as string
 	const key = e.target.dataset['key'] as keyof Change['new']
 	const defaultValue = e.target.dataset['default'] as string
 	const currentValue = e.target.value
