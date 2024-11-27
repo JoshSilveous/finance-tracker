@@ -6,7 +6,7 @@ import { default as LoadingAnim } from '@/public/loading.svg'
 export namespace JDropdownTypes {
 	export interface Props {
 		options: Option[]
-		onChange: ChangeEventHandler
+		onChange?: ChangeEventHandler
 		defaultValue?: string | number
 		placeholder?: string
 		className?: string
@@ -35,7 +35,9 @@ export function JDropdown(props: JDropdownTypes.Props) {
 					<LoadingAnim />
 				</div>
 			)}
-			<select onChange={props.onChange}>{props.loading ? '' : optionsDisplay}</select>
+			<select onChange={props.onChange} defaultValue={props.defaultValue}>
+				{props.loading ? '' : optionsDisplay}
+			</select>
 			<div className={s.custom_arrow}>
 				<DropdownArrow />
 			</div>

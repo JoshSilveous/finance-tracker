@@ -100,7 +100,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 				onFocus={handleFocus}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
-				style={showFormatted ? { color: 'transparent' } : {}}
+				style={showFormatted ? { color: 'transparent' } : { color: 'inherit' }}
 			/>
 			<div
 				className={s.right_parenthesis}

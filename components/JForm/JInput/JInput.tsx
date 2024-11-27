@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, RefObject } from 'react'
+import { InputHTMLAttributes } from 'react'
 import s from './JInput.module.scss'
 
 interface JInputProps extends InputHTMLAttributes<HTMLInputElement> {}
