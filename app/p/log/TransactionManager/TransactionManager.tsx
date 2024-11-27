@@ -1,5 +1,5 @@
 'use client'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import s from './TransactionManager.module.scss'
 import { isStandardError, promptError } from '@/utils'
 import {
@@ -12,6 +12,8 @@ import {
 	fetchAccountData,
 } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
+import { JInput, JNumberAccounting } from '@/components/JForm'
+import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 interface LoadState {
 	loading: boolean
 	message: string
@@ -63,14 +65,42 @@ export function TransactionManager() {
 			data
 		)
 	}
+
+	const dropdownOptionsCategory: JDropdownTypes.Option[] = useMemo(() => {
+		if (categories === null) {
+			return []
+		} else {
+			return categories.map((cat) => {
+				return {
+					name: cat.name,
+					value: cat.id,
+				}
+			})
+		}
+	}, [categories])
+	const dropdownOptionsAccount: JDropdownTypes.Option[] = useMemo(() => {
+		if (accounts === null) {
+			return []
+		} else {
+			return accounts.map((act) => {
+				return {
+					name: act.name,
+					value: act.id,
+				}
+			})
+		}
+	}, [accounts])
+
 	const headers: JGridTypes.Header[] = [
-		{ content: <div>Date</div>, defaultWidth: 100 },
-		{ content: <div>Name</div>, defaultWidth: 100 },
-		{ content: <div>Amount</div>, defaultWidth: 100 },
-		{ content: <div>Category</div>, defaultWidth: 100 },
-		{ content: <div>Account</div>, defaultWidth: 100 },
+		{ content: <div className={s.header_container}>Date</div>, defaultWidth: 100 },
+		{ content: <div className={s.header_container}>Name</div>, defaultWidth: 300 },
+		{ content: <div className={s.header_container}>Amount</div>, defaultWidth: 100 },
+		{ content: <div className={s.header_container}>Category</div>, defaultWidth: 100 },
+		{ content: <div className={s.header_container}>Account</div>, defaultWidth: 100 },
 	]
+
 	let grid: ReactNode
+
 	if (!loadState.loading && data !== null && categories !== null && accounts !== null) {
 		if (data.length === 0) {
 			grid = (
@@ -85,30 +115,50 @@ export function TransactionManager() {
 				if (transaction.items.length === 1) {
 					const transactionItem = transaction.items[0]
 					cells.push([
-						{ content: <div>{transaction.date}</div> },
-						{ content: <div>{transaction.name}</div> },
-						{ content: <div>{transaction.items[0].amount}</div> },
 						{
 							content: (
-								<div>
-									{transactionItem.category_id === null
-										? 'NULL'
-										: categories.find(
-												(cat) =>
-													cat.id === transactionItem.category_id
-										  )?.name}
+								<div className={s.data_container}>{transaction.date}</div>
+							),
+						},
+						{
+							content: (
+								<div className={s.data_container}>
+									<JInput value={transaction.name} />
 								</div>
 							),
 						},
 						{
 							content: (
-								<div>
-									{transactionItem.account_id === null
-										? 'NULL'
-										: accounts.find(
-												(act) =>
-													act.id === transactionItem.account_id
-										  )?.name}
+								<div className={s.data_container}>
+									<JNumberAccounting value={transactionItem.amount} />
+								</div>
+							),
+						},
+						{
+							content: (
+								<div className={s.data_container}>
+									<JDropdown
+										options={dropdownOptionsCategory}
+										defaultValue={
+											transactionItem.category_id !== null
+												? transactionItem.category_id
+												: undefined
+										}
+									/>
+								</div>
+							),
+						},
+						{
+							content: (
+								<div className={s.data_container}>
+									<JDropdown
+										options={dropdownOptionsAccount}
+										defaultValue={
+											transactionItem.account_id !== null
+												? transactionItem.account_id
+												: undefined
+										}
+									/>
 								</div>
 							),
 						},
@@ -119,36 +169,70 @@ export function TransactionManager() {
 						sum += item.amount
 						return [
 							{ content: <></> },
-							{ content: <div>{item.name}</div> },
-							{ content: <div>{item.amount}</div> },
 							{
 								content: (
-									<div>
-										{item.category_id === null
-											? 'NULL'
-											: categories.find(
-													(cat) => cat.id === item.category_id
-											  )?.name}
+									<div className={s.data_container}>
+										<JInput value={item.name} />
 									</div>
 								),
 							},
 							{
 								content: (
-									<div>
-										{item.account_id === null
-											? 'NULL'
-											: accounts.find(
-													(act) => act.id === item.account_id
-											  )?.name}
+									<div className={s.data_container}>
+										<JNumberAccounting value={item.amount} />
+									</div>
+								),
+							},
+							{
+								content: (
+									<div className={s.data_container}>
+										<JDropdown
+											options={dropdownOptionsCategory}
+											defaultValue={
+												item.category_id !== null
+													? item.category_id
+													: undefined
+											}
+										/>
+									</div>
+								),
+							},
+							{
+								content: (
+									<div className={s.data_container}>
+										<JDropdown
+											options={dropdownOptionsAccount}
+											defaultValue={
+												item.account_id !== null
+													? item.account_id
+													: undefined
+											}
+										/>
 									</div>
 								),
 							},
 						]
 					})
 					const firstRow = [
-						{ content: <div>{transaction.date}</div> },
-						{ content: <div>{transaction.name}</div> },
-						{ content: <div>{sum}</div> },
+						{
+							content: (
+								<div className={s.data_container}>{transaction.date}</div>
+							),
+						},
+						{
+							content: (
+								<div className={s.data_container}>
+									<JInput value={transaction.name} />
+								</div>
+							),
+						},
+						{
+							content: (
+								<div className={s.data_container}>
+									<JNumberAccounting value={sum} disabled />
+								</div>
+							),
+						},
 						{ content: <></> },
 						{ content: <></> },
 					]
@@ -159,7 +243,7 @@ export function TransactionManager() {
 				headers: headers,
 				cells: cells,
 			}
-			grid = <JGrid {...gridConfig} />
+			grid = <JGrid className={s.grid} {...gridConfig} />
 		}
 	}
 	return (
