@@ -2,6 +2,7 @@ import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { FetchedAccount, FetchedCategory, FetchedTransaction } from '@/database'
+import { MouseEvent } from 'react'
 import s from './row_gen.module.scss'
 
 export function genSingleRow(
@@ -11,7 +12,9 @@ export function genSingleRow(
 ) {
 	const transactionItem = transaction.items[0]
 	return [
-		{ content: <div className={s.row_controller}></div> },
+		{
+			content: <div className={s.row_controller}></div>,
+		},
 		{
 			content: (
 				<div className={`${s.data_container} ${s.single_item} ${s.first_col}`}>
@@ -77,8 +80,21 @@ export function genMultiRow(
 
 		const isLastRow = itemIndex === transaction.items.length - 1
 
+		function handleReorder(e: MouseEvent<HTMLDivElement>) {
+			const reorderElem = e.target as HTMLDivElement
+			const rowElem = reorderElem.parentElement!.parentElement!
+				.parentElement as HTMLDivElement
+			console.log(rowElem)
+		}
+
 		return [
-			{ content: <div className={s.row_controller}></div> },
+			{
+				content: (
+					<div className={s.row_controller}>
+						<div onClick={handleReorder}>O</div>
+					</div>
+				),
+			},
 			{
 				content: (
 					<div
