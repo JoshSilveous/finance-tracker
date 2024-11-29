@@ -98,6 +98,11 @@ export function TransactionManager() {
 	}, [accounts])
 
 	const headers: JGridTypes.Header[] = [
+		{
+			content: <div className={s.header_container}>CNTRL</div>,
+			defaultWidth: 75,
+			noResize: true,
+		},
 		{ content: <div className={s.header_container}>Date</div>, defaultWidth: 125 },
 		{ content: <div className={s.header_container}>Name</div>, defaultWidth: 250 },
 		{ content: <div className={s.header_container}>Amount</div>, defaultWidth: 100 },

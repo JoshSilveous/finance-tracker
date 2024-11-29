@@ -11,6 +11,7 @@ export function genSingleRow(
 ) {
 	const transactionItem = transaction.items[0]
 	return [
+		{ content: <div className={s.row_controller}></div> },
 		{
 			content: (
 				<div className={`${s.data_container} ${s.single_item} ${s.first_col}`}>
@@ -77,6 +78,7 @@ export function genMultiRow(
 		const isLastRow = itemIndex === transaction.items.length - 1
 
 		return [
+			{ content: <div className={s.row_controller}></div> },
 			{
 				content: (
 					<div
@@ -167,6 +169,7 @@ export function genMultiRow(
 	})
 
 	const firstRow = [
+		{ content: <div className={s.row_controller}></div> },
 		{
 			content: (
 				<div

@@ -1,7 +1,11 @@
--   Phase out namespace type system- accounts
+-   TransactionManager: Add control to fold/unfold multi-rows
+-   TransactionManager: Add control to resort multi-rows
+-   TransactionManager: Add control to resort rows
+
 -   Model how the transaction log will look / work
 -   Switch preferred column widths to localStorage instead of DB
 
+-   Phase out namespace type system- accounts
 -   Create CategoryManager
 -   Add undo/redo buttons in AccountManager
 -   Add 'invisible' JButton style
