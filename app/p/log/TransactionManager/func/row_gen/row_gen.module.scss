@@ -1,0 +1,57 @@
+.data_container {
+	width: 100%;
+	box-sizing: border-box; // have to use border-box to prevent form element overlaps
+	--padding-val: 2.5px;
+	--margin-top: 10px;
+	--border-radius: 5px;
+
+	&.single_item {
+		background-color: var(--bg-color-lighter-2);
+		padding: calc(var(--padding-val) * 2) var(--padding-val);
+		height: calc(36px + (var(--padding-val) * 4));
+		&.first_col {
+			padding-left: calc(var(--padding-val) * 2);
+			border-radius: var(--border-radius) 0 0 var(--border-radius);
+		}
+		&.last_col {
+			padding-right: calc(var(--padding-val) * 2);
+			border-radius: 0 var(--border-radius) var(--border-radius) 0;
+		}
+	}
+	&.multi_item {
+		background-color: var(--bg-color-lighter-2);
+
+		padding: var(--padding-val);
+		height: calc(36px + (var(--padding-val) * 2));
+		&.first_row {
+			margin-top: var(--margin-top);
+		}
+		&.first_row {
+			padding-top: calc(var(--padding-val) * 2);
+			height: calc(36px + (var(--padding-val) * 3));
+		}
+		&.last_row {
+			padding-bottom: calc(var(--padding-val) * 2);
+			height: calc(36px + (var(--padding-val) * 3));
+		}
+		&.first_col {
+			padding-left: calc(var(--padding-val) * 2);
+		}
+		&.last_col {
+			padding-right: calc(var(--padding-val) * 2);
+		}
+
+		&.first_row.first_col {
+			border-radius: var(--border-radius) 0 0 0;
+		}
+		&.first_row.last_col {
+			border-radius: 0 var(--border-radius) 0 0;
+		}
+		&.last_row.last_col {
+			border-radius: 0 0 var(--border-radius) 0;
+		}
+		&.last_row.first_col {
+			border-radius: 0 0 0 var(--border-radius);
+		}
+	}
+}
