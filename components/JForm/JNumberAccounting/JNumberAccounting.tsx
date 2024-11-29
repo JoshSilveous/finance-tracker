@@ -11,7 +11,9 @@ import { addCommas } from '@/utils'
 import s from './JNumberAccounting.module.scss'
 import { evaluate } from 'mathjs'
 
-interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {}
+interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {
+	minimalStyle?: boolean
+}
 
 export function JNumberAccounting(props: JNumberAccountingProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -85,7 +87,11 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 	const showFormatted = !(isHovering || isFocused)
 
 	return (
-		<div className={`${s.main} ${props.className ? props.className : ''}`}>
+		<div
+			className={`${s.main} ${props.className ? props.className : ''} ${
+				props.minimalStyle ? s.minimal_style : ''
+			} ${props.disabled ? s.disabled : ''}`}
+		>
 			<span className={s.dollar_symbol}>$</span>
 			<div className={s.left_parenthesis} hidden={!(showParenthesis && showFormatted)}>
 				(

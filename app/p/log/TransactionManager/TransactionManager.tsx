@@ -14,6 +14,7 @@ import {
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
+import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 interface LoadState {
 	loading: boolean
 	message: string
@@ -117,7 +118,9 @@ export function TransactionManager() {
 					cells.push([
 						{
 							content: (
-								<div className={s.data_container}>{transaction.date}</div>
+								<div className={s.data_container}>
+									<JDatePicker defaultValue={transaction.date} />
+								</div>
 							),
 						},
 						{
@@ -213,10 +216,38 @@ export function TransactionManager() {
 							},
 						]
 					})
+
+					let categoryList = ''
+					let accountList = ''
+					transaction.items.forEach((item) => {
+						if (item.category_id !== null) {
+							const categoryName = categories.find(
+								(cat) => cat.id === item.category_id
+							)!.name
+							if (categoryList === '') {
+								categoryList += categoryName
+							} else {
+								categoryList += ', ' + categoryName
+							}
+						}
+						if (item.account_id !== null) {
+							const accountName = accounts.find(
+								(act) => act.id === item.account_id
+							)!.name
+							if (accountList === '') {
+								accountList += accountName
+							} else {
+								accountList += ', ' + accountName
+							}
+						}
+					})
+
 					const firstRow = [
 						{
 							content: (
-								<div className={s.data_container}>{transaction.date}</div>
+								<div className={s.data_container}>
+									<JDatePicker defaultValue={transaction.date} />
+								</div>
 							),
 						},
 						{
@@ -229,12 +260,24 @@ export function TransactionManager() {
 						{
 							content: (
 								<div className={s.data_container}>
-									<JNumberAccounting value={sum} disabled />
+									<JNumberAccounting value={sum} disabled minimalStyle />
 								</div>
 							),
 						},
-						{ content: <></> },
-						{ content: <></> },
+						{
+							content: (
+								<div className={s.data_container}>
+									<JInput value={categoryList} disabled minimalStyle />
+								</div>
+							),
+						},
+						{
+							content: (
+								<div className={s.data_container}>
+									<JInput value={accountList} disabled minimalStyle />
+								</div>
+							),
+						},
 					]
 					cells.push(firstRow, ...nextRows)
 				}

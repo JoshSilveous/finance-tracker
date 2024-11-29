@@ -7,7 +7,7 @@
 		height: 36px;
 		box-sizing: border-box;
 		width: 100%;
-		padding: 8px 12px;
+		padding: 8px 10px;
 		border-radius: 3px;
 		outline: none;
 		box-shadow: inset 0 0 0 0.5px var(--input-border-color);
@@ -18,9 +18,14 @@
 		&:active {
 			box-shadow: inset 0 0 0 2px var(--input-border-color);
 		}
-
-		&:disabled {
-			color: var(--font-color-disabled);
+	}
+	&.minimal_style input {
+		background-color: transparent;
+		box-shadow: none !important;
+	}
+	&.disabled {
+		color: var(--font-color-disabled);
+		input {
 			cursor: not-allowed;
 			&:focus,
 			&:active {
