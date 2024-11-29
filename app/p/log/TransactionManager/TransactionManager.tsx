@@ -118,28 +118,36 @@ export function TransactionManager() {
 					cells.push([
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.single_item} ${s.first_col}`}
+								>
 									<JDatePicker defaultValue={transaction.date} />
 								</div>
 							),
 						},
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.single_item} ${s.mid_col}`}
+								>
 									<JInput value={transaction.name} />
 								</div>
 							),
 						},
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.single_item} ${s.mid_col}`}
+								>
 									<JNumberAccounting value={transactionItem.amount} />
 								</div>
 							),
 						},
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.single_item} ${s.mid_col}`}
+								>
 									<JDropdown
 										options={dropdownOptionsCategory}
 										defaultValue={
@@ -153,7 +161,9 @@ export function TransactionManager() {
 						},
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.single_item} ${s.last_col}`}
+								>
 									<JDropdown
 										options={dropdownOptionsAccount}
 										defaultValue={
@@ -168,27 +178,56 @@ export function TransactionManager() {
 					])
 				} else {
 					let sum = 0
-					const nextRows = transaction.items.map((item) => {
+					const nextRows = transaction.items.map((item, itemIndex) => {
 						sum += item.amount
+
+						const isLastRow = itemIndex === transaction.items.length - 1
+
 						return [
-							{ content: <></> },
 							{
 								content: (
-									<div className={s.data_container}>
+									<div
+										className={`${s.data_container} ${s.multi_item} ${
+											s.first_col
+										} ${isLastRow ? s.last_row : s.mid_row}`}
+									>
+										<JDatePicker
+											defaultValue={transaction.date}
+											disabled
+											minimalStyle
+										/>
+									</div>
+								),
+							},
+							{
+								content: (
+									<div
+										className={`${s.data_container} ${s.multi_item} ${
+											s.mid_col
+										} ${isLastRow ? s.last_row : s.mid_row}`}
+									>
 										<JInput value={item.name} />
 									</div>
 								),
 							},
 							{
 								content: (
-									<div className={s.data_container}>
+									<div
+										className={`${s.data_container} ${s.multi_item} ${
+											s.mid_col
+										} ${isLastRow ? s.last_row : s.mid_row}`}
+									>
 										<JNumberAccounting value={item.amount} />
 									</div>
 								),
 							},
 							{
 								content: (
-									<div className={s.data_container}>
+									<div
+										className={`${s.data_container} ${s.multi_item} ${
+											s.mid_col
+										} ${isLastRow ? s.last_row : s.mid_row}`}
+									>
 										<JDropdown
 											options={dropdownOptionsCategory}
 											defaultValue={
@@ -202,7 +241,11 @@ export function TransactionManager() {
 							},
 							{
 								content: (
-									<div className={s.data_container}>
+									<div
+										className={`${s.data_container} ${s.multi_item} ${
+											s.last_col
+										} ${isLastRow ? s.last_row : s.mid_row}`}
+									>
 										<JDropdown
 											options={dropdownOptionsAccount}
 											defaultValue={
@@ -245,35 +288,45 @@ export function TransactionManager() {
 					const firstRow = [
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}
+								>
 									<JDatePicker defaultValue={transaction.date} />
 								</div>
 							),
 						},
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+								>
 									<JInput value={transaction.name} />
 								</div>
 							),
 						},
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+								>
 									<JNumberAccounting value={sum} disabled minimalStyle />
 								</div>
 							),
 						},
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+								>
 									<JInput value={categoryList} disabled minimalStyle />
 								</div>
 							),
 						},
 						{
 							content: (
-								<div className={s.data_container}>
+								<div
+									className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}
+								>
 									<JInput value={accountList} disabled minimalStyle />
 								</div>
 							),
@@ -285,6 +338,7 @@ export function TransactionManager() {
 			const gridConfig: JGridTypes.Props = {
 				headers: headers,
 				cells: cells,
+				noBorders: true,
 			}
 			grid = <JGrid className={s.grid} {...gridConfig} />
 		}
