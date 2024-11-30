@@ -12,58 +12,36 @@ export function genSingleRow(
 ) {
 	const transactionItem = transaction.items[0]
 	return [
-		{
-			content: <div className={s.row_controller}></div>,
-		},
-		{
-			content: (
-				<div className={`${s.data_container} ${s.single_item} ${s.first_col}`}>
-					<JDatePicker defaultValue={transaction.date} />
-				</div>
-			),
-		},
-		{
-			content: (
-				<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
-					<JInput value={transaction.name} />
-				</div>
-			),
-		},
-		{
-			content: (
-				<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
-					<JNumberAccounting value={transactionItem.amount} />
-				</div>
-			),
-		},
-		{
-			content: (
-				<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
-					<JDropdown
-						options={dropdownOptionsCategory}
-						defaultValue={
-							transactionItem.category_id !== null
-								? transactionItem.category_id
-								: undefined
-						}
-					/>
-				</div>
-			),
-		},
-		{
-			content: (
-				<div className={`${s.data_container} ${s.single_item} ${s.last_col}`}>
-					<JDropdown
-						options={dropdownOptionsAccount}
-						defaultValue={
-							transactionItem.account_id !== null
-								? transactionItem.account_id
-								: undefined
-						}
-					/>
-				</div>
-			),
-		},
+		<div className={s.row_controller}></div>,
+		<div className={`${s.data_container} ${s.single_item} ${s.first_col}`}>
+			<JDatePicker defaultValue={transaction.date} />
+		</div>,
+		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+			<JInput defaultValue={transaction.name} />
+		</div>,
+		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+			<JNumberAccounting defaultValue={transactionItem.amount} />
+		</div>,
+		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+			<JDropdown
+				options={dropdownOptionsCategory}
+				defaultValue={
+					transactionItem.category_id !== null
+						? transactionItem.category_id
+						: undefined
+				}
+			/>
+		</div>,
+		<div className={`${s.data_container} ${s.single_item} ${s.last_col}`}>
+			<JDropdown
+				options={dropdownOptionsAccount}
+				defaultValue={
+					transactionItem.account_id !== null
+						? transactionItem.account_id
+						: undefined
+				}
+			/>
+		</div>,
 	]
 }
 
@@ -88,78 +66,50 @@ export function genMultiRow(
 		}
 
 		return [
-			{
-				content: (
-					<div className={s.row_controller}>
-						<div onClick={handleReorder}>O</div>
-					</div>
-				),
-			},
-			{
-				content: (
-					<div
-						className={`${s.data_container} ${s.multi_item} ${s.first_col} ${
-							isLastRow ? s.last_row : s.mid_row
-						}`}
-					>
-						<JDatePicker defaultValue={transaction.date} disabled minimalStyle />
-					</div>
-				),
-			},
-			{
-				content: (
-					<div
-						className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
-							isLastRow ? s.last_row : s.mid_row
-						}`}
-					>
-						<JInput value={item.name} />
-					</div>
-				),
-			},
-			{
-				content: (
-					<div
-						className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
-							isLastRow ? s.last_row : s.mid_row
-						}`}
-					>
-						<JNumberAccounting value={item.amount} />
-					</div>
-				),
-			},
-			{
-				content: (
-					<div
-						className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
-							isLastRow ? s.last_row : s.mid_row
-						}`}
-					>
-						<JDropdown
-							options={dropdownOptionsCategory}
-							defaultValue={
-								item.category_id !== null ? item.category_id : undefined
-							}
-						/>
-					</div>
-				),
-			},
-			{
-				content: (
-					<div
-						className={`${s.data_container} ${s.multi_item} ${s.last_col} ${
-							isLastRow ? s.last_row : s.mid_row
-						}`}
-					>
-						<JDropdown
-							options={dropdownOptionsAccount}
-							defaultValue={
-								item.account_id !== null ? item.account_id : undefined
-							}
-						/>
-					</div>
-				),
-			},
+			<div className={s.row_controller}>
+				<div onClick={handleReorder}>O</div>
+			</div>,
+			<div
+				className={`${s.data_container} ${s.multi_item} ${s.first_col} ${
+					isLastRow ? s.last_row : s.mid_row
+				}`}
+			>
+				<JDatePicker defaultValue={transaction.date} disabled minimalStyle />
+			</div>,
+			<div
+				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
+					isLastRow ? s.last_row : s.mid_row
+				}`}
+			>
+				<JInput defaultValue={item.name} />
+			</div>,
+			<div
+				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
+					isLastRow ? s.last_row : s.mid_row
+				}`}
+			>
+				<JNumberAccounting defaultValue={item.amount} />
+			</div>,
+			<div
+				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
+					isLastRow ? s.last_row : s.mid_row
+				}`}
+			>
+				<JDropdown
+					options={dropdownOptionsCategory}
+					defaultValue={item.category_id !== null ? item.category_id : undefined}
+				/>
+			</div>,
+			<div
+				className={`${s.data_container} ${s.multi_item} ${s.last_col} ${
+					isLastRow ? s.last_row : s.mid_row
+				}`}
+			>
+				<JDropdown
+					options={dropdownOptionsAccount}
+					defaultValue={item.account_id !== null ? item.account_id : undefined}
+				/>
+			</div>,
 		]
 	})
 
@@ -185,52 +135,22 @@ export function genMultiRow(
 	})
 
 	const firstRow = [
-		{ content: <div className={s.row_controller}></div> },
-		{
-			content: (
-				<div
-					className={`${s.data_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}
-				>
-					<JDatePicker defaultValue={transaction.date} />
-				</div>
-			),
-		},
-		{
-			content: (
-				<div
-					className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
-				>
-					<JInput value={transaction.name} />
-				</div>
-			),
-		},
-		{
-			content: (
-				<div
-					className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
-				>
-					<JNumberAccounting value={sum} disabled minimalStyle />
-				</div>
-			),
-		},
-		{
-			content: (
-				<div
-					className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
-				>
-					<JInput value={categoryList} disabled minimalStyle />
-				</div>
-			),
-		},
-		{
-			content: (
-				<div
-					className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}
-				>
-					<JInput value={accountList} disabled minimalStyle />
-				</div>
-			),
-		},
+		<div className={s.row_controller}></div>,
+		<div className={`${s.data_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}>
+			<JDatePicker defaultValue={transaction.date} />
+		</div>,
+		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
+			<JInput defaultValue={transaction.name} />
+		</div>,
+		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
+			<JNumberAccounting defaultValue={sum} disabled minimalStyle />
+		</div>,
+		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
+			<JInput defaultValue={categoryList} disabled minimalStyle />
+		</div>,
+		<div className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}>
+			<JInput defaultValue={accountList} disabled minimalStyle />
+		</div>,
 	]
 	return [firstRow, ...nextRows]
 }

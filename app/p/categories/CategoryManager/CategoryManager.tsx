@@ -369,49 +369,41 @@ export function CategoryManager() {
 						: pendingChanges[thisPendingChangeIndex]
 
 				return [
-					{
-						content: (
-							<div key={`1-${thisData.id}`} className={s.cell_container}>
-								<RowController
-									category_id={sortId}
-									category_name={thisData.name}
-									deleteDisabled={saveOptionIsAvailable}
-									sortDisabled={data.length <= 1}
-									sortIndex={sortIndex}
-									currentSortOrder={currentSortOrder}
-									defaultSortOrder={defaultSortOrder}
-									gridRowRefs={gridRowRefs}
-									setCurrentSortOrder={setCurrentSortOrder}
-									fetchAndLoadData={fetchAndLoadData}
-									setUndoHistoryStack={setUndoHistoryStack}
-									setRedoHistoryStack={setRedoHistoryStack}
-								/>
-							</div>
-						),
-					},
-					{
-						content: (
-							<div key={`2-${thisData.id}`} className={s.cell_container}>
-								<JInput
-									onChange={handleInputChange}
-									onBlur={handleInputBlur}
-									onFocus={handleInputFocus}
-									className={`${s.category_name_input} ${
-										thisPendingChange?.new.name ? s.changed : ''
-									}`}
-									data-id={thisData.id}
-									data-key='name'
-									data-default={thisData.name}
-									maxLength={24}
-									value={
-										thisPendingChange?.new.name !== undefined
-											? thisPendingChange.new.name
-											: thisData.name
-									}
-								/>
-							</div>
-						),
-					},
+					<div key={`1-${thisData.id}`} className={s.cell_container}>
+						<RowController
+							category_id={sortId}
+							category_name={thisData.name}
+							deleteDisabled={saveOptionIsAvailable}
+							sortDisabled={data.length <= 1}
+							sortIndex={sortIndex}
+							currentSortOrder={currentSortOrder}
+							defaultSortOrder={defaultSortOrder}
+							gridRowRefs={gridRowRefs}
+							setCurrentSortOrder={setCurrentSortOrder}
+							fetchAndLoadData={fetchAndLoadData}
+							setUndoHistoryStack={setUndoHistoryStack}
+							setRedoHistoryStack={setRedoHistoryStack}
+						/>
+					</div>,
+					<div key={`2-${thisData.id}`} className={s.cell_container}>
+						<JInput
+							onChange={handleInputChange}
+							onBlur={handleInputBlur}
+							onFocus={handleInputFocus}
+							className={`${s.category_name_input} ${
+								thisPendingChange?.new.name ? s.changed : ''
+							}`}
+							data-id={thisData.id}
+							data-key='name'
+							data-default={thisData.name}
+							maxLength={24}
+							value={
+								thisPendingChange?.new.name !== undefined
+									? thisPendingChange.new.name
+									: thisData.name
+							}
+						/>
+					</div>,
 				]
 			})
 			const gridConfig: JGridTypes.Props = {
