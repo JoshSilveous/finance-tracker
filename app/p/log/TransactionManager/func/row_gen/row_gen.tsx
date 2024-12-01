@@ -52,25 +52,6 @@ export function genMultiRow(
 	dropdownOptionsAccount: JDropdownTypes.Option[],
 	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
 ) {
-	// re-focus JAccountingInput elements to update displayed values
-	const thisTimeout = setTimeout(() => {
-		const inputNodes = Array.from(
-			document.querySelectorAll(`input[data-rerender_tag="${transaction.id}"]`)
-		) as HTMLInputElement[]
-		console.log(inputNodes)
-		const prevFocus = document.activeElement as HTMLElement
-		inputNodes.forEach((node) => {
-			node.focus()
-			node.blur()
-		})
-		if (prevFocus !== null) {
-			prevFocus.focus()
-		} else {
-		}
-
-		clearTimeout(thisTimeout)
-	}, 10)
-
 	let sum = 0
 	const nextRows = transaction.items.map((item, itemIndex) => {
 		sum += item.amount
@@ -252,13 +233,18 @@ export function genMultiRow(
 		}
 
 		return [
-			<div className={s.row_controller} data-parent_id={transaction.id}>
+			<div
+				className={s.row_controller}
+				data-parent_id={transaction.id}
+				key={`${transaction.id}-${item.id}-1`}
+			>
 				<div onMouseDown={handleReorderMouseDown}>O</div>
 			</div>,
 			<div
 				className={`${s.data_container} ${s.multi_item} ${s.first_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				key={`${transaction.id}-${item.id}-2`}
 			>
 				<JDatePicker value={transaction.date} disabled minimalStyle />
 			</div>,
@@ -266,6 +252,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				key={`${transaction.id}-${item.id}-3`}
 			>
 				<JInput value={item.name} />
 			</div>,
@@ -273,6 +260,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				key={`${transaction.id}-${item.id}-4`}
 			>
 				<JNumberAccounting value={item.amount} data-rerender_tag={transaction.id} />
 			</div>,
@@ -280,6 +268,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				key={`${transaction.id}-${item.id}-5`}
 			>
 				<JDropdown
 					options={dropdownOptionsCategory}
@@ -290,6 +279,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.last_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				key={`${transaction.id}-${item.id}-7`}
 			>
 				<JDropdown
 					options={dropdownOptionsAccount}
@@ -321,20 +311,35 @@ export function genMultiRow(
 	})
 
 	const firstRow = [
-		<div className={s.row_controller}></div>,
-		<div className={`${s.data_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}>
+		<div className={s.row_controller} key={`${transaction.id}-1`}></div>,
+		<div
+			className={`${s.data_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}
+			key={`${transaction.id}-2`}
+		>
 			<JDatePicker value={transaction.date} />
 		</div>,
-		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
+		<div
+			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			key={`${transaction.id}-3`}
+		>
 			<JInput value={transaction.name} />
 		</div>,
-		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
+		<div
+			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			key={`${transaction.id}-4`}
+		>
 			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
-		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
+		<div
+			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			key={`${transaction.id}-5`}
+		>
 			<JInput value={categoryList} disabled minimalStyle />
 		</div>,
-		<div className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}>
+		<div
+			className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}
+			key={`${transaction.id}-6`}
+		>
 			<JInput value={accountList} disabled minimalStyle />
 		</div>,
 	]
