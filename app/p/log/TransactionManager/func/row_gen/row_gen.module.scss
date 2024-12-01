@@ -54,4 +54,39 @@
 			border-radius: 0 0 0 var(--border-radius);
 		}
 	}
+	.row_controller {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+}
+.transitions {
+	transition: margin-bottom 0.2s ease, border-radius 0.2s ease;
+	& > div {
+		transition: margin-bottom 0.2s ease, margin-top 0.2s ease, border-radius 0.2s ease;
+	}
+}
+.margin_bottom_double {
+	margin-bottom: 30px;
+}
+.margin_bottom > div {
+	margin-bottom: 17.5px;
+}
+.margin_top > div {
+	margin-top: 17.5px;
+}
+.margin_top_double > div {
+	margin-top: 30px;
+}
+.remove_border_radius .data_container {
+	border-radius: 0 !important;
+}
+.add_border_radius .data_container {
+	&.first_col {
+		border-radius: 0 0 0 var(--border-radius);
+	}
+	&.last_col {
+		border-radius: 0 0 var(--border-radius) 0;
+	}
 }

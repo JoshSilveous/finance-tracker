@@ -1,7 +1,7 @@
 'use client'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { isStandardError, promptError } from '@/utils'
+import { isStandardError, moveItemInArray, promptError, removeFromArray } from '@/utils'
 import {
 	fetchCategoryData,
 	FetchedTransaction,
@@ -20,6 +20,7 @@ interface LoadState {
 	loading: boolean
 	message: string
 }
+type SortOrderItem = string | string[]
 export function TransactionManager() {
 	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
 	const [accounts, setAccounts] = useState<FetchedAccount[] | null>(null)
@@ -28,12 +29,24 @@ export function TransactionManager() {
 		loading: true,
 		message: 'Loading',
 	})
+	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
+	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
 
 	async function fetchAndLoadData() {
 		try {
 			setLoadState({ loading: true, message: 'Fetching Transaction Data' })
 			const transactionData = await fetchTransactionData()
 			setData(transactionData)
+
+			const fetchedSortOrder = transactionData.map((transaction) => {
+				if (transaction.items.length === 1) {
+					return transaction.id
+				} else {
+					return [transaction.id, ...transaction.items.map((item) => item.id)]
+				}
+			})
+			setDefaultSortOrder(fetchedSortOrder)
+			setCurrentSortOrder(fetchedSortOrder)
 
 			setLoadState({ loading: true, message: 'Fetching Category Data' })
 			const categoryData = await fetchCategoryData()
@@ -64,7 +77,11 @@ export function TransactionManager() {
 			'\nAccounts:',
 			accounts,
 			'\nTransactions:',
-			data
+			data,
+			'\ndefaultSortOrder:',
+			defaultSortOrder,
+			'\ncurrentSortOrder:',
+			currentSortOrder
 		)
 	}
 
@@ -112,7 +129,30 @@ export function TransactionManager() {
 
 	let grid: ReactNode
 
-	if (!loadState.loading && data !== null && categories !== null && accounts !== null) {
+	function handleTransactionItemReorder(
+		transaction_id: string,
+		oldItemIndex: number,
+		newItemIndex: number
+	) {
+		setCurrentSortOrder((prev) => {
+			const newArr = structuredClone(prev) as SortOrderItem[]
+			const thisTransactionIndex = newArr.findIndex(
+				(item) => Array.isArray(item) && item[0] === transaction_id
+			)
+			const thisTransactionSortOrder = newArr[thisTransactionIndex] as string[]
+			moveItemInArray(thisTransactionSortOrder, oldItemIndex + 1, newItemIndex + 1)
+			return newArr
+		})
+	}
+
+	if (
+		!loadState.loading &&
+		data !== null &&
+		categories !== null &&
+		accounts !== null &&
+		defaultSortOrder !== null &&
+		currentSortOrder !== null
+	) {
 		if (data.length === 0) {
 			grid = (
 				<p>
@@ -132,13 +172,37 @@ export function TransactionManager() {
 						)
 					)
 				} else {
+					const sortedItemOrder = currentSortOrder.find(
+						(sortItem) =>
+							Array.isArray(sortItem) && sortItem[0] === transaction.id
+					) as string[]
+					const sortedItems = removeFromArray(sortedItemOrder, 0).map(
+						(item_id) => {
+							return transaction.items.find((item) => item.id === item_id)
+						}
+					) as FetchedTransaction['items']
+
+					const transactionSorted = { ...transaction, items: sortedItems }
+					console.log(
+						'original transaction:',
+						transaction,
+						'\n sorted:',
+						transactionSorted
+					)
 					cells.push(
 						...genMultiRow(
-							transaction,
+							transactionSorted,
 							categories,
 							accounts,
 							dropdownOptionsCategory,
-							dropdownOptionsAccount
+							dropdownOptionsAccount,
+							(oldIndex, newIndex) => {
+								handleTransactionItemReorder(
+									transaction.id,
+									oldIndex,
+									newIndex
+								)
+							}
 						)
 					)
 				}
