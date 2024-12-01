@@ -36,7 +36,6 @@ export function RowController({
 }: RowControllerProps) {
 	function handleReorderMouseDown(e: React.MouseEvent<HTMLInputElement>) {
 		document.body.style.cursor = 'grabbing'
-
 		const thisRowNode =
 			gridRowRefs.current[sortIndex].parentElement!.parentElement!.parentElement!
 

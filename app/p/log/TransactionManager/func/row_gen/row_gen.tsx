@@ -1,6 +1,7 @@
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
+import { default as ReorderIcon } from '@/public/reorder.svg'
 import { FetchedAccount, FetchedCategory, FetchedTransaction } from '@/database'
 import s from './row_gen.module.scss'
 
@@ -52,6 +53,7 @@ export function genMultiRow(
 	dropdownOptionsAccount: JDropdownTypes.Option[],
 	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
 ) {
+	document.body.style.cursor = 'grabbing'
 	let sum = 0
 	const nextRows = transaction.items.map((item, itemIndex) => {
 		sum += item.amount
@@ -59,14 +61,22 @@ export function genMultiRow(
 		const isLastRow = itemIndex === transaction.items.length - 1
 
 		function handleReorderMouseDown(e: React.MouseEvent<HTMLInputElement>) {
-			const grabberNode = e.target as HTMLDivElement
+			/* sometimes, a <path> element is the target instead of the SVG, meaning that
+			grabberNode is the <svg> instead of the parent <div>.
+			this prevents that from creating a bug: */
+			const grabberNode =
+				(e.target as HTMLElement).tagName === 'svg'
+					? ((e.target as SVGElement).parentElement as HTMLDivElement)
+					: ((e.target as SVGElement).parentElement!
+							.parentElement as HTMLDivElement)
+
 			const grabberContainerNode = grabberNode.parentElement as HTMLDivElement
-			const rowNode = grabberContainerNode.parentElement!
+			const thisRowNode = grabberContainerNode.parentElement!
 				.parentElement as HTMLDivElement
 
 			const thisRowIndex = itemIndex
 
-			rowNode.childNodes.forEach((childNode) => {
+			thisRowNode.childNodes.forEach((childNode) => {
 				const node = childNode as HTMLDivElement
 				node.style.width = `${node.offsetWidth}px`
 			})
@@ -79,12 +89,12 @@ export function genMultiRow(
 				grabberNode.offsetHeight / 2 -
 				grabberContainerNode.offsetTop
 
-			rowNode.style.left = `${e.clientX - offsetX}px`
-			rowNode.style.top = `${e.clientY - offsetY}px`
+			thisRowNode.style.left = `${e.clientX - offsetX}px`
+			thisRowNode.style.top = `${e.clientY - offsetY}px`
 
-			rowNode.style.display = 'flex'
-			rowNode.style.position = 'fixed'
-			rowNode.style.zIndex = '999'
+			thisRowNode.style.display = 'flex'
+			thisRowNode.style.position = 'fixed'
+			thisRowNode.style.zIndex = '999'
 
 			const allRows = (
 				Array.from(
@@ -103,6 +113,7 @@ export function genMultiRow(
 			)
 
 			let firstRun = true
+			const isLastRowSelected = thisRowIndex === allRows.length - 1
 			function putMarginGapOnRow(rowIndex: number | 'none') {
 				// if ending the animation, remove transition effects
 				if (rowIndex === 'none') {
@@ -135,6 +146,17 @@ export function genMultiRow(
 
 				rowIndex--
 
+				// border radius handling when last row is selected
+				if (isLastRowSelected && rowIndex !== transaction.items.length - 2) {
+					;(Array.from(thisRowNode.childNodes) as HTMLDivElement[]).forEach(
+						(cellNode) => cellNode.classList.add(s.remove_border_radius)
+					)
+					;(Array.from(otherRows.at(-1)!.childNodes) as HTMLDivElement[]).forEach(
+						(cellNode) => cellNode.classList.add(s.add_border_radius)
+					)
+				}
+
+				// if hovering over first row
 				if (rowIndex === -1) {
 					;(Array.from(otherRows[0].childNodes) as HTMLDivElement[]).forEach(
 						(cellNode) => cellNode.classList.add(s.margin_top_double)
@@ -142,22 +164,17 @@ export function genMultiRow(
 				}
 				// if hovering over last row
 				else if (rowIndex === transaction.items.length - 2) {
-					;(Array.from(allRows.at(-1)!.childNodes) as HTMLDivElement[]).forEach(
+					;(Array.from(otherRows.at(-1)!.childNodes) as HTMLDivElement[]).forEach(
 						(cellNode) =>
 							cellNode.classList.add(
 								s.margin_bottom_double,
 								s.remove_border_radius
 							)
 					)
-					;(Array.from(rowNode.childNodes) as HTMLDivElement[]).forEach(
+					;(Array.from(thisRowNode.childNodes) as HTMLDivElement[]).forEach(
 						(childNode) => childNode.classList.add(s.add_border_radius)
 					)
 				} else {
-					otherRows[
-						rowIndex
-					].parentElement!.parentElement!.parentElement!.classList.add(
-						s.margin_bottom
-					)
 					;(
 						Array.from(otherRows[rowIndex].childNodes) as HTMLDivElement[]
 					).forEach((cellNode) => cellNode.classList.add(s.margin_bottom))
@@ -189,8 +206,8 @@ export function genMultiRow(
 
 			putMarginGapOnRow(thisRowIndex)
 			function handleReorderMouseMove(e: MouseEvent) {
-				rowNode.style.left = `${e.clientX - offsetX}px`
-				rowNode.style.top = `${e.clientY - offsetY}px`
+				thisRowNode.style.left = `${e.clientX - offsetX}px`
+				thisRowNode.style.top = `${e.clientY - offsetY}px`
 
 				const prevClosestBreakpointIndex = closestBreakpointIndex
 				closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
@@ -202,20 +219,21 @@ export function genMultiRow(
 
 			function handleReorderMouseUp() {
 				putMarginGapOnRow('none')
-				rowNode.childNodes.forEach((childNode) => {
+				thisRowNode.childNodes.forEach((childNode) => {
 					const node = childNode as HTMLDivElement
 					node.style.width = ''
 				})
-				rowNode.style.display = ''
-				rowNode.style.top = ''
-				rowNode.style.left = ''
-				rowNode.style.zIndex = ''
-				rowNode.style.position = ''
+				thisRowNode.style.display = ''
+				thisRowNode.style.top = ''
+				thisRowNode.style.left = ''
+				thisRowNode.style.zIndex = ''
+				thisRowNode.style.position = ''
 
 				document.body.style.cursor = ''
 				window.removeEventListener('mousemove', handleReorderMouseMove)
 				window.removeEventListener('mouseup', handleReorderMouseUp)
 				window.removeEventListener('contextmenu', handleRightClick)
+				document.body.style.cursor = ''
 
 				if (thisRowIndex !== closestBreakpointIndex) {
 					handleTransactionItemReorder(thisRowIndex, closestBreakpointIndex)
@@ -234,11 +252,13 @@ export function genMultiRow(
 
 		return [
 			<div
-				className={s.row_controller}
+				className={s.row_controls_container}
 				data-parent_id={transaction.id}
 				key={`${transaction.id}-${item.id}-1`}
 			>
-				<div onMouseDown={handleReorderMouseDown}>O</div>
+				<div className={s.reorder_grabber} onMouseDown={handleReorderMouseDown}>
+					<ReorderIcon />
+				</div>
 			</div>,
 			<div
 				className={`${s.data_container} ${s.multi_item} ${s.first_col} ${

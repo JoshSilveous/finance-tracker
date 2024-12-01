@@ -54,11 +54,67 @@
 			border-radius: 0 0 0 var(--border-radius);
 		}
 	}
-	.row_controller {
-		width: 100%;
+}
+
+.row_controls_container {
+	height: 35px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	user-select: none;
+	width: 42px;
+
+	div.reorder_grabber,
+	button.delete_button {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		justify-content: center;
+		color: var(--font-color);
+		height: min-content;
+		transition: scale 0.1s ease, color 0.1s ease;
+	}
+	div.reorder_grabber {
+		svg {
+			height: 20px;
+			width: 20px;
+		}
+		cursor: grab;
+		&:hover {
+			scale: 120%;
+		}
+		&:active {
+			scale: 100%;
+			cursor: grabbing;
+		}
+	}
+	button.delete_button {
+		background-color: transparent;
+		border: none;
+		padding: 0;
+		outline: none;
+		svg {
+			height: 17px;
+			width: 17px;
+		}
+		cursor: pointer;
+		&:hover {
+			color: var(--font-color-error);
+		}
+		&:focus {
+			color: var(--font-color-error);
+			scale: 120%;
+		}
+		&:active {
+			scale: 100%;
+		}
+		&:disabled {
+			color: var(--font-color-disabled);
+			opacity: 50%;
+			cursor: not-allowed;
+		}
+	}
+	&.changed > .reorder_grabber {
+		color: var(--font-color-changed);
 	}
 }
 .transitions {
