@@ -265,7 +265,7 @@ export function genMultiRow(
 			>
 				<JDropdown
 					options={dropdownOptionsCategory}
-					defaultValue={item.category_id !== null ? item.category_id : undefined}
+					defaultValue={item.category_id !== null ? item.category_id : 'none'}
 				/>
 			</div>,
 			<div
@@ -275,7 +275,7 @@ export function genMultiRow(
 			>
 				<JDropdown
 					options={dropdownOptionsAccount}
-					defaultValue={item.account_id !== null ? item.account_id : undefined}
+					defaultValue={item.account_id !== null ? item.account_id : 'none'}
 				/>
 			</div>,
 		]

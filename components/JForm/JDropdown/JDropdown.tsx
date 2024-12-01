@@ -20,8 +20,12 @@ export namespace JDropdownTypes {
 }
 
 export function JDropdown(props: JDropdownTypes.Props) {
-	const optionsDisplay = props.options.map((option) => {
-		return <option value={option.value}>{option.name}</option>
+	const optionsDisplay = props.options.map((option, index) => {
+		return (
+			<option value={option.value} key={index}>
+				{option.name}
+			</option>
+		)
 	})
 	if (props.defaultValue === undefined) {
 		optionsDisplay.unshift(

@@ -86,6 +86,9 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 
 	const showFormatted = !(isHovering || isFocused)
 
+	const inputProps = structuredClone(props)
+	delete inputProps.minimalStyle
+
 	return (
 		<div
 			className={`${s.main} ${props.className ? props.className : ''} ${
@@ -98,7 +101,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 			</div>
 			<div className={s.formatted} hidden={!showFormatted} ref={displayRef} />
 			<input
-				{...props}
+				{...inputProps}
 				ref={inputRef}
 				type='text'
 				onChange={handleChange}
