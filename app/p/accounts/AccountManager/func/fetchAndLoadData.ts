@@ -1,13 +1,13 @@
 import { MutableRefObject, SetStateAction } from 'react'
 import { fetchPreferredColumnWidths } from '.'
 import { createPreferencesEntry, isStandardError, promptError } from '@/utils'
-import { fetchAccountData } from '@/database'
+import { fetchAccountData, FetchedAccount } from '@/database'
 
 export async function fetchAndLoadData(
 	setIsLoading: (value: SetStateAction<boolean>) => void,
 	gridRowRefs: MutableRefObject<HTMLDivElement[]>,
 	setDefaultColumnWidths: (value: SetStateAction<number[]>) => void,
-	setData: (value: SetStateAction<Account.WithPropsAndID[] | null>) => void,
+	setData: (value: SetStateAction<FetchedAccount[] | null>) => void,
 	setCurrentSortOrder: (value: SetStateAction<string[]>) => void,
 	setDefaultSortOrder: (value: SetStateAction<string[]>) => void
 ) {
