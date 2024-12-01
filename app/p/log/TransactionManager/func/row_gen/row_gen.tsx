@@ -289,23 +289,19 @@ export function genMultiRow(
 		]
 	})
 
-	let categoryList = ''
-	let accountList = ''
+	let uniqueCategories: string[] = []
+	let uniqueAccounts: string[] = []
 	transaction.items.forEach((item) => {
 		if (item.category_id !== null) {
 			const categoryName = categories.find((cat) => cat.id === item.category_id)!.name
-			if (categoryList === '') {
-				categoryList += categoryName
-			} else {
-				categoryList += ', ' + categoryName
+			if (uniqueCategories.findIndex((item) => item === categoryName) === -1) {
+				uniqueCategories.push(categoryName)
 			}
 		}
 		if (item.account_id !== null) {
 			const accountName = accounts.find((act) => act.id === item.account_id)!.name
-			if (accountList === '') {
-				accountList += accountName
-			} else {
-				accountList += ', ' + accountName
+			if (uniqueAccounts.findIndex((item) => item === accountName) === -1) {
+				uniqueAccounts.push(accountName)
 			}
 		}
 	})
@@ -334,13 +330,13 @@ export function genMultiRow(
 			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-5`}
 		>
-			<JInput value={categoryList} disabled minimalStyle />
+			<JInput value={uniqueCategories.join(', ')} disabled minimalStyle />
 		</div>,
 		<div
 			className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}
 			key={`${transaction.id}-6`}
 		>
-			<JInput value={accountList} disabled minimalStyle />
+			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
 		</div>,
 	]
 	return [firstRow, ...nextRows]
