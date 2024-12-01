@@ -13,18 +13,18 @@ export function genSingleRow(
 	return [
 		<div className={s.row_controller}></div>,
 		<div className={`${s.data_container} ${s.single_item} ${s.first_col}`}>
-			<JDatePicker defaultValue={transaction.date} />
+			<JDatePicker value={transaction.date} />
 		</div>,
 		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
-			<JInput defaultValue={transaction.name} />
+			<JInput value={transaction.name} />
 		</div>,
 		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
-			<JNumberAccounting defaultValue={transactionItem.amount} />
+			<JNumberAccounting value={transactionItem.amount} />
 		</div>,
 		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
 			<JDropdown
 				options={dropdownOptionsCategory}
-				defaultValue={
+				value={
 					transactionItem.category_id !== null
 						? transactionItem.category_id
 						: undefined
@@ -34,7 +34,7 @@ export function genSingleRow(
 		<div className={`${s.data_container} ${s.single_item} ${s.last_col}`}>
 			<JDropdown
 				options={dropdownOptionsAccount}
-				defaultValue={
+				value={
 					transactionItem.account_id !== null
 						? transactionItem.account_id
 						: undefined
@@ -52,7 +52,25 @@ export function genMultiRow(
 	dropdownOptionsAccount: JDropdownTypes.Option[],
 	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
 ) {
-	console.log('GEN MULTIROW RAN WITH', transaction)
+	// re-focus JAccountingInput elements to update displayed values
+	const thisTimeout = setTimeout(() => {
+		const inputNodes = Array.from(
+			document.querySelectorAll(`input[data-rerender_tag="${transaction.id}"]`)
+		) as HTMLInputElement[]
+		console.log(inputNodes)
+		const prevFocus = document.activeElement as HTMLElement
+		inputNodes.forEach((node) => {
+			node.focus()
+			node.blur()
+		})
+		if (prevFocus !== null) {
+			prevFocus.focus()
+		} else {
+		}
+
+		clearTimeout(thisTimeout)
+	}, 10)
+
 	let sum = 0
 	const nextRows = transaction.items.map((item, itemIndex) => {
 		sum += item.amount
@@ -242,21 +260,21 @@ export function genMultiRow(
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 			>
-				<JDatePicker defaultValue={transaction.date} disabled minimalStyle />
+				<JDatePicker value={transaction.date} disabled minimalStyle />
 			</div>,
 			<div
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 			>
-				<JInput defaultValue={item.name} />
+				<JInput value={item.name} />
 			</div>,
 			<div
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 			>
-				<JNumberAccounting defaultValue={item.amount} />
+				<JNumberAccounting value={item.amount} data-rerender_tag={transaction.id} />
 			</div>,
 			<div
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
@@ -265,7 +283,7 @@ export function genMultiRow(
 			>
 				<JDropdown
 					options={dropdownOptionsCategory}
-					defaultValue={item.category_id !== null ? item.category_id : 'none'}
+					value={item.category_id !== null ? item.category_id : 'none'}
 				/>
 			</div>,
 			<div
@@ -275,7 +293,7 @@ export function genMultiRow(
 			>
 				<JDropdown
 					options={dropdownOptionsAccount}
-					defaultValue={item.account_id !== null ? item.account_id : 'none'}
+					value={item.account_id !== null ? item.account_id : 'none'}
 				/>
 			</div>,
 		]
@@ -305,19 +323,19 @@ export function genMultiRow(
 	const firstRow = [
 		<div className={s.row_controller}></div>,
 		<div className={`${s.data_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}>
-			<JDatePicker defaultValue={transaction.date} />
+			<JDatePicker value={transaction.date} />
 		</div>,
 		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
-			<JInput defaultValue={transaction.name} />
+			<JInput value={transaction.name} />
 		</div>,
 		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
-			<JNumberAccounting defaultValue={sum} disabled minimalStyle />
+			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
 		<div className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}>
-			<JInput defaultValue={categoryList} disabled minimalStyle />
+			<JInput value={categoryList} disabled minimalStyle />
 		</div>,
 		<div className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}>
-			<JInput defaultValue={accountList} disabled minimalStyle />
+			<JInput value={accountList} disabled minimalStyle />
 		</div>,
 	]
 	return [firstRow, ...nextRows]

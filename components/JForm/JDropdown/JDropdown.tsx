@@ -7,7 +7,7 @@ export namespace JDropdownTypes {
 	export interface Props {
 		options: Option[]
 		onChange?: ChangeEventHandler
-		defaultValue?: string | number
+		value?: string | number
 		placeholder?: string
 		className?: string
 		loading?: boolean
@@ -27,7 +27,7 @@ export function JDropdown(props: JDropdownTypes.Props) {
 			</option>
 		)
 	})
-	if (props.defaultValue === undefined) {
+	if (props.value === undefined) {
 		optionsDisplay.unshift(
 			<option value=''>{props.placeholder ? props.placeholder : ''}</option>
 		)
@@ -39,7 +39,7 @@ export function JDropdown(props: JDropdownTypes.Props) {
 					<LoadingAnim />
 				</div>
 			)}
-			<select onChange={props.onChange} defaultValue={props.defaultValue}>
+			<select onChange={props.onChange} value={props.value}>
 				{props.loading ? '' : optionsDisplay}
 			</select>
 			<div className={s.custom_arrow}>

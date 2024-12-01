@@ -6,7 +6,7 @@ interface JDatePickerProps {
 	/**
 	 * In `YYYY-DD-MM` format
 	 */
-	defaultValue?: string
+	value?: string
 	className?: string
 	onChange?: (e: ChangeEvent<HTMLInputElement>) => void
 	minimalStyle?: boolean
@@ -21,7 +21,7 @@ export function JDatePicker(props: JDatePickerProps) {
 		>
 			<input
 				type='date'
-				defaultValue={props.defaultValue}
+				value={props.value}
 				onChange={props.onChange}
 				disabled={props.disabled}
 			/>

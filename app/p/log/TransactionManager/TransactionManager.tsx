@@ -70,20 +70,6 @@ export function TransactionManager() {
 	useEffect(() => {
 		fetchAndLoadData()
 	}, [])
-	if (!loadState.loading) {
-		console.log(
-			'data loaded:\nCategories:',
-			categories,
-			'\nAccounts:',
-			accounts,
-			'\nTransactions:',
-			data,
-			'\ndefaultSortOrder:',
-			defaultSortOrder,
-			'\ncurrentSortOrder:',
-			currentSortOrder
-		)
-	}
 
 	const dropdownOptionsCategory: JDropdownTypes.Option[] = useMemo(() => {
 		if (categories === null) {
@@ -183,12 +169,6 @@ export function TransactionManager() {
 					) as FetchedTransaction['items']
 
 					const transactionSorted = { ...transaction, items: sortedItems }
-					console.log(
-						'original transaction:',
-						transaction,
-						'\n sorted:',
-						transactionSorted
-					)
 					cells.push(
 						...genMultiRow(
 							transactionSorted,
