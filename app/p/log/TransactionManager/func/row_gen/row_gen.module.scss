@@ -61,20 +61,50 @@
 	height: 35px;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: flex-start;
 	user-select: none;
 	width: 42px;
+	width: 100%;
+	padding: 0 10px;
 
-	div.reorder_grabber,
-	button.delete_button {
+	&.align_right {
+		justify-content: flex-end;
+	}
+
+	.fold_toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--font-color);
+		height: min-content;
+		transition: scale 0.1s ease, color 0.1s ease, transform 0.5s ease;
+		&.folded {
+			transform: rotate(0deg);
+		}
+		&.unfolded {
+			transform: rotate(-180deg);
+		}
+		svg {
+			height: 15px;
+			width: 15px;
+		}
+		cursor: pointer;
+		&:hover {
+			scale: 120%;
+		}
+		&:active {
+			scale: 100%;
+			cursor: grabbing;
+		}
+	}
+
+	.reorder_grabber {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		color: var(--font-color);
 		height: min-content;
 		transition: scale 0.1s ease, color 0.1s ease;
-	}
-	div.reorder_grabber {
 		svg {
 			height: 20px;
 			width: 20px;
@@ -86,32 +116,6 @@
 		&:active {
 			scale: 100%;
 			cursor: grabbing;
-		}
-	}
-	button.delete_button {
-		background-color: transparent;
-		border: none;
-		padding: 0;
-		outline: none;
-		svg {
-			height: 17px;
-			width: 17px;
-		}
-		cursor: pointer;
-		&:hover {
-			color: var(--font-color-error);
-		}
-		&:focus {
-			color: var(--font-color-error);
-			scale: 120%;
-		}
-		&:active {
-			scale: 100%;
-		}
-		&:disabled {
-			color: var(--font-color-disabled);
-			opacity: 50%;
-			cursor: not-allowed;
 		}
 	}
 	&.changed > .reorder_grabber {

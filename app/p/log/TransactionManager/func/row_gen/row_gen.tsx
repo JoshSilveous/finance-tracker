@@ -1,6 +1,7 @@
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
+import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { FetchedAccount, FetchedCategory, FetchedTransaction } from '@/database'
 import s from './row_gen.module.scss'
@@ -45,18 +46,30 @@ export function genSingleRow(
 		</div>,
 	]
 }
-
-export function genMultiRow(
-	transaction: FetchedTransaction,
-	categories: FetchedCategory[],
-	accounts: FetchedAccount[],
-	dropdownOptionsCategory: JDropdownTypes.Option[],
-	dropdownOptionsAccount: JDropdownTypes.Option[],
+export interface GenMultiRowProps {
+	transaction: FetchedTransaction
+	categories: FetchedCategory[]
+	accounts: FetchedAccount[]
+	dropdownOptionsCategory: JDropdownTypes.Option[]
+	dropdownOptionsAccount: JDropdownTypes.Option[]
 	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
-) {
-	document.body.style.cursor = 'grabbing'
+	folded: boolean
+	onFold: () => void
+	onUnfold: () => void
+}
+export function genMultiRow({
+	transaction,
+	categories,
+	accounts,
+	dropdownOptionsCategory,
+	dropdownOptionsAccount,
+	handleTransactionItemReorder,
+	folded,
+	onFold,
+	onUnfold,
+}: GenMultiRowProps) {
 	let sum = 0
-	const nextRows = transaction.items.map((item, itemIndex) => {
+	const itemRows = transaction.items.map((item, itemIndex) => {
 		sum += item.amount
 
 		const isLastRow = itemIndex === transaction.items.length - 1
@@ -255,11 +268,15 @@ export function genMultiRow(
 
 		return [
 			<div
-				className={s.row_controls_container}
+				className={`${s.row_controls_container} ${s.align_right}`}
 				data-parent_id={transaction.id}
 				key={`${transaction.id}-${item.id}-1`}
 			>
-				<div className={s.reorder_grabber} onMouseDown={handleReorderMouseDown}>
+				<div
+					className={s.reorder_grabber}
+					onMouseDown={handleReorderMouseDown}
+					title='Grab to reposition this item'
+				>
 					<ReorderIcon />
 				</div>
 			</div>,
@@ -317,8 +334,8 @@ export function genMultiRow(
 		]
 	})
 
-	let uniqueCategories: string[] = []
-	let uniqueAccounts: string[] = []
+	const uniqueCategories: string[] = []
+	const uniqueAccounts: string[] = []
 	transaction.items.forEach((item) => {
 		if (item.category_id !== null) {
 			const categoryName = categories.find((cat) => cat.id === item.category_id)!.name
@@ -348,8 +365,8 @@ export function genMultiRow(
 	}
 
 	const foldAnimationTime = 500
-	async function foldItems() {
-		// fold all item cells closed
+	async function renderFold() {
+		// asjust height of middle/bottom rows
 		getItemCells().forEach(async (cell) => {
 			const startingHeight = cell.clientHeight + 'px'
 			cell.style.transition = `height ${foldAnimationTime / 1000}s ease`
@@ -359,37 +376,43 @@ export function genMultiRow(
 			cell.dataset['unfolded_height'] = startingHeight
 		})
 
-		// adjust border radius / margins
+		// adjust border radius / margins of top row
 		await delay(foldAnimationTime - 100)
 		getFirstRowCells().forEach(async (cell) => {
 			cell.classList.add(s.last_row)
 		})
 	}
-
-	function unfoldItems() {
+	async function renderUnfold() {
+		// asjust height of middle/bottom rows
 		getItemCells().forEach(async (cell) => {
 			const startingHeight = cell.dataset['unfolded_height'] as string
 			cell.style.height = startingHeight
 			await delay(foldAnimationTime + 10)
 			cell.style.height = ''
 		})
-		// adjust border radius / margins
+		// adjust border radius / margins of top row
 		getFirstRowCells().forEach(async (cell) => {
 			cell.classList.remove(s.last_row)
 		})
 	}
+	if (folded) {
+		renderFold()
+	} else {
+		renderUnfold()
+	}
 
 	const firstRow = [
 		<div
-			className={s.row_controller}
+			className={s.row_controls_container}
 			key={`${transaction.id}-1`}
 			data-transaction_id={transaction.id}
 		>
-			<div className={s.folder} onClick={foldItems}>
-				O
-			</div>
-			<div className={s.folder} onClick={unfoldItems}>
-				X
+			<div
+				className={`${s.fold_toggle} ${folded ? s.folded : s.unfolded}`}
+				onClick={folded ? onUnfold : onFold}
+				title={folded ? 'Click to reveal items' : 'Click to hide items'}
+			>
+				<FoldArrow />
 			</div>
 		</div>,
 		<div
@@ -428,5 +451,5 @@ export function genMultiRow(
 			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
 		</div>,
 	]
-	return [firstRow, ...nextRows]
+	return [firstRow, ...itemRows]
 }

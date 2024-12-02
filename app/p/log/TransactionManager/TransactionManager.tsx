@@ -15,7 +15,7 @@ import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { genMultiRow, genSingleRow } from './func/row_gen/row_gen'
+import { genMultiRow, GenMultiRowProps, genSingleRow } from './func/row_gen/row_gen'
 interface LoadState {
 	loading: boolean
 	message: string
@@ -31,6 +31,8 @@ export function TransactionManager() {
 	})
 	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
+	const [multiItemIsFolded, setMultiItemIsFolded] = useState<boolean[]>([])
+	const [counter, setCounter] = useState(0)
 
 	async function fetchAndLoadData() {
 		try {
@@ -47,6 +49,7 @@ export function TransactionManager() {
 			})
 			setDefaultSortOrder(fetchedSortOrder)
 			setCurrentSortOrder(fetchedSortOrder)
+			setMultiItemIsFolded(fetchedSortOrder.map(() => false))
 
 			setLoadState({ loading: true, message: 'Fetching Category Data' })
 			const categoryData = await fetchCategoryData()
@@ -131,6 +134,8 @@ export function TransactionManager() {
 		})
 	}
 
+	useEffect(() => console.log(multiItemIsFolded), [multiItemIsFolded])
+
 	if (
 		!loadState.loading &&
 		data !== null &&
@@ -148,7 +153,7 @@ export function TransactionManager() {
 			)
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
-			data.forEach((transaction) => {
+			data.forEach((transaction, index) => {
 				if (transaction.items.length === 1) {
 					cells.push(
 						genSingleRow(
@@ -169,22 +174,33 @@ export function TransactionManager() {
 					) as FetchedTransaction['items']
 
 					const transactionSorted = { ...transaction, items: sortedItems }
-					cells.push(
-						...genMultiRow(
-							transactionSorted,
-							categories,
-							accounts,
-							dropdownOptionsCategory,
-							dropdownOptionsAccount,
-							(oldIndex, newIndex) => {
-								handleTransactionItemReorder(
-									transaction.id,
-									oldIndex,
-									newIndex
-								)
-							}
-						)
-					)
+
+					const props: GenMultiRowProps = {
+						transaction: transactionSorted,
+						categories: categories,
+						accounts: accounts,
+						dropdownOptionsCategory: dropdownOptionsCategory,
+						dropdownOptionsAccount: dropdownOptionsAccount,
+						handleTransactionItemReorder: (oldIndex, newIndex) => {
+							handleTransactionItemReorder(transaction.id, oldIndex, newIndex)
+						},
+						folded: multiItemIsFolded[index],
+						onFold: () => {
+							setMultiItemIsFolded((prev) => {
+								const newArr = [...prev]
+								newArr[index] = true
+								return newArr
+							})
+						},
+						onUnfold: () => {
+							setMultiItemIsFolded((prev) => {
+								const newArr = [...prev]
+								newArr[index] = false
+								return newArr
+							})
+						},
+					}
+					cells.push(...genMultiRow(props))
 				}
 			})
 			const gridConfig: JGridTypes.Props = {
@@ -196,7 +212,10 @@ export function TransactionManager() {
 		}
 	}
 	return (
-		<div>
+		<div className={s.main}>
+			<button onClick={() => setCounter((prev) => prev + 1)}>
+				Counter: {counter}
+			</button>
 			TransactionManager<div>{loadState.loading ? loadState.message : 'Loaded!'}</div>
 			<div>{grid}</div>
 		</div>
