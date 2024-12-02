@@ -4,6 +4,7 @@ import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdow
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { FetchedAccount, FetchedCategory, FetchedTransaction } from '@/database'
 import s from './row_gen.module.scss'
+import { delay } from '@/utils'
 
 export function genSingleRow(
 	transaction: FetchedTransaction,
@@ -98,7 +99,9 @@ export function genMultiRow(
 
 			const allRows = (
 				Array.from(
-					document.querySelectorAll(`[data-parent_id="${transaction.id}"]`)
+					document.querySelectorAll(
+						`.${s.row_controls_container}[data-parent_id="${transaction.id}"]`
+					)
 				) as HTMLDivElement[]
 			).map((node) => node.parentElement!.parentElement!) as HTMLDivElement[]
 
@@ -264,6 +267,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.first_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				data-parent_id={transaction.id}
 				key={`${transaction.id}-${item.id}-2`}
 			>
 				<JDatePicker value={transaction.date} disabled minimalStyle />
@@ -272,6 +276,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				data-parent_id={transaction.id}
 				key={`${transaction.id}-${item.id}-3`}
 			>
 				<JInput value={item.name} />
@@ -280,6 +285,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				data-parent_id={transaction.id}
 				key={`${transaction.id}-${item.id}-4`}
 			>
 				<JNumberAccounting value={item.amount} data-rerender_tag={transaction.id} />
@@ -288,6 +294,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				data-parent_id={transaction.id}
 				key={`${transaction.id}-${item.id}-5`}
 			>
 				<JDropdown
@@ -299,6 +306,7 @@ export function genMultiRow(
 				className={`${s.data_container} ${s.multi_item} ${s.last_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
+				data-parent_id={transaction.id}
 				key={`${transaction.id}-${item.id}-7`}
 			>
 				<JDropdown
@@ -326,35 +334,96 @@ export function genMultiRow(
 		}
 	})
 
+	function getItemCells() {
+		return (
+			Array.from(
+				document.querySelectorAll(`[data-parent_id="${transaction.id}"`)
+			) as HTMLDivElement[]
+		).map((div) => div.parentElement as HTMLDivElement)
+	}
+	function getFirstRowCells() {
+		return Array.from(
+			document.querySelectorAll(`[data-transaction_id="${transaction.id}"`)
+		) as HTMLDivElement[]
+	}
+
+	const foldAnimationTime = 500
+	async function foldItems() {
+		// fold all item cells closed
+		getItemCells().forEach(async (cell) => {
+			const startingHeight = cell.clientHeight + 'px'
+			cell.style.transition = `height ${foldAnimationTime / 1000}s ease`
+			cell.style.height = startingHeight
+			await delay(10)
+			cell.style.height = '0px'
+			cell.dataset['unfolded_height'] = startingHeight
+		})
+
+		// adjust border radius / margins
+		await delay(foldAnimationTime - 100)
+		getFirstRowCells().forEach(async (cell) => {
+			cell.classList.add(s.last_row)
+		})
+	}
+
+	function unfoldItems() {
+		getItemCells().forEach(async (cell) => {
+			const startingHeight = cell.dataset['unfolded_height'] as string
+			cell.style.height = startingHeight
+			await delay(foldAnimationTime + 10)
+			cell.style.height = ''
+		})
+		// adjust border radius / margins
+		getFirstRowCells().forEach(async (cell) => {
+			cell.classList.remove(s.last_row)
+		})
+	}
+
 	const firstRow = [
-		<div className={s.row_controller} key={`${transaction.id}-1`}></div>,
+		<div
+			className={s.row_controller}
+			key={`${transaction.id}-1`}
+			data-transaction_id={transaction.id}
+		>
+			<div className={s.folder} onClick={foldItems}>
+				O
+			</div>
+			<div className={s.folder} onClick={unfoldItems}>
+				X
+			</div>
+		</div>,
 		<div
 			className={`${s.data_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}
 			key={`${transaction.id}-2`}
+			data-transaction_id={transaction.id}
 		>
 			<JDatePicker value={transaction.date} />
 		</div>,
 		<div
 			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-3`}
+			data-transaction_id={transaction.id}
 		>
 			<JInput value={transaction.name} />
 		</div>,
 		<div
 			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-4`}
+			data-transaction_id={transaction.id}
 		>
 			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
 		<div
 			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-5`}
+			data-transaction_id={transaction.id}
 		>
 			<JInput value={uniqueCategories.join(', ')} disabled minimalStyle />
 		</div>,
 		<div
 			className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}
 			key={`${transaction.id}-6`}
+			data-transaction_id={transaction.id}
 		>
 			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
 		</div>,

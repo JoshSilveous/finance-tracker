@@ -20,19 +20,20 @@
 	}
 	&.multi_item {
 		background-color: var(--bg-color-lighter-2);
-
 		padding: var(--padding-val);
 		height: calc(36px + (var(--padding-val) * 2));
 		&.first_row {
 			margin-top: var(--margin-top);
-		}
-		&.first_row {
 			padding-top: calc(var(--padding-val) * 2);
 			height: calc(36px + (var(--padding-val) * 3));
+			transition: border-radius 0.2s ease, padding-bottom 0.2s ease, height 0.2s ease;
 		}
 		&.last_row {
 			padding-bottom: calc(var(--padding-val) * 2);
 			height: calc(36px + (var(--padding-val) * 3));
+		}
+		&.first_row.last_row {
+			height: calc(36px + (var(--padding-val) * 4));
 		}
 		&.first_col {
 			padding-left: calc(var(--padding-val) * 2);
@@ -42,16 +43,16 @@
 		}
 
 		&.first_row.first_col {
-			border-radius: var(--border-radius) 0 0 0;
+			border-top-left-radius: var(--border-radius);
 		}
 		&.first_row.last_col {
-			border-radius: 0 var(--border-radius) 0 0;
+			border-top-right-radius: var(--border-radius);
 		}
 		&.last_row.last_col {
-			border-radius: 0 0 var(--border-radius) 0;
+			border-bottom-right-radius: var(--border-radius);
 		}
 		&.last_row.first_col {
-			border-radius: 0 0 0 var(--border-radius);
+			border-bottom-left-radius: var(--border-radius);
 		}
 	}
 }
