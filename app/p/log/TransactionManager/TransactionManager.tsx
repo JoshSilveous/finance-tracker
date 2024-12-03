@@ -15,7 +15,8 @@ import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { genMultiRow, GenMultiRowProps, genSingleRow } from './func/row_gen/row_gen'
+import { genSingleRow, genMultiRow } from './func/row_gen/row_gen'
+import { genMultiRow2, GenMultiRowProps } from './func/row_gen_2/row_gen'
 interface LoadState {
 	loading: boolean
 	message: string
@@ -134,7 +135,7 @@ export function TransactionManager() {
 		})
 	}
 
-	useEffect(() => console.log(multiItemIsFolded), [multiItemIsFolded])
+	// useEffect(() => console.log(multiItemIsFolded), [multiItemIsFolded])
 
 	if (
 		!loadState.loading &&
@@ -200,7 +201,8 @@ export function TransactionManager() {
 							})
 						},
 					}
-					cells.push(...genMultiRow(props))
+					// cells.push(...genMultiRow(props))
+					cells.push(genMultiRow2(props))
 				}
 			})
 			const gridConfig: JGridTypes.Props = {

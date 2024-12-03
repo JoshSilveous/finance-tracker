@@ -15,16 +15,16 @@ export function genSingleRow(
 	const transactionItem = transaction.items[0]
 	return [
 		<div className={s.row_controller}></div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.first_col}`}>
+		<div className={`${s.cell_container} ${s.single_item} ${s.first_col}`}>
 			<JDatePicker value={transaction.date} />
 		</div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+		<div className={`${s.cell_container} ${s.single_item} ${s.mid_col}`}>
 			<JInput value={transaction.name} />
 		</div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+		<div className={`${s.cell_container} ${s.single_item} ${s.mid_col}`}>
 			<JNumberAccounting value={transactionItem.amount} />
 		</div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+		<div className={`${s.cell_container} ${s.single_item} ${s.mid_col}`}>
 			<JDropdown
 				options={dropdownOptionsCategory}
 				value={
@@ -34,7 +34,7 @@ export function genSingleRow(
 				}
 			/>
 		</div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.last_col}`}>
+		<div className={`${s.cell_container} ${s.single_item} ${s.last_col}`}>
 			<JDropdown
 				options={dropdownOptionsAccount}
 				value={
@@ -57,7 +57,7 @@ export interface GenMultiRowProps {
 	onFold: () => void
 	onUnfold: () => void
 }
-export function genMultiRow({
+export function genMultiRow2({
 	transaction,
 	categories,
 	accounts,
@@ -85,15 +85,12 @@ export function genMultiRow({
 							.parentElement as HTMLDivElement)
 
 			const grabberContainerNode = grabberNode.parentElement as HTMLDivElement
-			const thisRowNode = grabberContainerNode.parentElement!
-				.parentElement as HTMLDivElement
+			const thisRow = Array.from(
+				document.querySelectorAll(`[data-item_id="${item.id}"]`)
+			) as HTMLDivElement[]
 
 			const thisRowIndex = itemIndex
 
-			thisRowNode.childNodes.forEach((childNode) => {
-				const node = childNode as HTMLDivElement
-				node.style.width = `${node.offsetWidth}px`
-			})
 			const offsetX =
 				grabberNode.offsetLeft +
 				grabberNode.offsetWidth / 2 -
@@ -103,29 +100,41 @@ export function genMultiRow({
 				grabberNode.offsetHeight / 2 -
 				grabberContainerNode.offsetTop
 
-			thisRowNode.style.left = `${e.clientX - offsetX}px`
-			thisRowNode.style.top = `${e.clientY - offsetY}px`
+			let leftOffset = 0
+			thisRow.forEach((node) => {
+				node.style.width = `${node.offsetWidth}px`
+				node.style.left = `${e.clientX - offsetX + leftOffset}px`
+				node.style.top = `${e.clientY - offsetY}px`
+				node.style.display = 'flex'
+				node.style.position = 'fixed'
+				node.style.zIndex = '999'
+			})
 
-			thisRowNode.style.display = 'flex'
-			thisRowNode.style.position = 'fixed'
-			thisRowNode.style.zIndex = '999'
-
-			const allRows = (
-				Array.from(
-					document.querySelectorAll(
-						`.${s.row_controls_container}[data-parent_id="${transaction.id}"]`
-					)
+			let allRows = transaction.items.map((item) => {
+				return Array.from(
+					document.querySelectorAll(`[data-item_id="${item.id}"]`)
 				) as HTMLDivElement[]
-			).map((node) => node.parentElement!.parentElement!) as HTMLDivElement[]
+			})
+			console.log(allRows)
 
 			const otherRows = allRows.filter((_, index) => index !== thisRowIndex)
 
-			const breakpoints = otherRows.map(
-				(node) => (node.childNodes[0] as HTMLDivElement).offsetTop
-			)
+			const breakpoints = otherRows.map((row) => row[0].offsetTop)
 			breakpoints.push(
-				breakpoints.at(-1)! +
-					(allRows.at(-1)!.childNodes[0] as HTMLDivElement).offsetHeight
+				breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
+			)
+			console.log(
+				'thisRow:',
+				thisRow,
+				'\n',
+				'allRows:',
+				allRows,
+				'\n',
+				'otherRows:',
+				otherRows,
+				'\n',
+				'breakpoints:',
+				breakpoints
 			)
 
 			let firstRun = true
@@ -133,28 +142,24 @@ export function genMultiRow({
 			function putMarginGapOnRow(rowIndex: number | 'none') {
 				// if ending the animation, remove transition effects
 				if (rowIndex === 'none') {
-					allRows.forEach((rowNode) => {
-						;(Array.from(rowNode.childNodes) as HTMLDivElement[]).forEach(
-							(cellNode) => {
-								cellNode.classList.remove(s.transitions)
-							}
-						)
+					allRows.forEach((rowNodes) => {
+						rowNodes.forEach((node) => {
+							node.classList.remove(s.transitions)
+						})
 					})
 				}
 				// remove all current margin modifications
-				allRows.forEach((rowNode) => {
-					;(Array.from(rowNode.childNodes) as HTMLDivElement[]).forEach(
-						(cellNode) => {
-							cellNode.classList.remove(
-								s.margin_top,
-								s.margin_bottom,
-								s.margin_top_double,
-								s.margin_bottom_double,
-								s.remove_border_radius,
-								s.add_border_radius
-							)
-						}
-					)
+				allRows.forEach((rowNodes) => {
+					rowNodes.forEach((node) => {
+						node.classList.remove(
+							s.margin_top,
+							s.margin_bottom,
+							s.margin_top_double,
+							s.margin_bottom_double,
+							s.remove_border_radius,
+							s.add_border_radius
+						)
+					})
 				})
 				if (rowIndex === 'none') {
 					return
@@ -164,47 +169,43 @@ export function genMultiRow({
 
 				// border radius handling when last row is selected
 				if (isLastRowSelected && rowIndex !== transaction.items.length - 2) {
-					;(Array.from(thisRowNode.childNodes) as HTMLDivElement[]).forEach(
-						(cellNode) => cellNode.classList.add(s.remove_border_radius)
-					)
-					;(Array.from(otherRows.at(-1)!.childNodes) as HTMLDivElement[]).forEach(
-						(cellNode) => cellNode.classList.add(s.add_border_radius)
-					)
+					thisRow.forEach((node) => {
+						node.classList.add(s.remove_border_radius)
+					})
+					otherRows.at(-1)!.forEach((node) => {
+						node.classList.add(s.add_border_radius)
+					})
 				}
 
 				// if hovering over first row
 				if (rowIndex === -1) {
-					;(Array.from(otherRows[0].childNodes) as HTMLDivElement[]).forEach(
-						(cellNode) => cellNode.classList.add(s.margin_top_double)
-					)
+					otherRows[0].forEach((node) => {
+						node.classList.add(s.margin_top_double)
+					})
 				}
 				// if hovering over last row
 				else if (rowIndex === transaction.items.length - 2) {
-					;(Array.from(otherRows.at(-1)!.childNodes) as HTMLDivElement[]).forEach(
-						(cellNode) =>
-							cellNode.classList.add(
-								s.margin_bottom_double,
-								s.remove_border_radius
-							)
-					)
-					;(Array.from(thisRowNode.childNodes) as HTMLDivElement[]).forEach(
-						(childNode) => childNode.classList.add(s.add_border_radius)
-					)
+					otherRows.at(-1)!.forEach((node) => {
+						node.classList.add(s.margin_bottom_double, s.remove_border_radius)
+					})
+					thisRow.forEach((node) => {
+						node.classList.add(s.add_border_radius)
+					})
 				} else {
-					;(
-						Array.from(otherRows[rowIndex].childNodes) as HTMLDivElement[]
-					).forEach((cellNode) => cellNode.classList.add(s.margin_bottom))
-					;(
-						Array.from(otherRows[rowIndex + 1].childNodes) as HTMLDivElement[]
-					).forEach((cellNode) => cellNode.classList.add(s.margin_top))
+					otherRows[rowIndex].forEach((node) =>
+						node.classList.add(s.margin_bottom)
+					)
+					otherRows[rowIndex + 1].forEach((node) =>
+						node.classList.add(s.margin_top)
+					)
 				}
 
 				if (firstRun) {
 					const delay = setTimeout(() => {
-						allRows.forEach((rowNode) => {
-							;(Array.from(rowNode.childNodes) as HTMLDivElement[]).forEach(
-								(cellNode) => cellNode.classList.add(s.transitions)
-							)
+						allRows.forEach((row) => {
+							row.forEach((node) => {
+								node.classList.add(s.transitions)
+							})
 						})
 						clearTimeout(delay)
 					}, 10)
@@ -222,8 +223,13 @@ export function genMultiRow({
 
 			putMarginGapOnRow(thisRowIndex)
 			function handleReorderMouseMove(e: MouseEvent) {
-				thisRowNode.style.left = `${e.clientX - offsetX}px`
-				thisRowNode.style.top = `${e.clientY - offsetY}px`
+				let leftOffset = 0
+				thisRow.forEach((node) => {
+					node.style.left = `${e.clientX - offsetX + leftOffset}px`
+					node.style.top = `${e.clientY - offsetY}px`
+
+					leftOffset += node.clientWidth
+				})
 
 				const prevClosestBreakpointIndex = closestBreakpointIndex
 				closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
@@ -235,15 +241,14 @@ export function genMultiRow({
 
 			function handleReorderMouseUp() {
 				putMarginGapOnRow('none')
-				thisRowNode.childNodes.forEach((childNode) => {
-					const node = childNode as HTMLDivElement
+				thisRow.forEach((node) => {
 					node.style.width = ''
+					node.style.display = ''
+					node.style.top = ''
+					node.style.left = ''
+					node.style.zIndex = ''
+					node.style.position = ''
 				})
-				thisRowNode.style.display = ''
-				thisRowNode.style.top = ''
-				thisRowNode.style.left = ''
-				thisRowNode.style.zIndex = ''
-				thisRowNode.style.position = ''
 
 				document.body.style.cursor = ''
 				window.removeEventListener('mousemove', handleReorderMouseMove)
@@ -268,8 +273,9 @@ export function genMultiRow({
 
 		return [
 			<div
-				className={`${s.row_controls_container} ${s.align_right}`}
+				className={`${s.cell_container} ${s.align_right}`}
 				data-parent_id={transaction.id}
+				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-1`}
 			>
 				<div
@@ -281,37 +287,41 @@ export function genMultiRow({
 				</div>
 			</div>,
 			<div
-				className={`${s.data_container} ${s.multi_item} ${s.first_col} ${
+				className={`${s.cell_container} ${s.multi_item} ${s.first_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
+				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-2`}
 			>
 				<JDatePicker value={transaction.date} disabled minimalStyle />
 			</div>,
 			<div
-				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
+				className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
+				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-3`}
 			>
 				<JInput value={item.name} />
 			</div>,
 			<div
-				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
+				className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
+				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-4`}
 			>
 				<JNumberAccounting value={item.amount} data-rerender_tag={transaction.id} />
 			</div>,
 			<div
-				className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${
+				className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
+				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-5`}
 			>
 				<JDropdown
@@ -320,10 +330,11 @@ export function genMultiRow({
 				/>
 			</div>,
 			<div
-				className={`${s.data_container} ${s.multi_item} ${s.last_col} ${
+				className={`${s.cell_container} ${s.multi_item} ${s.last_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
+				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-7`}
 			>
 				<JDropdown
@@ -351,113 +362,71 @@ export function genMultiRow({
 		}
 	})
 
-	function getItemCells() {
-		return (
-			Array.from(
-				document.querySelectorAll(`[data-parent_id="${transaction.id}"`)
-			) as HTMLDivElement[]
-		).map((div) => div.parentElement as HTMLDivElement)
-	}
-	function getFirstRowCells() {
-		return Array.from(
-			document.querySelectorAll(`[data-transaction_id="${transaction.id}"`)
-		) as HTMLDivElement[]
-	}
-
-	const foldAnimationTime = 500
-	let foldAnimationRanThisRender = false
-	async function renderFold() {
-		// asjust height of middle/bottom rows
-		getItemCells().forEach(async (cell) => {
-			const startingHeight = cell.clientHeight + 'px'
-			cell.style.transition = `height ${foldAnimationTime / 1000}s ease`
-			cell.style.height = startingHeight
-			await delay(10)
-			cell.style.height = '0px'
-			cell.dataset['unfolded_height'] = startingHeight
-		})
-
-		// adjust border radius / margins of top row
-		await delay(foldAnimationTime - 100)
-		getFirstRowCells().forEach(async (cell) => {
-			cell.classList.add(s.last_row)
-		})
-	}
-	async function renderUnfold() {
-		// asjust height of middle/bottom rows
-		getItemCells().forEach(async (cell) => {
-			const startingHeight = cell.dataset['unfolded_height'] as string
-			cell.style.height = startingHeight
-			await delay(foldAnimationTime + 10)
-			cell.style.height = ''
-		})
-		// adjust border radius / margins of top row
-		getFirstRowCells().forEach(async (cell) => {
-			cell.classList.remove(s.last_row)
-		})
-	}
-
-	if (folded) {
-		renderFold()
-	} else {
-		renderUnfold()
-	}
-
 	const firstRow = [
 		<div
-			className={s.row_controls_container}
+			className={s.cell_container}
 			key={`${transaction.id}-1`}
 			data-transaction_id={transaction.id}
 		>
 			<div
 				className={`${s.fold_toggle} ${folded ? s.folded : s.unfolded}`}
-				onClick={() => {
-					console.log('clicked with', foldAnimationRanThisRender)
-					if (!foldAnimationRanThisRender) {
-						folded ? onUnfold() : onFold()
-						foldAnimationRanThisRender = true
-					}
-				}}
 				title={folded ? 'Click to reveal items' : 'Click to hide items'}
 			>
 				<FoldArrow />
 			</div>
 		</div>,
 		<div
-			className={`${s.data_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}
+			className={`${s.cell_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}
 			key={`${transaction.id}-2`}
 			data-transaction_id={transaction.id}
 		>
 			<JDatePicker value={transaction.date} />
 		</div>,
 		<div
-			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-3`}
 			data-transaction_id={transaction.id}
 		>
 			<JInput value={transaction.name} />
 		</div>,
 		<div
-			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-4`}
 			data-transaction_id={transaction.id}
 		>
 			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
 		<div
-			className={`${s.data_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-5`}
 			data-transaction_id={transaction.id}
 		>
 			<JInput value={uniqueCategories.join(', ')} disabled minimalStyle />
 		</div>,
 		<div
-			className={`${s.data_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}
 			key={`${transaction.id}-6`}
 			data-transaction_id={transaction.id}
 		>
 			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
 		</div>,
 	]
-	return [firstRow, ...itemRows]
+
+	const uniqueColumnClassNames = [
+		'control',
+		'date',
+		'name',
+		'amount',
+		'category',
+		'account',
+	]
+	const cols = firstRow.map((rowItem, rowItemIndex) => {
+		return (
+			<div className={`${s.column} ${s[uniqueColumnClassNames[rowItemIndex]]}`}>
+				{rowItem} {itemRows.map((itemRow) => itemRow[rowItemIndex])}
+			</div>
+		)
+	})
+
+	return cols
 }
