@@ -118,6 +118,9 @@
 		padding-top: calc(var(--padding-val) * 3);
 		padding-right: calc(var(--padding-val) * 2.5);
 	}
+	&.date .cell_container.popped_out {
+		width: calc(100% + calc(var(--padding-val) * 3));
+	}
 
 	/* RE-ORDERING ROW EFFECT STYLES */
 	--margin-gap-size: calc(36px + var(--padding-val));
@@ -137,6 +140,15 @@
 		margin-bottom: var(--margin-gap-size);
 	}
 
-	/* FOLDING / UNFOLDING EFFECT STYLES */
+	/* FOLDING / UNFOLDING EFFECT STYLES (mostly in js) */
 	overflow-y: hidden;
+	&.folded {
+		.cell_container:not(.first_row) {
+			display: none;
+		}
+	}
+}
+
+.control {
+	color: red !important;
 }
