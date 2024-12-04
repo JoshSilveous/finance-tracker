@@ -94,20 +94,30 @@ export function genMultiRow2({
 			const offsetX =
 				grabberNode.offsetLeft +
 				grabberNode.offsetWidth / 2 -
-				grabberContainerNode.offsetLeft
+				grabberContainerNode.offsetLeft -
+				4
 			const offsetY =
 				grabberNode.offsetTop +
 				grabberNode.offsetHeight / 2 -
-				grabberContainerNode.offsetTop
+				grabberContainerNode.offsetTop +
+				4
+			console.log(offsetX, offsetY)
 
 			let leftOffset = 0
-			thisRow.forEach((node) => {
-				node.style.width = `${node.offsetWidth}px`
+			thisRow.forEach((node, index) => {
+				let widthOffset = 0
+				if (index > 1) {
+					widthOffset += 5
+				}
+				if (index === 5) {
+					widthOffset += 2.5
+				}
+
+				node.style.width = `${node.offsetWidth + widthOffset}px`
 				node.style.left = `${e.clientX - offsetX + leftOffset}px`
 				node.style.top = `${e.clientY - offsetY}px`
-				node.style.display = 'flex'
-				node.style.position = 'fixed'
-				node.style.zIndex = '999'
+				node.classList.add(s.popped_out)
+				leftOffset += node.clientWidth
 			})
 
 			let allRows = transaction.items.map((item) => {
@@ -115,7 +125,6 @@ export function genMultiRow2({
 					document.querySelectorAll(`[data-item_id="${item.id}"]`)
 				) as HTMLDivElement[]
 			})
-			console.log(allRows)
 
 			const otherRows = allRows.filter((_, index) => index !== thisRowIndex)
 
@@ -123,19 +132,19 @@ export function genMultiRow2({
 			breakpoints.push(
 				breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
 			)
-			console.log(
-				'thisRow:',
-				thisRow,
-				'\n',
-				'allRows:',
-				allRows,
-				'\n',
-				'otherRows:',
-				otherRows,
-				'\n',
-				'breakpoints:',
-				breakpoints
-			)
+			// console.log(
+			// 	'thisRow:',
+			// 	thisRow,
+			// 	'\n',
+			// 	'allRows:',
+			// 	allRows,
+			// 	'\n',
+			// 	'otherRows:',
+			// 	otherRows,
+			// 	'\n',
+			// 	'breakpoints:',
+			// 	breakpoints
+			// )
 
 			let firstRun = true
 			const isLastRowSelected = thisRowIndex === allRows.length - 1
@@ -227,7 +236,6 @@ export function genMultiRow2({
 				thisRow.forEach((node) => {
 					node.style.left = `${e.clientX - offsetX + leftOffset}px`
 					node.style.top = `${e.clientY - offsetY}px`
-
 					leftOffset += node.clientWidth
 				})
 
@@ -243,11 +251,9 @@ export function genMultiRow2({
 				putMarginGapOnRow('none')
 				thisRow.forEach((node) => {
 					node.style.width = ''
-					node.style.display = ''
 					node.style.top = ''
 					node.style.left = ''
-					node.style.zIndex = ''
-					node.style.position = ''
+					node.classList.remove(s.popped_out)
 				})
 
 				document.body.style.cursor = ''
