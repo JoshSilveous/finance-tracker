@@ -32,7 +32,7 @@
 			justify-content: flex-start;
 			user-select: none;
 			width: 100%;
-			padding: 5px 10px;
+			padding: var(--padding-val) calc(var(--padding-val) * 2);
 			background-color: transparent;
 
 			&.align_right {
@@ -136,4 +136,7 @@
 	.margin_bottom_double {
 		margin-bottom: var(--margin-gap-size);
 	}
+
+	/* FOLDING / UNFOLDING EFFECT STYLES */
+	overflow-y: hidden;
 }
