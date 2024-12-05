@@ -1,5 +1,4 @@
 -   TransactionManager: Add control to fold/unfold multi-rows
-    -   Allow animation interrupts
 -   TransactionManager: Add control to resort rows
 
 -   Model how the transaction log will look / work

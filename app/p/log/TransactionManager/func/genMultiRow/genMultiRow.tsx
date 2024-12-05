@@ -4,48 +4,9 @@ import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdow
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { FetchedAccount, FetchedCategory, FetchedTransaction } from '@/database'
-import s from './row_gen.module.scss'
+import s from './genMultiRow.module.scss'
 import { delay } from '@/utils'
 
-export function genSingleRow(
-	transaction: FetchedTransaction,
-	dropdownOptionsCategory: JDropdownTypes.Option[],
-	dropdownOptionsAccount: JDropdownTypes.Option[]
-) {
-	const transactionItem = transaction.items[0]
-	return [
-		<div className={s.row_controller}></div>,
-		<div className={`${s.cell_container} ${s.single_item} ${s.first_col}`}>
-			<JDatePicker value={transaction.date} />
-		</div>,
-		<div className={`${s.cell_container} ${s.single_item} ${s.mid_col}`}>
-			<JInput value={transaction.name} />
-		</div>,
-		<div className={`${s.cell_container} ${s.single_item} ${s.mid_col}`}>
-			<JNumberAccounting value={transactionItem.amount} />
-		</div>,
-		<div className={`${s.cell_container} ${s.single_item} ${s.mid_col}`}>
-			<JDropdown
-				options={dropdownOptionsCategory}
-				value={
-					transactionItem.category_id !== null
-						? transactionItem.category_id
-						: undefined
-				}
-			/>
-		</div>,
-		<div className={`${s.cell_container} ${s.single_item} ${s.last_col}`}>
-			<JDropdown
-				options={dropdownOptionsAccount}
-				value={
-					transactionItem.account_id !== null
-						? transactionItem.account_id
-						: undefined
-				}
-			/>
-		</div>,
-	]
-}
 export interface GenMultiRowProps {
 	transaction: FetchedTransaction
 	categories: FetchedCategory[]
@@ -53,11 +14,20 @@ export interface GenMultiRowProps {
 	dropdownOptionsCategory: JDropdownTypes.Option[]
 	dropdownOptionsAccount: JDropdownTypes.Option[]
 	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
+	/**
+	 * Provide a stateful value for the fold/unfold state of this transaction
+	 */
 	folded: boolean
+	/**
+	 * Function that runs when the transaction's items are folded (hidden)
+	 */
 	onFold: () => void
+	/**
+	 * Function that runs when the transaction's items are unfolded (revealed)
+	 */
 	onUnfold: () => void
 }
-export function genMultiRow2({
+export function genMultiRow({
 	transaction,
 	categories,
 	accounts,
@@ -68,6 +38,157 @@ export function genMultiRow2({
 	onFold,
 	onUnfold,
 }: GenMultiRowProps) {
+	const uniqueCategories: string[] = []
+	const uniqueAccounts: string[] = []
+	transaction.items.forEach((item) => {
+		if (item.category_id !== null) {
+			const categoryName = categories.find((cat) => cat.id === item.category_id)!.name
+			if (uniqueCategories.findIndex((item) => item === categoryName) === -1) {
+				uniqueCategories.push(categoryName)
+			}
+		}
+		if (item.account_id !== null) {
+			const accountName = accounts.find((act) => act.id === item.account_id)!.name
+			if (uniqueAccounts.findIndex((item) => item === accountName) === -1) {
+				uniqueAccounts.push(accountName)
+			}
+		}
+	})
+
+	const uniqueColumnClassNames = [
+		'control',
+		'date',
+		'name',
+		'amount',
+		'category',
+		'account',
+	]
+	let isFolded = folded
+	function getColumnNodes() {
+		return Array.from(
+			document.querySelectorAll(
+				`.${s.column}[data-transaction_id="${transaction.id}"]`
+			)
+		) as HTMLDivElement[]
+	}
+
+	const foldAnimationTime = 1000
+	let isFolding = false
+	let cancelAnim: (() => void) | null = null
+
+	function handleFoldToggle() {
+		const toggleArrowNode = document.querySelector(
+			`.${s.fold_toggle}[data-transaction_id="${transaction.id}"]`
+		) as HTMLDivElement
+		toggleArrowNode.style.transition = `scale 0.1s ease, color 0.1s ease, transform ${
+			foldAnimationTime / 1000
+		}s ease`
+
+		if (isFolded) {
+			toggleArrowNode.classList.remove(s.folded)
+			if (isFolding === false) {
+				unfold()
+			} else {
+				cancelAnim!()
+				unfold()
+			}
+			isFolded = false
+		} else {
+			toggleArrowNode.classList.add(s.folded)
+			if (isFolding === false) {
+				fold()
+			} else {
+				cancelAnim!()
+				fold()
+			}
+			isFolded = true
+		}
+	}
+
+	function fold() {
+		isFolding = true
+		let cancelled = false
+		cancelAnim = () => {
+			cancelled = true
+		}
+
+		const cols = getColumnNodes()
+		const firstRowHeight = document.querySelector(
+			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
+		)!.clientHeight
+		cols.forEach(async (col) => {
+			const colStyle = getComputedStyle(col)
+			const startingHeight = colStyle.height
+			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
+			col.style.height = startingHeight
+			await delay(10)
+			if (cancelled) {
+				return
+			}
+			col.style.height = firstRowHeight + 'px'
+			await delay(foldAnimationTime)
+			if (cancelled) {
+				return
+			}
+			col.style.height = ''
+			col.classList.add(s.folded)
+			isFolding = false
+			cancelAnim = null
+			onFold()
+		})
+	}
+
+	function unfold() {
+		isFolding = true
+		let cancelled = false
+		cancelAnim = () => {
+			cancelled = true
+		}
+
+		const cells = Array.from(
+			document.querySelectorAll(
+				`.${s.column}.${s.date}[data-transaction_id="${transaction.id}"] > .${s.cell_container}`
+			)
+		) as HTMLDivElement[]
+		const cols = getColumnNodes()
+		const firstRowHeight = document.querySelector(
+			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
+		)!.clientHeight
+
+		cols.forEach((col) => {
+			col.classList.remove(s.folded)
+		})
+
+		// calculate full height to return to
+		// (cannot just set to 100%, animation won't play)
+		let fullColHeight = 0
+		cells.forEach((cell) => {
+			fullColHeight += cell.clientHeight
+		})
+		const gapSize = parseInt(getComputedStyle(cols[0]).gap)
+		fullColHeight += (cells.length - 1) * gapSize
+
+		// apply new height animation
+		cols.forEach(async (col) => {
+			const startingHeight = firstRowHeight + 'px'
+			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
+			col.style.height = startingHeight
+			await delay(10)
+			if (cancelled) {
+				return
+			}
+			col.style.height = fullColHeight + 'px'
+			await delay(foldAnimationTime)
+			if (cancelled) {
+				return
+			}
+			col.style.height = ''
+			isFolding = false
+			cancelAnim = null
+			onUnfold()
+		})
+	}
+
 	let sum = 0
 	const itemRows = transaction.items.map((item, itemIndex) => {
 		sum += item.amount
@@ -101,7 +222,6 @@ export function genMultiRow2({
 				grabberNode.offsetHeight / 2 -
 				grabberContainerNode.offsetTop +
 				4
-			console.log(offsetX, offsetY)
 
 			let leftOffset = 0
 			thisRow.forEach((node, index) => {
@@ -121,7 +241,6 @@ export function genMultiRow2({
 				node.style.left = `${e.clientX - offsetX + leftOffset}px`
 				node.style.top = `${e.clientY - offsetY}px`
 				node.classList.add(s.popped_out)
-				console.log()
 				leftOffset += node.clientWidth
 			})
 
@@ -343,23 +462,6 @@ export function genMultiRow2({
 		]
 	})
 
-	const uniqueCategories: string[] = []
-	const uniqueAccounts: string[] = []
-	transaction.items.forEach((item) => {
-		if (item.category_id !== null) {
-			const categoryName = categories.find((cat) => cat.id === item.category_id)!.name
-			if (uniqueCategories.findIndex((item) => item === categoryName) === -1) {
-				uniqueCategories.push(categoryName)
-			}
-		}
-		if (item.account_id !== null) {
-			const accountName = accounts.find((act) => act.id === item.account_id)!.name
-			if (uniqueAccounts.findIndex((item) => item === accountName) === -1) {
-				uniqueAccounts.push(accountName)
-			}
-		}
-	})
-
 	const firstRow = [
 		<div
 			className={`${s.cell_container} ${s.first_row}`}
@@ -367,9 +469,10 @@ export function genMultiRow2({
 			data-transaction_id={transaction.id}
 		>
 			<div
-				className={`${s.fold_toggle} ${folded ? s.folded : s.unfolded}`}
-				onClick={foldClick}
-				title={folded ? 'Click to reveal items' : 'Click to hide items'}
+				className={`${s.fold_toggle} ${isFolded ? s.folded : ''}`}
+				data-transaction_id={transaction.id}
+				onClick={handleFoldToggle}
+				title={isFolded ? 'Click to reveal items' : 'Click to hide items'}
 			>
 				<FoldArrow />
 			</div>
@@ -411,87 +514,6 @@ export function genMultiRow2({
 		</div>,
 	]
 
-	const uniqueColumnClassNames = [
-		'control',
-		'date',
-		'name',
-		'amount',
-		'category',
-		'account',
-	]
-	let testFolded = false
-	function getColumnNodes() {
-		return Array.from(
-			document.querySelectorAll(
-				`.${s.column}[data-transaction_id="${transaction.id}"]`
-			)
-		) as HTMLDivElement[]
-	}
-
-	const foldAnimationTime = 500
-	function foldClick() {
-		if (testFolded) {
-			unfold()
-			testFolded = false
-		} else {
-			fold()
-			testFolded = true
-		}
-	}
-
-	function fold() {
-		const cols = getColumnNodes()
-		const firstRowHeight = document.querySelector(
-			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
-		)!.clientHeight
-		cols.forEach(async (col) => {
-			const colStyle = getComputedStyle(col)
-			const startingHeight = colStyle.height
-			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
-			col.style.height = startingHeight
-			await delay(10)
-			col.style.height = firstRowHeight + 'px'
-			await delay(foldAnimationTime)
-			col.style.height = ''
-			col.classList.add(s.folded)
-		})
-	}
-	function unfold() {
-		const cells = Array.from(
-			document.querySelectorAll(
-				`.${s.column}.${s.date}[data-transaction_id="${transaction.id}"] > .${s.cell_container}`
-			)
-		) as HTMLDivElement[]
-		const cols = getColumnNodes()
-		const firstRowHeight = document.querySelector(
-			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
-		)!.clientHeight
-
-		cols.forEach((col) => {
-			col.classList.remove(s.folded)
-		})
-
-		// calculate full height to return to
-		// (cannot just set to 100%, animation won't play)
-		let fullColHeight = 0
-		cells.forEach((cell) => {
-			fullColHeight += cell.clientHeight
-		})
-		const gapSize = parseInt(getComputedStyle(cols[0]).gap)
-		fullColHeight += (cells.length - 1) * gapSize
-
-		// apply new height animation
-		cols.forEach(async (col) => {
-			const startingHeight = firstRowHeight + 'px'
-			console.log('setting height to', startingHeight)
-			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
-			col.style.height = startingHeight
-			await delay(10)
-			col.style.height = fullColHeight + 'px'
-			await delay(foldAnimationTime)
-			col.style.height = ''
-		})
-	}
 	const cols = firstRow.map((rowItem, rowItemIndex) => {
 		return (
 			<div

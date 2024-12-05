@@ -12,11 +12,9 @@ import {
 	fetchAccountData,
 } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
-import { JInput, JNumberAccounting } from '@/components/JForm'
-import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { genSingleRow, genMultiRow } from './func/row_gen/row_gen'
-import { genMultiRow2, GenMultiRowProps } from './func/row_gen_2/row_gen'
+import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
+import { genSingleRow } from './func/genSingleRow/genSingleRow'
+import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
 interface LoadState {
 	loading: boolean
 	message: string
@@ -32,7 +30,7 @@ export function TransactionManager() {
 	})
 	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
-	const [multiItemIsFolded, setMultiItemIsFolded] = useState<boolean[]>([])
+	const [isFoldedOrder, setIsFoldedOrder] = useState<boolean[]>([])
 	const [counter, setCounter] = useState(0)
 
 	async function fetchAndLoadData() {
@@ -50,7 +48,7 @@ export function TransactionManager() {
 			})
 			setDefaultSortOrder(fetchedSortOrder)
 			setCurrentSortOrder(fetchedSortOrder)
-			setMultiItemIsFolded(fetchedSortOrder.map(() => false))
+			setIsFoldedOrder(fetchedSortOrder.map(() => false))
 
 			setLoadState({ loading: true, message: 'Fetching Category Data' })
 			const categoryData = await fetchCategoryData()
@@ -185,16 +183,16 @@ export function TransactionManager() {
 						handleTransactionItemReorder: (oldIndex, newIndex) => {
 							handleTransactionItemReorder(transaction.id, oldIndex, newIndex)
 						},
-						folded: multiItemIsFolded[index],
+						folded: isFoldedOrder[index],
 						onFold: () => {
-							setMultiItemIsFolded((prev) => {
+							setIsFoldedOrder((prev) => {
 								const newArr = [...prev]
 								newArr[index] = true
 								return newArr
 							})
 						},
 						onUnfold: () => {
-							setMultiItemIsFolded((prev) => {
+							setIsFoldedOrder((prev) => {
 								const newArr = [...prev]
 								newArr[index] = false
 								return newArr
@@ -202,7 +200,7 @@ export function TransactionManager() {
 						},
 					}
 					// cells.push(...genMultiRow(props))
-					cells.push(genMultiRow2(props))
+					cells.push(genMultiRow(props))
 				}
 			})
 			const gridConfig: JGridTypes.Props = {
