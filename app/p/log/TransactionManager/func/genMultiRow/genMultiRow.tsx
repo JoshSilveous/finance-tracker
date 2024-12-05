@@ -94,7 +94,7 @@ export function genMultiRow({
 				<div
 					className={s.reorder_grabber}
 					onMouseDown={handleReorderMouseDown}
-					title='Grab to reposition this item'
+					title='Grab and drag to reposition this item'
 				>
 					<ReorderIcon />
 				</div>

@@ -202,7 +202,6 @@ export function TransactionManager() {
 							})
 						},
 					}
-					// cells.push(...genMultiRow(props))
 					cells.push(genMultiRow(props))
 				}
 			})
