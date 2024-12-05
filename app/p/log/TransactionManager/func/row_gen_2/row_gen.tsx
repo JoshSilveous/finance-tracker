@@ -428,7 +428,7 @@ export function genMultiRow2({
 		) as HTMLDivElement[]
 	}
 
-	const foldAnimationTime = 1000
+	const foldAnimationTime = 500
 	function foldClick() {
 		if (testFolded) {
 			unfold()
@@ -467,13 +467,14 @@ export function genMultiRow2({
 			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
 		)!.clientHeight
 
+		cols.forEach((col) => {
+			col.classList.remove(s.folded)
+		})
+
 		// calculate full height to return to
 		// (cannot just set to 100%, animation won't play)
 		let fullColHeight = 0
 		cells.forEach((cell) => {
-			const cellStyle = getComputedStyle(cell)
-			console.log(cell.clientHeight, cell.offsetHeight, cell.scrollHeight)
-			console.log(cellStyle.height)
 			fullColHeight += cell.clientHeight
 		})
 		const gapSize = parseInt(getComputedStyle(cols[0]).gap)
@@ -481,15 +482,14 @@ export function genMultiRow2({
 
 		// apply new height animation
 		cols.forEach(async (col) => {
-			col.classList.remove(s.folded)
 			const startingHeight = firstRowHeight + 'px'
 			console.log('setting height to', startingHeight)
 			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
 			col.style.height = startingHeight
-			// delay(10)
-			// col.style.height = fullColHeight + 'px'
-			// delay(foldAnimationTime)
-			// col.style.height = ''
+			await delay(10)
+			col.style.height = fullColHeight + 'px'
+			await delay(foldAnimationTime)
+			col.style.height = ''
 		})
 	}
 	const cols = firstRow.map((rowItem, rowItemIndex) => {
