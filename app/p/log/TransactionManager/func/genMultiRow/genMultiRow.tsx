@@ -15,7 +15,9 @@ export interface GenMultiRowProps {
 	dropdownOptionsAccount: JDropdownTypes.Option[]
 	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
 	/**
-	 * Provide a stateful value for the fold/unfold state of this transaction
+	 * Provide a stateful value for the fold/unfold state of this transaction.
+	 *
+	 * **INITIAL RENDER VALUE MUST BE `FALSE`**
 	 */
 	folded: boolean
 	/**
@@ -72,7 +74,7 @@ export function genMultiRow({
 		) as HTMLDivElement[]
 	}
 
-	const foldAnimationTime = 1000
+	const foldAnimationTime = 500
 	let isFolding = false
 	let cancelAnim: (() => void) | null = null
 
@@ -404,7 +406,7 @@ export function genMultiRow({
 				</div>
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.multi_item} ${s.first_col} ${
+				className={`${s.cell_container} ${s.first_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
@@ -414,7 +416,7 @@ export function genMultiRow({
 				<JDatePicker value={transaction.date} disabled minimalStyle />
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${
+				className={`${s.cell_container} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
@@ -424,7 +426,7 @@ export function genMultiRow({
 				<JInput value={item.name} />
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${
+				className={`${s.cell_container} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
@@ -434,7 +436,7 @@ export function genMultiRow({
 				<JNumberAccounting value={item.amount} data-rerender_tag={transaction.id} />
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${
+				className={`${s.cell_container} ${s.mid_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
@@ -447,7 +449,7 @@ export function genMultiRow({
 				/>
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.multi_item} ${s.last_col} ${
+				className={`${s.cell_container} ${s.last_col} ${
 					isLastRow ? s.last_row : s.mid_row
 				}`}
 				data-parent_id={transaction.id}
@@ -478,35 +480,35 @@ export function genMultiRow({
 			</div>
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.multi_item} ${s.first_row} ${s.first_col}`}
+			className={`${s.cell_container} ${s.first_row} ${s.first_col}`}
 			key={`${transaction.id}-2`}
 			data-transaction_id={transaction.id}
 		>
 			<JDatePicker value={transaction.date} />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-3`}
 			data-transaction_id={transaction.id}
 		>
 			<JInput value={transaction.name} />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-4`}
 			data-transaction_id={transaction.id}
 		>
 			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.multi_item} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.mid_col} ${s.first_row}`}
 			key={`${transaction.id}-5`}
 			data-transaction_id={transaction.id}
 		>
 			<JInput value={uniqueCategories.join(', ')} disabled minimalStyle />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.multi_item} ${s.last_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.last_col} ${s.first_row}`}
 			key={`${transaction.id}-6`}
 			data-transaction_id={transaction.id}
 		>

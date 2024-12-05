@@ -12,16 +12,16 @@ export function genSingleRow(
 	const transactionItem = transaction.items[0]
 	return [
 		<div className={s.row_controller}></div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.first_col}`}>
+		<div className={`${s.cell_container} ${s.first_col}`}>
 			<JDatePicker value={transaction.date} />
 		</div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+		<div className={`${s.cell_container} ${s.mid_col}`}>
 			<JInput value={transaction.name} />
 		</div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+		<div className={`${s.cell_container} ${s.mid_col}`}>
 			<JNumberAccounting value={transactionItem.amount} />
 		</div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.mid_col}`}>
+		<div className={`${s.cell_container} ${s.mid_col}`}>
 			<JDropdown
 				options={dropdownOptionsCategory}
 				value={
@@ -31,7 +31,7 @@ export function genSingleRow(
 				}
 			/>
 		</div>,
-		<div className={`${s.data_container} ${s.single_item} ${s.last_col}`}>
+		<div className={`${s.cell_container} ${s.last_col}`}>
 			<JDropdown
 				options={dropdownOptionsAccount}
 				value={
