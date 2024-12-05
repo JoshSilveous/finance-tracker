@@ -57,14 +57,6 @@ export function genMultiRow({
 		}
 	})
 
-	const uniqueColumnClassNames = [
-		'control',
-		'date',
-		'name',
-		'amount',
-		'category',
-		'account',
-	]
 	let isFolded = folded
 	function getColumnNodes() {
 		return Array.from(
@@ -406,9 +398,7 @@ export function genMultiRow({
 				</div>
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.first_col} ${
-					isLastRow ? s.last_row : s.mid_row
-				}`}
+				className={s.cell_container}
 				data-parent_id={transaction.id}
 				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-2`}
@@ -416,9 +406,7 @@ export function genMultiRow({
 				<JDatePicker value={transaction.date} disabled minimalStyle />
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.mid_col} ${
-					isLastRow ? s.last_row : s.mid_row
-				}`}
+				className={s.cell_container}
 				data-parent_id={transaction.id}
 				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-3`}
@@ -426,9 +414,7 @@ export function genMultiRow({
 				<JInput value={item.name} />
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.mid_col} ${
-					isLastRow ? s.last_row : s.mid_row
-				}`}
+				className={s.cell_container}
 				data-parent_id={transaction.id}
 				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-4`}
@@ -436,9 +422,7 @@ export function genMultiRow({
 				<JNumberAccounting value={item.amount} data-rerender_tag={transaction.id} />
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.mid_col} ${
-					isLastRow ? s.last_row : s.mid_row
-				}`}
+				className={s.cell_container}
 				data-parent_id={transaction.id}
 				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-5`}
@@ -449,9 +433,7 @@ export function genMultiRow({
 				/>
 			</div>,
 			<div
-				className={`${s.cell_container} ${s.last_col} ${
-					isLastRow ? s.last_row : s.mid_row
-				}`}
+				className={s.cell_container}
 				data-parent_id={transaction.id}
 				data-item_id={item.id}
 				key={`${transaction.id}-${item.id}-7`}
@@ -464,6 +446,14 @@ export function genMultiRow({
 		]
 	})
 
+	const uniqueColumnClassNames = [
+		'control',
+		'date',
+		'name',
+		'amount',
+		'category',
+		'account',
+	]
 	const firstRow = [
 		<div
 			className={`${s.cell_container} ${s.first_row}`}
@@ -480,35 +470,35 @@ export function genMultiRow({
 			</div>
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.first_row} ${s.first_col}`}
+			className={`${s.cell_container} ${s.first_row}`}
 			key={`${transaction.id}-2`}
 			data-transaction_id={transaction.id}
 		>
 			<JDatePicker value={transaction.date} />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.first_row}`}
 			key={`${transaction.id}-3`}
 			data-transaction_id={transaction.id}
 		>
 			<JInput value={transaction.name} />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.first_row}`}
 			key={`${transaction.id}-4`}
 			data-transaction_id={transaction.id}
 		>
 			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.mid_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.first_row}`}
 			key={`${transaction.id}-5`}
 			data-transaction_id={transaction.id}
 		>
 			<JInput value={uniqueCategories.join(', ')} disabled minimalStyle />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.last_col} ${s.first_row}`}
+			className={`${s.cell_container} ${s.first_row}`}
 			key={`${transaction.id}-6`}
 			data-transaction_id={transaction.id}
 		>
