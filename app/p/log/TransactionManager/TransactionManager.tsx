@@ -15,6 +15,7 @@ import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { genSingleRow } from './func/genSingleRow/genSingleRow'
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
+import { genGapRow } from './func/genGapRow/genGapRow'
 interface LoadState {
 	loading: boolean
 	message: string
@@ -133,8 +134,6 @@ export function TransactionManager() {
 		})
 	}
 
-	// useEffect(() => console.log(multiItemIsFolded), [multiItemIsFolded])
-
 	if (
 		!loadState.loading &&
 		data !== null &&
@@ -153,6 +152,10 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 			data.forEach((transaction, index) => {
+				// add gap row
+				if (index !== 0) {
+					cells.push(genGapRow())
+				}
 				if (transaction.items.length === 1) {
 					cells.push(
 						genSingleRow(
