@@ -41,7 +41,7 @@ export function reorderMouseDownHandler(
 		let widthOffset = 0
 		// patches for minor visual issues. after a few hours, i decided it wasn't worth the time troubleshooting the css for this
 		if (index === 1) {
-			widthOffset += 7.5
+			widthOffset += 8
 		}
 		if (index > 1) {
 			widthOffset += 5
