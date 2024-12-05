@@ -1,10 +1,17 @@
--   TransactionManager: Add control to fold/unfold multi-rows
--   TransactionManager: Add control to resort rows
+-   TransactionManager
+
+    -   Add control to resort rows
+    -   Add control to delete rows
+    -   Add control to delete transaction items
+    -   Set up PendingChange system
+    -   Set up history system
 
 -   Model how the transaction log will look / work
 -   Switch preferred column widths to localStorage instead of DB
 
--   TransactionManager: Add control to resort multi-rows
+-   TransactionManager
+    -   Add control to fold/unfold multi-rows
+    -   Add control to resort multi-rows
 -   Phase out namespace type system- accounts
 -   Create CategoryManager
 -   Add undo/redo buttons in AccountManager
