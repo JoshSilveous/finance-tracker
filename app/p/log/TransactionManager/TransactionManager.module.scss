@@ -1,7 +1,31 @@
 .main {
 	height: 100%;
+	--gap-row-height: 10px;
 	.grid {
 		border-color: transparent;
-		--gap-row-height: 10px;
+	}
+
+	.popped_out {
+		display: flex;
+		position: absolute;
+		z-index: 999;
+	}
+
+	/* RE-ORDERING ROW EFFECT STYLES */
+	--margin-gap-size: calc(36px + var(--gap-row-height));
+	.transitions {
+		transition: margin 0.2s ease;
+	}
+	.margin_top {
+		margin-top: calc(var(--margin-gap-size) / 2);
+	}
+	.margin_bottom {
+		margin-bottom: calc(var(--margin-gap-size) / 2);
+	}
+	.margin_top_double {
+		margin-top: var(--margin-gap-size);
+	}
+	.margin_bottom_double {
+		margin-bottom: var(--margin-gap-size);
 	}
 }
