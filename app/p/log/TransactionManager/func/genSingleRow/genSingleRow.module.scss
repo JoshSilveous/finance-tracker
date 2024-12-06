@@ -16,38 +16,40 @@
 		padding-right: calc(var(--padding-val) * 2);
 		border-radius: 0 var(--border-radius) var(--border-radius) 0;
 	}
-}
-.row_controller {
-	height: 35px;
-	display: flex;
-	align-items: center;
-	justify-content: flex-start;
-	user-select: none;
-	width: 42px;
-	width: 100%;
-	padding: 0 10px;
 
-	.reorder_grabber {
+	&.row_controller {
+		height: 35px;
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		color: var(--font-color);
-		height: min-content;
-		transition: scale 0.1s ease, color 0.1s ease;
-		svg {
-			height: 20px;
-			width: 20px;
+		justify-content: flex-start;
+		user-select: none;
+		width: 42px;
+		width: 100%;
+		padding: 0 10px;
+		background-color: transparent;
+
+		.reorder_grabber {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--font-color);
+			height: min-content;
+			transition: scale 0.1s ease, color 0.1s ease;
+			svg {
+				height: 20px;
+				width: 20px;
+			}
+			cursor: grab;
+			&:hover {
+				scale: 120%;
+			}
+			&:active {
+				scale: 100%;
+				cursor: grabbing;
+			}
 		}
-		cursor: grab;
-		&:hover {
-			scale: 120%;
+		&.changed > .reorder_grabber {
+			color: var(--font-color-changed);
 		}
-		&:active {
-			scale: 100%;
-			cursor: grabbing;
-		}
-	}
-	&.changed > .reorder_grabber {
-		color: var(--font-color-changed);
 	}
 }

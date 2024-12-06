@@ -19,7 +19,10 @@ export function genSingleRow({
 }: GenSingleRowProps) {
 	const transactionItem = transaction.items[0]
 	return [
-		<div className={s.row_controller}>
+		<div
+			className={`${s.cell_container} ${s.row_controller}`}
+			data-transaction_id={transaction.id}
+		>
 			<div
 				className={s.reorder_grabber}
 				onMouseDown={onResortMouseDown}
@@ -28,16 +31,28 @@ export function genSingleRow({
 				<ReorderIcon />
 			</div>
 		</div>,
-		<div className={`${s.cell_container} ${s.first_col}`}>
+		<div
+			className={`${s.cell_container} ${s.first_col}`}
+			data-transaction_id={transaction.id}
+		>
 			<JDatePicker value={transaction.date} />
 		</div>,
-		<div className={`${s.cell_container} ${s.mid_col}`}>
+		<div
+			className={`${s.cell_container} ${s.mid_col}`}
+			data-transaction_id={transaction.id}
+		>
 			<JInput value={transaction.name} />
 		</div>,
-		<div className={`${s.cell_container} ${s.mid_col}`}>
+		<div
+			className={`${s.cell_container} ${s.mid_col}`}
+			data-transaction_id={transaction.id}
+		>
 			<JNumberAccounting value={transactionItem.amount} />
 		</div>,
-		<div className={`${s.cell_container} ${s.mid_col}`}>
+		<div
+			className={`${s.cell_container} ${s.mid_col}`}
+			data-transaction_id={transaction.id}
+		>
 			<JDropdown
 				options={dropdownOptionsCategory}
 				value={
@@ -47,7 +62,10 @@ export function genSingleRow({
 				}
 			/>
 		</div>,
-		<div className={`${s.cell_container} ${s.last_col}`}>
+		<div
+			className={`${s.cell_container} ${s.last_col}`}
+			data-transaction_id={transaction.id}
+		>
 			<JDropdown
 				options={dropdownOptionsAccount}
 				value={

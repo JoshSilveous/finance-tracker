@@ -22,6 +22,8 @@ import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRow'
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
 import { genGapRow } from './func/genGapRow/genGapRow'
+import genMultiRowStyles from './func/genMultiRow/genMultiRow.module.scss'
+import genSingleRowStyles from './func/genSingleRow/genSingleRow.module.scss'
 interface LoadState {
 	loading: boolean
 	message: string
@@ -129,8 +131,15 @@ export function TransactionManager() {
 		transaction: FetchedTransaction
 	) {
 		const isMultiRow = transaction.items.length > 1
-		const query = `[data-transaction_id="${transaction.id}"]`
-		const thisRow = typedQuerySelectAll<HTMLDivElement>(query)
+		let cssQuery = ''
+		if (isMultiRow) {
+			cssQuery = `.${genMultiRowStyles.column}[data-transaction_id="${transaction.id}"]`
+		} else {
+			cssQuery = `.${genSingleRowStyles.cell_container}[data-transaction_id="${transaction.id}"]`
+		}
+		const thisRow = typedQuerySelectAll<HTMLDivElement>(cssQuery).map(
+			(item) => item.parentElement! as HTMLDivElement
+		)
 		thisRow.forEach((item) => console.log(item))
 	}
 
