@@ -35,7 +35,7 @@
 			min-height: 36px;
 			display: flex;
 			align-items: center;
-			justify-content: flex-start;
+			justify-content: space-between;
 			user-select: none;
 			width: 100%;
 			padding: var(--padding-val) calc(var(--padding-val) * 2);
@@ -46,6 +46,7 @@
 
 			.fold_toggle {
 				display: flex;
+				margin-right: 3.5px;
 				align-items: center;
 				justify-content: center;
 				color: var(--font-color);

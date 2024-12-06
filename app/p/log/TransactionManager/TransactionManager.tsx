@@ -13,7 +13,7 @@ import {
 } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { genSingleRow } from './func/genSingleRow/genSingleRow'
+import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRow'
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
 import { genGapRow } from './func/genGapRow/genGapRow'
 interface LoadState {
@@ -118,6 +118,17 @@ export function TransactionManager() {
 
 	let grid: ReactNode
 
+	function handleTransactionReorder(
+		e: React.MouseEvent<HTMLDivElement>,
+		transaction: FetchedTransaction
+	) {
+		const isMultiRow = transaction.items.length > 1
+		const thisRow = document.querySelectorAll(
+			`[data-transaction_id="${transaction.id}"]`
+		)
+		console.log(thisRow)
+	}
+
 	function handleTransactionItemReorder(
 		transaction_id: string,
 		oldItemIndex: number,
@@ -157,13 +168,15 @@ export function TransactionManager() {
 					cells.push(genGapRow())
 				}
 				if (transaction.items.length === 1) {
-					cells.push(
-						genSingleRow(
-							transaction,
-							dropdownOptionsCategory,
-							dropdownOptionsAccount
-						)
-					)
+					const props: GenSingleRowProps = {
+						transaction,
+						dropdownOptionsCategory,
+						dropdownOptionsAccount,
+						onResortMouseDown: (e) => {
+							handleTransactionReorder(e, transaction)
+						},
+					}
+					cells.push(genSingleRow(props))
 				} else {
 					const sortedItemOrder = currentSortOrder.find(
 						(sortItem) =>
@@ -200,6 +213,9 @@ export function TransactionManager() {
 								newArr[index] = false
 								return newArr
 							})
+						},
+						onWholeResortMouseDown: (e) => {
+							handleTransactionReorder(e, transaction)
 						},
 					}
 					cells.push(genMultiRow(props))

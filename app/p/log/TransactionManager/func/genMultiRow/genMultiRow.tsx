@@ -30,6 +30,10 @@ export interface GenMultiRowProps {
 	 * Function that runs when the transaction's items are unfolded (revealed)
 	 */
 	onUnfold: () => void
+	/**
+	 * MouseDown handler for when the WHOLE transaction is being resorted
+	 */
+	onWholeResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 export function genMultiRow({
 	transaction,
@@ -41,6 +45,7 @@ export function genMultiRow({
 	folded,
 	onFold,
 	onUnfold,
+	onWholeResortMouseDown,
 }: GenMultiRowProps) {
 	const uniqueCategories: string[] = []
 	const uniqueAccounts: string[] = []
@@ -162,6 +167,13 @@ export function genMultiRow({
 			key={`${transaction.id}-1`}
 			data-transaction_id={transaction.id}
 		>
+			<div
+				className={s.reorder_grabber}
+				onMouseDown={onWholeResortMouseDown}
+				title='Grab and drag to reposition this item'
+			>
+				<ReorderIcon />
+			</div>
 			<div
 				className={`${s.fold_toggle} ${folded ? s.folded : ''}`}
 				data-transaction_id={transaction.id}
