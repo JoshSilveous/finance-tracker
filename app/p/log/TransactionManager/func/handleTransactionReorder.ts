@@ -4,11 +4,12 @@ import genMultiRowStyles from './genMultiRow/genMultiRow.module.scss'
 import genSingleRowStyles from './genSingleRow/genSingleRow.module.scss'
 import { typedQuerySelectAll, delay } from '@/utils'
 
-export function handleTransactionReorder(
+export function handleTransactionReorderMouseDown(
 	e: React.MouseEvent<HTMLDivElement>,
 	allTransactions: FetchedTransaction[],
 	transaction: FetchedTransaction,
 	transactionIndex: number,
+	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
 	fold?: () => boolean,
 	unfold?: () => boolean
 ) {
@@ -33,8 +34,6 @@ export function handleTransactionReorder(
 	const thisRow = getTransactionRow(transaction)
 	const allRows = allTransactions.map((transaction) => getTransactionRow(transaction))
 	const otherRows = allRows.filter((_, index) => index !== thisRowIndex)
-
-	console.log(thisRow)
 
 	const grabberNode = e.currentTarget as HTMLDivElement
 
@@ -141,14 +140,6 @@ export function handleTransactionReorder(
 		})
 		const prevClosestBreakpointIndex = closestBreakpointIndex
 		closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
-		console.log(
-			'cursor Y',
-			e.clientY,
-			'breakpoints',
-			breakpoints,
-			'closest',
-			closestBreakpointIndex
-		)
 		if (firstRun || prevClosestBreakpointIndex !== closestBreakpointIndex) {
 			putMarginGapOnRow(closestBreakpointIndex)
 		}
@@ -168,12 +159,15 @@ export function handleTransactionReorder(
 		window.removeEventListener('mousemove', handleReorderMouseMove)
 		window.removeEventListener('mouseup', handleReorderMouseUp)
 
+		if (thisRowIndex !== closestBreakpointIndex) {
+			updateTransactionSortOrder(thisRowIndex, closestBreakpointIndex)
+		}
+
 		// if this is a multi-row that was forced to fold, unfold it
 		if (forceFolded) {
 			unfold!()
 		}
 	}
-	console.log('down!')
 	window.addEventListener('mousemove', handleReorderMouseMove)
 	window.addEventListener('mouseup', handleReorderMouseUp)
 }

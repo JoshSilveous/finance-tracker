@@ -22,12 +22,13 @@ import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRow'
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
 import { genGapRow } from './func/genGapRow/genGapRow'
-import { handleTransactionReorder } from './func/handleTransactionReorder'
+import { handleTransactionReorderMouseDown } from './func/handleTransactionReorder'
 interface LoadState {
 	loading: boolean
 	message: string
 }
 type SortOrderItem = string | string[]
+
 export function TransactionManager() {
 	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
 	const [accounts, setAccounts] = useState<FetchedAccount[] | null>(null)
@@ -125,7 +126,7 @@ export function TransactionManager() {
 
 	let grid: ReactNode
 
-	function transactionItemReorderHandler(
+	function updateTransactionItemSortOrder(
 		transaction_id: string,
 		oldItemIndex: number,
 		newItemIndex: number
@@ -140,7 +141,17 @@ export function TransactionManager() {
 			return newArr
 		})
 	}
-
+	function updateTransactionSortOrder(oldIndex: number, newIndex: number) {
+		setCurrentSortOrder((prev) => {
+			const newArr = structuredClone(prev) as SortOrderItem[]
+			moveItemInArray(newArr, oldIndex, newIndex)
+			return newArr
+		})
+	}
+	useEffect(() => {
+		console.log(currentSortOrder)
+	}, [currentSortOrder])
+	console.log('rerender')
 	if (
 		!loadState.loading &&
 		data !== null &&
@@ -158,18 +169,33 @@ export function TransactionManager() {
 			)
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
-			data.forEach((transaction, index) => {
+			currentSortOrder.forEach((sortItem, index) => {
+				const transaction = data.find((transaction) => {
+					if (Array.isArray(sortItem)) {
+						return transaction.id === sortItem[0]
+					} else {
+						return transaction.id === sortItem
+					}
+				})!
+
 				// add gap row
 				if (index !== 0) {
 					cells.push(genGapRow())
 				}
+
 				if (transaction.items.length === 1) {
 					const props: GenSingleRowProps = {
 						transaction,
 						dropdownOptionsCategory,
 						dropdownOptionsAccount,
 						onResortMouseDown: (e) => {
-							handleTransactionReorder(e, data, transaction, index)
+							handleTransactionReorderMouseDown(
+								e,
+								data,
+								transaction,
+								index,
+								updateTransactionSortOrder
+							)
 						},
 					}
 					cells.push(genSingleRow(props))
@@ -193,7 +219,11 @@ export function TransactionManager() {
 						dropdownOptionsCategory: dropdownOptionsCategory,
 						dropdownOptionsAccount: dropdownOptionsAccount,
 						handleTransactionItemReorder: (oldIndex, newIndex) => {
-							transactionItemReorderHandler(transaction.id, oldIndex, newIndex)
+							updateTransactionItemSortOrder(
+								transaction.id,
+								oldIndex,
+								newIndex
+							)
 						},
 						folded: isFoldedOrder[index],
 						onFold: () => {
@@ -211,11 +241,12 @@ export function TransactionManager() {
 							})
 						},
 						onWholeResortMouseDown: (e) => {
-							handleTransactionReorder(
+							handleTransactionReorderMouseDown(
 								e,
 								data,
 								transaction,
 								index,
+								updateTransactionSortOrder,
 								fold,
 								unfold
 							)
