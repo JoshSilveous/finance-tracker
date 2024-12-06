@@ -6,6 +6,8 @@
     -   Set up PendingChange system
     -   Set up history system
 
+    -   !! NEED TO ALLOW STATE TO CONTROL FOLDED/UNFOLDED DIRECTLY FOR SORTORDER TO WORK
+
 -   Model how the transaction log will look / work
 -   Switch preferred column widths to localStorage instead of DB
 
