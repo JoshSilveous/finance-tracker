@@ -8,7 +8,9 @@ export function handleTransactionReorder(
 	e: React.MouseEvent<HTMLDivElement>,
 	allTransactions: FetchedTransaction[],
 	transaction: FetchedTransaction,
-	transactionIndex: number
+	transactionIndex: number,
+	fold?: () => boolean,
+	unfold?: () => boolean
 ) {
 	function getTransactionRow(transaction: FetchedTransaction) {
 		const isMultiRow = transaction.items.length > 1
@@ -21,10 +23,18 @@ export function handleTransactionReorder(
 		return typedQuerySelectAll<HTMLDivElement>(cssQuery)
 	}
 
+	// if this is a multi-row, force it to fold while popped out
+	let forceFolded = false
+	if (transaction.items.length > 1) {
+		forceFolded = fold!()
+	}
+
 	const thisRowIndex = transactionIndex
 	const thisRow = getTransactionRow(transaction)
 	const allRows = allTransactions.map((transaction) => getTransactionRow(transaction))
 	const otherRows = allRows.filter((_, index) => index !== thisRowIndex)
+
+	console.log(thisRow)
 
 	const grabberNode = e.currentTarget as HTMLDivElement
 
@@ -33,7 +43,18 @@ export function handleTransactionReorder(
 	const offsetY =
 		grabberNode.offsetHeight / 2 + grabberNode.offsetTop + 2 - thisRow[0].offsetTop
 
-	const breakpoints = otherRows.map((row) => row[0].offsetTop)
+	const breakpoints = otherRows.map((row, rowIndex) => {
+		if (forceFolded && rowIndex >= transactionIndex) {
+			const unfoldedHeight = thisRow[0].offsetHeight
+			const foldedHeight = document.querySelector(
+				`.${genMultiRowStyles.first_row}[data-transaction_id="${transaction.id}"]`
+			)!.clientHeight
+
+			return row[0].offsetTop - unfoldedHeight + foldedHeight
+		} else {
+			return row[0].offsetTop
+		}
+	})
 	breakpoints.push(
 		breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
 	)
@@ -120,6 +141,14 @@ export function handleTransactionReorder(
 		})
 		const prevClosestBreakpointIndex = closestBreakpointIndex
 		closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
+		console.log(
+			'cursor Y',
+			e.clientY,
+			'breakpoints',
+			breakpoints,
+			'closest',
+			closestBreakpointIndex
+		)
 		if (firstRun || prevClosestBreakpointIndex !== closestBreakpointIndex) {
 			putMarginGapOnRow(closestBreakpointIndex)
 		}
@@ -138,6 +167,11 @@ export function handleTransactionReorder(
 		document.body.style.cursor = ''
 		window.removeEventListener('mousemove', handleReorderMouseMove)
 		window.removeEventListener('mouseup', handleReorderMouseUp)
+
+		// if this is a multi-row that was forced to fold, unfold it
+		if (forceFolded) {
+			unfold!()
+		}
 	}
 	console.log('down!')
 	window.addEventListener('mousemove', handleReorderMouseMove)

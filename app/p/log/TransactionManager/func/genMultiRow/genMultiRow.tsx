@@ -65,10 +65,9 @@ export function genMultiRow({
 	})
 
 	// moved extensive fold logic to separate file
-	const handleFoldToggle = createFoldToggleHandler(
+	const { handleFoldToggle, fold, unfold } = createFoldToggleHandler(
 		folded,
 		transaction,
-		s,
 		onFold,
 		onUnfold
 	)
@@ -84,7 +83,6 @@ export function genMultiRow({
 				item,
 				itemIndex,
 				transaction,
-				s,
 				handleTransactionItemReorder
 			)
 		}
@@ -220,7 +218,7 @@ export function genMultiRow({
 		</div>,
 	]
 
-	const cols = firstRow.map((rowItem, rowItemIndex) => {
+	const columns = firstRow.map((rowItem, rowItemIndex) => {
 		return (
 			<div
 				className={`${s.column} ${s[uniqueColumnClassNames[rowItemIndex]]}`}
@@ -231,5 +229,17 @@ export function genMultiRow({
 		)
 	})
 
-	return cols
+	return {
+		columns,
+		/**
+		 * Allows this row to be folded from a different component, without the user triggering it
+		 * @returns `true` if fold succeeds, `false` if already folded
+		 */
+		fold,
+		/**
+		 * Allows this row to be unfolded from a different component, without the user triggering it
+		 * @returns `true` if unfold succeeds, `false` if already unfolded
+		 */
+		unfold,
+	}
 }

@@ -125,7 +125,7 @@ export function TransactionManager() {
 
 	let grid: ReactNode
 
-	function handleTransactionItemReorder(
+	function transactionItemReorderHandler(
 		transaction_id: string,
 		oldItemIndex: number,
 		newItemIndex: number
@@ -193,7 +193,7 @@ export function TransactionManager() {
 						dropdownOptionsCategory: dropdownOptionsCategory,
 						dropdownOptionsAccount: dropdownOptionsAccount,
 						handleTransactionItemReorder: (oldIndex, newIndex) => {
-							handleTransactionItemReorder(transaction.id, oldIndex, newIndex)
+							transactionItemReorderHandler(transaction.id, oldIndex, newIndex)
 						},
 						folded: isFoldedOrder[index],
 						onFold: () => {
@@ -211,10 +211,19 @@ export function TransactionManager() {
 							})
 						},
 						onWholeResortMouseDown: (e) => {
-							handleTransactionReorder(e, data, transaction, index)
+							handleTransactionReorder(
+								e,
+								data,
+								transaction,
+								index,
+								fold,
+								unfold
+							)
 						},
 					}
-					cells.push(genMultiRow(props))
+					const { columns, fold, unfold } = genMultiRow(props)
+
+					cells.push(columns)
 				}
 			})
 			const gridConfig: JGridTypes.Props = {

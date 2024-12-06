@@ -1,12 +1,10 @@
 import { FetchedTransaction } from '@/database'
 import { delay, typedQuerySelectAll } from '@/utils'
+import s from './genMultiRow.module.scss'
 
 export function createFoldToggleHandler(
 	folded: boolean,
 	transaction: FetchedTransaction,
-	s: {
-		readonly [key: string]: string
-	},
 	onFold: () => void,
 	onUnfold: () => void
 ) {
@@ -131,5 +129,22 @@ export function createFoldToggleHandler(
 			onUnfold()
 		})
 	}
-	return handleFoldToggle
+
+	return {
+		handleFoldToggle,
+		fold: () => {
+			if (!isFolded) {
+				handleFoldToggle()
+				return true
+			}
+			return false
+		},
+		unfold: () => {
+			if (isFolded) {
+				handleFoldToggle()
+				return true
+			}
+			return false
+		},
+	}
 }

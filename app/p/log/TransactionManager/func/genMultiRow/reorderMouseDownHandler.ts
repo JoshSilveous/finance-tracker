@@ -1,14 +1,12 @@
 import { FetchedTransaction } from '@/database'
 import { delay, typedQuerySelectAll } from '@/utils'
+import s from './genMultiRow.module.scss'
 
 export function reorderMouseDownHandler(
 	e: React.MouseEvent<HTMLInputElement>,
 	item: FetchedTransaction['items'][number],
 	itemIndex: number,
 	transaction: FetchedTransaction,
-	s: {
-		readonly [key: string]: string
-	},
 	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
 ) {
 	/* sometimes, a <path> element is the target instead of the SVG, meaning that
