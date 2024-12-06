@@ -1,7 +1,13 @@
 'use client'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { isStandardError, moveItemInArray, promptError, removeFromArray } from '@/utils'
+import {
+	isStandardError,
+	moveItemInArray,
+	promptError,
+	removeFromArray,
+	typedQuerySelectAll,
+} from '@/utils'
 import {
 	fetchCategoryData,
 	FetchedTransaction,
@@ -123,10 +129,9 @@ export function TransactionManager() {
 		transaction: FetchedTransaction
 	) {
 		const isMultiRow = transaction.items.length > 1
-		const thisRow = document.querySelectorAll(
-			`[data-transaction_id="${transaction.id}"]`
-		)
-		console.log(thisRow)
+		const query = `[data-transaction_id="${transaction.id}"]`
+		const thisRow = typedQuerySelectAll<HTMLDivElement>(query)
+		thisRow.forEach((item) => console.log(item))
 	}
 
 	function handleTransactionItemReorder(

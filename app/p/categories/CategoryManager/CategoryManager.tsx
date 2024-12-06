@@ -21,6 +21,7 @@ import {
 	promptError,
 	useBgLoad,
 	arraysAreEqual,
+	typedQuerySelectAll,
 } from '@/utils'
 import {
 	updatePreferredColumnWidth,
@@ -278,8 +279,8 @@ export function CategoryManager() {
 					e.preventDefault()
 					const currentElement = document.activeElement as HTMLInputElement
 
-					const focusableElements = Array.from(
-						document.querySelectorAll<HTMLInputElement>('input')
+					const focusableElements = typedQuerySelectAll<HTMLInputElement>(
+						'input'
 					).filter(
 						(elem) =>
 							!elem.disabled && !elem.hidden && elem.offsetParent !== null

@@ -1,4 +1,5 @@
 import { FetchedTransaction } from '@/database'
+import { typedQuerySelectAll } from '@/utils'
 
 export function reorderMouseDownHandler(
 	e: React.MouseEvent<HTMLInputElement>,
@@ -19,9 +20,7 @@ export function reorderMouseDownHandler(
 			: ((e.target as SVGElement).parentElement!.parentElement as HTMLDivElement)
 
 	const grabberContainerNode = grabberNode.parentElement as HTMLDivElement
-	const thisRow = Array.from(
-		document.querySelectorAll(`[data-item_id="${item.id}"]`)
-	) as HTMLDivElement[]
+	const thisRow = typedQuerySelectAll<HTMLDivElement>(`[data-item_id="${item.id}"]`)
 
 	const thisRowIndex = itemIndex
 
@@ -58,9 +57,7 @@ export function reorderMouseDownHandler(
 	})
 
 	let allRows = transaction.items.map((item) => {
-		return Array.from(
-			document.querySelectorAll(`[data-item_id="${item.id}"]`)
-		) as HTMLDivElement[]
+		return typedQuerySelectAll<HTMLDivElement>(`[data-item_id="${item.id}"]`)
 	})
 
 	const otherRows = allRows.filter((_, index) => index !== thisRowIndex)

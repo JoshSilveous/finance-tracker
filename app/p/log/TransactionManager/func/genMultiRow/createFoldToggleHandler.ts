@@ -1,5 +1,5 @@
 import { FetchedTransaction } from '@/database'
-import { delay } from '@/utils'
+import { delay, typedQuerySelectAll } from '@/utils'
 
 export function createFoldToggleHandler(
 	folded: boolean,
@@ -12,11 +12,9 @@ export function createFoldToggleHandler(
 ) {
 	let isFolded = folded
 	function getColumnNodes() {
-		return Array.from(
-			document.querySelectorAll(
-				`.${s.column}[data-transaction_id="${transaction.id}"]`
-			)
-		) as HTMLDivElement[]
+		return typedQuerySelectAll<HTMLDivElement>(
+			`.${s.column}[data-transaction_id="${transaction.id}"]`
+		)
 	}
 
 	const foldAnimationTime = 500
@@ -92,11 +90,9 @@ export function createFoldToggleHandler(
 			cancelled = true
 		}
 
-		const cells = Array.from(
-			document.querySelectorAll(
-				`.${s.column}.${s.date}[data-transaction_id="${transaction.id}"] > .${s.cell_container}`
-			)
-		) as HTMLDivElement[]
+		const cells = typedQuerySelectAll<HTMLDivElement>(
+			`.${s.column}.${s.date}[data-transaction_id="${transaction.id}"] > .${s.cell_container}`
+		)
 		const cols = getColumnNodes()
 		const firstRowHeight = document.querySelector(
 			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
