@@ -18,7 +18,7 @@
 	}
 
 	&.row_controller {
-		height: 35px;
+		min-height: 35px;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;

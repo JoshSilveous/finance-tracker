@@ -1,5 +1,5 @@
 import { FetchedTransaction } from '@/database'
-import { typedQuerySelectAll } from '@/utils'
+import { delay, typedQuerySelectAll } from '@/utils'
 
 export function reorderMouseDownHandler(
 	e: React.MouseEvent<HTMLInputElement>,
@@ -68,7 +68,6 @@ export function reorderMouseDownHandler(
 	)
 
 	let firstRun = true
-	const isLastRowSelected = thisRowIndex === allRows.length - 1
 	function putMarginGapOnRow(rowIndex: number | 'none') {
 		// if ending the animation, remove transition effects
 		if (rowIndex === 'none') {
@@ -85,9 +84,7 @@ export function reorderMouseDownHandler(
 					s.margin_top,
 					s.margin_bottom,
 					s.margin_top_double,
-					s.margin_bottom_double,
-					s.remove_border_radius,
-					s.add_border_radius
+					s.margin_bottom_double
 				)
 			})
 		})
@@ -96,16 +93,6 @@ export function reorderMouseDownHandler(
 		}
 
 		rowIndex--
-
-		// border radius handling when last row is selected
-		if (isLastRowSelected && rowIndex !== transaction.items.length - 2) {
-			thisRow.forEach((node) => {
-				node.classList.add(s.remove_border_radius)
-			})
-			otherRows.at(-1)!.forEach((node) => {
-				node.classList.add(s.add_border_radius)
-			})
-		}
 
 		// if hovering over first row
 		if (rowIndex === -1) {
@@ -116,10 +103,7 @@ export function reorderMouseDownHandler(
 		// if hovering over last row
 		else if (rowIndex === transaction.items.length - 2) {
 			otherRows.at(-1)!.forEach((node) => {
-				node.classList.add(s.margin_bottom_double, s.remove_border_radius)
-			})
-			thisRow.forEach((node) => {
-				node.classList.add(s.add_border_radius)
+				node.classList.add(s.margin_bottom_double)
 			})
 		} else {
 			otherRows[rowIndex].forEach((node) => node.classList.add(s.margin_bottom))
@@ -127,14 +111,13 @@ export function reorderMouseDownHandler(
 		}
 
 		if (firstRun) {
-			const delay = setTimeout(() => {
+			delay(10).then(() => {
 				allRows.forEach((row) => {
 					row.forEach((node) => {
 						node.classList.add(s.transitions)
 					})
 				})
-				clearTimeout(delay)
-			}, 10)
+			})
 		}
 	}
 	function getClosestBreakpointIndex(yPos: number) {
@@ -176,7 +159,6 @@ export function reorderMouseDownHandler(
 		window.removeEventListener('mousemove', handleReorderMouseMove)
 		window.removeEventListener('mouseup', handleReorderMouseUp)
 		window.removeEventListener('contextmenu', handleRightClick)
-		document.body.style.cursor = ''
 
 		if (thisRowIndex !== closestBreakpointIndex) {
 			handleTransactionItemReorder(thisRowIndex, closestBreakpointIndex)

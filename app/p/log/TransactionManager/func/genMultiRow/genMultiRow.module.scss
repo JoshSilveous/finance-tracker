@@ -51,7 +51,7 @@
 				justify-content: center;
 				color: var(--font-color);
 				height: min-content;
-				transition: scale 0.1s ease, color 0.1s ease; // also defined in js
+				transition: scale 0.1s ease, color 0.1s ease; // also defined in genMultiRow.ts
 				&.folded {
 					transform: rotate(0deg);
 				}
