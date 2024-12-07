@@ -1,5 +1,5 @@
 'use client'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import s from './TransactionManager.module.scss'
 import {
 	isStandardError,
@@ -39,8 +39,18 @@ export function TransactionManager() {
 	})
 	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
-	const [isFoldedOrder, setIsFoldedOrder] = useState<boolean[]>([])
 	const [counter, setCounter] = useState(0)
+
+	// previous foldOrder is needed to detect when it actually changes between animations (to play animation)
+	const [isFoldedOrder, setIsFoldedOrder] = useState<boolean[]>([])
+	const prevIsFoldedOrderRef = useRef<boolean[] | null>(null)
+	useEffect(() => {
+		prevIsFoldedOrderRef.current = isFoldedOrder
+	}, [isFoldedOrder])
+
+	useEffect(() => {
+		fetchAndLoadData()
+	}, [])
 
 	async function fetchAndLoadData() {
 		try {
@@ -78,9 +88,6 @@ export function TransactionManager() {
 			}
 		}
 	}
-	useEffect(() => {
-		fetchAndLoadData()
-	}, [])
 
 	const dropdownOptionsCategory: JDropdownTypes.Option[] = useMemo(() => {
 		if (categories === null) {
@@ -149,9 +156,8 @@ export function TransactionManager() {
 		})
 	}
 	useEffect(() => {
-		console.log(currentSortOrder)
-	}, [currentSortOrder])
-	console.log('rerender')
+		console.log('fold order changed:', isFoldedOrder)
+	}, [isFoldedOrder])
 	if (
 		!loadState.loading &&
 		data !== null &&
@@ -226,20 +232,13 @@ export function TransactionManager() {
 							)
 						},
 						folded: isFoldedOrder[index],
-						onFold: () => {
-							setIsFoldedOrder((prev) => {
-								const newArr = [...prev]
-								newArr[index] = true
-								return newArr
-							})
-						},
-						onUnfold: () => {
-							setIsFoldedOrder((prev) => {
-								const newArr = [...prev]
-								newArr[index] = false
-								return newArr
-							})
-						},
+						foldChangedBetweenRenders:
+							prevIsFoldedOrderRef.current !== null
+								? isFoldedOrder[index] !==
+								  prevIsFoldedOrderRef.current[index]
+								: false,
+						transactionIndex: index,
+						setIsFoldedOrder,
 						onWholeResortMouseDown: (e) => {
 							handleTransactionReorderMouseDown(
 								e,
@@ -247,14 +246,13 @@ export function TransactionManager() {
 								transaction,
 								index,
 								updateTransactionSortOrder,
-								fold,
-								unfold
+								isFoldedOrder,
+								setIsFoldedOrder
 							)
 						},
 					}
-					const { columns, fold, unfold } = genMultiRow(props)
 
-					cells.push(columns)
+					cells.push(genMultiRow(props))
 				}
 			})
 			const gridConfig: JGridTypes.Props = {

@@ -3,6 +3,7 @@ import s from '../TransactionManager.module.scss'
 import genMultiRowStyles from './genMultiRow/genMultiRow.module.scss'
 import genSingleRowStyles from './genSingleRow/genSingleRow.module.scss'
 import { typedQuerySelectAll, delay } from '@/utils'
+import { Dispatch, SetStateAction } from 'react'
 
 export function handleTransactionReorderMouseDown(
 	e: React.MouseEvent<HTMLDivElement>,
@@ -10,9 +11,25 @@ export function handleTransactionReorderMouseDown(
 	transaction: FetchedTransaction,
 	transactionIndex: number,
 	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
-	fold?: () => boolean,
-	unfold?: () => boolean
+	/**
+	 * only needed for multi-rows
+	 */
+	isFoldedOrder?: boolean[],
+
+	/**
+	 * only needed for multi-rows
+	 */
+	setIsFoldedOrder?: Dispatch<SetStateAction<boolean[]>>
 ) {
+	if (
+		transaction.items.length > 1 &&
+		(isFoldedOrder === undefined || setIsFoldedOrder === undefined)
+	) {
+		throw new Error(
+			`isFoldedOrder and setIsFoldedOrder MUST be defined for multi-rows! Transaction ID: ${transaction.id}`
+		)
+	}
+
 	function getTransactionRow(transaction: FetchedTransaction) {
 		const isMultiRow = transaction.items.length > 1
 		let cssQuery = ''
@@ -26,8 +43,13 @@ export function handleTransactionReorderMouseDown(
 
 	// if this is a multi-row, force it to fold while popped out
 	let forceFolded = false
-	if (transaction.items.length > 1) {
-		forceFolded = fold!()
+	if (transaction.items.length > 1 && isFoldedOrder![transactionIndex] === false) {
+		forceFolded = true
+		setIsFoldedOrder!((prev) => {
+			const newArr = structuredClone(prev)
+			newArr[transactionIndex] = true
+			return newArr
+		})
 	}
 
 	const thisRowIndex = transactionIndex
@@ -165,7 +187,11 @@ export function handleTransactionReorderMouseDown(
 
 		// if this is a multi-row that was forced to fold, unfold it
 		if (forceFolded) {
-			unfold!()
+			setIsFoldedOrder!((prev) => {
+				const newArr = structuredClone(prev)
+				newArr[transactionIndex] = false
+				return newArr
+			})
 		}
 	}
 	window.addEventListener('mousemove', handleReorderMouseMove)

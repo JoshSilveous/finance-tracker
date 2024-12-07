@@ -1,12 +1,14 @@
 import { FetchedTransaction } from '@/database'
 import { delay, typedQuerySelectAll } from '@/utils'
 import s from './genMultiRow.module.scss'
+import { Dispatch, SetStateAction } from 'react'
 
 export function createFoldToggleHandler(
 	folded: boolean,
 	transaction: FetchedTransaction,
-	onFold: () => void,
-	onUnfold: () => void
+	transactionIndex: number,
+	foldChangedBetweenRenders: boolean,
+	setIsFoldedOrder: Dispatch<SetStateAction<boolean[]>>
 ) {
 	let isFolded = folded
 	function getColumnNodes() {
@@ -19,6 +21,7 @@ export function createFoldToggleHandler(
 	let isFolding = false
 	let cancelAnim: (() => void) | null = null
 
+	console.log('foldChangedBetweenRenders', foldChangedBetweenRenders, 'folded', folded)
 	function handleFoldToggle() {
 		const toggleArrowNode = document.querySelector(
 			`.${s.fold_toggle}[data-transaction_id="${transaction.id}"]`
@@ -47,6 +50,9 @@ export function createFoldToggleHandler(
 			isFolded = true
 		}
 	}
+
+	// need a way to detect if the item is folded or not organically
+	// then, everything can be controlled from the state. The button simply controls state
 
 	function fold() {
 		isFolding = true
@@ -77,7 +83,9 @@ export function createFoldToggleHandler(
 			col.classList.add(s.folded)
 			isFolding = false
 			cancelAnim = null
-			onFold()
+			setIsFoldedOrder((prev) =>
+				prev.map((item, itemIndex) => (itemIndex === transactionIndex ? true : item))
+			)
 		})
 	}
 
@@ -126,25 +134,13 @@ export function createFoldToggleHandler(
 			col.style.height = ''
 			isFolding = false
 			cancelAnim = null
-			onUnfold()
+			setIsFoldedOrder((prev) =>
+				prev.map((item, itemIndex) =>
+					itemIndex === transactionIndex ? false : item
+				)
+			)
 		})
 	}
 
-	return {
-		handleFoldToggle,
-		fold: () => {
-			if (!isFolded) {
-				handleFoldToggle()
-				return true
-			}
-			return false
-		},
-		unfold: () => {
-			if (isFolded) {
-				handleFoldToggle()
-				return true
-			}
-			return false
-		},
-	}
+	return handleFoldToggle
 }

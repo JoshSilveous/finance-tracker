@@ -8,9 +8,11 @@ import s from './genMultiRow.module.scss'
 import { delay } from '@/utils'
 import { createFoldToggleHandler } from './createFoldToggleHandler'
 import { reorderMouseDownHandler } from './reorderMouseDownHandler'
+import { Dispatch, SetStateAction } from 'react'
 
 export interface GenMultiRowProps {
 	transaction: FetchedTransaction
+	transactionIndex: number
 	categories: FetchedCategory[]
 	accounts: FetchedAccount[]
 	dropdownOptionsCategory: JDropdownTypes.Option[]
@@ -22,14 +24,8 @@ export interface GenMultiRowProps {
 	 * **INITIAL RENDER VALUE MUST BE `FALSE`**
 	 */
 	folded: boolean
-	/**
-	 * Function that runs when the transaction's items are folded (hidden)
-	 */
-	onFold: () => void
-	/**
-	 * Function that runs when the transaction's items are unfolded (revealed)
-	 */
-	onUnfold: () => void
+	foldChangedBetweenRenders: boolean
+	setIsFoldedOrder: Dispatch<SetStateAction<boolean[]>>
 	/**
 	 * MouseDown handler for when the WHOLE transaction is being resorted
 	 */
@@ -37,14 +33,15 @@ export interface GenMultiRowProps {
 }
 export function genMultiRow({
 	transaction,
+	transactionIndex,
 	categories,
 	accounts,
 	dropdownOptionsCategory,
 	dropdownOptionsAccount,
 	handleTransactionItemReorder,
 	folded,
-	onFold,
-	onUnfold,
+	foldChangedBetweenRenders,
+	setIsFoldedOrder,
 	onWholeResortMouseDown,
 }: GenMultiRowProps) {
 	const uniqueCategories: string[] = []
@@ -65,12 +62,21 @@ export function genMultiRow({
 	})
 
 	// moved extensive fold logic to separate file
-	const { handleFoldToggle, fold, unfold } = createFoldToggleHandler(
+	const handleFoldToggle = createFoldToggleHandler(
 		folded,
 		transaction,
-		onFold,
-		onUnfold
+		transactionIndex,
+		foldChangedBetweenRenders,
+		setIsFoldedOrder
 	)
+
+	if (foldChangedBetweenRenders) {
+		if (folded) {
+			console.log('PLAYING FOLD ANIMATION')
+		} else {
+			console.log('PLAYING UNFOLD ANIMATION')
+		}
+	}
 
 	let sum = 0
 	const itemRows = transaction.items.map((item, itemIndex) => {
@@ -229,17 +235,5 @@ export function genMultiRow({
 		)
 	})
 
-	return {
-		columns,
-		/**
-		 * Allows this row to be folded from a different component, without the user triggering it
-		 * @returns `true` if fold succeeds, `false` if already folded
-		 */
-		fold,
-		/**
-		 * Allows this row to be unfolded from a different component, without the user triggering it
-		 * @returns `true` if unfold succeeds, `false` if already unfolded
-		 */
-		unfold,
-	}
+	return columns
 }
