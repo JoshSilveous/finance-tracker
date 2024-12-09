@@ -7,17 +7,22 @@ import s from './genSingleRow.module.scss'
 
 export interface GenSingleRowProps {
 	transaction: FetchedTransaction
+	transactionIndex: number
 	dropdownOptionsCategory: JDropdownTypes.Option[]
 	dropdownOptionsAccount: JDropdownTypes.Option[]
 	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 export function genSingleRow({
 	transaction,
+	transactionIndex,
 	dropdownOptionsCategory,
 	dropdownOptionsAccount,
 	onResortMouseDown,
 }: GenSingleRowProps) {
 	const transactionItem = transaction.items[0]
+
+	const isFirstRowInGrid = transactionIndex === 0
+
 	return [
 		<div
 			className={`${s.cell_container} ${s.row_controller}`}

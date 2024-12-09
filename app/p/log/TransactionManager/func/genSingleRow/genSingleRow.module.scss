@@ -5,6 +5,10 @@
 	--margin-top: 10px;
 	--border-radius: 5px;
 
+	&:not(.first_row_in_grid) {
+		margin-top: var(--gap-row-height);
+	}
+
 	background-color: var(--bg-color-lighter-2);
 	padding: calc(var(--padding-val) * 2) var(--padding-val);
 	height: calc(36px + (var(--padding-val) * 4));

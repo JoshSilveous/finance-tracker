@@ -43,7 +43,9 @@ export function handleTransactionReorderMouseDown(
 
 	let leftOffset = 0
 	thisRow.forEach((node) => {
-		node.style.width = `${node.offsetWidth}px`
+		const nodeStyle = getComputedStyle(node)
+		console.log('node:', node, 'width:', nodeStyle.width)
+		node.style.width = nodeStyle.width
 		node.style.left = `${e.clientX - offsetX + leftOffset}px`
 		node.style.top = `${e.clientY - offsetY}px`
 		node.classList.add(s.popped_out)
@@ -52,8 +54,6 @@ export function handleTransactionReorderMouseDown(
 
 	let firstRun = true
 	const marginSize = thisRow[0].offsetHeight
-	console.log('Y Pos of mouse:', 'Y Pos of center of selected:')
-
 	function putMarginGapOnRow(rowIndex: number | 'none') {
 		// if ending the animation, remove transition effects
 		if (rowIndex === 'none') {
@@ -113,7 +113,6 @@ export function handleTransactionReorderMouseDown(
 				? currentIndex
 				: closestIndex
 		}, 0)
-		console.log('BCI', test)
 		return test
 	}
 	let closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)

@@ -191,14 +191,10 @@ export function TransactionManager() {
 				}
 			})
 			dataSorted.forEach((transaction, index) => {
-				// add gap row
-				if (index !== 0) {
-					cells.push(genGapRow())
-				}
-
 				if (transaction.items.length === 1) {
 					const props: GenSingleRowProps = {
 						transaction,
+						transactionIndex: index,
 						dropdownOptionsCategory,
 						dropdownOptionsAccount,
 						onResortMouseDown: (e) => {

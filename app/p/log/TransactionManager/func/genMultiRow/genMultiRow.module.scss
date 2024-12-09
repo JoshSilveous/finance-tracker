@@ -11,6 +11,10 @@
 	flex-direction: column;
 	gap: var(--padding-val);
 
+	&:not(.first_row_in_grid) {
+		margin-top: var(--gap-row-height);
+	}
+
 	.cell_container {
 		width: 100%;
 		box-sizing: border-box; // have to use border-box to prevent form element overlaps

@@ -68,11 +68,12 @@ export function genMultiRow({
 	const handleFoldToggle = createFoldToggleHandler(
 		folded,
 		transaction,
-		transactionIndex,
 		playAnimation,
 		setFoldStateArr,
 		prevIsFoldedOrderRef
 	)
+
+	const isFirstRowInGrid = transactionIndex === 0
 
 	let sum = 0
 	const itemRows = transaction.items.map((item, itemIndex) => {
@@ -223,7 +224,9 @@ export function genMultiRow({
 	const columns = firstRow.map((rowItem, rowItemIndex) => {
 		return (
 			<div
-				className={`${s.column} ${s[uniqueColumnClassNames[rowItemIndex]]}`}
+				className={`${s.column} ${s[uniqueColumnClassNames[rowItemIndex]]} ${
+					isFirstRowInGrid ? s.first_row_in_grid : ''
+				}`}
 				data-transaction_id={transaction.id}
 			>
 				{rowItem} {itemRows.map((itemRow) => itemRow[rowItemIndex])}
