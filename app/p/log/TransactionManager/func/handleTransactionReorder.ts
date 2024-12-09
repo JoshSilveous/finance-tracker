@@ -36,9 +36,13 @@ export function handleTransactionReorderMouseDown(
 	const offsetY =
 		grabberNode.offsetHeight / 2 + grabberNode.offsetTop + 2 - thisRow[0].offsetTop
 
-	const breakpoints = otherRows.map((row) => row[0].offsetTop)
+	const breakpoints = otherRows.map(
+		(row) => row[0].offsetTop - thisRow[0].offsetHeight / 2
+	)
 	breakpoints.push(
-		breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
+		breakpoints.at(-1)! +
+			(allRows.at(-1)![0] as HTMLDivElement).offsetHeight -
+			thisRow[0].offsetHeight / 2
 	)
 
 	let leftOffset = 0
