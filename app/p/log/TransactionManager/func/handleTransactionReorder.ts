@@ -4,32 +4,15 @@ import genMultiRowStyles from './genMultiRow/genMultiRow.module.scss'
 import genSingleRowStyles from './genSingleRow/genSingleRow.module.scss'
 import { typedQuerySelectAll, delay } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
+import { FoldState } from '../TransactionManager'
 
 export function handleTransactionReorderMouseDown(
 	e: React.MouseEvent<HTMLDivElement>,
 	allTransactions: FetchedTransaction[],
 	transaction: FetchedTransaction,
 	transactionIndex: number,
-	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
-	/**
-	 * only needed for multi-rows
-	 */
-	isFoldedOrder?: boolean[],
-
-	/**
-	 * only needed for multi-rows
-	 */
-	setIsFoldedOrder?: Dispatch<SetStateAction<boolean[]>>
+	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void
 ) {
-	if (
-		transaction.items.length > 1 &&
-		(isFoldedOrder === undefined || setIsFoldedOrder === undefined)
-	) {
-		throw new Error(
-			`isFoldedOrder and setIsFoldedOrder MUST be defined for multi-rows! Transaction ID: ${transaction.id}`
-		)
-	}
-
 	function getTransactionRow(transaction: FetchedTransaction) {
 		const isMultiRow = transaction.items.length > 1
 		let cssQuery = ''
@@ -39,17 +22,6 @@ export function handleTransactionReorderMouseDown(
 			cssQuery = `.${genSingleRowStyles.cell_container}[data-transaction_id="${transaction.id}"]`
 		}
 		return typedQuerySelectAll<HTMLDivElement>(cssQuery)
-	}
-
-	// if this is a multi-row, force it to fold while popped out
-	let forceFolded = false
-	if (transaction.items.length > 1 && isFoldedOrder![transactionIndex] === false) {
-		forceFolded = true
-		setIsFoldedOrder!((prev) => {
-			const newArr = structuredClone(prev)
-			newArr[transactionIndex] = true
-			return newArr
-		})
 	}
 
 	const thisRowIndex = transactionIndex
@@ -64,18 +36,7 @@ export function handleTransactionReorderMouseDown(
 	const offsetY =
 		grabberNode.offsetHeight / 2 + grabberNode.offsetTop + 2 - thisRow[0].offsetTop
 
-	const breakpoints = otherRows.map((row, rowIndex) => {
-		if (forceFolded && rowIndex >= transactionIndex) {
-			const unfoldedHeight = thisRow[0].offsetHeight
-			const foldedHeight = document.querySelector(
-				`.${genMultiRowStyles.first_row}[data-transaction_id="${transaction.id}"]`
-			)!.clientHeight
-
-			return row[0].offsetTop - unfoldedHeight + foldedHeight
-		} else {
-			return row[0].offsetTop
-		}
-	})
+	const breakpoints = otherRows.map((row) => row[0].offsetTop)
 	breakpoints.push(
 		breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
 	)
@@ -183,15 +144,6 @@ export function handleTransactionReorderMouseDown(
 
 		if (thisRowIndex !== closestBreakpointIndex) {
 			updateTransactionSortOrder(thisRowIndex, closestBreakpointIndex)
-		}
-
-		// if this is a multi-row that was forced to fold, unfold it
-		if (forceFolded) {
-			setIsFoldedOrder!((prev) => {
-				const newArr = structuredClone(prev)
-				newArr[transactionIndex] = false
-				return newArr
-			})
 		}
 	}
 	window.addEventListener('mousemove', handleReorderMouseMove)

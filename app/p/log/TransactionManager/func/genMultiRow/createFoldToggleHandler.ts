@@ -1,105 +1,87 @@
 import { FetchedTransaction } from '@/database'
 import { delay, typedQuerySelectAll } from '@/utils'
 import s from './genMultiRow.module.scss'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import { FoldState } from '../../TransactionManager'
 
 export function createFoldToggleHandler(
 	folded: boolean,
 	transaction: FetchedTransaction,
 	transactionIndex: number,
-	foldChangedBetweenRenders: boolean,
-	setIsFoldedOrder: Dispatch<SetStateAction<boolean[]>>
+	playAnimation: boolean,
+	setIsFoldedOrder: Dispatch<SetStateAction<FoldState[]>>,
+	prevIsFoldedOrderRef: MutableRefObject<FoldState[] | null>
 ) {
-	let isFolded = folded
-	function getColumnNodes() {
+	const foldAnimationTime = 500
+	if (folded && playAnimation) {
+		renderFoldAnimation()
+	} else if (!folded && playAnimation) {
+		renderUnfoldAnimation()
+	} else if (folded && !playAnimation) {
+		renderFold()
+	} else if (!folded && !playAnimation) {
+		renderUnfold()
+	}
+
+	async function getColumnNodes() {
+		await delay(10)
 		return typedQuerySelectAll<HTMLDivElement>(
 			`.${s.column}[data-transaction_id="${transaction.id}"]`
 		)
 	}
 
-	const foldAnimationTime = 500
-	let isFolding = false
-	let cancelAnim: (() => void) | null = null
-
-	console.log('foldChangedBetweenRenders', foldChangedBetweenRenders, 'folded', folded)
 	function handleFoldToggle() {
-		const toggleArrowNode = document.querySelector(
-			`.${s.fold_toggle}[data-transaction_id="${transaction.id}"]`
-		) as HTMLDivElement
-		toggleArrowNode.style.transition = `scale 0.1s ease, color 0.1s ease, transform ${
-			foldAnimationTime / 1000
-		}s ease`
-
-		if (isFolded) {
-			toggleArrowNode.classList.remove(s.folded)
-			if (isFolding === false) {
-				unfold()
-			} else {
-				cancelAnim!()
-				unfold()
-			}
-			isFolded = false
-		} else {
-			toggleArrowNode.classList.add(s.folded)
-			if (isFolding === false) {
-				fold()
-			} else {
-				cancelAnim!()
-				fold()
-			}
-			isFolded = true
-		}
+		setIsFoldedOrder((prev) => {
+			const newArr = structuredClone(prev)
+			const thisItemIndex = newArr.findIndex(
+				(item) => item.transaction_id === transaction.id
+			)
+			newArr[thisItemIndex].folded = !newArr[thisItemIndex].folded
+			return newArr
+		})
 	}
 
-	// need a way to detect if the item is folded or not organically
-	// then, everything can be controlled from the state. The button simply controls state
-
-	function fold() {
-		isFolding = true
-		let cancelled = false
-		cancelAnim = () => {
-			cancelled = true
+	/**
+	 * Checks against ref to see if fold state has changed (used to cancel async animations when fold is toggled before animation finished)
+	 */
+	function checkIfAnimCancelled() {
+		const latestRefValue = prevIsFoldedOrderRef.current!.find(
+			(item) => item.transaction_id === transaction.id
+		)?.folded
+		if ((folded && latestRefValue === false) || (!folded && latestRefValue === true)) {
+			return true
 		}
+		return false
+	}
 
-		const cols = getColumnNodes()
+	async function renderFoldAnimation() {
+		const cols = await getColumnNodes()
 		const firstRowHeight = document.querySelector(
 			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
 		)!.clientHeight
 		cols.forEach(async (col) => {
+			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
 			const colStyle = getComputedStyle(col)
 			const startingHeight = colStyle.height
-			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
 			col.style.height = startingHeight
 			await delay(10)
-			if (cancelled) {
+			if (checkIfAnimCancelled()) {
 				return
 			}
 			col.style.height = firstRowHeight + 'px'
 			await delay(foldAnimationTime)
-			if (cancelled) {
+			if (checkIfAnimCancelled()) {
 				return
 			}
 			col.style.height = ''
 			col.classList.add(s.folded)
-			isFolding = false
-			cancelAnim = null
-			setIsFoldedOrder((prev) =>
-				prev.map((item, itemIndex) => (itemIndex === transactionIndex ? true : item))
-			)
 		})
 	}
-
-	function unfold() {
-		isFolding = true
-		let cancelled = false
-		cancelAnim = () => {
-			cancelled = true
-		}
-
+	async function renderUnfoldAnimation() {
 		const cells = typedQuerySelectAll<HTMLDivElement>(
 			`.${s.column}.${s.date}[data-transaction_id="${transaction.id}"] > .${s.cell_container}`
 		)
-		const cols = getColumnNodes()
+		const cols = await getColumnNodes()
 		const firstRowHeight = document.querySelector(
 			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
 		)!.clientHeight
@@ -123,22 +105,32 @@ export function createFoldToggleHandler(
 			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
 			col.style.height = startingHeight
 			await delay(10)
-			if (cancelled) {
+			if (checkIfAnimCancelled()) {
 				return
 			}
 			col.style.height = fullColHeight + 'px'
 			await delay(foldAnimationTime)
-			if (cancelled) {
+			if (checkIfAnimCancelled()) {
 				return
 			}
 			col.style.height = ''
-			isFolding = false
-			cancelAnim = null
-			setIsFoldedOrder((prev) =>
-				prev.map((item, itemIndex) =>
-					itemIndex === transactionIndex ? false : item
-				)
-			)
+		})
+	}
+	async function renderFold() {
+		const cols = await getColumnNodes()
+		cols.forEach(async (col) => {
+			col.classList.add(s.folded)
+			col.style.transition = ``
+			col.style.height = ''
+		})
+	}
+	async function renderUnfold() {
+		const cols = await getColumnNodes()
+
+		cols.forEach(async (col) => {
+			col.style.transition = ``
+			col.classList.remove(s.folded)
+			col.style.height = ''
 		})
 	}
 

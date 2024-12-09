@@ -23,9 +23,14 @@ import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRo
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
 import { genGapRow } from './func/genGapRow/genGapRow'
 import { handleTransactionReorderMouseDown } from './func/handleTransactionReorder'
+
 interface LoadState {
 	loading: boolean
 	message: string
+}
+export interface FoldState {
+	transaction_id: string
+	folded: boolean
 }
 type SortOrderItem = string | string[]
 
@@ -40,13 +45,12 @@ export function TransactionManager() {
 	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [counter, setCounter] = useState(0)
-
 	// previous foldOrder is needed to detect when it actually changes between animations (to play animation)
-	const [isFoldedOrder, setIsFoldedOrder] = useState<boolean[]>([])
-	const prevIsFoldedOrderRef = useRef<boolean[] | null>(null)
+	const [foldStateArr, setFoldStateArr] = useState<FoldState[]>([])
+	const prevFoldStateRef = useRef<FoldState[] | null>(null)
 	useEffect(() => {
-		prevIsFoldedOrderRef.current = isFoldedOrder
-	}, [isFoldedOrder])
+		prevFoldStateRef.current = foldStateArr
+	}, [foldStateArr])
 
 	useEffect(() => {
 		fetchAndLoadData()
@@ -67,7 +71,14 @@ export function TransactionManager() {
 			})
 			setDefaultSortOrder(fetchedSortOrder)
 			setCurrentSortOrder(fetchedSortOrder)
-			setIsFoldedOrder(fetchedSortOrder.map(() => false))
+			setFoldStateArr(
+				fetchedSortOrder.map((item) => {
+					return {
+						transaction_id: Array.isArray(item) ? item[0] : item,
+						folded: false,
+					}
+				})
+			)
 
 			setLoadState({ loading: true, message: 'Fetching Category Data' })
 			const categoryData = await fetchCategoryData()
@@ -155,9 +166,6 @@ export function TransactionManager() {
 			return newArr
 		})
 	}
-	useEffect(() => {
-		console.log('fold order changed:', isFoldedOrder)
-	}, [isFoldedOrder])
 	if (
 		!loadState.loading &&
 		data !== null &&
@@ -218,38 +226,50 @@ export function TransactionManager() {
 
 					const transactionSorted = { ...transaction, items: sortedItems }
 
+					const handleTransactionItemReorder = (
+						oldIndex: number,
+						newIndex: number
+					) => {
+						updateTransactionItemSortOrder(transaction.id, oldIndex, newIndex)
+					}
+
+					const folded = foldStateArr.find(
+						(item) => item.transaction_id === transaction.id
+					)!.folded
+
+					const playAnimation =
+						prevFoldStateRef.current !== null
+							? foldStateArr.find(
+									(item) => item.transaction_id === transaction.id
+							  )!.folded !==
+							  prevFoldStateRef.current!.find(
+									(item) => item.transaction_id === transaction.id
+							  )!.folded
+							: false
+
+					const onWholeResortMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+						handleTransactionReorderMouseDown(
+							e,
+							data,
+							transaction,
+							index,
+							updateTransactionSortOrder
+						)
+					}
+
 					const props: GenMultiRowProps = {
 						transaction: transactionSorted,
 						categories: categories,
 						accounts: accounts,
 						dropdownOptionsCategory: dropdownOptionsCategory,
 						dropdownOptionsAccount: dropdownOptionsAccount,
-						handleTransactionItemReorder: (oldIndex, newIndex) => {
-							updateTransactionItemSortOrder(
-								transaction.id,
-								oldIndex,
-								newIndex
-							)
-						},
-						folded: isFoldedOrder[index],
-						foldChangedBetweenRenders:
-							prevIsFoldedOrderRef.current !== null
-								? isFoldedOrder[index] !==
-								  prevIsFoldedOrderRef.current[index]
-								: false,
+						handleTransactionItemReorder,
+						folded,
+						playAnimation,
+						prevIsFoldedOrderRef: prevFoldStateRef,
 						transactionIndex: index,
-						setIsFoldedOrder,
-						onWholeResortMouseDown: (e) => {
-							handleTransactionReorderMouseDown(
-								e,
-								data,
-								transaction,
-								index,
-								updateTransactionSortOrder,
-								isFoldedOrder,
-								setIsFoldedOrder
-							)
-						},
+						setFoldStateArr,
+						onWholeResortMouseDown,
 					}
 
 					cells.push(genMultiRow(props))

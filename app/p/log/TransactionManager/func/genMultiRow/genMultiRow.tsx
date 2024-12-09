@@ -8,7 +8,8 @@ import s from './genMultiRow.module.scss'
 import { delay } from '@/utils'
 import { createFoldToggleHandler } from './createFoldToggleHandler'
 import { reorderMouseDownHandler } from './reorderMouseDownHandler'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import { FoldState } from '../../TransactionManager'
 
 export interface GenMultiRowProps {
 	transaction: FetchedTransaction
@@ -24,8 +25,9 @@ export interface GenMultiRowProps {
 	 * **INITIAL RENDER VALUE MUST BE `FALSE`**
 	 */
 	folded: boolean
-	foldChangedBetweenRenders: boolean
-	setIsFoldedOrder: Dispatch<SetStateAction<boolean[]>>
+	playAnimation: boolean
+	prevIsFoldedOrderRef: MutableRefObject<FoldState[] | null>
+	setFoldStateArr: Dispatch<SetStateAction<FoldState[]>>
 	/**
 	 * MouseDown handler for when the WHOLE transaction is being resorted
 	 */
@@ -40,8 +42,9 @@ export function genMultiRow({
 	dropdownOptionsAccount,
 	handleTransactionItemReorder,
 	folded,
-	foldChangedBetweenRenders,
-	setIsFoldedOrder,
+	playAnimation,
+	prevIsFoldedOrderRef,
+	setFoldStateArr,
 	onWholeResortMouseDown,
 }: GenMultiRowProps) {
 	const uniqueCategories: string[] = []
@@ -66,17 +69,10 @@ export function genMultiRow({
 		folded,
 		transaction,
 		transactionIndex,
-		foldChangedBetweenRenders,
-		setIsFoldedOrder
+		playAnimation,
+		setFoldStateArr,
+		prevIsFoldedOrderRef
 	)
-
-	if (foldChangedBetweenRenders) {
-		if (folded) {
-			console.log('PLAYING FOLD ANIMATION')
-		} else {
-			console.log('PLAYING UNFOLD ANIMATION')
-		}
-	}
 
 	let sum = 0
 	const itemRows = transaction.items.map((item, itemIndex) => {

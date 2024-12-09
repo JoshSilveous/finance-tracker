@@ -51,7 +51,6 @@
 				justify-content: center;
 				color: var(--font-color);
 				height: min-content;
-				transition: scale 0.1s ease, color 0.1s ease; // also defined in genMultiRow.ts
 				&.folded {
 					transform: rotate(0deg);
 				}
@@ -146,11 +145,16 @@
 		margin-bottom: var(--margin-gap-size);
 	}
 
-	/* FOLDING / UNFOLDING EFFECT STYLES (mostly in js) */
+	/* FOLDING / UNFOLDING EFFECT STYLES */
 	overflow-y: hidden;
+	--fold-animation-time: 0.5s; // set in createFoldToggleHandler.ts as well
 	&.folded {
 		.cell_container:not(.first_row) {
 			display: none;
 		}
+	}
+	.fold_toggle {
+		transition: scale 0.1s ease, color 0.1s ease,
+			transform var(--fold-animation-time) ease;
 	}
 }
