@@ -14,8 +14,10 @@ export function createFoldToggleHandler(
 ) {
 	const foldAnimationTime = 500
 	if (folded && playAnimation) {
+		console.log('playing fold animation on', transaction.name)
 		renderFoldAnimation()
 	} else if (!folded && playAnimation) {
+		console.log('playing unfold animation on', transaction.name)
 		renderUnfoldAnimation()
 	} else if (folded && !playAnimation) {
 		renderFold()

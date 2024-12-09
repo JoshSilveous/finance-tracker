@@ -183,15 +183,14 @@ export function TransactionManager() {
 			)
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
-			currentSortOrder.forEach((sortItem, index) => {
-				const transaction = data.find((transaction) => {
-					if (Array.isArray(sortItem)) {
-						return transaction.id === sortItem[0]
-					} else {
-						return transaction.id === sortItem
-					}
-				})!
-
+			const dataSorted = currentSortOrder.map((sortedID) => {
+				if (Array.isArray(sortedID)) {
+					return data.find((item) => item.id === sortedID[0])!
+				} else {
+					return data.find((item) => item.id === sortedID)!
+				}
+			})
+			dataSorted.forEach((transaction, index) => {
 				// add gap row
 				if (index !== 0) {
 					cells.push(genGapRow())
@@ -205,7 +204,7 @@ export function TransactionManager() {
 						onResortMouseDown: (e) => {
 							handleTransactionReorderMouseDown(
 								e,
-								data,
+								dataSorted,
 								transaction,
 								index,
 								updateTransactionSortOrder
@@ -250,7 +249,7 @@ export function TransactionManager() {
 					const onWholeResortMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
 						handleTransactionReorderMouseDown(
 							e,
-							data,
+							dataSorted,
 							transaction,
 							index,
 							updateTransactionSortOrder

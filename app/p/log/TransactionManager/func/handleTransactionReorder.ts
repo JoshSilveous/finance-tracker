@@ -3,8 +3,6 @@ import s from '../TransactionManager.module.scss'
 import genMultiRowStyles from './genMultiRow/genMultiRow.module.scss'
 import genSingleRowStyles from './genSingleRow/genSingleRow.module.scss'
 import { typedQuerySelectAll, delay } from '@/utils'
-import { Dispatch, SetStateAction } from 'react'
-import { FoldState } from '../TransactionManager'
 
 export function handleTransactionReorderMouseDown(
 	e: React.MouseEvent<HTMLDivElement>,
@@ -13,17 +11,6 @@ export function handleTransactionReorderMouseDown(
 	transactionIndex: number,
 	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void
 ) {
-	const thisRowNew: HTMLDivElement[] = []
-
-	if (transaction.items.length === 1) {
-		e.currentTarget.parentElement?.parentElement?.parentElement?.childNodes.forEach(
-			(node) => thisRowNew.push(node.childNodes[0] as HTMLDivElement)
-		)
-	} else {
-		e.currentTarget.parentElement?.parentElement?.parentElement?.parentElement?.childNodes.forEach(
-			(node) => thisRowNew.push(node.childNodes[0] as HTMLDivElement)
-		)
-	}
 	function getTransactionRow(transaction: FetchedTransaction) {
 		const isMultiRow = transaction.items.length > 1
 		let cssQuery = ''
@@ -54,14 +41,6 @@ export function handleTransactionReorderMouseDown(
 		breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
 	)
 
-	console.log('thisRowNew:', thisRowNew[0].dataset['transaction_id'])
-	console.log('thisRowIndex:', thisRowIndex)
-	console.log('thisRow:', thisRow[0].dataset['transaction_id'])
-	console.log(
-		'otherRows:',
-		otherRows.map((item) => item[0].dataset['transaction_id'])
-	)
-
 	let leftOffset = 0
 	thisRow.forEach((node) => {
 		node.style.width = `${node.offsetWidth}px`
@@ -73,8 +52,7 @@ export function handleTransactionReorderMouseDown(
 
 	let firstRun = true
 	const marginSize = thisRow[0].offsetHeight
-
-	console.log('transactionName:', transaction.name, '\nbreakpoints:', breakpoints)
+	console.log('Y Pos of mouse:', 'Y Pos of center of selected:')
 
 	function putMarginGapOnRow(rowIndex: number | 'none') {
 		// if ending the animation, remove transition effects
