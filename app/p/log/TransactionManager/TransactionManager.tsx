@@ -221,50 +221,43 @@ export function TransactionManager() {
 
 					const transactionSorted = { ...transaction, items: sortedItems }
 
-					const handleTransactionItemReorder = (
-						oldIndex: number,
-						newIndex: number
-					) => {
-						updateTransactionItemSortOrder(transaction.id, oldIndex, newIndex)
-					}
-
-					const folded = foldStateArr.find(
-						(item) => item.transaction_id === transaction.id
-					)!.folded
-
-					const playAnimation =
-						prevFoldStateRef.current !== null
-							? foldStateArr.find(
-									(item) => item.transaction_id === transaction.id
-							  )!.folded !==
-							  prevFoldStateRef.current!.find(
-									(item) => item.transaction_id === transaction.id
-							  )!.folded
-							: false
-
-					const onWholeResortMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-						handleTransactionReorderMouseDown(
-							e,
-							dataSorted,
-							transaction,
-							index,
-							updateTransactionSortOrder
-						)
-					}
-
 					const props: GenMultiRowProps = {
 						transaction: transactionSorted,
 						categories: categories,
 						accounts: accounts,
 						dropdownOptionsCategory: dropdownOptionsCategory,
 						dropdownOptionsAccount: dropdownOptionsAccount,
-						handleTransactionItemReorder,
-						folded,
-						playAnimation,
+						handleTransactionItemReorder: (oldIndex, newIndex) => {
+							updateTransactionItemSortOrder(
+								transaction.id,
+								oldIndex,
+								newIndex
+							)
+						},
+						folded: foldStateArr.find(
+							(item) => item.transaction_id === transaction.id
+						)!.folded,
+						playAnimation:
+							prevFoldStateRef.current !== null
+								? foldStateArr.find(
+										(item) => item.transaction_id === transaction.id
+								  )!.folded !==
+								  prevFoldStateRef.current!.find(
+										(item) => item.transaction_id === transaction.id
+								  )!.folded
+								: false,
 						prevIsFoldedOrderRef: prevFoldStateRef,
 						transactionIndex: index,
 						setFoldStateArr,
-						onWholeResortMouseDown,
+						onWholeResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
+							handleTransactionReorderMouseDown(
+								e,
+								dataSorted,
+								transaction,
+								index,
+								updateTransactionSortOrder
+							)
+						},
 					}
 
 					cells.push(genMultiRow(props))

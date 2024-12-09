@@ -22,8 +22,7 @@ export function createFoldToggleHandler(
 		renderUnfold()
 	}
 
-	async function getColumnNodes() {
-		await delay(10)
+	function getColumnNodes() {
 		return typedQuerySelectAll<HTMLDivElement>(
 			`.${s.column}[data-transaction_id="${transaction.id}"]`
 		)
@@ -53,8 +52,8 @@ export function createFoldToggleHandler(
 		return false
 	}
 
-	async function renderFoldAnimation() {
-		const cols = await getColumnNodes()
+	function renderFoldAnimation() {
+		const cols = getColumnNodes()
 		const firstRowHeight = document.querySelector(
 			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
 		)!.clientHeight
@@ -76,11 +75,11 @@ export function createFoldToggleHandler(
 			col.classList.add(s.folded)
 		})
 	}
-	async function renderUnfoldAnimation() {
+	function renderUnfoldAnimation() {
 		const cells = typedQuerySelectAll<HTMLDivElement>(
 			`.${s.column}.${s.date}[data-transaction_id="${transaction.id}"] > .${s.cell_container}`
 		)
-		const cols = await getColumnNodes()
+		const cols = getColumnNodes()
 		const firstRowHeight = document.querySelector(
 			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
 		)!.clientHeight
@@ -115,16 +114,16 @@ export function createFoldToggleHandler(
 			col.style.height = ''
 		})
 	}
-	async function renderFold() {
-		const cols = await getColumnNodes()
+	function renderFold() {
+		const cols = getColumnNodes()
 		cols.forEach(async (col) => {
 			col.classList.add(s.folded)
 			col.style.transition = ``
 			col.style.height = ''
 		})
 	}
-	async function renderUnfold() {
-		const cols = await getColumnNodes()
+	function renderUnfold() {
+		const cols = getColumnNodes()
 
 		cols.forEach(async (col) => {
 			col.style.transition = ``

@@ -19,7 +19,6 @@ export function reorderMouseDownHandler(
 
 	const grabberContainerNode = grabberNode.parentElement as HTMLDivElement
 	const thisRow = typedQuerySelectAll<HTMLDivElement>(`[data-item_id="${item.id}"]`)
-
 	const thisRowIndex = itemIndex
 
 	const offsetX =
