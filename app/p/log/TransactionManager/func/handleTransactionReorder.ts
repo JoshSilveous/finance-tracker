@@ -13,6 +13,17 @@ export function handleTransactionReorderMouseDown(
 	transactionIndex: number,
 	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void
 ) {
+	const thisRowNew: HTMLDivElement[] = []
+
+	if (transaction.items.length === 1) {
+		e.currentTarget.parentElement?.parentElement?.parentElement?.childNodes.forEach(
+			(node) => thisRowNew.push(node.childNodes[0] as HTMLDivElement)
+		)
+	} else {
+		e.currentTarget.parentElement?.parentElement?.parentElement?.parentElement?.childNodes.forEach(
+			(node) => thisRowNew.push(node.childNodes[0] as HTMLDivElement)
+		)
+	}
 	function getTransactionRow(transaction: FetchedTransaction) {
 		const isMultiRow = transaction.items.length > 1
 		let cssQuery = ''
@@ -27,7 +38,9 @@ export function handleTransactionReorderMouseDown(
 	const thisRowIndex = transactionIndex
 	const thisRow = getTransactionRow(transaction)
 	const allRows = allTransactions.map((transaction) => getTransactionRow(transaction))
-	const otherRows = allRows.filter((_, index) => index !== thisRowIndex)
+	const otherRows = allRows.filter(
+		(item) => item[0].dataset['transaction_id'] !== transaction.id
+	)
 
 	const grabberNode = e.currentTarget as HTMLDivElement
 
@@ -41,6 +54,14 @@ export function handleTransactionReorderMouseDown(
 		breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
 	)
 
+	console.log('thisRowNew:', thisRowNew[0].dataset['transaction_id'])
+	console.log('thisRowIndex:', thisRowIndex)
+	console.log('thisRow:', thisRow[0].dataset['transaction_id'])
+	console.log(
+		'otherRows:',
+		otherRows.map((item) => item[0].dataset['transaction_id'])
+	)
+
 	let leftOffset = 0
 	thisRow.forEach((node) => {
 		node.style.width = `${node.offsetWidth}px`
@@ -51,6 +72,10 @@ export function handleTransactionReorderMouseDown(
 	})
 
 	let firstRun = true
+	const marginSize = thisRow[0].offsetHeight
+
+	console.log('transactionName:', transaction.name, '\nbreakpoints:', breakpoints)
+
 	function putMarginGapOnRow(rowIndex: number | 'none') {
 		// if ending the animation, remove transition effects
 		if (rowIndex === 'none') {
@@ -63,12 +88,8 @@ export function handleTransactionReorderMouseDown(
 		// remove all current margin modifications
 		allRows.forEach((rowNodes) => {
 			rowNodes.forEach((node) => {
-				node.classList.remove(
-					s.margin_top,
-					s.margin_bottom,
-					s.margin_top_double,
-					s.margin_bottom_double
-				)
+				node.style.marginTop = ''
+				node.style.marginBottom = ''
 			})
 		})
 		if (rowIndex === 'none') {
@@ -80,17 +101,21 @@ export function handleTransactionReorderMouseDown(
 		// if hovering over first row
 		if (rowIndex === -1) {
 			otherRows[0].forEach((node) => {
-				node.classList.add(s.margin_top_double)
+				node.style.marginTop = marginSize + 'px'
 			})
 		}
 		// if hovering over last row
 		else if (rowIndex === allTransactions.length - 2) {
 			otherRows.at(-1)!.forEach((node) => {
-				node.classList.add(s.margin_bottom_double)
+				node.style.marginBottom = marginSize + 'px'
 			})
 		} else {
-			otherRows[rowIndex].forEach((node) => node.classList.add(s.margin_bottom))
-			otherRows[rowIndex + 1].forEach((node) => node.classList.add(s.margin_top))
+			otherRows[rowIndex].forEach(
+				(node) => (node.style.marginBottom = marginSize / 2 + 'px')
+			)
+			otherRows[rowIndex + 1].forEach(
+				(node) => (node.style.marginTop = marginSize / 2 + 'px')
+			)
 		}
 
 		if (firstRun) {
@@ -105,11 +130,13 @@ export function handleTransactionReorderMouseDown(
 	}
 
 	function getClosestBreakpointIndex(yPos: number) {
-		return breakpoints.reduce((closestIndex, currentValue, currentIndex) => {
+		const test = breakpoints.reduce((closestIndex, currentValue, currentIndex) => {
 			return Math.abs(currentValue - yPos) < Math.abs(breakpoints[closestIndex] - yPos)
 				? currentIndex
 				: closestIndex
 		}, 0)
+		console.log('BCI', test)
+		return test
 	}
 	let closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
 	putMarginGapOnRow(thisRowIndex)

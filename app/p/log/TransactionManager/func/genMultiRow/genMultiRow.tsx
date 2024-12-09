@@ -74,6 +74,8 @@ export function genMultiRow({
 		prevIsFoldedOrderRef
 	)
 
+	console.log('rerender')
+
 	let sum = 0
 	const itemRows = transaction.items.map((item, itemIndex) => {
 		sum += item.amount
