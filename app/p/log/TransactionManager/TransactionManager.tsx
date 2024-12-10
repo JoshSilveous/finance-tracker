@@ -87,16 +87,35 @@ export function TransactionManager() {
 				defaultWidth: 75,
 				noResize: true,
 			},
-			{ content: <div className={s.header_container}>Date</div>, defaultWidth: 125 },
-			{ content: <div className={s.header_container}>Name</div>, defaultWidth: 250 },
-			{ content: <div className={s.header_container}>Amount</div>, defaultWidth: 100 },
+			{
+				content: <div className={s.header_container}>Date</div>,
+				defaultWidth: 140,
+				minWidth: 105,
+				maxWidth: 150,
+			},
+			{
+				content: <div className={s.header_container}>Name</div>,
+				defaultWidth: 260,
+				minWidth: 160,
+				maxWidth: 300,
+			},
+			{
+				content: <div className={s.header_container}>Amount</div>,
+				defaultWidth: 140,
+				minWidth: 95,
+				maxWidth: 160,
+			},
 			{
 				content: <div className={s.header_container}>Category</div>,
-				defaultWidth: 150,
+				defaultWidth: 170,
+				minWidth: 110,
+				maxWidth: 200,
 			},
 			{
 				content: <div className={s.header_container}>Account</div>,
-				defaultWidth: 150,
+				defaultWidth: 170,
+				minWidth: 110,
+				maxWidth: 200,
 			},
 		]
 	}, [])
@@ -230,6 +249,7 @@ export function TransactionManager() {
 				headers: headers,
 				cells: cells,
 				noBorders: true,
+				maxTableWidth: 1000,
 			}
 			grid = <JGrid className={s.grid} {...gridConfig} />
 		}
