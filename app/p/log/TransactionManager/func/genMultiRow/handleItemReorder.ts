@@ -2,7 +2,7 @@ import { FetchedTransaction } from '@/database'
 import { delay, typedQuerySelectAll } from '@/utils'
 import s from './genMultiRow.module.scss'
 
-export function reorderMouseDownHandler(
+export function handleItemReorder(
 	e: React.MouseEvent<HTMLInputElement>,
 	item: FetchedTransaction['items'][number],
 	itemIndex: number,

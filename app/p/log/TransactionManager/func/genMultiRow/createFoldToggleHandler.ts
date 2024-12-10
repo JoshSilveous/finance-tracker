@@ -5,10 +5,26 @@ import { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import { FoldState } from '../../TransactionManager'
 
 export function createFoldToggleHandler(
+	/**
+	 * Controls whether or not the multi-item appears folded
+	 */
 	folded: boolean,
+	/**
+	 * The transaction used to generate this row. MUST be a multi-row (`transaction.items.length > 1`)
+	 */
 	transaction: FetchedTransaction,
+	/**
+	 * If true, a fold/unfold animation will be played to accompany the `folded` value provided
+	 */
 	playAnimation: boolean,
-	setIsFoldedOrder: Dispatch<SetStateAction<FoldState[]>>,
+
+	/**
+	 * Used to update state when folded/unfolded via toggle button
+	 */
+	setFoldStateArr: Dispatch<SetStateAction<FoldState[]>>,
+	/**
+	 * Used to compare ref when running animation to determine if animation should be cancelled
+	 */
 	prevIsFoldedOrderRef: MutableRefObject<FoldState[] | null>
 ) {
 	const foldAnimationTime = 500
@@ -31,7 +47,7 @@ export function createFoldToggleHandler(
 	}
 
 	function handleFoldToggle() {
-		setIsFoldedOrder((prev) => {
+		setFoldStateArr((prev) => {
 			const newArr = structuredClone(prev)
 			const thisItemIndex = newArr.findIndex(
 				(item) => item.transaction_id === transaction.id
@@ -74,6 +90,7 @@ export function createFoldToggleHandler(
 				return
 			}
 			col.style.height = ''
+			col.style.transition = ''
 			col.classList.add(s.folded)
 		})
 	}
@@ -101,8 +118,8 @@ export function createFoldToggleHandler(
 
 		// apply new height animation
 		cols.forEach(async (col) => {
-			const startingHeight = firstRowHeight + 'px'
 			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
+			const startingHeight = firstRowHeight + 'px'
 			col.style.height = startingHeight
 			await delay(10)
 			if (checkIfAnimCancelled()) {
@@ -114,6 +131,7 @@ export function createFoldToggleHandler(
 				return
 			}
 			col.style.height = ''
+			col.style.transition = ''
 		})
 	}
 	// function renderFold() {

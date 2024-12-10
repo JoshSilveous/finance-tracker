@@ -42,12 +42,15 @@ export function handleTransactionReorderMouseDown(
 	)
 
 	let leftOffset = 0
-	thisRow.forEach((node) => {
+	thisRow.forEach((node, nodeIndex) => {
 		const nodeStyle = getComputedStyle(node)
 		node.style.width = nodeStyle.width
 		node.style.left = `${e.clientX - offsetX + leftOffset}px`
 		node.style.top = `${e.clientY - offsetY}px`
 		node.classList.add(s.popped_out)
+		if (nodeIndex === 0) {
+			node.classList.add(s.row_controller)
+		}
 		leftOffset += node.clientWidth
 	})
 

@@ -9,23 +9,17 @@
 		display: flex;
 		position: absolute;
 		z-index: 999;
+
+		&:not(.row_controller) {
+			box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+		}
+		&.row_controller {
+			filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
+		}
 	}
 
 	/* RE-ORDERING ROW EFFECT STYLES */
-	--margin-gap-size: calc(36px + var(--gap-row-height));
 	.transitions {
 		transition: margin 0.2s ease;
-	}
-	.margin_top {
-		margin-top: calc(var(--margin-gap-size) / 2);
-	}
-	.margin_bottom {
-		margin-bottom: calc(var(--margin-gap-size) / 2);
-	}
-	.margin_top_double {
-		margin-top: var(--margin-gap-size);
-	}
-	.margin_bottom_double {
-		margin-bottom: var(--margin-gap-size);
 	}
 }

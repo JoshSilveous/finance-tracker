@@ -1,5 +1,5 @@
 'use client'
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import s from './TransactionManager.module.scss'
 import {
 	isStandardError,
@@ -23,8 +23,9 @@ import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRo
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
 import { genGapRow } from './func/genGapRow/genGapRow'
 import { handleTransactionReorderMouseDown } from './func/handleTransactionReorder'
+import { fetchAndLoadData } from './func/fetchAndLoadData'
 
-interface LoadState {
+export interface LoadState {
 	loading: boolean
 	message: string
 }
@@ -32,7 +33,7 @@ export interface FoldState {
 	transaction_id: string
 	folded: boolean
 }
-type SortOrderItem = string | string[]
+export type SortOrderItem = string | string[]
 
 export function TransactionManager() {
 	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
@@ -45,6 +46,7 @@ export function TransactionManager() {
 	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [counter, setCounter] = useState(0)
+
 	// previous foldOrder is needed to detect when it actually changes between animations (to play animation)
 	const [foldStateArr, setFoldStateArr] = useState<FoldState[]>([])
 	const prevFoldStateRef = useRef<FoldState[] | null>(null)
@@ -53,52 +55,16 @@ export function TransactionManager() {
 	}, [foldStateArr])
 
 	useEffect(() => {
-		fetchAndLoadData()
+		fetchAndLoadData(
+			setLoadState,
+			setData,
+			setDefaultSortOrder,
+			setCurrentSortOrder,
+			setFoldStateArr,
+			setCategories,
+			setAccounts
+		)
 	}, [])
-
-	async function fetchAndLoadData() {
-		try {
-			setLoadState({ loading: true, message: 'Fetching Transaction Data' })
-			const transactionData = await fetchTransactionData()
-			setData(transactionData)
-
-			const fetchedSortOrder = transactionData.map((transaction) => {
-				if (transaction.items.length === 1) {
-					return transaction.id
-				} else {
-					return [transaction.id, ...transaction.items.map((item) => item.id)]
-				}
-			})
-			setDefaultSortOrder(fetchedSortOrder)
-			setCurrentSortOrder(fetchedSortOrder)
-			setFoldStateArr(
-				fetchedSortOrder.map((item) => {
-					return {
-						transaction_id: Array.isArray(item) ? item[0] : item,
-						folded: false,
-					}
-				})
-			)
-
-			setLoadState({ loading: true, message: 'Fetching Category Data' })
-			const categoryData = await fetchCategoryData()
-			setCategories(categoryData)
-
-			setLoadState({ loading: true, message: 'Fetching Account Data' })
-			const accountData = await fetchAccountData()
-			setAccounts(accountData)
-			setLoadState({ loading: false, message: '' })
-			fetchCategoryTotals()
-		} catch (e) {
-			if (isStandardError(e)) {
-				promptError(
-					'An unexpected error has occurred while fetching your data from the database:',
-					e.message,
-					'Try refreshing the page to resolve this issue.'
-				)
-			}
-		}
-	}
 
 	const dropdownOptionsCategory: JDropdownTypes.Option[] = useMemo(() => {
 		if (categories === null) {
@@ -129,52 +95,74 @@ export function TransactionManager() {
 		}
 	}, [accounts])
 
-	const headers: JGridTypes.Header[] = [
-		{
-			content: <div className={s.header_container}>CNTRL</div>,
-			defaultWidth: 75,
-			noResize: true,
+	const headers: JGridTypes.Header[] = useMemo(() => {
+		return [
+			{
+				content: <div className={s.header_container}>CNTRL</div>,
+				defaultWidth: 75,
+				noResize: true,
+			},
+			{ content: <div className={s.header_container}>Date</div>, defaultWidth: 125 },
+			{ content: <div className={s.header_container}>Name</div>, defaultWidth: 250 },
+			{ content: <div className={s.header_container}>Amount</div>, defaultWidth: 100 },
+			{
+				content: <div className={s.header_container}>Category</div>,
+				defaultWidth: 150,
+			},
+			{
+				content: <div className={s.header_container}>Account</div>,
+				defaultWidth: 150,
+			},
+		]
+	}, [])
+
+	const updateItemSortOrder = useCallback(
+		(transaction_id: string, oldItemIndex: number, newItemIndex: number) => {
+			setCurrentSortOrder((prev) => {
+				const newArr = structuredClone(prev) as SortOrderItem[]
+				const thisTransactionIndex = newArr.findIndex(
+					(item) => Array.isArray(item) && item[0] === transaction_id
+				)
+				const thisTransactionSortOrder = newArr[thisTransactionIndex] as string[]
+				moveItemInArray(thisTransactionSortOrder, oldItemIndex + 1, newItemIndex + 1)
+				return newArr
+			})
 		},
-		{ content: <div className={s.header_container}>Date</div>, defaultWidth: 125 },
-		{ content: <div className={s.header_container}>Name</div>, defaultWidth: 250 },
-		{ content: <div className={s.header_container}>Amount</div>, defaultWidth: 100 },
-		{ content: <div className={s.header_container}>Category</div>, defaultWidth: 150 },
-		{ content: <div className={s.header_container}>Account</div>, defaultWidth: 150 },
-	]
-
-	let grid: ReactNode
-
-	function updateTransactionItemSortOrder(
-		transaction_id: string,
-		oldItemIndex: number,
-		newItemIndex: number
-	) {
-		setCurrentSortOrder((prev) => {
-			const newArr = structuredClone(prev) as SortOrderItem[]
-			const thisTransactionIndex = newArr.findIndex(
-				(item) => Array.isArray(item) && item[0] === transaction_id
-			)
-			const thisTransactionSortOrder = newArr[thisTransactionIndex] as string[]
-			moveItemInArray(thisTransactionSortOrder, oldItemIndex + 1, newItemIndex + 1)
-			return newArr
-		})
-	}
-	function updateTransactionSortOrder(oldIndex: number, newIndex: number) {
+		[]
+	)
+	const updateTransactionSortOrder = useCallback((oldIndex: number, newIndex: number) => {
 		setCurrentSortOrder((prev) => {
 			const newArr = structuredClone(prev) as SortOrderItem[]
 			moveItemInArray(newArr, oldIndex, newIndex)
 			return newArr
 		})
-	}
+	}, [])
+
+	const sortedData = useMemo(() => {
+		if (data === null || currentSortOrder === null) {
+			return null
+		} else {
+			return currentSortOrder!.map((sortedID) => {
+				if (Array.isArray(sortedID)) {
+					return data!.find((item) => item.id === sortedID[0])!
+				} else {
+					return data!.find((item) => item.id === sortedID)!
+				}
+			})
+		}
+	}, [data, currentSortOrder])
+
+	let grid: ReactNode
+
 	if (
 		!loadState.loading &&
-		data !== null &&
 		categories !== null &&
 		accounts !== null &&
 		defaultSortOrder !== null &&
-		currentSortOrder !== null
+		currentSortOrder !== null &&
+		sortedData !== null
 	) {
-		if (data.length === 0) {
+		if (sortedData.length === 0) {
 			grid = (
 				<p>
 					You do not have any transactions, click "Create new transaction" below to
@@ -183,14 +171,8 @@ export function TransactionManager() {
 			)
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
-			const dataSorted = currentSortOrder.map((sortedID) => {
-				if (Array.isArray(sortedID)) {
-					return data.find((item) => item.id === sortedID[0])!
-				} else {
-					return data.find((item) => item.id === sortedID)!
-				}
-			})
-			dataSorted.forEach((transaction, index) => {
+
+			sortedData.forEach((transaction, index) => {
 				if (transaction.items.length === 1) {
 					const props: GenSingleRowProps = {
 						transaction,
@@ -200,7 +182,7 @@ export function TransactionManager() {
 						onResortMouseDown: (e) => {
 							handleTransactionReorderMouseDown(
 								e,
-								dataSorted,
+								sortedData,
 								transaction,
 								index,
 								updateTransactionSortOrder
@@ -223,16 +205,10 @@ export function TransactionManager() {
 
 					const props: GenMultiRowProps = {
 						transaction: transactionSorted,
-						categories: categories,
-						accounts: accounts,
 						dropdownOptionsCategory: dropdownOptionsCategory,
 						dropdownOptionsAccount: dropdownOptionsAccount,
-						handleTransactionItemReorder: (oldIndex, newIndex) => {
-							updateTransactionItemSortOrder(
-								transaction.id,
-								oldIndex,
-								newIndex
-							)
+						onItemReorder: (oldIndex, newIndex) => {
+							updateItemSortOrder(transaction.id, oldIndex, newIndex)
 						},
 						folded: foldStateArr.find(
 							(item) => item.transaction_id === transaction.id
@@ -249,10 +225,12 @@ export function TransactionManager() {
 						prevIsFoldedOrderRef: prevFoldStateRef,
 						transactionIndex: index,
 						setFoldStateArr,
-						onWholeResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
+						onTransactionReorderMouseDown: (
+							e: React.MouseEvent<HTMLDivElement>
+						) => {
 							handleTransactionReorderMouseDown(
 								e,
-								dataSorted,
+								sortedData,
 								transaction,
 								index,
 								updateTransactionSortOrder

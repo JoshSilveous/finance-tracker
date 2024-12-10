@@ -35,6 +35,7 @@
 		}
 	}
 	&.control {
+		padding: var(--padding-val) 0;
 		.cell_container {
 			min-height: 36px;
 			display: flex;

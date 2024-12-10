@@ -3,61 +3,85 @@ import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
-import { FetchedAccount, FetchedCategory, FetchedTransaction } from '@/database'
+import { FetchedTransaction } from '@/database'
 import s from './genMultiRow.module.scss'
-import { delay } from '@/utils'
 import { createFoldToggleHandler } from './createFoldToggleHandler'
-import { reorderMouseDownHandler } from './reorderMouseDownHandler'
+import { handleItemReorder } from './handleItemReorder'
 import { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import { FoldState } from '../../TransactionManager'
 
 export interface GenMultiRowProps {
-	transaction: FetchedTransaction
-	transactionIndex: number
-	categories: FetchedCategory[]
-	accounts: FetchedAccount[]
-	dropdownOptionsCategory: JDropdownTypes.Option[]
-	dropdownOptionsAccount: JDropdownTypes.Option[]
-	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
 	/**
-	 * Provide a stateful value for the fold/unfold state of this transaction.
-	 *
-	 * **INITIAL RENDER VALUE MUST BE `FALSE`**
+	 * The transaction used to generate this row. MUST be a multi-row (`transaction.items.length > 1`)
+	 */
+	transaction: FetchedTransaction
+	/**
+	 * This transaction's index relative to all **sorted** transactions. Used to determine when to add margins between rows on the grid.
+	 */
+	transactionIndex: number
+	/**
+	 * Array of all categories in `JDropdownTypes.Option[]` format. Used to generate drop-down menus and extra data.
+	 */
+	dropdownOptionsCategory: JDropdownTypes.Option[]
+	/**
+	 * Array of all accounts in `JDropdownTypes.Option[]` format. Used to generate drop-down menus and extra data.
+	 */
+	dropdownOptionsAccount: JDropdownTypes.Option[]
+	/**
+	 * Fires when an item is repositioned within this multi-item transaction
+	 * @param oldIndex The item's previous index
+	 * @param newIndex The item's new index
+	 */
+	onItemReorder: (oldIndex: number, newIndex: number) => void
+	/**
+	 * Controls whether or not the multi-item appears folded
 	 */
 	folded: boolean
+	/**
+	 * If true, a fold/unfold animation will be played to accompany the `folded` value provided
+	 */
 	playAnimation: boolean
+	/**
+	 * Used to compare ref when running animation to determine if animation should be cancelled
+	 */
 	prevIsFoldedOrderRef: MutableRefObject<FoldState[] | null>
+	/**
+	 * Used to update state when folded/unfolded via toggle button
+	 */
 	setFoldStateArr: Dispatch<SetStateAction<FoldState[]>>
 	/**
 	 * MouseDown handler for when the WHOLE transaction is being resorted
 	 */
-	onWholeResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
+	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 export function genMultiRow({
 	transaction,
 	transactionIndex,
-	categories,
-	accounts,
 	dropdownOptionsCategory,
 	dropdownOptionsAccount,
-	handleTransactionItemReorder,
+	onItemReorder,
 	folded,
 	playAnimation,
 	prevIsFoldedOrderRef,
 	setFoldStateArr,
-	onWholeResortMouseDown,
+	onTransactionReorderMouseDown: onWholeResortMouseDown,
 }: GenMultiRowProps) {
 	const uniqueCategories: string[] = []
 	const uniqueAccounts: string[] = []
+	console.log('dropdownOptionsCategory', dropdownOptionsCategory)
 	transaction.items.forEach((item) => {
 		if (item.category_id !== null) {
-			const categoryName = categories.find((cat) => cat.id === item.category_id)!.name
+			const categoryName = dropdownOptionsCategory.find(
+				(cat) => cat.value === item.category_id
+			)!.name
 			if (uniqueCategories.findIndex((item) => item === categoryName) === -1) {
 				uniqueCategories.push(categoryName)
 			}
 		}
 		if (item.account_id !== null) {
-			const accountName = accounts.find((act) => act.id === item.account_id)!.name
+			const accountName = dropdownOptionsAccount.find(
+				(act) => act.value === item.account_id
+			)!.name
 			if (uniqueAccounts.findIndex((item) => item === accountName) === -1) {
 				uniqueAccounts.push(accountName)
 			}
@@ -73,10 +97,6 @@ export function genMultiRow({
 		prevIsFoldedOrderRef
 	)
 
-	console.log(
-		`genMultiRow: "${transaction.name}"\nfolded:${folded}\nplayAnimation:${playAnimation}`
-	)
-
 	const isFirstRowInGrid = transactionIndex === 0
 
 	let sum = 0
@@ -85,13 +105,7 @@ export function genMultiRow({
 
 		// moved extensive reorder logic to separate file
 		function handleReorderMouseDown(e: React.MouseEvent<HTMLInputElement>) {
-			reorderMouseDownHandler(
-				e,
-				item,
-				itemIndex,
-				transaction,
-				handleTransactionItemReorder
-			)
+			handleItemReorder(e, item, itemIndex, transaction, onItemReorder)
 		}
 
 		return [
