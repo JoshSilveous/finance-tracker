@@ -7,14 +7,14 @@ import s from './genSingleRow.module.scss'
 
 export interface GenSingleRowProps {
 	transaction: FetchedTransaction
-	transactionIndex: number
+	placeMarginAbove: boolean
 	dropdownOptionsCategory: JDropdownTypes.Option[]
 	dropdownOptionsAccount: JDropdownTypes.Option[]
 	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 export function genSingleRow({
 	transaction,
-	transactionIndex,
+	placeMarginAbove,
 	dropdownOptionsCategory,
 	dropdownOptionsAccount,
 	onResortMouseDown,
@@ -23,7 +23,9 @@ export function genSingleRow({
 
 	return [
 		<div
-			className={`${s.cell_container} ${s.row_controller}`}
+			className={`${s.cell_container} ${s.row_controller} ${
+				placeMarginAbove ? s.margin_above : ''
+			}`}
 			data-transaction_id={transaction.id}
 		>
 			<div
@@ -35,25 +37,33 @@ export function genSingleRow({
 			</div>
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.first_col}`}
+			className={`${s.cell_container} ${s.first_col} ${
+				placeMarginAbove ? s.margin_above : ''
+			}`}
 			data-transaction_id={transaction.id}
 		>
 			<JDatePicker value={transaction.date} />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.mid_col}`}
+			className={`${s.cell_container} ${s.mid_col} ${
+				placeMarginAbove ? s.margin_above : ''
+			}`}
 			data-transaction_id={transaction.id}
 		>
 			<JInput value={transaction.name} />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.mid_col}`}
+			className={`${s.cell_container} ${s.mid_col} ${
+				placeMarginAbove ? s.margin_above : ''
+			}`}
 			data-transaction_id={transaction.id}
 		>
 			<JNumberAccounting value={transactionItem.amount} />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.mid_col}`}
+			className={`${s.cell_container} ${s.mid_col} ${
+				placeMarginAbove ? s.margin_above : ''
+			}`}
 			data-transaction_id={transaction.id}
 		>
 			<JDropdown
@@ -66,7 +76,9 @@ export function genSingleRow({
 			/>
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.last_col}`}
+			className={`${s.cell_container} ${s.last_col} ${
+				placeMarginAbove ? s.margin_above : ''
+			}`}
 			data-transaction_id={transaction.id}
 		>
 			<JDropdown

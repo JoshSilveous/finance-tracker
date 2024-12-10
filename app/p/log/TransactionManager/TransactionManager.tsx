@@ -156,6 +156,33 @@ export function TransactionManager() {
 		}
 	}, [data, currentSortOrder])
 
+	const sortedAndGroupedData = useMemo(() => {
+		if (data === null || currentSortOrder === null) {
+			return null
+		} else {
+			const sortedData = currentSortOrder!.map((sortedID) => {
+				if (Array.isArray(sortedID)) {
+					return data!.find((item) => item.id === sortedID[0])!
+				} else {
+					return data!.find((item) => item.id === sortedID)!
+				}
+			})
+			let grouped: { date: string; transactions: FetchedTransaction[] }[] = []
+			sortedData.forEach((transaction) => {
+				const thisDateIndex = grouped.findIndex(
+					(item) => item.date === transaction.date
+				)
+
+				if (thisDateIndex === -1) {
+					grouped.push({ date: transaction.date, transactions: [transaction] })
+				} else {
+					grouped[thisDateIndex].transactions.push(transaction)
+				}
+			})
+			return grouped
+		}
+	}, [data, currentSortOrder])
+
 	let grid: ReactNode
 
 	if (
@@ -164,7 +191,8 @@ export function TransactionManager() {
 		accounts !== null &&
 		defaultSortOrder !== null &&
 		currentSortOrder !== null &&
-		sortedData !== null
+		sortedData !== null &&
+		sortedAndGroupedData !== null
 	) {
 		if (sortedData.length === 0) {
 			grid = (
@@ -176,74 +204,84 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			sortedData.forEach((transaction, index) => {
-				if (transaction.items.length === 1) {
-					const props: GenSingleRowProps = {
-						transaction,
-						transactionIndex: index,
-						dropdownOptionsCategory,
-						dropdownOptionsAccount,
-						onResortMouseDown: (e) => {
-							handleTransactionReorderMouseDown(
-								e,
-								sortedData,
-								transaction,
-								index,
-								updateTransactionSortOrder
-							)
-						},
-					}
-					cells.push(genSingleRow(props))
-				} else {
-					const sortedItemOrder = currentSortOrder.find(
-						(sortItem) =>
-							Array.isArray(sortItem) && sortItem[0] === transaction.id
-					) as string[]
-					const sortedItems = removeFromArray(sortedItemOrder, 0).map(
-						(item_id) => {
-							return transaction.items.find((item) => item.id === item_id)
+			console.log('res')
+			console.log(sortedData)
+			console.log(sortedAndGroupedData)
+
+			sortedAndGroupedData.forEach((groupItem) => {
+				cells.push([
+					<></>,
+					{ content: <>{groupItem.date}</>, style: { gridColumn: '2 / 7' } },
+				])
+				groupItem.transactions.forEach((transaction, index) => {
+					if (transaction.items.length === 1) {
+						const props: GenSingleRowProps = {
+							transaction,
+							placeMarginAbove: index !== 0,
+							dropdownOptionsCategory,
+							dropdownOptionsAccount,
+							onResortMouseDown: (e) => {
+								handleTransactionReorderMouseDown(
+									e,
+									sortedData,
+									transaction,
+									index,
+									updateTransactionSortOrder
+								)
+							},
 						}
-					) as FetchedTransaction['items']
+						cells.push(genSingleRow(props))
+					} else {
+						const sortedItemOrder = currentSortOrder.find(
+							(sortItem) =>
+								Array.isArray(sortItem) && sortItem[0] === transaction.id
+						) as string[]
+						const sortedItems = removeFromArray(sortedItemOrder, 0).map(
+							(item_id) => {
+								return transaction.items.find((item) => item.id === item_id)
+							}
+						) as FetchedTransaction['items']
 
-					const transactionSorted = { ...transaction, items: sortedItems }
+						const transactionSorted = { ...transaction, items: sortedItems }
 
-					const props: GenMultiRowProps = {
-						transaction: transactionSorted,
-						dropdownOptionsCategory: dropdownOptionsCategory,
-						dropdownOptionsAccount: dropdownOptionsAccount,
-						onItemReorder: (oldIndex, newIndex) => {
-							updateItemSortOrder(transaction.id, oldIndex, newIndex)
-						},
-						folded: foldStateArr.find(
-							(item) => item.transaction_id === transaction.id
-						)!.folded,
-						playAnimation:
-							prevFoldStateRef.current !== null
-								? foldStateArr.find(
-										(item) => item.transaction_id === transaction.id
-								  )!.folded !==
-								  prevFoldStateRef.current!.find(
-										(item) => item.transaction_id === transaction.id
-								  )!.folded
-								: false,
-						prevIsFoldedOrderRef: prevFoldStateRef,
-						transactionIndex: index,
-						setFoldStateArr,
-						onTransactionReorderMouseDown: (
-							e: React.MouseEvent<HTMLDivElement>
-						) => {
-							handleTransactionReorderMouseDown(
-								e,
-								sortedData,
-								transaction,
-								index,
-								updateTransactionSortOrder
-							)
-						},
+						const props: GenMultiRowProps = {
+							transaction: transactionSorted,
+							dropdownOptionsCategory: dropdownOptionsCategory,
+							dropdownOptionsAccount: dropdownOptionsAccount,
+							onItemReorder: (oldIndex, newIndex) => {
+								updateItemSortOrder(transaction.id, oldIndex, newIndex)
+							},
+							folded: foldStateArr.find(
+								(item) => item.transaction_id === transaction.id
+							)!.folded,
+							playAnimation:
+								prevFoldStateRef.current !== null
+									? foldStateArr.find(
+											(item) => item.transaction_id === transaction.id
+									  )!.folded !==
+									  prevFoldStateRef.current!.find(
+											(item) => item.transaction_id === transaction.id
+									  )!.folded
+									: false,
+							prevIsFoldedOrderRef: prevFoldStateRef,
+							placeMarginAbove: index !== 0,
+							setFoldStateArr,
+							onTransactionReorderMouseDown: (
+								e: React.MouseEvent<HTMLDivElement>
+							) => {
+								handleTransactionReorderMouseDown(
+									e,
+									sortedData,
+									transaction,
+									index,
+									updateTransactionSortOrder
+								)
+							},
+						}
+
+						cells.push(genMultiRow(props))
 					}
-
-					cells.push(genMultiRow(props))
-				}
+				})
 			})
 			const gridConfig: JGridTypes.Props = {
 				headers: headers,

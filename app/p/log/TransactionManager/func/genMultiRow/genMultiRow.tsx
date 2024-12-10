@@ -16,9 +16,9 @@ export interface GenMultiRowProps {
 	 */
 	transaction: FetchedTransaction
 	/**
-	 * This transaction's index relative to all **sorted** transactions. Used to determine when to add margins between rows on the grid.
+	 * Places a margin above the row
 	 */
-	transactionIndex: number
+	placeMarginAbove: boolean
 	/**
 	 * Array of all categories in `JDropdownTypes.Option[]` format. Used to generate drop-down menus and extra data.
 	 */
@@ -56,7 +56,7 @@ export interface GenMultiRowProps {
 }
 export function genMultiRow({
 	transaction,
-	transactionIndex,
+	placeMarginAbove,
 	dropdownOptionsCategory,
 	dropdownOptionsAccount,
 	onItemReorder,
@@ -96,8 +96,6 @@ export function genMultiRow({
 		setFoldStateArr,
 		prevIsFoldedOrderRef
 	)
-
-	const isFirstRowInGrid = transactionIndex === 0
 
 	let sum = 0
 	const itemRows = transaction.items.map((item, itemIndex) => {
@@ -243,7 +241,7 @@ export function genMultiRow({
 		return (
 			<div
 				className={`${s.column} ${s[uniqueColumnClassNames[rowItemIndex]]} ${
-					isFirstRowInGrid ? s.first_row_in_grid : ''
+					placeMarginAbove ? s.margin_above : ''
 				} ${folded && !playAnimation ? s.folded : ''}`}
 				data-transaction_id={transaction.id}
 			>

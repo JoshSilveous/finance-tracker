@@ -13,9 +13,10 @@ export namespace JGridTypes {
 		defaultWidth: number
 		noResize?: boolean
 	}
+	export type Cell = JSX.Element | { content: JSX.Element; style?: React.CSSProperties }
 	export interface Props {
 		headers: Header[]
-		cells: JSX.Element[][]
+		cells: Cell[][]
 		style?: React.CSSProperties
 		className?: string
 		noOuterBorders?: boolean
@@ -217,19 +218,25 @@ export function JGrid({
 				{itemRow.map((itemCell, itemCellIndex) => {
 					const isBottomRow = itemRowIndex === cells.length - 1
 					const isRightColumn = itemCellIndex === itemRow.length - 1
+
+					/**
+					 * Detects if `itemCell` is a `JSX.Element` or `{ content: JSX.Element, style?: React.CSSProperties }`
+					 */
+					const isCustomCell = 'content' in itemCell
+
+					const style: React.CSSProperties = {
+						gridColumn: `${itemCellIndex + 1} / ${itemCellIndex + 2}`,
+						borderBottomWidth: isBottomRow && noOuterBorders ? '0px' : '',
+						borderRightWidth: isRightColumn && noOuterBorders ? '0px' : '',
+					}
+
 					return (
 						<div
 							className={s.cell}
 							key={itemCellIndex}
-							style={{
-								gridColumn: `${itemCellIndex + 1} / ${itemCellIndex + 2}`,
-								borderBottomWidth:
-									isBottomRow && noOuterBorders ? '0px' : '',
-								borderRightWidth:
-									isRightColumn && noOuterBorders ? '0px' : '',
-							}}
+							style={isCustomCell ? { ...style, ...itemCell.style } : style}
 						>
-							{itemCell}
+							{isCustomCell ? itemCell.content : itemCell}
 						</div>
 					)
 				})}
