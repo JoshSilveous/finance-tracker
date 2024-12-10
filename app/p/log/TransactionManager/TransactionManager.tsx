@@ -1,27 +1,12 @@
 'use client'
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import {
-	isStandardError,
-	moveItemInArray,
-	promptError,
-	removeFromArray,
-	typedQuerySelectAll,
-} from '@/utils'
-import {
-	fetchCategoryData,
-	FetchedTransaction,
-	fetchTransactionData,
-	fetchCategoryTotals,
-	FetchedAccount,
-	FetchedCategory,
-	fetchAccountData,
-} from '@/database'
+import { moveItemInArray, removeFromArray } from '@/utils'
+import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRow'
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
-import { genGapRow } from './func/genGapRow/genGapRow'
 import { handleTransactionReorderMouseDown } from './func/handleTransactionReorder'
 import { fetchAndLoadData } from './func/fetchAndLoadData'
 

@@ -21,8 +21,6 @@ export function genSingleRow({
 }: GenSingleRowProps) {
 	const transactionItem = transaction.items[0]
 
-	const isFirstRowInGrid = transactionIndex === 0
-
 	return [
 		<div
 			className={`${s.cell_container} ${s.row_controller}`}
