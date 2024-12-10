@@ -50,6 +50,7 @@ body {
 	--input-border-color: rgba(229, 229, 229, 0.2);
 
 	background-color: var(--bg-color);
+	overflow: hidden;
 	color: var(--font-color);
 	font-size: 14px;
 	display: flex;

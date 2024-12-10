@@ -66,7 +66,7 @@ export function handleTransactionReorderMouseDown(
 		allRows.forEach((rowNodes) => {
 			rowNodes.forEach((node) => {
 				node.style.marginTop = ''
-				node.style.marginBottom = ''
+				node.style.marginBottom = '0px'
 			})
 		})
 		if (rowIndex === 'none') {

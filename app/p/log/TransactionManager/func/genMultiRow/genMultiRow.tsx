@@ -230,7 +230,7 @@ export function genMultiRow({
 			<div
 				className={`${s.column} ${s[uniqueColumnClassNames[rowItemIndex]]} ${
 					isFirstRowInGrid ? s.first_row_in_grid : ''
-				}`}
+				} ${folded && !playAnimation ? s.folded : ''}`}
 				data-transaction_id={transaction.id}
 			>
 				{rowItem} {itemRows.map((itemRow) => itemRow[rowItemIndex])}

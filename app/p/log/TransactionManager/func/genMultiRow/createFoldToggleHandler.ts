@@ -13,11 +13,13 @@ export function createFoldToggleHandler(
 ) {
 	const foldAnimationTime = 500
 	if (folded && playAnimation) {
-		renderFoldAnimation()
+		renderFoldAnimated()
 	} else if (!folded && playAnimation) {
-		renderUnfoldAnimation()
+		renderUnfoldAnimated()
 	} else if (folded && !playAnimation) {
-		renderFold()
+		// renderFold()
+		/* fold state is rendered in genMultiRow when `columns` is defined (by adding s.folded class manually).
+		this is necessary instead of defining here because querySelector can select old data on re-renders. */
 	} else if (!folded && !playAnimation) {
 		renderUnfold()
 	}
@@ -52,7 +54,7 @@ export function createFoldToggleHandler(
 		return false
 	}
 
-	function renderFoldAnimation() {
+	function renderFoldAnimated() {
 		const cols = getColumnNodes()
 		const firstRowHeight = document.querySelector(
 			`.${s.first_row}[data-transaction_id="${transaction.id}"]`
@@ -75,7 +77,7 @@ export function createFoldToggleHandler(
 			col.classList.add(s.folded)
 		})
 	}
-	function renderUnfoldAnimation() {
+	function renderUnfoldAnimated() {
 		const cells = typedQuerySelectAll<HTMLDivElement>(
 			`.${s.column}.${s.date}[data-transaction_id="${transaction.id}"] > .${s.cell_container}`
 		)
@@ -114,16 +116,14 @@ export function createFoldToggleHandler(
 			col.style.height = ''
 		})
 	}
-	async function renderFold() {
-		await delay(1)
-		const cols = getColumnNodes()
-		console.log('renderFold on:', cols)
-		cols.forEach(async (col) => {
-			col.classList.add(s.folded)
-			col.style.transition = ``
-			col.style.height = ''
-		})
-	}
+	// function renderFold() {
+	// 	const cols = getColumnNodes()
+	// 	cols.forEach(async (col) => {
+	// 		col.classList.add(s.folded)
+	// 		col.style.transition = ``
+	// 		col.style.height = ''
+	// 	})
+	// }
 	function renderUnfold() {
 		const cols = getColumnNodes()
 
