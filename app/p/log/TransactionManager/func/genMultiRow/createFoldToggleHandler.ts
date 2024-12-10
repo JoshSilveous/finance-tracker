@@ -114,8 +114,10 @@ export function createFoldToggleHandler(
 			col.style.height = ''
 		})
 	}
-	function renderFold() {
+	async function renderFold() {
+		await delay(1)
 		const cols = getColumnNodes()
+		console.log('renderFold on:', cols)
 		cols.forEach(async (col) => {
 			col.classList.add(s.folded)
 			col.style.transition = ``
@@ -128,6 +130,7 @@ export function createFoldToggleHandler(
 		cols.forEach(async (col) => {
 			col.style.transition = ``
 			col.classList.remove(s.folded)
+			col.style.display = ''
 			col.style.height = ''
 		})
 	}

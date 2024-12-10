@@ -73,6 +73,10 @@ export function genMultiRow({
 		prevIsFoldedOrderRef
 	)
 
+	console.log(
+		`genMultiRow: "${transaction.name}"\nfolded:${folded}\nplayAnimation:${playAnimation}`
+	)
+
 	const isFirstRowInGrid = transactionIndex === 0
 
 	let sum = 0
