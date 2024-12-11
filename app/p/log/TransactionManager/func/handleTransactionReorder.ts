@@ -1,29 +1,46 @@
 import { FetchedTransaction } from '@/database'
 import s from '../TransactionManager.module.scss'
-import genMultiRowStyles from '../MultiRow/MultiRow.module.scss'
-import genSingleRowStyles from './genSingleRow/genSingleRow.module.scss'
-import { typedQuerySelectAll, delay } from '@/utils'
+import { delay } from '@/utils'
+import { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import { FoldState, TransactionRowRef } from '../TransactionManager'
 
 export function handleTransactionReorderMouseDown(
 	e: React.MouseEvent<HTMLDivElement>,
 	allTransactions: FetchedTransaction[],
 	transaction: FetchedTransaction,
 	transactionIndex: number,
-	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void
+	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
+	transactionRowsRef: MutableRefObject<TransactionRowRef>,
+	foldStateArr: FoldState[],
+	setFoldStateArr: Dispatch<SetStateAction<FoldState[]>>
 ) {
+	console.log('length:', Object.keys(transactionRowsRef.current).length)
 	function getTransactionRow(transaction: FetchedTransaction) {
-		const isMultiRow = transaction.items.length > 1
-		let cssQuery = ''
-		if (isMultiRow) {
-			cssQuery = `.${genMultiRowStyles.column}[data-transaction_id="${transaction.id}"]`
-		} else {
-			cssQuery = `.${genSingleRowStyles.cell_container}[data-transaction_id="${transaction.id}"]`
-		}
-		return typedQuerySelectAll<HTMLDivElement>(cssQuery)
+		const rowNode = transactionRowsRef.current[transaction.id]!
+
+		const childNodes = Array.from(rowNode.childNodes) as HTMLDivElement[]
+
+		return childNodes
 	}
 
 	const thisRowIndex = transactionIndex
 	const thisRow = getTransactionRow(transaction)
+
+	let forceFolded = false
+	if (transaction.items.length > 1) {
+		const foldStateIndex = foldStateArr.findIndex(
+			(item) => item.transaction_id === transaction.id
+		)
+		if (foldStateIndex !== -1 && foldStateArr[foldStateIndex].folded === false) {
+			setFoldStateArr((prev) => {
+				const newArr = structuredClone(prev)
+				newArr[foldStateIndex].folded = true
+				return newArr
+			})
+			forceFolded = true
+		}
+	}
+
 	const allRows = allTransactions.map((transaction) => getTransactionRow(transaction))
 	const otherRows = allRows.filter(
 		(item) => item[0].dataset['transaction_id'] !== transaction.id
@@ -150,6 +167,17 @@ export function handleTransactionReorderMouseDown(
 
 		if (thisRowIndex !== closestBreakpointIndex) {
 			updateTransactionSortOrder(thisRowIndex, closestBreakpointIndex)
+		}
+
+		if (forceFolded) {
+			const foldStateIndex = foldStateArr.findIndex(
+				(item) => item.transaction_id === transaction.id
+			)
+			setFoldStateArr((prev) => {
+				const newArr = structuredClone(prev)
+				newArr[foldStateIndex].folded = false
+				return newArr
+			})
 		}
 	}
 	window.addEventListener('mousemove', handleReorderMouseMove)

@@ -9,7 +9,7 @@ import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRo
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
 import { handleTransactionReorderMouseDown } from './func/handleTransactionReorder'
 import { fetchAndLoadData } from './func/fetchAndLoadData'
-import { MultiRow } from './MultiRow/MultiRow'
+import { MultiRow, MultiRowProps } from './MultiRow/MultiRow'
 import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
 
 export interface LoadState {
@@ -21,6 +21,9 @@ export interface FoldState {
 	folded: boolean
 }
 export type SortOrderItem = string | string[]
+export type TransactionRowRef = {
+	[key: string]: HTMLDivElement | null
+}
 
 export function TransactionManager() {
 	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
@@ -33,6 +36,11 @@ export function TransactionManager() {
 	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [counter, setCounter] = useState(0)
+
+	const transactionRowsRef = useRef<TransactionRowRef>({})
+	const setTransactionRowRef = (key: string) => (node: HTMLInputElement | null) => {
+		if (node) transactionRowsRef.current[key] = node
+	}
 
 	// previous foldOrder is needed to detect when it actually changes between animations (to play animation)
 	const [foldStateArr, setFoldStateArr] = useState<FoldState[]>([])
@@ -206,10 +214,6 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			console.log('res')
-			console.log(sortedData)
-			console.log(sortedAndGroupedData)
-
 			sortedAndGroupedData.forEach((groupItem) => {
 				groupItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
@@ -224,11 +228,19 @@ export function TransactionManager() {
 									sortedData,
 									transaction,
 									index,
-									updateTransactionSortOrder
+									updateTransactionSortOrder,
+									transactionRowsRef,
+									foldStateArr,
+									setFoldStateArr
 								)
 							},
 						}
-						cells.push(<SingleRow {...props} />)
+						cells.push(
+							<SingleRow
+								{...props}
+								ref={setTransactionRowRef(transaction.id)}
+							/>
+						)
 					} else {
 						const sortedItemOrder = currentSortOrder.find(
 							(sortItem) =>
@@ -242,7 +254,7 @@ export function TransactionManager() {
 
 						const transactionSorted = { ...transaction, items: sortedItems }
 
-						const props: GenMultiRowProps = {
+						const props: MultiRowProps = {
 							transaction: transactionSorted,
 							dropdownOptionsCategory: dropdownOptionsCategory,
 							dropdownOptionsAccount: dropdownOptionsAccount,
@@ -261,7 +273,6 @@ export function TransactionManager() {
 											(item) => item.transaction_id === transaction.id
 									  )!.folded
 									: false,
-							prevIsFoldedOrderRef: prevFoldStateRef,
 							placeMarginAbove: index !== 0,
 							setFoldStateArr,
 							onTransactionReorderMouseDown: (
@@ -272,12 +283,20 @@ export function TransactionManager() {
 									sortedData,
 									transaction,
 									index,
-									updateTransactionSortOrder
+									updateTransactionSortOrder,
+									transactionRowsRef,
+									foldStateArr,
+									setFoldStateArr
 								)
 							},
 						}
 
-						cells.push(<MultiRow {...props} />)
+						cells.push(
+							<MultiRow
+								{...props}
+								ref={setTransactionRowRef(transaction.id)}
+							/>
+						)
 					}
 				})
 			})

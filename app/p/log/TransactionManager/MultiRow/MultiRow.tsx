@@ -1,13 +1,6 @@
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { FetchedTransaction } from '@/database'
-import {
-	MutableRefObject,
-	Dispatch,
-	SetStateAction,
-	useMemo,
-	useCallback,
-	useRef,
-} from 'react'
+import { Dispatch, SetStateAction, useMemo, useRef, forwardRef, useEffect } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { FoldState } from '../TransactionManager'
@@ -15,76 +8,32 @@ import s from './MultiRow.module.scss'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { handleItemReorder } from './func/handleItemReorder'
-import { toggleFold } from './func/toggleFold'
+import { foldRenderer } from './func/foldRenderer'
 
-interface MultiRowProps {
-	/**
-	 * The transaction used to generate this row. MUST be a multi-row (`transaction.items.length > 1`)
-	 */
+export interface MultiRowProps {
 	transaction: FetchedTransaction
-	/**
-	 * Places a margin above the row
-	 */
 	placeMarginAbove: boolean
-	/**
-	 * Array of all categories in `JDropdownTypes.Option[]` format. Used to generate drop-down menus and extra data.
-	 */
 	dropdownOptionsCategory: JDropdownTypes.Option[]
-	/**
-	 * Array of all accounts in `JDropdownTypes.Option[]` format. Used to generate drop-down menus and extra data.
-	 */
 	dropdownOptionsAccount: JDropdownTypes.Option[]
-	/**
-	 * Fires when an item is repositioned within this multi-item transaction
-	 * @param oldIndex The item's previous index
-	 * @param newIndex The item's new index
-	 */
 	onItemReorder: (oldIndex: number, newIndex: number) => void
-	/**
-	 * Controls whether or not the multi-item appears folded
-	 */
 	folded: boolean
-	/**
-	 * If true, a fold/unfold animation will be played to accompany the `folded` value provided
-	 */
 	playAnimation: boolean
-	/**
-	 * Used to compare ref when running animation to determine if animation should be cancelled
-	 */
-	prevIsFoldedOrderRef: MutableRefObject<FoldState[] | null>
-	/**
-	 * Used to update state when folded/unfolded via toggle button
-	 */
 	setFoldStateArr: Dispatch<SetStateAction<FoldState[]>>
-	/**
-	 * MouseDown handler for when the WHOLE transaction is being resorted
-	 */
 	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 }
-export function MultiRow({
-	transaction,
-	placeMarginAbove,
-	dropdownOptionsCategory,
-	dropdownOptionsAccount,
-	onItemReorder,
-	folded,
-	playAnimation,
-	prevIsFoldedOrderRef,
-	setFoldStateArr,
-	onTransactionReorderMouseDown,
-}: MultiRowProps) {
+export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwardedRef) => {
 	const columnNodesRef = useRef<(HTMLDivElement | null)[]>([])
-	const addToColumnNodesRef = useCallback((node: HTMLDivElement) => {
+	const addToColumnNodesRef = (node: HTMLDivElement) => {
 		if (node && !columnNodesRef.current.includes(node)) {
 			columnNodesRef.current.push(node)
 		}
-	}, [])
+	}
 
 	const uniqueCategories = useMemo(() => {
 		const arr: string[] = []
-		transaction.items.forEach((item) => {
+		props.transaction.items.forEach((item) => {
 			if (item.category_id !== null) {
-				const categoryName = dropdownOptionsCategory.find(
+				const categoryName = props.dropdownOptionsCategory.find(
 					(cat) => cat.value === item.category_id
 				)!.name
 				if (arr.findIndex((item) => item === categoryName) === -1) {
@@ -93,12 +42,12 @@ export function MultiRow({
 			}
 		})
 		return arr
-	}, [dropdownOptionsCategory, transaction])
+	}, [props.dropdownOptionsCategory, props.transaction])
 	const uniqueAccounts = useMemo(() => {
 		const arr: string[] = []
-		transaction.items.forEach((item) => {
+		props.transaction.items.forEach((item) => {
 			if (item.account_id !== null) {
-				const accountName = dropdownOptionsAccount.find(
+				const accountName = props.dropdownOptionsAccount.find(
 					(act) => act.value === item.account_id
 				)!.name
 				if (arr.findIndex((item) => item === accountName) === -1) {
@@ -107,33 +56,53 @@ export function MultiRow({
 			}
 		})
 		return arr
-	}, [dropdownOptionsCategory, transaction])
+	}, [props.dropdownOptionsCategory, props.transaction])
 
-	// moved extensive fold logic to separate file
-	const handleFoldClick = toggleFold(
-		folded,
-		transaction,
-		playAnimation,
-		setFoldStateArr,
-		prevIsFoldedOrderRef,
-		columnNodesRef
-	)
+	// paint fold state / animation after dom renders
+	useEffect(() => {
+		const columnNodes = columnNodesRef.current as HTMLDivElement[]
+		const render = foldRenderer(columnNodes, props.transaction.id)
+
+		if (props.folded && props.playAnimation) {
+			render.foldAnimated()
+		} else if (!props.folded && props.playAnimation) {
+			render.unfoldAnimated()
+		} else if (props.folded && !props.playAnimation) {
+			render.fold()
+		} else if (!props.folded && !props.playAnimation) {
+			render.unfold()
+		}
+
+		// runs when this component unmounts to prevent animation bugs (e.x. when a multi-row is reordered)
+		return render.cancel
+	}, [props.folded, props.playAnimation])
+
+	function handleFoldClick() {
+		props.setFoldStateArr((prev) => {
+			const newArr = structuredClone(prev)
+			const thisItemIndex = newArr.findIndex(
+				(item) => item.transaction_id === props.transaction.id
+			)
+			newArr[thisItemIndex].folded = !newArr[thisItemIndex].folded
+			return newArr
+		})
+	}
 
 	let sum = 0
-	const itemRows = transaction.items.map((item, itemIndex) => {
+	const itemRows = props.transaction.items.map((item, itemIndex) => {
 		sum += item.amount
 
 		// moved extensive reorder logic to separate file
 		function handleReorderMouseDown(e: React.MouseEvent<HTMLInputElement>) {
-			handleItemReorder(e, item, itemIndex, transaction, onItemReorder)
+			handleItemReorder(e, item, itemIndex, props.transaction, props.onItemReorder)
 		}
 
 		return [
 			<div
 				className={s.cell_container}
-				data-parent_id={transaction.id}
+				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
-				key={`${transaction.id}-${item.id}-1`}
+				key={`${props.transaction.id}-${item.id}-1`}
 			>
 				<div
 					className={s.reorder_grabber}
@@ -145,47 +114,50 @@ export function MultiRow({
 			</div>,
 			<div
 				className={s.cell_container}
-				data-parent_id={transaction.id}
+				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
-				key={`${transaction.id}-${item.id}-2`}
+				key={`${props.transaction.id}-${item.id}-2`}
 			>
-				<JDatePicker value={transaction.date} disabled minimalStyle />
+				<JDatePicker value={props.transaction.date} disabled minimalStyle />
 			</div>,
 			<div
 				className={s.cell_container}
-				data-parent_id={transaction.id}
+				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
-				key={`${transaction.id}-${item.id}-3`}
+				key={`${props.transaction.id}-${item.id}-3`}
 			>
 				<JInput value={item.name} />
 			</div>,
 			<div
 				className={s.cell_container}
-				data-parent_id={transaction.id}
+				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
-				key={`${transaction.id}-${item.id}-4`}
+				key={`${props.transaction.id}-${item.id}-4`}
 			>
-				<JNumberAccounting value={item.amount} data-rerender_tag={transaction.id} />
+				<JNumberAccounting
+					value={item.amount}
+					data-rerender_tag={props.transaction.id}
+				/>
 			</div>,
 			<div
 				className={s.cell_container}
-				data-parent_id={transaction.id}
+				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
-				key={`${transaction.id}-${item.id}-5`}
+				key={`${props.transaction.id}-${item.id}-5`}
 			>
 				<JDropdown
-					options={dropdownOptionsCategory}
+					options={props.dropdownOptionsCategory}
 					value={item.category_id !== null ? item.category_id : 'none'}
 				/>
 			</div>,
 			<div
 				className={s.cell_container}
-				data-parent_id={transaction.id}
+				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
-				key={`${transaction.id}-${item.id}-7`}
+				key={`${props.transaction.id}-${item.id}-7`}
 			>
 				<JDropdown
-					options={dropdownOptionsAccount}
+					options={props.dropdownOptionsAccount}
 					value={item.account_id !== null ? item.account_id : 'none'}
 				/>
 			</div>,
@@ -195,76 +167,77 @@ export function MultiRow({
 	const firstRow = [
 		<div
 			className={`${s.cell_container} ${s.first_row}`}
-			key={`${transaction.id}-1`}
-			data-transaction_id={transaction.id}
+			key={`${props.transaction.id}-1`}
+			data-transaction_id={props.transaction.id}
 		>
 			<div
 				className={s.reorder_grabber}
-				onMouseDown={onTransactionReorderMouseDown}
+				onMouseDown={props.onTransactionReorderMouseDown}
 				title='Grab and drag to reposition this item'
 			>
 				<ReorderIcon />
 			</div>
 			<div
-				className={`${s.fold_toggle} ${folded ? s.folded : ''}`}
-				data-transaction_id={transaction.id}
+				className={`${s.fold_toggle} ${props.folded ? s.folded : ''}`}
+				data-transaction_id={props.transaction.id}
 				onClick={handleFoldClick}
-				title={folded ? 'Click to reveal items' : 'Click to hide items'}
+				title={props.folded ? 'Click to reveal items' : 'Click to hide items'}
 			>
 				<FoldArrow />
 			</div>
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row}`}
-			key={`${transaction.id}-2`}
-			data-transaction_id={transaction.id}
+			key={`${props.transaction.id}-2`}
+			data-transaction_id={props.transaction.id}
 		>
-			<JDatePicker value={transaction.date} />
+			<JDatePicker value={props.transaction.date} />
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row}`}
-			key={`${transaction.id}-3`}
-			data-transaction_id={transaction.id}
+			key={`${props.transaction.id}-3`}
+			data-transaction_id={props.transaction.id}
 		>
-			<JInput value={transaction.name} />
+			<JInput value={props.transaction.name} />
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row}`}
-			key={`${transaction.id}-4`}
-			data-transaction_id={transaction.id}
+			key={`${props.transaction.id}-4`}
+			data-transaction_id={props.transaction.id}
 		>
 			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row}`}
-			key={`${transaction.id}-5`}
-			data-transaction_id={transaction.id}
+			key={`${props.transaction.id}-5`}
+			data-transaction_id={props.transaction.id}
 		>
 			<JInput value={uniqueCategories.join(', ')} disabled minimalStyle />
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row}`}
-			key={`${transaction.id}-6`}
-			data-transaction_id={transaction.id}
+			key={`${props.transaction.id}-6`}
+			data-transaction_id={props.transaction.id}
 		>
 			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
 		</div>,
 	]
+
 	const uniqueColumnClassNames = [
-		'control',
-		'date',
-		'name',
-		'amount',
-		'category',
-		'account',
+		s.control,
+		s.date,
+		s.name,
+		s.amount,
+		s.category,
+		s.account,
 	]
 	const columns = firstRow.map((rowItem, rowItemIndex) => {
 		return (
 			<div
-				className={`${s.column} ${s[uniqueColumnClassNames[rowItemIndex]]} ${
-					placeMarginAbove ? s.margin_above : ''
-				} ${folded && !playAnimation ? s.folded : ''}`}
-				data-transaction_id={transaction.id}
+				className={`${s.column} ${uniqueColumnClassNames[rowItemIndex]} ${
+					props.placeMarginAbove ? s.margin_above : ''
+				} ${props.folded && !props.playAnimation ? s.folded : ''}`}
+				data-transaction_id={props.transaction.id}
 				ref={addToColumnNodesRef}
 			>
 				{rowItem} {itemRows.map((itemRow) => itemRow[rowItemIndex])}
@@ -272,5 +245,13 @@ export function MultiRow({
 		)
 	})
 
-	return <div className={s.container}>{columns}</div>
-}
+	return (
+		<div
+			className={s.container}
+			data-transaction_id={props.transaction.id}
+			ref={forwardedRef}
+		>
+			{columns}
+		</div>
+	)
+})
