@@ -1,13 +1,8 @@
 import { FetchedTransaction } from '@/database'
 import s from '../TransactionManager.module.scss'
 import { delay } from '@/utils'
-import { Dispatch, MutableRefObject, SetStateAction } from 'react'
-import {
-	FoldState,
-	FoldStateUpdater,
-	NewFoldState,
-	TransactionRowsRef,
-} from '../TransactionManager'
+import { MutableRefObject } from 'react'
+import { FoldStateUpdater, TransactionRowsRef } from '../TransactionManager'
 
 export function handleTransactionReorderMouseDown(
 	e: React.MouseEvent<HTMLDivElement>,
@@ -16,7 +11,7 @@ export function handleTransactionReorderMouseDown(
 	transactionIndex: number,
 	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
 	transactionRowsRef: MutableRefObject<TransactionRowsRef>,
-	foldState: NewFoldState,
+	folded: boolean,
 	/**
 	 * See {@link FoldStateUpdater}
 	 */
@@ -35,7 +30,7 @@ export function handleTransactionReorderMouseDown(
 	const thisRow = getTransactionRow(transaction)
 
 	let forceFolded = false
-	if (transaction.items.length > 1 && foldState[transaction.id] !== true) {
+	if (transaction.items.length > 1 && !folded) {
 		updateFoldState(transaction.id, true)
 		forceFolded = true
 	}

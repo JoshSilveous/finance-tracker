@@ -16,15 +16,11 @@ export interface LoadState {
 	loading: boolean
 	message: string
 }
-export interface FoldState {
-	transaction_id: string
-	folded: boolean
-}
 export type SortOrderItem = string | string[]
 export type TransactionRowsRef = {
 	[key: string]: HTMLDivElement | null
 }
-export type NewFoldState = {
+export type FoldState = {
 	[key: string]: boolean
 }
 /**
@@ -52,22 +48,22 @@ export function TransactionManager() {
 	}
 
 	// previous foldState is needed to detect when it actually changes between animations (to play animation)
-	const [foldState, setFoldState] = useState<NewFoldState>({})
-	const prevFoldStateRef = useRef<NewFoldState>({})
+	const [foldState, setFoldState] = useState<FoldState>({})
+	const prevFoldStateRef = useRef<FoldState>({})
 	useEffect(() => {
 		prevFoldStateRef.current = foldState
 	}, [foldState])
 	/**
 	 * See {@link FoldStateUpdater}
 	 */
-	const updateFoldState: FoldStateUpdater = (transaction_id, folded) => {
+	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {
 		setFoldState((prev) => {
 			const newState = structuredClone(prev)
 			newState[transaction_id] =
 				folded !== undefined ? folded : !newState[transaction_id]
 			return newState
 		})
-	}
+	}, [])
 
 	useEffect(() => {
 		fetchAndLoadData(
@@ -250,7 +246,7 @@ export function TransactionManager() {
 									index,
 									updateTransactionSortOrder,
 									transactionRowsRef,
-									foldState,
+									foldState[transaction.id],
 									updateFoldState
 								)
 							},
@@ -299,7 +295,7 @@ export function TransactionManager() {
 									index,
 									updateTransactionSortOrder,
 									transactionRowsRef,
-									foldState,
+									foldState[transaction.id],
 									updateFoldState
 								)
 							},

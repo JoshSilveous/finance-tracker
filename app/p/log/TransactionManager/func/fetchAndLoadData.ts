@@ -9,14 +9,14 @@ import {
 } from '@/database'
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
-import { FoldState, LoadState, NewFoldState, SortOrderItem } from '../TransactionManager'
+import { FoldState, LoadState, FoldState, SortOrderItem } from '../TransactionManager'
 
 export async function fetchAndLoadData(
 	setLoadState: Dispatch<SetStateAction<LoadState>>,
 	setData: Dispatch<SetStateAction<FetchedTransaction[] | null>>,
 	setDefaultSortOrder: Dispatch<SetStateAction<SortOrderItem[] | null>>,
 	setCurrentSortOrder: Dispatch<SetStateAction<SortOrderItem[] | null>>,
-	setFoldState: Dispatch<SetStateAction<NewFoldState>>,
+	setFoldState: Dispatch<SetStateAction<FoldState>>,
 	setCategories: Dispatch<SetStateAction<FetchedCategory[] | null>>,
 	setAccounts: Dispatch<SetStateAction<FetchedAccount[] | null>>
 ) {
@@ -35,7 +35,7 @@ export async function fetchAndLoadData(
 		setDefaultSortOrder(fetchedSortOrder)
 		setCurrentSortOrder(fetchedSortOrder)
 		setFoldState(() => {
-			const foldState: NewFoldState = {}
+			const foldState: FoldState = {}
 			transactionData.forEach((transaction) => {
 				if (transaction.items.length > 1) {
 					foldState[transaction.id] = false
