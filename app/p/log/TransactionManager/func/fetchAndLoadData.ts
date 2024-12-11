@@ -9,7 +9,7 @@ import {
 } from '@/database'
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
-import { FoldState, LoadState, FoldState, SortOrderItem } from '../TransactionManager'
+import { FoldState, LoadState, SortOrderItem } from '../TransactionManager'
 
 export async function fetchAndLoadData(
 	setLoadState: Dispatch<SetStateAction<LoadState>>,

@@ -20,9 +20,7 @@ export const handleTransactionReorder =
 	(e: React.MouseEvent<HTMLDivElement>) => {
 		function getTransactionRow(transaction: FetchedTransaction) {
 			const rowNode = transactionRowsRef.current[transaction.id]!
-
 			const childNodes = Array.from(rowNode.childNodes) as HTMLDivElement[]
-
 			return childNodes
 		}
 
@@ -53,9 +51,10 @@ export const handleTransactionReorder =
 		)
 
 		let leftOffset = 0
+		const startWidths = thisRow.map((item) => getComputedStyle(item).width)
 		thisRow.forEach((node, nodeIndex) => {
-			const nodeStyle = getComputedStyle(node)
-			node.style.width = nodeStyle.width
+			// not sure why calculating the width here isn't working. fix eventually
+			node.style.width = startWidths[nodeIndex]
 			node.style.left = `${e.clientX - offsetX + leftOffset}px`
 			node.style.top = `${e.clientY - offsetY}px`
 			node.classList.add(s.popped_out)
@@ -66,7 +65,7 @@ export const handleTransactionReorder =
 		})
 
 		let firstRun = true
-		const marginSize = thisRow[0].offsetHeight
+		const marginSize = 50
 		function putMarginGapOnRow(rowIndex: number | 'none') {
 			// if ending the animation, remove transition effects
 			if (rowIndex === 'none') {

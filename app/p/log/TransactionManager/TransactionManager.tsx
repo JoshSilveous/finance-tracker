@@ -29,6 +29,7 @@ export type FoldState = {
 export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
 
 export function TransactionManager() {
+	console.log('transactionmanager re-render')
 	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
 	const [accounts, setAccounts] = useState<FetchedAccount[] | null>(null)
 	const [data, setData] = useState<FetchedTransaction[] | null>(null)
