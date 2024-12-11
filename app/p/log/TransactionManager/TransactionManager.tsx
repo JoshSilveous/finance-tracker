@@ -209,10 +209,6 @@ export function TransactionManager() {
 			console.log(sortedAndGroupedData)
 
 			sortedAndGroupedData.forEach((groupItem) => {
-				cells.push([
-					<></>,
-					{ content: <>{groupItem.date}</>, style: { gridColumn: '2 / 7' } },
-				])
 				groupItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
 						const props: GenSingleRowProps = {

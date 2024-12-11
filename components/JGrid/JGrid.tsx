@@ -14,9 +14,50 @@ export namespace JGridTypes {
 		noResize?: boolean
 	}
 	export type Cell = JSX.Element | { content: JSX.Element; style?: React.CSSProperties }
+	export type Row = JSX.Element
 	export interface Props {
 		headers: Header[]
-		cells: Cell[][]
+		/**
+		 * `cells` is an array of the data displayed in the grid. This is a two-dimensional array, composed of rows and their cells.
+		 *
+		 * **There are two ways a row can be packaged:**
+		 *
+		 * 1. {@link JGridTypes.Cell `JGridTypes.Cell[]`}
+		 * An array of either `JSX.Element`s, or objects packaged like this:
+		 * `
+		 * { content: JSX.Element; style?: React.CSSProperties }
+		 * `
+		 * The `style` property applies to the cell container, allowing multi-row cells using the `gridColumn` CSS property.
+		 * &nbsp;
+		 *
+		 *
+		 * 2. {@link JGridTypes.Row `JGridTypes.Row`}
+		 * A single `JSX.Element`, which should contain a {@link React.Fragment `React.Fragment`} with several cells as children (or make sure the container's `display` property is set to `contents`). This allows a row to be a React Component.
+		 * <u>Default JGrid styles do not apply here and will need to be manually configured (such as `gridColumn`)</u>
+		 *
+		 * @example
+		 * // a standard array of cells
+		 * const row1 = [ <div>John</div>, <div>Smith</div> ]
+		 *
+		 * // a single cell that spans two columns
+		 * const row2 = [{ content: <div>John Smith</div>, style: { gridColumn = "1 / 3" } }]
+		 *
+		 * // a single component that has two cells, with a fragment container
+		 * const row3 = <>
+		 *     <div style={{ gridColumn = "1 / 2" }}>John</div>
+		 *     <div style={{ gridColumn = "2 / 3" }}>Smith</div>
+		 * </>
+		 *
+		 * // a single component that has two cells, with a container with `display: contents`
+		 * const row4 = <div style={{ display: "contents" }}>
+		 *     <div style={{ gridColumn = "1 / 2" }}>John</div>
+		 *     <div style={{ gridColumn = "2 / 3" }}>Smith</div>
+		 * </div>
+		 *
+		 * const cells: JGridTypes.props["cells"] = [row1, row2, row3, row4]
+		 *
+		 */
+		cells: (Cell[] | Row)[]
 		style?: React.CSSProperties
 		className?: string
 		noOuterBorders?: boolean
@@ -213,35 +254,41 @@ export function JGrid({
 	})
 
 	const contentJSX = cells.map((itemRow, itemRowIndex) => {
-		return (
-			<div className={s.row} key={itemRowIndex}>
-				{itemRow.map((itemCell, itemCellIndex) => {
-					const isBottomRow = itemRowIndex === cells.length - 1
-					const isRightColumn = itemCellIndex === itemRow.length - 1
+		if (Array.isArray(itemRow)) {
+			return (
+				<div className={s.row} key={itemRowIndex}>
+					{itemRow.map((itemCell, itemCellIndex) => {
+						const isBottomRow = itemRowIndex === cells.length - 1
+						const isRightColumn = itemCellIndex === itemRow.length - 1
 
-					/**
-					 * Detects if `itemCell` is a `JSX.Element` or `{ content: JSX.Element, style?: React.CSSProperties }`
-					 */
-					const isCustomCell = 'content' in itemCell
+						/**
+						 * Detects if `itemCell` is a `JSX.Element` or `{ content: JSX.Element, style?: React.CSSProperties }`
+						 */
+						const isCustomCell = 'content' in itemCell
 
-					const style: React.CSSProperties = {
-						gridColumn: `${itemCellIndex + 1} / ${itemCellIndex + 2}`,
-						borderBottomWidth: isBottomRow && noOuterBorders ? '0px' : '',
-						borderRightWidth: isRightColumn && noOuterBorders ? '0px' : '',
-					}
+						const style: React.CSSProperties = {
+							gridColumn: `${itemCellIndex + 1} / ${itemCellIndex + 2}`,
+							borderBottomWidth: isBottomRow && noOuterBorders ? '0px' : '',
+							borderRightWidth: isRightColumn && noOuterBorders ? '0px' : '',
+						}
 
-					return (
-						<div
-							className={s.cell}
-							key={itemCellIndex}
-							style={isCustomCell ? { ...style, ...itemCell.style } : style}
-						>
-							{isCustomCell ? itemCell.content : itemCell}
-						</div>
-					)
-				})}
-			</div>
-		)
+						return (
+							<div
+								className={s.cell}
+								key={itemCellIndex}
+								style={
+									isCustomCell ? { ...style, ...itemCell.style } : style
+								}
+							>
+								{isCustomCell ? itemCell.content : itemCell}
+							</div>
+						)
+					})}
+				</div>
+			)
+		} else {
+			return itemRow
+		}
 	})
 	return (
 		<div
