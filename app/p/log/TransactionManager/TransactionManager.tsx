@@ -43,8 +43,8 @@ export function TransactionManager() {
 	const [counter, setCounter] = useState(0)
 
 	const transactionRowsRef = useRef<TransactionRowsRef>({})
-	const setTransactionRowRef = (key: string) => (node: HTMLInputElement | null) => {
-		if (node) transactionRowsRef.current[key] = node
+	const setTransactionRowRef = (transaction_id: string) => (node: HTMLInputElement) => {
+		transactionRowsRef.current[transaction_id] = node
 	}
 
 	// previous foldState is needed to detect when it actually changes between animations (to play animation)

@@ -25,6 +25,8 @@ export interface MultiRowProps {
 	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 
+export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
+
 export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwardedRef) => {
 	const columnNodesRef = useRef<(HTMLDivElement | null)[]>([])
 	const addToColumnNodesRef = (node: HTMLDivElement) => {
@@ -32,6 +34,21 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 			columnNodesRef.current.push(node)
 		}
 	}
+
+	const itemRowsRef = useRef<ItemRowRefs>([])
+	const addToItemRowsRef = (item_id: string) => (node: HTMLDivElement) => {
+		if (node !== null) {
+			const itemRowRefIndex = itemRowsRef.current.findIndex(
+				(ref) => ref.item_id === item_id
+			)
+			if (itemRowRefIndex === -1) {
+				itemRowsRef.current.push({ item_id, cells: [node] })
+			} else {
+				itemRowsRef.current[itemRowRefIndex].cells.push(node)
+			}
+		}
+	}
+	itemRowsRef.current = []
 
 	const uniqueCategories = useMemo(() => {
 		const arr: string[] = []
@@ -81,14 +98,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 		return render.cancel
 	}, [props.folded, props.playAnimation])
 
+	console.log('re-render')
 	let sum = 0
 	const itemRows = props.transaction.items.map((item, itemIndex) => {
 		sum += item.amount
-
-		// moved extensive reorder logic to separate file
-		function handleReorderMouseDown(e: React.MouseEvent<HTMLInputElement>) {
-			handleItemReorder(e, item, itemIndex, props.transaction, props.onItemReorder)
-		}
 
 		return [
 			<div
@@ -96,10 +109,17 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
 				key={`${props.transaction.id}-${item.id}-1`}
+				ref={addToItemRowsRef(item.id)}
 			>
 				<div
 					className={s.reorder_grabber}
-					onMouseDown={handleReorderMouseDown}
+					onMouseDown={handleItemReorder(
+						item,
+						itemRowsRef.current,
+						itemIndex,
+						props.transaction,
+						props.onItemReorder
+					)}
 					title='Grab and drag to reposition this item'
 				>
 					<ReorderIcon />
@@ -110,6 +130,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
 				key={`${props.transaction.id}-${item.id}-2`}
+				ref={addToItemRowsRef(item.id)}
 			>
 				<JDatePicker value={props.transaction.date} disabled minimalStyle />
 			</div>,
@@ -118,6 +139,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
 				key={`${props.transaction.id}-${item.id}-3`}
+				ref={addToItemRowsRef(item.id)}
 			>
 				<JInput value={item.name} />
 			</div>,
@@ -126,6 +148,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
 				key={`${props.transaction.id}-${item.id}-4`}
+				ref={addToItemRowsRef(item.id)}
 			>
 				<JNumberAccounting
 					value={item.amount}
@@ -137,6 +160,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
 				key={`${props.transaction.id}-${item.id}-5`}
+				ref={addToItemRowsRef(item.id)}
 			>
 				<JDropdown
 					options={props.dropdownOptionsCategory}
@@ -148,6 +172,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 				data-parent_id={props.transaction.id}
 				data-item_id={item.id}
 				key={`${props.transaction.id}-${item.id}-7`}
+				ref={addToItemRowsRef(item.id)}
 			>
 				<JDropdown
 					options={props.dropdownOptionsAccount}
