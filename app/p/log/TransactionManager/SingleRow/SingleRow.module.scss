@@ -1,0 +1,62 @@
+.container {
+	display: contents;
+
+	.cell_container {
+		width: 100%;
+		box-sizing: border-box; // have to use border-box to prevent form element overlaps
+		--padding-val: 2.5px;
+		--margin-top: 10px;
+		--border-radius: 5px;
+
+		&.margin_above {
+			margin-top: var(--gap-row-height);
+		}
+
+		background-color: var(--bg-color-lighter-2);
+		padding: calc(var(--padding-val) * 2) var(--padding-val);
+		height: calc(36px + (var(--padding-val) * 4));
+		&.first_col {
+			padding-left: calc(var(--padding-val) * 2);
+			border-radius: var(--border-radius) 0 0 var(--border-radius);
+		}
+		&.last_col {
+			padding-right: calc(var(--padding-val) * 2);
+			border-radius: 0 var(--border-radius) var(--border-radius) 0;
+		}
+
+		&.row_controller {
+			min-height: 35px;
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			user-select: none;
+			width: 100%;
+			padding: 0 10px;
+			background-color: transparent;
+
+			.reorder_grabber {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: var(--font-color);
+				height: min-content;
+				transition: scale 0.1s ease, color 0.1s ease;
+				svg {
+					height: 20px;
+					width: 20px;
+				}
+				cursor: grab;
+				&:hover {
+					scale: 120%;
+				}
+				&:active {
+					scale: 100%;
+					cursor: grabbing;
+				}
+			}
+			&.changed > .reorder_grabber {
+				color: var(--font-color-changed);
+			}
+		}
+	}
+}

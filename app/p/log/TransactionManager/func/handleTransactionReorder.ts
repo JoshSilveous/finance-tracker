@@ -1,6 +1,6 @@
 import { FetchedTransaction } from '@/database'
 import s from '../TransactionManager.module.scss'
-import genMultiRowStyles from './genMultiRow/genMultiRow.module.scss'
+import genMultiRowStyles from '../MultiRow/MultiRow.module.scss'
 import genSingleRowStyles from './genSingleRow/genSingleRow.module.scss'
 import { typedQuerySelectAll, delay } from '@/utils'
 

@@ -1,0 +1,168 @@
+.container {
+	display: contents;
+	.column {
+		--padding-val: 5px;
+		--margin-top: 10px;
+		--border-radius: 5px;
+		width: 100%;
+		padding-top: var(--padding-val);
+		padding-bottom: var(--padding-val);
+		padding-left: calc(var(--padding-val) / 2);
+		padding-right: calc(var(--padding-val) / 2);
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding-val);
+
+		&.margin_above {
+			margin-top: var(--gap-row-height);
+		}
+
+		.cell_container {
+			width: 100%;
+			box-sizing: border-box; // have to use border-box to prevent form element overlaps
+			background-color: var(--bg-color-lighter-2);
+		}
+
+		&:not(.control) {
+			background-color: var(--bg-color-lighter-2);
+			&.date {
+				padding-left: var(--padding-val);
+				border-top-left-radius: var(--border-radius);
+				border-bottom-left-radius: var(--border-radius);
+			}
+			&.account {
+				padding-right: var(--padding-val);
+				border-top-right-radius: var(--border-radius);
+				border-bottom-right-radius: var(--border-radius);
+			}
+		}
+		&.control {
+			padding: var(--padding-val) 0;
+			.cell_container {
+				min-height: 36px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				user-select: none;
+				width: 100%;
+				padding: var(--padding-val) calc(var(--padding-val) * 2);
+				background-color: transparent;
+				&:not(.first_row) {
+					justify-content: flex-end;
+				}
+
+				.fold_toggle {
+					display: flex;
+					margin-right: 3.5px;
+					align-items: center;
+					justify-content: center;
+					color: var(--font-color);
+					height: min-content;
+					&.folded {
+						transform: rotate(0deg);
+					}
+					&:not(.folded) {
+						transform: rotate(-180deg);
+					}
+					svg {
+						height: 15px;
+						width: 15px;
+					}
+					cursor: pointer;
+					&:hover {
+						scale: 120%;
+					}
+					&:active {
+						scale: 100%;
+						cursor: grabbing;
+					}
+				}
+
+				.reorder_grabber {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					color: var(--font-color);
+					transition: scale 0.1s ease, color 0.1s ease;
+					svg {
+						height: 20px;
+						width: 20px;
+					}
+					cursor: grab;
+					&:hover {
+						scale: 120%;
+					}
+					&:active {
+						scale: 100%;
+						cursor: grabbing;
+					}
+				}
+				&.changed > .reorder_grabber {
+					color: var(--font-color-changed);
+				}
+			}
+		}
+
+		/* POPPED-OUT ROW STYLES */
+		.cell_container.popped_out {
+			padding: var(--padding-val) calc(var(--padding-val) / 2);
+			display: flex;
+			position: fixed;
+			z-index: 999;
+			box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+		}
+		&.control .cell_container.popped_out {
+			box-shadow: none;
+			filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
+		}
+		&.date .cell_container.popped_out {
+			padding-left: var(--padding-val);
+			border-top-left-radius: var(--border-radius);
+			border-bottom-left-radius: var(--border-radius);
+		}
+		&.account .cell_container.popped_out {
+			padding-right: var(--padding-val);
+			border-top-right-radius: var(--border-radius);
+			border-bottom-right-radius: var(--border-radius);
+		}
+		&.control .cell_container.popped_out {
+			background-color: transparent;
+			padding-top: calc(var(--padding-val) * 3);
+			padding-right: calc(var(--padding-val) * 2.5);
+		}
+		&.date .cell_container.popped_out {
+			width: calc(100% + calc(var(--padding-val) * 3));
+		}
+
+		/* RE-ORDERING ROW EFFECT STYLES */
+		--margin-gap-size: calc(36px + var(--padding-val));
+		.transitions {
+			transition: margin 0.2s ease;
+		}
+		.margin_top {
+			margin-top: calc(var(--margin-gap-size) / 2);
+		}
+		.margin_bottom {
+			margin-bottom: calc(var(--margin-gap-size) / 2);
+		}
+		.margin_top_double {
+			margin-top: var(--margin-gap-size);
+		}
+		.margin_bottom_double {
+			margin-bottom: var(--margin-gap-size);
+		}
+
+		/* FOLDING / UNFOLDING EFFECT STYLES */
+		overflow-y: hidden;
+		--fold-animation-time: 0.5s; // set in createFoldToggleHandler.ts as well
+		&.folded {
+			.cell_container:not(.first_row) {
+				display: none;
+			}
+		}
+		.fold_toggle {
+			transition: scale 0.1s ease, color 0.1s ease,
+				transform var(--fold-animation-time) ease;
+		}
+	}
+}

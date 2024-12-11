@@ -9,6 +9,8 @@ import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRo
 import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
 import { handleTransactionReorderMouseDown } from './func/handleTransactionReorder'
 import { fetchAndLoadData } from './func/fetchAndLoadData'
+import { MultiRow } from './MultiRow/MultiRow'
+import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
 
 export interface LoadState {
 	loading: boolean
@@ -211,7 +213,7 @@ export function TransactionManager() {
 			sortedAndGroupedData.forEach((groupItem) => {
 				groupItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
-						const props: GenSingleRowProps = {
+						const props: SingleRowProps = {
 							transaction,
 							placeMarginAbove: index !== 0,
 							dropdownOptionsCategory,
@@ -226,7 +228,7 @@ export function TransactionManager() {
 								)
 							},
 						}
-						cells.push(genSingleRow(props))
+						cells.push(<SingleRow {...props} />)
 					} else {
 						const sortedItemOrder = currentSortOrder.find(
 							(sortItem) =>
@@ -275,7 +277,7 @@ export function TransactionManager() {
 							},
 						}
 
-						cells.push(genMultiRow(props))
+						cells.push(<MultiRow {...props} />)
 					}
 				})
 			})
