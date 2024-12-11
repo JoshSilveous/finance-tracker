@@ -21,9 +21,18 @@ export interface FoldState {
 	folded: boolean
 }
 export type SortOrderItem = string | string[]
-export type TransactionRowRef = {
+export type TransactionRowsRef = {
 	[key: string]: HTMLDivElement | null
 }
+export type NewFoldState = {
+	[key: string]: boolean
+}
+/**
+ * Used to update a specific transaction's `foldState` in a concise way.
+ * @param transaction_id
+ * @param folded the value to set the `foldState` to. Leave undefined to toggle.
+ */
+export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
 
 export function TransactionManager() {
 	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
@@ -37,17 +46,28 @@ export function TransactionManager() {
 	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [counter, setCounter] = useState(0)
 
-	const transactionRowsRef = useRef<TransactionRowRef>({})
+	const transactionRowsRef = useRef<TransactionRowsRef>({})
 	const setTransactionRowRef = (key: string) => (node: HTMLInputElement | null) => {
 		if (node) transactionRowsRef.current[key] = node
 	}
 
-	// previous foldOrder is needed to detect when it actually changes between animations (to play animation)
-	const [foldStateArr, setFoldStateArr] = useState<FoldState[]>([])
-	const prevFoldStateRef = useRef<FoldState[] | null>(null)
+	// previous foldState is needed to detect when it actually changes between animations (to play animation)
+	const [foldState, setFoldState] = useState<NewFoldState>({})
+	const prevFoldStateRef = useRef<NewFoldState>({})
 	useEffect(() => {
-		prevFoldStateRef.current = foldStateArr
-	}, [foldStateArr])
+		prevFoldStateRef.current = foldState
+	}, [foldState])
+	/**
+	 * See {@link FoldStateUpdater}
+	 */
+	const updateFoldState: FoldStateUpdater = (transaction_id, folded) => {
+		setFoldState((prev) => {
+			const newState = structuredClone(prev)
+			newState[transaction_id] =
+				folded !== undefined ? folded : !newState[transaction_id]
+			return newState
+		})
+	}
 
 	useEffect(() => {
 		fetchAndLoadData(
@@ -55,7 +75,7 @@ export function TransactionManager() {
 			setData,
 			setDefaultSortOrder,
 			setCurrentSortOrder,
-			setFoldStateArr,
+			setFoldState,
 			setCategories,
 			setAccounts
 		)
@@ -230,8 +250,8 @@ export function TransactionManager() {
 									index,
 									updateTransactionSortOrder,
 									transactionRowsRef,
-									foldStateArr,
-									setFoldStateArr
+									foldState,
+									updateFoldState
 								)
 							},
 						}
@@ -261,20 +281,14 @@ export function TransactionManager() {
 							onItemReorder: (oldIndex, newIndex) => {
 								updateItemSortOrder(transaction.id, oldIndex, newIndex)
 							},
-							folded: foldStateArr.find(
-								(item) => item.transaction_id === transaction.id
-							)!.folded,
+							folded: foldState[transaction.id],
 							playAnimation:
-								prevFoldStateRef.current !== null
-									? foldStateArr.find(
-											(item) => item.transaction_id === transaction.id
-									  )!.folded !==
-									  prevFoldStateRef.current!.find(
-											(item) => item.transaction_id === transaction.id
-									  )!.folded
-									: false,
+								prevFoldStateRef.current[transaction.id] === undefined
+									? false
+									: prevFoldStateRef.current[transaction.id] !==
+									  foldState[transaction.id],
 							placeMarginAbove: index !== 0,
-							setFoldStateArr,
+							updateFoldState,
 							onTransactionReorderMouseDown: (
 								e: React.MouseEvent<HTMLDivElement>
 							) => {
@@ -285,8 +299,8 @@ export function TransactionManager() {
 									index,
 									updateTransactionSortOrder,
 									transactionRowsRef,
-									foldStateArr,
-									setFoldStateArr
+									foldState,
+									updateFoldState
 								)
 							},
 						}

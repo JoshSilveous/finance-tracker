@@ -2,7 +2,12 @@ import { FetchedTransaction } from '@/database'
 import s from '../TransactionManager.module.scss'
 import { delay } from '@/utils'
 import { Dispatch, MutableRefObject, SetStateAction } from 'react'
-import { FoldState, TransactionRowRef } from '../TransactionManager'
+import {
+	FoldState,
+	FoldStateUpdater,
+	NewFoldState,
+	TransactionRowsRef,
+} from '../TransactionManager'
 
 export function handleTransactionReorderMouseDown(
 	e: React.MouseEvent<HTMLDivElement>,
@@ -10,9 +15,12 @@ export function handleTransactionReorderMouseDown(
 	transaction: FetchedTransaction,
 	transactionIndex: number,
 	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
-	transactionRowsRef: MutableRefObject<TransactionRowRef>,
-	foldStateArr: FoldState[],
-	setFoldStateArr: Dispatch<SetStateAction<FoldState[]>>
+	transactionRowsRef: MutableRefObject<TransactionRowsRef>,
+	foldState: NewFoldState,
+	/**
+	 * See {@link FoldStateUpdater}
+	 */
+	updateFoldState: FoldStateUpdater
 ) {
 	console.log('length:', Object.keys(transactionRowsRef.current).length)
 	function getTransactionRow(transaction: FetchedTransaction) {
@@ -27,18 +35,9 @@ export function handleTransactionReorderMouseDown(
 	const thisRow = getTransactionRow(transaction)
 
 	let forceFolded = false
-	if (transaction.items.length > 1) {
-		const foldStateIndex = foldStateArr.findIndex(
-			(item) => item.transaction_id === transaction.id
-		)
-		if (foldStateIndex !== -1 && foldStateArr[foldStateIndex].folded === false) {
-			setFoldStateArr((prev) => {
-				const newArr = structuredClone(prev)
-				newArr[foldStateIndex].folded = true
-				return newArr
-			})
-			forceFolded = true
-		}
+	if (transaction.items.length > 1 && foldState[transaction.id] !== true) {
+		updateFoldState(transaction.id, true)
+		forceFolded = true
 	}
 
 	const allRows = allTransactions.map((transaction) => getTransactionRow(transaction))
@@ -170,14 +169,7 @@ export function handleTransactionReorderMouseDown(
 		}
 
 		if (forceFolded) {
-			const foldStateIndex = foldStateArr.findIndex(
-				(item) => item.transaction_id === transaction.id
-			)
-			setFoldStateArr((prev) => {
-				const newArr = structuredClone(prev)
-				newArr[foldStateIndex].folded = false
-				return newArr
-			})
+			updateFoldState(transaction.id, false)
 		}
 	}
 	window.addEventListener('mousemove', handleReorderMouseMove)

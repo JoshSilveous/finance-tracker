@@ -3,7 +3,7 @@ import { FetchedTransaction } from '@/database'
 import { Dispatch, SetStateAction, useMemo, useRef, forwardRef, useEffect } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
-import { FoldState } from '../TransactionManager'
+import { FoldState, FoldStateUpdater, NewFoldState } from '../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
@@ -18,9 +18,13 @@ export interface MultiRowProps {
 	onItemReorder: (oldIndex: number, newIndex: number) => void
 	folded: boolean
 	playAnimation: boolean
-	setFoldStateArr: Dispatch<SetStateAction<FoldState[]>>
+	/**
+	 * See {@link FoldStateUpdater}
+	 */
+	updateFoldState: FoldStateUpdater
 	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 }
+
 export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwardedRef) => {
 	const columnNodesRef = useRef<(HTMLDivElement | null)[]>([])
 	const addToColumnNodesRef = (node: HTMLDivElement) => {
@@ -76,17 +80,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 		// runs when this component unmounts to prevent animation bugs (e.x. when a multi-row is reordered)
 		return render.cancel
 	}, [props.folded, props.playAnimation])
-
-	function handleFoldClick() {
-		props.setFoldStateArr((prev) => {
-			const newArr = structuredClone(prev)
-			const thisItemIndex = newArr.findIndex(
-				(item) => item.transaction_id === props.transaction.id
-			)
-			newArr[thisItemIndex].folded = !newArr[thisItemIndex].folded
-			return newArr
-		})
-	}
 
 	let sum = 0
 	const itemRows = props.transaction.items.map((item, itemIndex) => {
@@ -180,7 +173,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 			<div
 				className={`${s.fold_toggle} ${props.folded ? s.folded : ''}`}
 				data-transaction_id={props.transaction.id}
-				onClick={handleFoldClick}
+				onClick={() => props.updateFoldState(props.transaction.id)}
 				title={props.folded ? 'Click to reveal items' : 'Click to hide items'}
 			>
 				<FoldArrow />

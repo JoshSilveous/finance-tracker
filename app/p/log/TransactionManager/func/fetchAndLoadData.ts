@@ -9,14 +9,14 @@ import {
 } from '@/database'
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
-import { FoldState, LoadState, SortOrderItem } from '../TransactionManager'
+import { FoldState, LoadState, NewFoldState, SortOrderItem } from '../TransactionManager'
 
 export async function fetchAndLoadData(
 	setLoadState: Dispatch<SetStateAction<LoadState>>,
 	setData: Dispatch<SetStateAction<FetchedTransaction[] | null>>,
 	setDefaultSortOrder: Dispatch<SetStateAction<SortOrderItem[] | null>>,
 	setCurrentSortOrder: Dispatch<SetStateAction<SortOrderItem[] | null>>,
-	setFoldStateArr: Dispatch<SetStateAction<FoldState[]>>,
+	setFoldState: Dispatch<SetStateAction<NewFoldState>>,
 	setCategories: Dispatch<SetStateAction<FetchedCategory[] | null>>,
 	setAccounts: Dispatch<SetStateAction<FetchedAccount[] | null>>
 ) {
@@ -34,14 +34,15 @@ export async function fetchAndLoadData(
 		})
 		setDefaultSortOrder(fetchedSortOrder)
 		setCurrentSortOrder(fetchedSortOrder)
-		setFoldStateArr(
-			fetchedSortOrder.map((item) => {
-				return {
-					transaction_id: Array.isArray(item) ? item[0] : item,
-					folded: false,
+		setFoldState(() => {
+			const foldState: NewFoldState = {}
+			transactionData.forEach((transaction) => {
+				if (transaction.items.length > 1) {
+					foldState[transaction.id] = false
 				}
 			})
-		)
+			return foldState
+		})
 
 		setLoadState({ loading: true, message: 'Fetching Category Data' })
 		const categoryData = await fetchCategoryData()
