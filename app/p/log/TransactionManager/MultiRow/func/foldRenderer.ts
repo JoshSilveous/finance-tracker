@@ -1,4 +1,4 @@
-import { delay, typedQuerySelectAll } from '@/utils'
+import { delay } from '@/utils'
 import s from '../MultiRow.module.scss'
 
 /**
@@ -55,12 +55,8 @@ export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: stri
 	}
 
 	function unfoldAnimated() {
-		const cells = typedQuerySelectAll<HTMLDivElement>(
-			`.${s.column}.${s.date}[data-transaction_id="${transaction_id}"] > .${s.cell_container}`
-		)
-		const firstRowHeight = document.querySelector(
-			`.${s.first_row}[data-transaction_id="${transaction_id}"]`
-		)!.clientHeight
+		const cells = Array.from(columnNodes[1].children) as HTMLDivElement[]
+		const firstRowHeight = cells[0].clientHeight
 
 		columnNodes.forEach((col) => {
 			col.classList.remove(s.folded)

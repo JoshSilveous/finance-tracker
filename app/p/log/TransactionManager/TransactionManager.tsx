@@ -5,9 +5,7 @@ import { moveItemInArray, removeFromArray } from '@/utils'
 import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { genSingleRow, GenSingleRowProps } from './func/genSingleRow/genSingleRow'
-import { genMultiRow, GenMultiRowProps } from './func/genMultiRow/genMultiRow'
-import { handleTransactionReorderMouseDown } from './func/handleTransactionReorder'
+import { handleTransactionReorder } from './func/handleTransactionReorder'
 import { fetchAndLoadData } from './func/fetchAndLoadData'
 import { MultiRow, MultiRowProps } from './MultiRow/MultiRow'
 import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
@@ -238,18 +236,15 @@ export function TransactionManager() {
 							placeMarginAbove: index !== 0,
 							dropdownOptionsCategory,
 							dropdownOptionsAccount,
-							onResortMouseDown: (e) => {
-								handleTransactionReorderMouseDown(
-									e,
-									sortedData,
-									transaction,
-									index,
-									updateTransactionSortOrder,
-									transactionRowsRef,
-									foldState[transaction.id],
-									updateFoldState
-								)
-							},
+							onResortMouseDown: handleTransactionReorder(
+								sortedData,
+								transaction,
+								index,
+								updateTransactionSortOrder,
+								transactionRowsRef,
+								foldState[transaction.id],
+								updateFoldState
+							),
 						}
 						cells.push(
 							<SingleRow
@@ -285,20 +280,15 @@ export function TransactionManager() {
 									  foldState[transaction.id],
 							placeMarginAbove: index !== 0,
 							updateFoldState,
-							onTransactionReorderMouseDown: (
-								e: React.MouseEvent<HTMLDivElement>
-							) => {
-								handleTransactionReorderMouseDown(
-									e,
-									sortedData,
-									transaction,
-									index,
-									updateTransactionSortOrder,
-									transactionRowsRef,
-									foldState[transaction.id],
-									updateFoldState
-								)
-							},
+							onTransactionReorderMouseDown: handleTransactionReorder(
+								sortedData,
+								transaction,
+								index,
+								updateTransactionSortOrder,
+								transactionRowsRef,
+								foldState[transaction.id],
+								updateFoldState
+							),
 						}
 
 						cells.push(

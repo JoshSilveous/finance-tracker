@@ -1,6 +1,6 @@
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { FetchedTransaction } from '@/database'
-import { useMemo, useRef, forwardRef, useEffect } from 'react'
+import { useMemo, useRef, forwardRef, useEffect, useCallback } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { FoldStateUpdater } from '../TransactionManager'
@@ -29,26 +29,29 @@ export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
 
 export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwardedRef) => {
 	const columnNodesRef = useRef<(HTMLDivElement | null)[]>([])
-	const addToColumnNodesRef = (node: HTMLDivElement) => {
+	const addToColumnNodesRef = useCallback((node: HTMLDivElement) => {
 		if (node && !columnNodesRef.current.includes(node)) {
 			columnNodesRef.current.push(node)
 		}
-	}
+	}, [])
 
 	const itemRowsRef = useRef<ItemRowRefs>([])
-	const addToItemRowsRef = (item_id: string) => (node: HTMLDivElement) => {
-		if (node !== null) {
-			const itemRowRefIndex = itemRowsRef.current.findIndex(
-				(ref) => ref.item_id === item_id
-			)
-			if (itemRowRefIndex === -1) {
-				itemRowsRef.current.push({ item_id, cells: [node] })
-			} else {
-				itemRowsRef.current[itemRowRefIndex].cells.push(node)
+	const addToItemRowsRef = useCallback(
+		(item_id: string) => (node: HTMLDivElement) => {
+			if (node !== null) {
+				const itemRowRefIndex = itemRowsRef.current.findIndex(
+					(ref) => ref.item_id === item_id
+				)
+				if (itemRowRefIndex === -1) {
+					itemRowsRef.current.push({ item_id, cells: [node] })
+				} else {
+					itemRowsRef.current[itemRowRefIndex].cells.push(node)
+				}
 			}
-		}
-	}
-	itemRowsRef.current = []
+		},
+		[]
+	)
+	itemRowsRef.current = [] // wipe refs every re-render
 
 	const uniqueCategories = useMemo(() => {
 		const arr: string[] = []
@@ -98,7 +101,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 		return render.cancel
 	}, [props.folded, props.playAnimation])
 
-	console.log('re-render')
 	let sum = 0
 	const itemRows = props.transaction.items.map((item, itemIndex) => {
 		sum += item.amount

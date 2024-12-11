@@ -24,11 +24,6 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>(
 		},
 		forwardedRef
 	) => {
-		useEffect(() => {
-			return () => {
-				console.log('component unmounted.')
-			}
-		}, [])
 		const transactionItem = transaction.items[0]
 
 		return (
