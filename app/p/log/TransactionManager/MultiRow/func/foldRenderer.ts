@@ -31,9 +31,13 @@ export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: stri
 	}
 
 	function foldAnimated() {
-		const firstRowHeight = document.querySelector(
-			`.${s.first_row}[data-transaction_id="${transaction_id}"]`
-		)!.clientHeight
+		// columnNodes[1] is arbitrary, any columnNode will do
+		const cells = Array.from(columnNodes[1].children) as HTMLDivElement[]
+		const firstRowHeight =
+			parseInt(getComputedStyle(cells[0]).height) +
+			parseInt(getComputedStyle(columnNodes[1]).paddingTop) +
+			parseInt(getComputedStyle(columnNodes[1]).paddingBottom)
+
 		columnNodes.forEach(async (col) => {
 			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
 			const colStyle = getComputedStyle(col)
@@ -55,8 +59,9 @@ export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: stri
 	}
 
 	function unfoldAnimated() {
+		// columnNodes[1] is arbitrary, any columnNode will do
 		const cells = Array.from(columnNodes[1].children) as HTMLDivElement[]
-		const firstRowHeight = cells[0].clientHeight
+		const startingHeight = parseInt(getComputedStyle(columnNodes[1]).height)
 
 		columnNodes.forEach((col) => {
 			col.classList.remove(s.folded)
@@ -68,14 +73,15 @@ export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: stri
 		cells.forEach((cell) => {
 			fullColHeight += cell.clientHeight
 		})
-		const gapSize = parseInt(getComputedStyle(columnNodes[0]).gap)
-		fullColHeight += (cells.length - 1) * gapSize
+		const colStyle = getComputedStyle(columnNodes[0])
+		fullColHeight += (cells.length - 1) * parseInt(colStyle.gap)
+		fullColHeight += parseInt(colStyle.paddingTop)
+		fullColHeight += parseInt(colStyle.paddingBottom)
 
 		// apply new height animation
 		columnNodes.forEach(async (col) => {
 			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
-			const startingHeight = firstRowHeight + 'px'
-			col.style.height = startingHeight
+			col.style.height = startingHeight + 'px'
 			await delay(10)
 			if (cancelled) {
 				return
