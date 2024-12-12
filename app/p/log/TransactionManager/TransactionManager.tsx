@@ -9,6 +9,7 @@ import { handleTransactionReorder } from './func/handleTransactionReorder'
 import { fetchAndLoadData } from './func/fetchAndLoadData'
 import { MultiRow, MultiRowProps } from './MultiRow/MultiRow'
 import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
+import { DateRow } from './DateRow/DateRow'
 
 export interface LoadState {
 	loading: boolean
@@ -229,8 +230,9 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			sortedAndGroupedData.forEach((groupItem) => {
-				groupItem.transactions.forEach((transaction, index) => {
+			sortedAndGroupedData.forEach((groupedItem) => {
+				cells.push(<DateRow date={groupedItem.date} />)
+				groupedItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
 						const props: SingleRowProps = {
 							transaction,
