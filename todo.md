@@ -1,5 +1,7 @@
 -   TransactionManager
 
+    -   Make margins when resorting fit row size exactly ( + use linear transitions for less wobbling)
+    -   Make Transaction resorting limited to the row
     -   Add control to resort rows
     -   Add control to delete rows
     -   Add control to delete transaction items
