@@ -16,6 +16,9 @@ export interface LoadState {
 	message: string
 }
 export type SortOrderItem = string | string[]
+export type SortOrder = {
+	[date: string]: SortOrderItem[]
+}
 export type TransactionRowsRef = {
 	[key: string]: HTMLDivElement | null
 }
@@ -39,6 +42,8 @@ export function TransactionManager() {
 	})
 	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
 	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
+	const [newDefaultSortOrder, setNewDefaultSortOrder] = useState<SortOrder>({})
+	const [newCurrentSortOrder, setNewCurrentSortOrder] = useState<SortOrder>({})
 	const [counter, setCounter] = useState(0)
 
 	const transactionRowsRef = useRef<TransactionRowsRef>({})
@@ -52,6 +57,31 @@ export function TransactionManager() {
 	useEffect(() => {
 		prevFoldStateRef.current = foldState
 	}, [foldState])
+
+	// used for testing new SortOrder system
+	useEffect(() => {
+		console.log('new sort order update!', readableSortOrder(newCurrentSortOrder))
+	}, [newCurrentSortOrder])
+	function readableSortOrder(sortOrder: SortOrder) {
+		const debugDisplaySortOrder: SortOrder = {}
+		Object.entries(sortOrder).forEach((item) => {
+			debugDisplaySortOrder[item[0]] = item[1].map((item) => {
+				if (Array.isArray(item)) {
+					const thisTrans = data!.find((trans) => trans.id === item[0])!
+					const otherItems = structuredClone(item)
+					otherItems.shift()
+					const otherItemsNamed = otherItems.map((item) => {
+						return thisTrans.items.find((it) => it.id === item)?.name!
+					})
+					return [thisTrans!.name, ...otherItemsNamed]
+				} else {
+					const thisTrans = data?.find((trans) => trans.id === item)!
+					return thisTrans.name
+				}
+			})
+		})
+		return debugDisplaySortOrder
+	}
 	/**
 	 * See {@link FoldStateUpdater}
 	 */
@@ -72,7 +102,9 @@ export function TransactionManager() {
 			setCurrentSortOrder,
 			setFoldState,
 			setCategories,
-			setAccounts
+			setAccounts,
+			setNewDefaultSortOrder,
+			setNewCurrentSortOrder
 		)
 	}, [])
 
@@ -146,40 +178,52 @@ export function TransactionManager() {
 	}, [])
 
 	const updateItemSortOrder = useCallback(
-		(transaction_id: string, oldItemIndex: number, newItemIndex: number) => {
+		(transaction: FetchedTransaction, transactionIndex: number) =>
+			(oldItemIndex: number, newItemIndex: number) => {
+				setCurrentSortOrder((prev) => {
+					const newArr = structuredClone(prev) as SortOrderItem[]
+					const thisTransactionIndex = newArr.findIndex(
+						(item) => Array.isArray(item) && item[0] === transaction.id
+					)
+					const thisTransactionSortOrder = newArr[thisTransactionIndex] as string[]
+					moveItemInArray(
+						thisTransactionSortOrder,
+						oldItemIndex + 1,
+						newItemIndex + 1
+					)
+					return newArr
+				})
+				setNewCurrentSortOrder((prev) => {
+					const clone = structuredClone(prev)
+
+					const thisTransactionOrder = clone[transaction.date][
+						transactionIndex
+					] as string[]
+
+					moveItemInArray(thisTransactionOrder, oldItemIndex + 1, newItemIndex + 1)
+
+					return clone
+				})
+			},
+		[]
+	)
+	const updateTransactionSortOrder = useCallback(
+		(date: string) => (oldIndex: number, newIndex: number) => {
 			setCurrentSortOrder((prev) => {
 				const newArr = structuredClone(prev) as SortOrderItem[]
-				const thisTransactionIndex = newArr.findIndex(
-					(item) => Array.isArray(item) && item[0] === transaction_id
-				)
-				const thisTransactionSortOrder = newArr[thisTransactionIndex] as string[]
-				moveItemInArray(thisTransactionSortOrder, oldItemIndex + 1, newItemIndex + 1)
+				moveItemInArray(newArr, oldIndex, newIndex)
 				return newArr
+			})
+			setNewCurrentSortOrder((prev) => {
+				const clone = structuredClone(prev)
+
+				moveItemInArray(clone[date], oldIndex, newIndex)
+
+				return clone
 			})
 		},
 		[]
 	)
-	const updateTransactionSortOrder = useCallback((oldIndex: number, newIndex: number) => {
-		setCurrentSortOrder((prev) => {
-			const newArr = structuredClone(prev) as SortOrderItem[]
-			moveItemInArray(newArr, oldIndex, newIndex)
-			return newArr
-		})
-	}, [])
-
-	const sortedData = useMemo(() => {
-		if (data === null || currentSortOrder === null) {
-			return null
-		} else {
-			return currentSortOrder!.map((sortedID) => {
-				if (Array.isArray(sortedID)) {
-					return data!.find((item) => item.id === sortedID[0])!
-				} else {
-					return data!.find((item) => item.id === sortedID)!
-				}
-			})
-		}
-	}, [data, currentSortOrder])
 
 	const sortedAndGroupedData = useMemo(() => {
 		if (data === null || currentSortOrder === null) {
@@ -204,9 +248,21 @@ export function TransactionManager() {
 					grouped[thisDateIndex].transactions.push(transaction)
 				}
 			})
+			console.log(newCurrentSortOrder)
+			console.log(Object.entries(newCurrentSortOrder))
 			return grouped
 		}
 	}, [data, currentSortOrder])
+
+	const newSortedAndGroupedData = useMemo(() => {
+		if (data === null || newCurrentSortOrder === null) {
+			return null
+		} else {
+			const entries = Object.entries(newCurrentSortOrder)
+
+			console.log(entries)
+		}
+	}, [data, newCurrentSortOrder])
 
 	let grid: ReactNode
 
@@ -216,10 +272,9 @@ export function TransactionManager() {
 		accounts !== null &&
 		defaultSortOrder !== null &&
 		currentSortOrder !== null &&
-		sortedData !== null &&
 		sortedAndGroupedData !== null
 	) {
-		if (sortedData.length === 0) {
+		if (sortedAndGroupedData.length === 0) {
 			grid = (
 				<p>
 					You do not have any transactions, click "Create new transaction" below to
@@ -242,7 +297,7 @@ export function TransactionManager() {
 								groupedItem.transactions,
 								transaction,
 								index,
-								updateTransactionSortOrder,
+								updateTransactionSortOrder(groupedItem.date),
 								transactionRowsRef,
 								foldState[transaction.id],
 								updateFoldState
@@ -271,9 +326,7 @@ export function TransactionManager() {
 							transaction: transactionSorted,
 							dropdownOptionsCategory: dropdownOptionsCategory,
 							dropdownOptionsAccount: dropdownOptionsAccount,
-							onItemReorder: (oldIndex, newIndex) => {
-								updateItemSortOrder(transaction.id, oldIndex, newIndex)
-							},
+							onItemReorder: updateItemSortOrder(transaction, index),
 							folded: foldState[transaction.id],
 							playAnimation:
 								prevFoldStateRef.current[transaction.id] === undefined
@@ -286,7 +339,7 @@ export function TransactionManager() {
 								groupedItem.transactions,
 								transaction,
 								index,
-								updateTransactionSortOrder,
+								updateTransactionSortOrder(groupedItem.date),
 								transactionRowsRef,
 								foldState[transaction.id],
 								updateFoldState
