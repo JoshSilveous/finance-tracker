@@ -7,10 +7,7 @@
 		--padding-val: 2.5px;
 		--margin-top: 10px;
 		--border-radius: 5px;
-
-		&.margin_above {
-			margin-top: var(--gap-row-height);
-		}
+		margin-top: var(--gap-row-height);
 
 		background-color: var(--bg-color-lighter-2);
 		padding: calc(var(--padding-val) * 2) var(--padding-val);

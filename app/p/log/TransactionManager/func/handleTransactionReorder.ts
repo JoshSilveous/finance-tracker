@@ -6,7 +6,7 @@ import { FoldStateUpdater, TransactionRowsRef } from '../TransactionManager'
 
 export const handleTransactionReorder =
 	(
-		allTransactions: FetchedTransaction[],
+		otherTransactions: FetchedTransaction[],
 		transaction: FetchedTransaction,
 		transactionIndex: number,
 		updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
@@ -26,6 +26,12 @@ export const handleTransactionReorder =
 
 		const thisRowIndex = transactionIndex
 		const thisRow = getTransactionRow(transaction)
+		const allRows = otherTransactions.map((transaction) =>
+			getTransactionRow(transaction)
+		)
+		const otherRows = allRows.filter(
+			(item) => item[0].dataset['transaction_id'] !== transaction.id
+		)
 
 		let forceFolded = false
 		if (transaction.items.length > 1 && !folded) {
@@ -33,19 +39,38 @@ export const handleTransactionReorder =
 			forceFolded = true
 		}
 
-		const allRows = allTransactions.map((transaction) => getTransactionRow(transaction))
-		const otherRows = allRows.filter(
-			(item) => item[0].dataset['transaction_id'] !== transaction.id
-		)
-
 		const grabberNode = e.currentTarget as HTMLDivElement
 
 		const offsetX =
-			grabberNode.offsetWidth / 2 + grabberNode.offsetLeft + 2 - thisRow[0].offsetLeft
+			grabberNode.offsetWidth / 2 + grabberNode.offsetLeft - thisRow[0].offsetLeft
 		const offsetY =
-			grabberNode.offsetHeight / 2 + grabberNode.offsetTop + 2 - thisRow[0].offsetTop
+			grabberNode.offsetHeight / 2 + grabberNode.offsetTop + 8 - thisRow[0].offsetTop
 
-		const breakpoints = otherRows.map((row) => row[0].offsetTop)
+		const colStyle = getComputedStyle(thisRow[1])
+		const gapHeight = parseInt(colStyle.getPropertyValue('--gap-row-height'))
+
+		const originalRowHeight = parseInt(colStyle.height)
+		let calculatedRowHeight = 0
+		if (forceFolded) {
+			const firstRowCell = thisRow[1].children[0] as HTMLDivElement
+			calculatedRowHeight += firstRowCell.offsetHeight
+			calculatedRowHeight += parseInt(colStyle.paddingTop)
+			calculatedRowHeight += parseInt(colStyle.paddingBottom)
+		} else {
+			calculatedRowHeight = thisRow[1].offsetHeight
+		}
+
+		const breakpoints = otherRows.map((row, index) => {
+			if (forceFolded && index > thisRowIndex - 1) {
+				return (
+					row[0].offsetTop -
+					originalRowHeight +
+					calculatedRowHeight -
+					gapHeight / 2
+				)
+			}
+			return row[0].offsetTop - gapHeight / 2
+		})
 		breakpoints.push(
 			breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
 		)
@@ -53,7 +78,6 @@ export const handleTransactionReorder =
 		let leftOffset = 0
 		const startWidths = thisRow.map((item) => getComputedStyle(item).width)
 		thisRow.forEach((node, nodeIndex) => {
-			// not sure why calculating the width here isn't working. fix eventually
 			node.style.width = startWidths[nodeIndex]
 			node.style.left = `${e.clientX - offsetX + leftOffset}px`
 			node.style.top = `${e.clientY - offsetY}px`
@@ -65,7 +89,7 @@ export const handleTransactionReorder =
 		})
 
 		let firstRun = true
-		const marginSize = 50
+		const marginSize = calculatedRowHeight + gapHeight
 		function putMarginGapOnRow(rowIndex: number | 'none') {
 			// if ending the animation, remove transition effects
 			if (rowIndex === 'none') {
@@ -95,7 +119,7 @@ export const handleTransactionReorder =
 				})
 			}
 			// if hovering over last row
-			else if (rowIndex === allTransactions.length - 2) {
+			else if (rowIndex === otherTransactions.length - 2) {
 				otherRows.at(-1)!.forEach((node) => {
 					node.style.marginBottom = marginSize + 'px'
 				})

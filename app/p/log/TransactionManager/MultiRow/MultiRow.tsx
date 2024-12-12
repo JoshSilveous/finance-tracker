@@ -88,16 +88,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 		const render = foldRenderer(columnNodes, props.transaction.id)
 
 		if (props.folded && props.playAnimation) {
-			console.log('rendering foldAnimated -', props.transaction.name)
 			render.foldAnimated()
 		} else if (!props.folded && props.playAnimation) {
-			console.log('rendering unfoldAnimated -', props.transaction.name)
 			render.unfoldAnimated()
 		} else if (props.folded && !props.playAnimation) {
-			console.log('rendering fold -', props.transaction.name)
 			render.fold()
 		} else if (!props.folded && !props.playAnimation) {
-			console.log('rendering unfold -', props.transaction.name)
 			render.unfold()
 		}
 

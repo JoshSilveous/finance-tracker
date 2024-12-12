@@ -30,7 +30,6 @@ export type FoldState = {
 export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
 
 export function TransactionManager() {
-	console.log('transactionmanager re-render')
 	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
 	const [accounts, setAccounts] = useState<FetchedAccount[] | null>(null)
 	const [data, setData] = useState<FetchedTransaction[] | null>(null)
@@ -240,7 +239,7 @@ export function TransactionManager() {
 							dropdownOptionsCategory,
 							dropdownOptionsAccount,
 							onResortMouseDown: handleTransactionReorder(
-								sortedData,
+								groupedItem.transactions,
 								transaction,
 								index,
 								updateTransactionSortOrder,
@@ -284,7 +283,7 @@ export function TransactionManager() {
 							placeMarginAbove: index !== 0,
 							updateFoldState,
 							onTransactionReorderMouseDown: handleTransactionReorder(
-								sortedData,
+								groupedItem.transactions,
 								transaction,
 								index,
 								updateTransactionSortOrder,

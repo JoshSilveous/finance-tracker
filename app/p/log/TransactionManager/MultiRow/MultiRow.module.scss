@@ -13,10 +13,7 @@
 		flex-direction: column;
 		box-sizing: border-box;
 		gap: var(--padding-val);
-
-		&.margin_above {
-			margin-top: var(--gap-row-height);
-		}
+		margin-top: var(--gap-row-height);
 
 		.cell_container {
 			width: 100%;

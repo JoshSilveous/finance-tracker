@@ -65,7 +65,6 @@ export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: stri
 			parseInt(getComputedStyle(cells[0]).height) +
 			parseInt(getComputedStyle(columnNodes[1]).paddingTop) +
 			parseInt(getComputedStyle(columnNodes[1]).paddingBottom)
-		console.log('')
 
 		columnNodes.forEach((col) => {
 			col.classList.remove(s.folded)
@@ -82,9 +81,6 @@ export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: stri
 		fullColHeight += parseInt(colStyle.paddingTop)
 		fullColHeight += parseInt(colStyle.paddingBottom)
 
-		console.log('cells', cells)
-		console.log('firstRowHeight', firstRowHeight)
-		console.log('fullColHeight', fullColHeight)
 		// apply new height animation
 		columnNodes.forEach(async (col) => {
 			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
