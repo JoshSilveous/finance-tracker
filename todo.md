@@ -8,6 +8,8 @@
     -   Set up PendingChange system
     -   Set up history system
 
+    -   fix this bug https://imgur.com/NO91QLm
+
     -   !! NEED TO ALLOW STATE TO CONTROL FOLDED/UNFOLDED DIRECTLY FOR SORTORDER TO WORK
 
 -   Model how the transaction log will look / work

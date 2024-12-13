@@ -40,10 +40,8 @@ export function TransactionManager() {
 		loading: true,
 		message: 'Loading',
 	})
-	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrderItem[] | null>(null)
-	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrderItem[] | null>(null)
-	const [newDefaultSortOrder, setNewDefaultSortOrder] = useState<SortOrder>({})
-	const [newCurrentSortOrder, setNewCurrentSortOrder] = useState<SortOrder>({})
+	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrder>({})
+	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrder>({})
 	const [counter, setCounter] = useState(0)
 
 	const transactionRowsRef = useRef<TransactionRowsRef>({})
@@ -60,8 +58,8 @@ export function TransactionManager() {
 
 	// used for testing new SortOrder system
 	useEffect(() => {
-		console.log('new sort order update!', readableSortOrder(newCurrentSortOrder))
-	}, [newCurrentSortOrder])
+		// console.log('new sort order update!', readableSortOrder(newCurrentSortOrder))
+	}, [currentSortOrder])
 	function readableSortOrder(sortOrder: SortOrder) {
 		const debugDisplaySortOrder: SortOrder = {}
 		Object.entries(sortOrder).forEach((item) => {
@@ -98,13 +96,11 @@ export function TransactionManager() {
 		fetchAndLoadData(
 			setLoadState,
 			setData,
-			setDefaultSortOrder,
-			setCurrentSortOrder,
 			setFoldState,
 			setCategories,
 			setAccounts,
-			setNewDefaultSortOrder,
-			setNewCurrentSortOrder
+			setDefaultSortOrder,
+			setCurrentSortOrder
 		)
 	}, [])
 
@@ -181,19 +177,6 @@ export function TransactionManager() {
 		(transaction: FetchedTransaction, transactionIndex: number) =>
 			(oldItemIndex: number, newItemIndex: number) => {
 				setCurrentSortOrder((prev) => {
-					const newArr = structuredClone(prev) as SortOrderItem[]
-					const thisTransactionIndex = newArr.findIndex(
-						(item) => Array.isArray(item) && item[0] === transaction.id
-					)
-					const thisTransactionSortOrder = newArr[thisTransactionIndex] as string[]
-					moveItemInArray(
-						thisTransactionSortOrder,
-						oldItemIndex + 1,
-						newItemIndex + 1
-					)
-					return newArr
-				})
-				setNewCurrentSortOrder((prev) => {
 					const clone = structuredClone(prev)
 
 					const thisTransactionOrder = clone[transaction.date][
@@ -210,11 +193,6 @@ export function TransactionManager() {
 	const updateTransactionSortOrder = useCallback(
 		(date: string) => (oldIndex: number, newIndex: number) => {
 			setCurrentSortOrder((prev) => {
-				const newArr = structuredClone(prev) as SortOrderItem[]
-				moveItemInArray(newArr, oldIndex, newIndex)
-				return newArr
-			})
-			setNewCurrentSortOrder((prev) => {
 				const clone = structuredClone(prev)
 
 				moveItemInArray(clone[date], oldIndex, newIndex)
@@ -225,44 +203,37 @@ export function TransactionManager() {
 		[]
 	)
 
-	const sortedAndGroupedData = useMemo(() => {
+	const organizedData = useMemo(() => {
 		if (data === null || currentSortOrder === null) {
 			return null
 		} else {
-			const sortedData = currentSortOrder!.map((sortedID) => {
-				if (Array.isArray(sortedID)) {
-					return data!.find((item) => item.id === sortedID[0])!
-				} else {
-					return data!.find((item) => item.id === sortedID)!
-				}
-			})
-			let grouped: { date: string; transactions: FetchedTransaction[] }[] = []
-			sortedData.forEach((transaction) => {
-				const thisDateIndex = grouped.findIndex(
-					(item) => item.date === transaction.date
-				)
+			const entries = Object.entries(currentSortOrder)
+			const sortAndGrouped = entries.map((entry) => {
+				return {
+					date: entry[0],
+					transactions: entry[1].map((sortItem) => {
+						if (Array.isArray(sortItem)) {
+							const newItems: FetchedTransaction['items'] = []
+							const thisTransaction = data.find(
+								(item) => item.id === sortItem[0]
+							)!
 
-				if (thisDateIndex === -1) {
-					grouped.push({ date: transaction.date, transactions: [transaction] })
-				} else {
-					grouped[thisDateIndex].transactions.push(transaction)
+							sortItem.forEach((itemID, index) => {
+								if (index === 0) return
+								newItems.push(
+									thisTransaction.items.find((item) => item.id === itemID)!
+								)
+							})
+							return { ...thisTransaction, items: newItems }
+						} else {
+							return data.find((item) => item.id === sortItem)!
+						}
+					}),
 				}
 			})
-			console.log(newCurrentSortOrder)
-			console.log(Object.entries(newCurrentSortOrder))
-			return grouped
+			return sortAndGrouped
 		}
 	}, [data, currentSortOrder])
-
-	const newSortedAndGroupedData = useMemo(() => {
-		if (data === null || newCurrentSortOrder === null) {
-			return null
-		} else {
-			const entries = Object.entries(newCurrentSortOrder)
-
-			console.log(entries)
-		}
-	}, [data, newCurrentSortOrder])
 
 	let grid: ReactNode
 
@@ -272,9 +243,9 @@ export function TransactionManager() {
 		accounts !== null &&
 		defaultSortOrder !== null &&
 		currentSortOrder !== null &&
-		sortedAndGroupedData !== null
+		organizedData !== null
 	) {
-		if (sortedAndGroupedData.length === 0) {
+		if (organizedData.length === 0) {
 			grid = (
 				<p>
 					You do not have any transactions, click "Create new transaction" below to
@@ -284,8 +255,9 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			sortedAndGroupedData.forEach((groupedItem) => {
+			organizedData.forEach((groupedItem) => {
 				cells.push(<DateRow date={groupedItem.date} />)
+
 				groupedItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
 						const props: SingleRowProps = {
@@ -310,20 +282,8 @@ export function TransactionManager() {
 							/>
 						)
 					} else {
-						const sortedItemOrder = currentSortOrder.find(
-							(sortItem) =>
-								Array.isArray(sortItem) && sortItem[0] === transaction.id
-						) as string[]
-						const sortedItems = removeFromArray(sortedItemOrder, 0).map(
-							(item_id) => {
-								return transaction.items.find((item) => item.id === item_id)
-							}
-						) as FetchedTransaction['items']
-
-						const transactionSorted = { ...transaction, items: sortedItems }
-
 						const props: MultiRowProps = {
-							transaction: transactionSorted,
+							transaction: transaction,
 							dropdownOptionsCategory: dropdownOptionsCategory,
 							dropdownOptionsAccount: dropdownOptionsAccount,
 							onItemReorder: updateItemSortOrder(transaction, index),

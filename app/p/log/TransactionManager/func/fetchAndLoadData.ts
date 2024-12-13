@@ -14,28 +14,16 @@ import { FoldState, LoadState, SortOrder, SortOrderItem } from '../TransactionMa
 export async function fetchAndLoadData(
 	setLoadState: Dispatch<SetStateAction<LoadState>>,
 	setData: Dispatch<SetStateAction<FetchedTransaction[] | null>>,
-	setDefaultSortOrder: Dispatch<SetStateAction<SortOrderItem[] | null>>,
-	setCurrentSortOrder: Dispatch<SetStateAction<SortOrderItem[] | null>>,
 	setFoldState: Dispatch<SetStateAction<FoldState>>,
 	setCategories: Dispatch<SetStateAction<FetchedCategory[] | null>>,
 	setAccounts: Dispatch<SetStateAction<FetchedAccount[] | null>>,
-	setNewDefaultSortOrder: Dispatch<SetStateAction<SortOrder>>,
-	setNewCurrentSortOrder: Dispatch<SetStateAction<SortOrder>>
+	setDefaultSortOrder: Dispatch<SetStateAction<SortOrder>>,
+	setCurrentSortOrder: Dispatch<SetStateAction<SortOrder>>
 ) {
 	try {
 		setLoadState({ loading: true, message: 'Fetching Transaction Data' })
 		const transactionData = await fetchTransactionData()
 		setData(transactionData)
-
-		const fetchedSortOrder = transactionData.map((transaction) => {
-			if (transaction.items.length === 1) {
-				return transaction.id
-			} else {
-				return [transaction.id, ...transaction.items.map((item) => item.id)]
-			}
-		})
-		setDefaultSortOrder(fetchedSortOrder)
-		setCurrentSortOrder(fetchedSortOrder)
 
 		let groupedData: { date: string; transactions: FetchedTransaction[] }[] = []
 		transactionData.forEach((transaction) => {
@@ -50,8 +38,6 @@ export async function fetchAndLoadData(
 			}
 		})
 
-		console.log('groupedData:', groupedData)
-
 		// Get sort order
 		let sortOrder: SortOrder = {}
 		groupedData.forEach((groupItem) => {
@@ -63,8 +49,8 @@ export async function fetchAndLoadData(
 				}
 			})
 		})
-		setNewCurrentSortOrder(sortOrder)
-		setNewDefaultSortOrder(sortOrder)
+		setCurrentSortOrder(sortOrder)
+		setDefaultSortOrder(sortOrder)
 
 		setFoldState(() => {
 			const foldState: FoldState = {}
