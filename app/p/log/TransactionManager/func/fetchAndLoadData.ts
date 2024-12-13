@@ -1,7 +1,6 @@
 import {
 	fetchAccountData,
 	fetchCategoryData,
-	fetchCategoryTotals,
 	FetchedAccount,
 	FetchedCategory,
 	FetchedTransaction,
@@ -9,75 +8,75 @@ import {
 } from '@/database'
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
-import { FoldState, LoadState, SortOrder, SortOrderItem } from '../TransactionManager'
+import { FoldState, SortOrder } from '../TransactionManager'
 
 export async function fetchAndLoadData(
-	setLoadState: Dispatch<SetStateAction<LoadState>>,
-	setData: Dispatch<SetStateAction<FetchedTransaction[] | null>>,
+	setLoaded: Dispatch<SetStateAction<boolean>>,
+	setDefTransactionData: Dispatch<SetStateAction<FetchedTransaction[] | null>>,
+	setCurTransactionData: Dispatch<SetStateAction<FetchedTransaction[] | null>>,
 	setFoldState: Dispatch<SetStateAction<FoldState>>,
-	setCategories: Dispatch<SetStateAction<FetchedCategory[] | null>>,
-	setAccounts: Dispatch<SetStateAction<FetchedAccount[] | null>>,
-	setDefaultSortOrder: Dispatch<SetStateAction<SortOrder>>,
-	setCurrentSortOrder: Dispatch<SetStateAction<SortOrder>>
+	setCategoryData: Dispatch<SetStateAction<FetchedCategory[] | null>>,
+	setAccountData: Dispatch<SetStateAction<FetchedAccount[] | null>>,
+	setDefSortOrder: Dispatch<SetStateAction<SortOrder>>,
+	setCurSortOrder: Dispatch<SetStateAction<SortOrder>>
 ) {
-	try {
-		setLoadState({ loading: true, message: 'Fetching Transaction Data' })
-		const transactionData = await fetchTransactionData()
-		setData(transactionData)
+	setLoaded(false)
+	Promise.all([fetchTransactionData(), fetchCategoryData(), fetchAccountData()])
+		.then((res) => {
+			const [transactions, categories, accounts] = res
 
-		let groupedData: { date: string; transactions: FetchedTransaction[] }[] = []
-		transactionData.forEach((transaction) => {
-			const thisDateIndex = groupedData.findIndex(
-				(item) => item.date === transaction.date
-			)
-
-			if (thisDateIndex === -1) {
-				groupedData.push({ date: transaction.date, transactions: [transaction] })
-			} else {
-				groupedData[thisDateIndex].transactions.push(transaction)
-			}
-		})
-
-		// Get sort order
-		let sortOrder: SortOrder = {}
-		groupedData.forEach((groupItem) => {
-			sortOrder[groupItem.date] = groupItem.transactions.map((transaction) => {
-				if (transaction.items.length === 1) {
-					return transaction.id
+			// generate default sort order
+			const sortOrder: SortOrder = {}
+			transactions.forEach((transaction) => {
+				if (sortOrder[transaction.date] === undefined) {
+					if (transaction.items.length > 1) {
+						sortOrder[transaction.date] = [
+							[transaction.id, ...transaction.items.map((item) => item.id)],
+						]
+					} else {
+						sortOrder[transaction.date] = [transaction.id]
+					}
 				} else {
-					return [transaction.id, ...transaction.items.map((item) => item.id)]
+					if (transaction.items.length > 1) {
+						sortOrder[transaction.date] = [
+							...sortOrder[transaction.date],
+							[transaction.id, ...transaction.items.map((item) => item.id)],
+						]
+					} else {
+						sortOrder[transaction.date] = [
+							...sortOrder[transaction.date],
+							transaction.id,
+						]
+					}
 				}
 			})
-		})
-		setCurrentSortOrder(sortOrder)
-		setDefaultSortOrder(sortOrder)
 
-		setFoldState(() => {
+			// generate default fold state
 			const foldState: FoldState = {}
-			transactionData.forEach((transaction) => {
+			transactions.forEach((transaction) => {
 				if (transaction.items.length > 1) {
 					foldState[transaction.id] = false
 				}
 			})
-			return foldState
+
+			setDefTransactionData(transactions)
+			setCurTransactionData(transactions)
+			setCategoryData(categories)
+			setAccountData(accounts)
+
+			setDefSortOrder(sortOrder)
+			setCurSortOrder(sortOrder)
+
+			setFoldState(foldState)
+			setLoaded(true)
 		})
-
-		setLoadState({ loading: true, message: 'Fetching Category Data' })
-		const categoryData = await fetchCategoryData()
-		setCategories(categoryData)
-
-		setLoadState({ loading: true, message: 'Fetching Account Data' })
-		const accountData = await fetchAccountData()
-		setAccounts(accountData)
-		setLoadState({ loading: false, message: '' })
-		fetchCategoryTotals()
-	} catch (e) {
-		if (isStandardError(e)) {
-			promptError(
-				'An unexpected error has occurred while fetching your data from the database:',
-				e.message,
-				'Try refreshing the page to resolve this issue.'
-			)
-		}
-	}
+		.catch((e) => {
+			if (isStandardError(e)) {
+				promptError(
+					'An unexpected error has occurred while fetching your data from the database:',
+					e.message,
+					'Try refreshing the page to resolve this issue.'
+				)
+			}
+		})
 }

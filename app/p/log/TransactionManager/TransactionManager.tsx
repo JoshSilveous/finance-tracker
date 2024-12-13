@@ -10,21 +10,21 @@ import { fetchAndLoadData } from './func/fetchAndLoadData'
 import { MultiRow, MultiRowProps } from './MultiRow/MultiRow'
 import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
 import { DateRow } from './DateRow/DateRow'
+import { sortTransactions } from './func/organizeTransactions'
 
-export interface LoadState {
-	loading: boolean
-	message: string
-}
 export type SortOrderItem = string | string[]
 export type SortOrder = {
 	[date: string]: SortOrderItem[]
 }
 export type TransactionRowsRef = {
-	[key: string]: HTMLDivElement | null
+	[id: string]: HTMLDivElement | null
 }
 export type FoldState = {
-	[key: string]: boolean
+	[id: string]: boolean
 }
+
+export type GroupedTransaction = { date: string; transactions: FetchedTransaction[] }
+
 /**
  * Used to update a specific transaction's `foldState` in a concise way.
  * @param transaction_id
@@ -33,53 +33,40 @@ export type FoldState = {
 export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
 
 export function TransactionManager() {
-	const [categories, setCategories] = useState<FetchedCategory[] | null>(null)
-	const [accounts, setAccounts] = useState<FetchedAccount[] | null>(null)
-	const [data, setData] = useState<FetchedTransaction[] | null>(null)
-	const [loadState, setLoadState] = useState<LoadState>({
-		loading: true,
-		message: 'Loading',
-	})
-	const [defaultSortOrder, setDefaultSortOrder] = useState<SortOrder>({})
-	const [currentSortOrder, setCurrentSortOrder] = useState<SortOrder>({})
+	const [loaded, setLoaded] = useState<boolean>(false)
+
+	const [defTransactionData, setDefTransactionData] = useState<
+		FetchedTransaction[] | null
+	>(null)
+	const [curTransactionData, setCurTransactionData] = useState<
+		FetchedTransaction[] | null
+	>(null)
+	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
+	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
+
+	const [defSortOrder, setDefSortOrder] = useState<SortOrder>({})
+	const [curSortOrder, setCurSortOrder] = useState<SortOrder>({})
 	const [counter, setCounter] = useState(0)
 
-	const transactionRowsRef = useRef<TransactionRowsRef>({})
-	const setTransactionRowRef = (transaction_id: string) => (node: HTMLInputElement) => {
-		transactionRowsRef.current[transaction_id] = node
-	}
-
-	// previous foldState is needed to detect when it actually changes between animations (to play animation)
 	const [foldState, setFoldState] = useState<FoldState>({})
+	/**
+	 * `prevFoldStateRef` is used to reference the previous render's fold state during
+	 * current render. This allows animations to be played only when foldState changes,
+	 * instead of every re-render
+	 */
 	const prevFoldStateRef = useRef<FoldState>({})
 	useEffect(() => {
 		prevFoldStateRef.current = foldState
 	}, [foldState])
 
-	// used for testing new SortOrder system
-	useEffect(() => {
-		// console.log('new sort order update!', readableSortOrder(newCurrentSortOrder))
-	}, [currentSortOrder])
-	function readableSortOrder(sortOrder: SortOrder) {
-		const debugDisplaySortOrder: SortOrder = {}
-		Object.entries(sortOrder).forEach((item) => {
-			debugDisplaySortOrder[item[0]] = item[1].map((item) => {
-				if (Array.isArray(item)) {
-					const thisTrans = data!.find((trans) => trans.id === item[0])!
-					const otherItems = structuredClone(item)
-					otherItems.shift()
-					const otherItemsNamed = otherItems.map((item) => {
-						return thisTrans.items.find((it) => it.id === item)?.name!
-					})
-					return [thisTrans!.name, ...otherItemsNamed]
-				} else {
-					const thisTrans = data?.find((trans) => trans.id === item)!
-					return thisTrans.name
-				}
-			})
-		})
-		return debugDisplaySortOrder
+	/**
+	 * References the DOM elements of each transaction row. Used for resorting logic.
+	 */
+	const transactionRowsRef = useRef<TransactionRowsRef>({})
+	const setTransactionRowRef = (transaction_id: string) => (node: HTMLInputElement) => {
+		transactionRowsRef.current[transaction_id] = node
 	}
+
 	/**
 	 * See {@link FoldStateUpdater}
 	 */
@@ -94,21 +81,22 @@ export function TransactionManager() {
 
 	useEffect(() => {
 		fetchAndLoadData(
-			setLoadState,
-			setData,
+			setLoaded,
+			setDefTransactionData,
+			setCurTransactionData,
 			setFoldState,
-			setCategories,
-			setAccounts,
-			setDefaultSortOrder,
-			setCurrentSortOrder
+			setCategoryData,
+			setAccountData,
+			setDefSortOrder,
+			setCurSortOrder
 		)
 	}, [])
 
-	const dropdownOptionsCategory: JDropdownTypes.Option[] = useMemo(() => {
-		if (categories === null) {
-			return []
+	const dropdownOptionsCategory: JDropdownTypes.Option[] | null = useMemo(() => {
+		if (categoryData === null) {
+			return null
 		} else {
-			const options = categories.map((cat) => {
+			const options = categoryData.map((cat) => {
 				return {
 					name: cat.name,
 					value: cat.id,
@@ -117,12 +105,12 @@ export function TransactionManager() {
 			options.unshift({ name: 'None', value: 'none' })
 			return options
 		}
-	}, [categories])
-	const dropdownOptionsAccount: JDropdownTypes.Option[] = useMemo(() => {
-		if (accounts === null) {
-			return []
+	}, [categoryData])
+	const dropdownOptionsAccount: JDropdownTypes.Option[] | null = useMemo(() => {
+		if (accountData === null) {
+			return null
 		} else {
-			const options = accounts.map((act) => {
+			const options = accountData.map((act) => {
 				return {
 					name: act.name,
 					value: act.id,
@@ -131,7 +119,51 @@ export function TransactionManager() {
 			options.unshift({ name: 'None', value: 'none' })
 			return options
 		}
-	}, [accounts])
+	}, [accountData])
+
+	const updateItemSortOrder = useCallback(
+		(transaction: FetchedTransaction, transactionIndex: number) =>
+			(oldItemIndex: number, newItemIndex: number) => {
+				setCurSortOrder((prev) => {
+					const clone = structuredClone(prev)
+
+					const thisTransactionOrder = clone[transaction.date][
+						transactionIndex
+					] as string[]
+
+					moveItemInArray(thisTransactionOrder, oldItemIndex + 1, newItemIndex + 1)
+
+					return clone
+				})
+			},
+		[]
+	)
+	const updateTransactionSortOrder = useCallback(
+		(date: string) => (oldIndex: number, newIndex: number) => {
+			setCurSortOrder((prev) => {
+				const clone = structuredClone(prev)
+
+				moveItemInArray(clone[date], oldIndex, newIndex)
+
+				return clone
+			})
+		},
+		[]
+	)
+
+	const defTransactionsOrganized = useMemo(() => {
+		if (defTransactionData !== null) {
+			return sortTransactions(curSortOrder, defTransactionData)
+		}
+		return null
+	}, [defTransactionData, curSortOrder])
+
+	const curTransactionsOrganized = useMemo(() => {
+		if (curTransactionData !== null) {
+			return sortTransactions(curSortOrder, curTransactionData)
+		}
+		return null
+	}, [curTransactionData, curSortOrder])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		return [
@@ -173,79 +205,16 @@ export function TransactionManager() {
 		]
 	}, [])
 
-	const updateItemSortOrder = useCallback(
-		(transaction: FetchedTransaction, transactionIndex: number) =>
-			(oldItemIndex: number, newItemIndex: number) => {
-				setCurrentSortOrder((prev) => {
-					const clone = structuredClone(prev)
-
-					const thisTransactionOrder = clone[transaction.date][
-						transactionIndex
-					] as string[]
-
-					moveItemInArray(thisTransactionOrder, oldItemIndex + 1, newItemIndex + 1)
-
-					return clone
-				})
-			},
-		[]
-	)
-	const updateTransactionSortOrder = useCallback(
-		(date: string) => (oldIndex: number, newIndex: number) => {
-			setCurrentSortOrder((prev) => {
-				const clone = structuredClone(prev)
-
-				moveItemInArray(clone[date], oldIndex, newIndex)
-
-				return clone
-			})
-		},
-		[]
-	)
-
-	const organizedData = useMemo(() => {
-		if (data === null || currentSortOrder === null) {
-			return null
-		} else {
-			const entries = Object.entries(currentSortOrder)
-			const sortAndGrouped = entries.map((entry) => {
-				return {
-					date: entry[0],
-					transactions: entry[1].map((sortItem) => {
-						if (Array.isArray(sortItem)) {
-							const newItems: FetchedTransaction['items'] = []
-							const thisTransaction = data.find(
-								(item) => item.id === sortItem[0]
-							)!
-
-							sortItem.forEach((itemID, index) => {
-								if (index === 0) return
-								newItems.push(
-									thisTransaction.items.find((item) => item.id === itemID)!
-								)
-							})
-							return { ...thisTransaction, items: newItems }
-						} else {
-							return data.find((item) => item.id === sortItem)!
-						}
-					}),
-				}
-			})
-			return sortAndGrouped
-		}
-	}, [data, currentSortOrder])
-
 	let grid: ReactNode
 
 	if (
-		!loadState.loading &&
-		categories !== null &&
-		accounts !== null &&
-		defaultSortOrder !== null &&
-		currentSortOrder !== null &&
-		organizedData !== null
+		loaded &&
+		defTransactionsOrganized !== null &&
+		curTransactionsOrganized !== null &&
+		dropdownOptionsCategory !== null &&
+		dropdownOptionsAccount !== null
 	) {
-		if (organizedData.length === 0) {
+		if (defTransactionsOrganized.length === 0) {
 			grid = (
 				<p>
 					You do not have any transactions, click "Create new transaction" below to
@@ -255,7 +224,7 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			organizedData.forEach((groupedItem) => {
+			curTransactionsOrganized.forEach((groupedItem) => {
 				cells.push(<DateRow date={groupedItem.date} />)
 
 				groupedItem.transactions.forEach((transaction, index) => {
@@ -329,7 +298,8 @@ export function TransactionManager() {
 			<button onClick={() => setCounter((prev) => prev + 1)}>
 				Counter: {counter}
 			</button>
-			TransactionManager<div>{loadState.loading ? loadState.message : 'Loaded!'}</div>
+			TransactionManager
+			{!loaded && <div>Loading...</div>}
 			<div>{grid}</div>
 		</div>
 	)
