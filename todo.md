@@ -1,16 +1,13 @@
 -   TransactionManager
 
-    -   Make margins when resorting fit row size exactly ( + use linear transitions for less wobbling)
-    -   Make Transaction resorting limited to the row
-    -   Add control to resort rows
     -   Add control to delete rows
     -   Add control to delete transaction items
     -   Set up PendingChange system
     -   Set up history system
+    -   remove datasets
 
     -   fix this bug https://imgur.com/NO91QLm
-
-    -   !! NEED TO ALLOW STATE TO CONTROL FOLDED/UNFOLDED DIRECTLY FOR SORTORDER TO WORK
+    -   remove data tags
 
 -   Model how the transaction log will look / work
 -   Switch preferred column widths to localStorage instead of DB
@@ -18,6 +15,9 @@
 -   TransactionManager
     -   Add control to fold/unfold multi-rows
     -   Add control to resort multi-rows
+    -   Make margins when resorting fit row size exactly ( + use linear transitions for less wobbling)
+    -   Make Transaction resorting limited to the row
+    -   Add control to resort rows
 -   Phase out namespace type system- accounts
 -   Create CategoryManager
 -   Add undo/redo buttons in AccountManager

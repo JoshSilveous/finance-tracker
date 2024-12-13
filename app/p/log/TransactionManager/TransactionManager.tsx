@@ -224,53 +224,56 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			curTransactionsOrganized.forEach((groupedItem) => {
+			curTransactionsOrganized.forEach((groupedItem, groupedItemIndex) => {
 				cells.push(<DateRow date={groupedItem.date} />)
 
-				groupedItem.transactions.forEach((transaction, index) => {
-					if (transaction.items.length === 1) {
+				groupedItem.transactions.forEach((curTransaction, index) => {
+					const defTransaction =
+						defTransactionsOrganized[groupedItemIndex].transactions[index]
+					if (curTransaction.items.length === 1) {
 						const props: SingleRowProps = {
-							transaction,
+							curTransaction,
+							defTransaction,
 							placeMarginAbove: index !== 0,
 							dropdownOptionsCategory,
 							dropdownOptionsAccount,
 							onResortMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
-								transaction,
+								curTransaction,
 								index,
 								updateTransactionSortOrder(groupedItem.date),
 								transactionRowsRef,
-								foldState[transaction.id],
+								foldState[curTransaction.id],
 								updateFoldState
 							),
 						}
 						cells.push(
 							<SingleRow
 								{...props}
-								ref={setTransactionRowRef(transaction.id)}
+								ref={setTransactionRowRef(curTransaction.id)}
 							/>
 						)
 					} else {
 						const props: MultiRowProps = {
-							transaction: transaction,
+							transaction: curTransaction,
 							dropdownOptionsCategory: dropdownOptionsCategory,
 							dropdownOptionsAccount: dropdownOptionsAccount,
-							onItemReorder: updateItemSortOrder(transaction, index),
-							folded: foldState[transaction.id],
+							onItemReorder: updateItemSortOrder(curTransaction, index),
+							folded: foldState[curTransaction.id],
 							playAnimation:
-								prevFoldStateRef.current[transaction.id] === undefined
+								prevFoldStateRef.current[curTransaction.id] === undefined
 									? false
-									: prevFoldStateRef.current[transaction.id] !==
-									  foldState[transaction.id],
+									: prevFoldStateRef.current[curTransaction.id] !==
+									  foldState[curTransaction.id],
 							placeMarginAbove: index !== 0,
 							updateFoldState,
 							onTransactionReorderMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
-								transaction,
+								curTransaction,
 								index,
 								updateTransactionSortOrder(groupedItem.date),
 								transactionRowsRef,
-								foldState[transaction.id],
+								foldState[curTransaction.id],
 								updateFoldState
 							),
 						}
@@ -278,7 +281,7 @@ export function TransactionManager() {
 						cells.push(
 							<MultiRow
 								{...props}
-								ref={setTransactionRowRef(transaction.id)}
+								ref={setTransactionRowRef(curTransaction.id)}
 							/>
 						)
 					}
