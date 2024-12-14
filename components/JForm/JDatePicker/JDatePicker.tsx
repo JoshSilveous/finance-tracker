@@ -2,29 +2,23 @@ import { ChangeEvent, DetailedHTMLProps, InputHTMLAttributes } from 'react'
 import s from './JDatePicker.module.scss'
 import { default as CalendarIcon } from '@/public/calendar.svg'
 
-interface JDatePickerProps {
+interface JDatePickerProps
+	extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
 	/**
 	 * In `YYYY-DD-MM` format
 	 */
 	value?: string
 	className?: string
-	onChange?: (e: ChangeEvent<HTMLInputElement>) => void
 	minimalStyle?: boolean
-	disabled?: boolean
 }
-export function JDatePicker(props: JDatePickerProps) {
+export function JDatePicker({ className, minimalStyle, ...rest }: JDatePickerProps) {
 	return (
 		<div
-			className={`${s.main} ${props.className ? props.className : ''} ${
-				props.minimalStyle ? s.minimal_style : ''
-			} ${props.disabled ? s.disabled : ''}`}
+			className={`${s.main} ${className ? className : ''} ${
+				minimalStyle ? s.minimal_style : ''
+			} ${rest.disabled ? s.disabled : ''}`}
 		>
-			<input
-				type='date'
-				value={props.value}
-				onChange={props.onChange}
-				disabled={props.disabled}
-			/>
+			<input type='date' {...rest} />
 			<div className={s.icon_container}>
 				<CalendarIcon />
 			</div>

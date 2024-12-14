@@ -1,13 +1,15 @@
-import { ChangeEvent } from 'react'
+import { ChangeEvent, DetailedHTMLProps, SelectHTMLAttributes } from 'react'
 import s from './JDropdown.module.scss'
 import { default as DropdownArrow } from '@/public/dropdown_arrow.svg'
 import { default as LoadingAnim } from '@/public/loading.svg'
 
 export namespace JDropdownTypes {
-	export interface Props {
+	export interface Props
+		extends DetailedHTMLProps<
+			SelectHTMLAttributes<HTMLSelectElement>,
+			HTMLSelectElement
+		> {
 		options: Option[]
-		onChange?: ChangeEventHandler
-		value?: string | number
 		placeholder?: string
 		className?: string
 		loading?: boolean
@@ -16,32 +18,33 @@ export namespace JDropdownTypes {
 		name: string
 		value: string | number
 	}
-	export type ChangeEventHandler = (e: ChangeEvent<HTMLSelectElement>) => void
 }
 
-export function JDropdown(props: JDropdownTypes.Props) {
-	const optionsDisplay = props.options.map((option, index) => {
+export function JDropdown({
+	options,
+	placeholder,
+	className,
+	loading,
+	...rest
+}: JDropdownTypes.Props) {
+	const optionsDisplay = options.map((option, index) => {
 		return (
 			<option value={option.value} key={index}>
 				{option.name}
 			</option>
 		)
 	})
-	if (props.value === undefined) {
-		optionsDisplay.unshift(
-			<option value=''>{props.placeholder ? props.placeholder : ''}</option>
-		)
+	if (rest.value === undefined) {
+		optionsDisplay.unshift(<option value=''>{placeholder ? placeholder : ''}</option>)
 	}
 	return (
-		<div className={`${s.main} ${props.className ? props.className : ''}`}>
-			{props.loading && (
+		<div className={`${s.main} ${className ? className : ''}`}>
+			{loading && (
 				<div className={s.loading}>
 					<LoadingAnim />
 				</div>
 			)}
-			<select onChange={props.onChange} value={props.value}>
-				{props.loading ? '' : optionsDisplay}
-			</select>
+			<select {...rest}>{loading ? '' : optionsDisplay}</select>
 			<div className={s.custom_arrow}>
 				<DropdownArrow />
 			</div>
