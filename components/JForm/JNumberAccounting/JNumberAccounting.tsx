@@ -1,3 +1,4 @@
+'use client'
 import {
 	ChangeEvent,
 	FocusEvent,
@@ -7,12 +8,14 @@ import {
 	useRef,
 	useState,
 } from 'react'
-import { addCommas } from '@/utils'
+import { addCommas, delay } from '@/utils'
 import s from './JNumberAccounting.module.scss'
 import { evaluate } from 'mathjs'
 
 interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {
 	minimalStyle?: boolean
+	maxDigLeftOfDecimal?: number
+	maxDigRightOfDecimal?: number
 }
 
 export function JNumberAccounting(props: JNumberAccountingProps) {
@@ -26,8 +29,27 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 		updateDisplayText()
 	}, [])
 
+	// adds error class to input, if errors are stacking it will remain until 0.5s after they stop stacking
+	let errorEffectQueue = 0
+	async function runErrorEffect() {
+		errorEffectQueue++
+		if (errorEffectQueue === 1) {
+			let prevErrorEffectQueue = errorEffectQueue
+			while (errorEffectQueue > 0) {
+				inputRef.current!.classList.add(s.error)
+				await delay(300)
+				if (errorEffectQueue === prevErrorEffectQueue) {
+					errorEffectQueue = 0
+					inputRef.current!.classList.remove(s.error)
+				}
+				errorEffectQueue--
+				prevErrorEffectQueue = errorEffectQueue
+			}
+		}
+	}
+
 	function updateDisplayText() {
-		const valFloat = parseFloat(inputRef.current!.value)
+		const valFloat = Number(inputRef.current!.value)
 		if (isNaN(valFloat)) {
 			inputRef.current!.value = prevVal
 			updateDisplayText()
@@ -77,11 +99,31 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 		}
 	}
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
-		const sanitizedInput = e.target.value.replace(/[^0-9+\-./*()]/g, '')
-		e.target.value = sanitizedInput
-		if (props.onChange) {
+		const input = e.target.value
+		const prevInput = e.target.dataset['val_before_change']!
+		let sanitizedInput = input.replace(/[^0-9+\-./*()]/g, '')
+
+		if (input !== sanitizedInput) {
+			runErrorEffect()
+		}
+
+		let [digLeft, digRight = 0] = sanitizedInput.split('.').map((it) => it.length)
+
+		if (
+			(props.maxDigLeftOfDecimal !== undefined &&
+				digLeft > props.maxDigLeftOfDecimal) ||
+			(props.maxDigRightOfDecimal !== undefined &&
+				digRight > props.maxDigRightOfDecimal)
+		) {
+			runErrorEffect()
+			sanitizedInput = prevInput
+		}
+
+		if (props.onChange && sanitizedInput !== prevInput) {
 			props.onChange(e)
 		}
+		e.target.value = sanitizedInput
+		e.target.dataset['input_before_change'] = sanitizedInput
 	}
 
 	const showFormatted = !(isHovering || isFocused)
@@ -106,6 +148,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 				onFocus={handleFocus}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
+				data-val_before_change={props.value ? props.value : ''}
 				style={
 					showFormatted
 						? { color: 'transparent', userSelect: 'none' }
