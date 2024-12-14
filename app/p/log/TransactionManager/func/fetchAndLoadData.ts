@@ -8,12 +8,16 @@ import {
 } from '@/database'
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
-import { FoldState, SortOrder, StateTransaction } from '../TransactionManager'
+import {
+	FoldState,
+	PendingChanges,
+	SortOrder,
+	StateTransaction,
+} from '../TransactionManager'
 
 export async function fetchAndLoadData(
 	setLoaded: Dispatch<SetStateAction<boolean>>,
-	setDefTransactionData: Dispatch<SetStateAction<StateTransaction[] | null>>,
-	setCurTransactionData: Dispatch<SetStateAction<StateTransaction[] | null>>,
+	setTransactionData: Dispatch<SetStateAction<StateTransaction[] | null>>,
 	setFoldState: Dispatch<SetStateAction<FoldState>>,
 	setCategoryData: Dispatch<SetStateAction<FetchedCategory[] | null>>,
 	setAccountData: Dispatch<SetStateAction<FetchedAccount[] | null>>,
@@ -70,8 +74,7 @@ export async function fetchAndLoadData(
 				})
 			)
 
-			setDefTransactionData(convertedTransactions)
-			setCurTransactionData(convertedTransactions)
+			setTransactionData(convertedTransactions)
 			setCategoryData(categories)
 			setAccountData(accounts)
 

@@ -20,6 +20,9 @@
 			padding-right: calc(var(--padding-val) * 2);
 			border-radius: 0 var(--border-radius) var(--border-radius) 0;
 		}
+		.pending_change {
+			color: var(--font-color-changed);
+		}
 
 		&.row_controller {
 			min-height: 35px;

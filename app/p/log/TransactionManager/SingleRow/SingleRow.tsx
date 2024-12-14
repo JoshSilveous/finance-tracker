@@ -11,155 +11,193 @@ import {
 	forwardRef,
 	SetStateAction,
 	useEffect,
+	useMemo,
 } from 'react'
-import { StateTransaction } from '../TransactionManager'
+import {
+	PendingChanges,
+	StateTransaction,
+	PendingChangeUpdater,
+} from '../TransactionManager'
 
-type Key = 'amount' | 'category_id' | 'account_id' | 'date' | 'name'
+type LiveVals = {
+	amount: string
+	category_id: string | null
+	account_id: string | null
+	date: string
+	name: string
+}
+
 export interface SingleRowProps {
-	curTransaction: StateTransaction
-	defTransaction: StateTransaction
+	transaction: StateTransaction
+	pendingChanges: PendingChanges
+	updatePendingChanges: PendingChangeUpdater
 	placeMarginAbove: boolean
 	dropdownOptionsCategory: JDropdownTypes.Option[]
 	dropdownOptionsAccount: JDropdownTypes.Option[]
 	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
-	setCurTransactionData: Dispatch<SetStateAction<StateTransaction[] | null>>
 }
-export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>(
-	(props, forwardedRef) => {
-		const curItem = props.curTransaction.items[0]
-		const defItem = props.defTransaction.items[0]
+export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwardedRef) => {
+	const transaction_id = p.transaction.id
+	const curItem = p.transaction.items[0]
+	const item_id = curItem.id
+	const defItem = p.transaction.items[0]
 
-		// add/remove change class whenever anything is changed
+	/**
+	 * Re-calculates the displayed value (from default transaction or pendingChange)
+	 */
+	const liveVals: LiveVals = useMemo(
+		() => ({
+			amount:
+				p.pendingChanges.items[item_id] !== undefined &&
+				p.pendingChanges.items[item_id].amount !== undefined
+					? p.pendingChanges.items[item_id].amount
+					: curItem.amount,
+			category_id:
+				p.pendingChanges.items[item_id] !== undefined &&
+				p.pendingChanges.items[item_id].category_id !== undefined
+					? p.pendingChanges.items[item_id].category_id
+					: curItem.category_id,
+			account_id:
+				p.pendingChanges.items[item_id] !== undefined &&
+				p.pendingChanges.items[item_id].account_id !== undefined
+					? p.pendingChanges.items[item_id].account_id
+					: curItem.account_id,
+			date:
+				p.pendingChanges.transactions[transaction_id] !== undefined &&
+				p.pendingChanges.transactions[transaction_id].date !== undefined
+					? p.pendingChanges.transactions[transaction_id].date
+					: p.transaction.date,
+			name:
+				p.pendingChanges.transactions[transaction_id] !== undefined &&
+				p.pendingChanges.transactions[transaction_id].name !== undefined
+					? p.pendingChanges.transactions[transaction_id].name
+					: p.transaction.name,
+		}),
+		[p.transaction, p.pendingChanges]
+	)
 
-		// should only apply changed style
-		const onChange: ChangeEventHandler<HTMLInputElement | HTMLSelectElement> = (e) => {
-			const origVal = e.target.dataset.default
-			const key = e.target.dataset.key as Key
-			const newVal = e.target.value
+	const onChange: ChangeEventHandler<HTMLInputElement | HTMLSelectElement> = (e) => {
+		const origVal = e.target.dataset.default
+		const key = e.target.dataset.key as keyof LiveVals
+		const newVal = e.target.value
 
-			console.log(`Change!\nkey: ${key}\norig: ${origVal}\nnew: ${newVal}`)
+		if (origVal !== newVal) {
+			e.target.parentElement!.classList.add(s.pending_change)
 
-			// avoid state update if user is adding a decimal to the end of the `amount` input
-			if (key === 'amount' && newVal.at(-1) === '.') {
-				e.target.value = newVal
-				console.log('hit!')
-				return
+			if (key === 'name' || key === 'date') {
+				p.updatePendingChanges('transactions', transaction_id, key, newVal)
+			} else {
+				p.updatePendingChanges('items', item_id, key, newVal)
 			}
-			// sighh i'm gonna need to make amount be strings instead of numbers. gonna need to change state entirely.
-			// OR we can make a change system similar to accounts
+		} else {
+			e.target.parentElement!.classList.remove(s.pending_change)
 
-			props.setCurTransactionData((prev) => {
-				console.log('state update')
-				const clone = structuredClone(prev)
-
-				if (key === 'name' || key === 'date') {
-					clone!.find(
-						(transaction) => transaction.id === props.curTransaction.id
-					)![key as 'name' | 'date'] = newVal
-				} else if (key === 'amount') {
-					clone!.find(
-						(transaction) => transaction.id === props.curTransaction.id
-					)!.items[0][key as 'category_id' | 'account_id' | 'amount'] = newVal
-				}
-
-				return clone
-			})
+			if (key === 'name' || key === 'date') {
+				p.updatePendingChanges('transactions', transaction_id, key)
+			} else {
+				p.updatePendingChanges('items', item_id, key)
+			}
 		}
+	}
 
-		return (
+	return (
+		<div
+			className={s.container}
+			ref={forwardedRef}
+			data-transaction_id={p.transaction.id}
+		>
 			<div
-				className={s.container}
-				ref={forwardedRef}
-				data-transaction_id={props.curTransaction.id}
+				className={`${s.cell_container} ${s.row_controller} ${
+					p.placeMarginAbove ? s.margin_above : ''
+				}`}
+				data-transaction_id={p.transaction.id}
 			>
 				<div
-					className={`${s.cell_container} ${s.row_controller} ${
-						props.placeMarginAbove ? s.margin_above : ''
-					}`}
-					data-transaction_id={props.curTransaction.id}
+					className={s.reorder_grabber}
+					onMouseDown={p.onResortMouseDown}
+					title='Grab and drag to reposition this item'
 				>
-					<div
-						className={s.reorder_grabber}
-						onMouseDown={props.onResortMouseDown}
-						title='Grab and drag to reposition this item'
-					>
-						<ReorderIcon />
-					</div>
-				</div>
-				<div
-					className={`${s.cell_container} ${s.first_col} ${
-						props.placeMarginAbove ? s.margin_above : ''
-					}`}
-					data-transaction_id={props.curTransaction.id}
-				>
-					<JDatePicker
-						value={props.curTransaction.date}
-						data-key={'date'}
-						data-default={props.defTransaction.date}
-						onChange={onChange}
-					/>
-				</div>
-				<div
-					className={`${s.cell_container} ${s.mid_col} ${
-						props.placeMarginAbove ? s.margin_above : ''
-					}`}
-					data-transaction_id={props.curTransaction.id}
-				>
-					<JInput
-						value={props.curTransaction.name}
-						data-key={'name'}
-						data-default={props.defTransaction.name}
-						onChange={onChange}
-					/>
-				</div>
-				<div
-					className={`${s.cell_container} ${s.mid_col} ${
-						props.placeMarginAbove ? s.margin_above : ''
-					}`}
-					data-transaction_id={props.curTransaction.id}
-				>
-					<JNumberAccounting
-						value={curItem.amount}
-						data-key={'amount'}
-						data-default={defItem.amount}
-						onChange={onChange}
-					/>
-				</div>
-				<div
-					className={`${s.cell_container} ${s.mid_col} ${
-						props.placeMarginAbove ? s.margin_above : ''
-					}`}
-					data-transaction_id={props.curTransaction.id}
-				>
-					<JDropdown
-						options={props.dropdownOptionsCategory}
-						value={
-							curItem.category_id !== null ? curItem.category_id : undefined
-						}
-						data-key={'category_id'}
-						data-default={
-							defItem.category_id !== null ? defItem.category_id : undefined
-						}
-						onChange={onChange}
-					/>
-				</div>
-				<div
-					className={`${s.cell_container} ${s.last_col} ${
-						props.placeMarginAbove ? s.margin_above : ''
-					}`}
-					data-transaction_id={props.curTransaction.id}
-				>
-					<JDropdown
-						options={props.dropdownOptionsAccount}
-						value={curItem.account_id !== null ? curItem.account_id : undefined}
-						data-key={'account_id'}
-						data-default={
-							defItem.account_id !== null ? defItem.account_id : undefined
-						}
-						onChange={onChange}
-					/>
+					<ReorderIcon />
 				</div>
 			</div>
-		)
-	}
-)
+			<div
+				className={`${s.cell_container} ${s.first_col} ${
+					p.placeMarginAbove ? s.margin_above : ''
+				}`}
+				data-transaction_id={p.transaction.id}
+			>
+				<JDatePicker
+					value={liveVals.date}
+					data-key={'date'}
+					data-default={p.transaction.date}
+					onChange={onChange}
+					onBlur={onChange}
+				/>
+			</div>
+			<div
+				className={`${s.cell_container} ${s.mid_col} ${
+					p.placeMarginAbove ? s.margin_above : ''
+				}`}
+				data-transaction_id={p.transaction.id}
+			>
+				<JInput
+					value={liveVals.name}
+					data-key={'name'}
+					data-default={p.transaction.name}
+					onChange={onChange}
+					onBlur={onChange}
+				/>
+			</div>
+			<div
+				className={`${s.cell_container} ${s.mid_col} ${
+					p.placeMarginAbove ? s.margin_above : ''
+				}`}
+				data-transaction_id={p.transaction.id}
+			>
+				<JNumberAccounting
+					value={liveVals.amount}
+					data-key={'amount'}
+					data-default={defItem.amount}
+					onChange={onChange}
+					onBlur={onChange}
+					maxDigLeftOfDecimal={8}
+					maxDigRightOfDecimal={2}
+				/>
+			</div>
+			<div
+				className={`${s.cell_container} ${s.mid_col} ${
+					p.placeMarginAbove ? s.margin_above : ''
+				}`}
+				data-transaction_id={p.transaction.id}
+			>
+				<JDropdown
+					options={p.dropdownOptionsCategory}
+					value={liveVals.category_id !== null ? liveVals.category_id : undefined}
+					data-key={'category_id'}
+					data-default={
+						defItem.category_id !== null ? defItem.category_id : undefined
+					}
+					onChange={onChange}
+					onBlur={onChange}
+				/>
+			</div>
+			<div
+				className={`${s.cell_container} ${s.last_col} ${
+					p.placeMarginAbove ? s.margin_above : ''
+				}`}
+				data-transaction_id={p.transaction.id}
+			>
+				<JDropdown
+					options={p.dropdownOptionsAccount}
+					value={liveVals.account_id !== null ? liveVals.account_id : undefined}
+					data-key={'account_id'}
+					data-default={
+						defItem.account_id !== null ? defItem.account_id : undefined
+					}
+					onChange={onChange}
+					onBlur={onChange}
+				/>
+			</div>
+		</div>
+	)
+})

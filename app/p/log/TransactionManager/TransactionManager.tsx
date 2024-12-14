@@ -42,15 +42,72 @@ export type GroupedTransaction = { date: string; transactions: StateTransaction[
  */
 export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
 
+export type PendingChanges = {
+	transactions: {
+		[id: string]: Partial<Omit<StateTransaction, 'id' | 'items' | 'order_position'>>
+	}
+	items: {
+		[id: string]: Partial<
+			Omit<StateTransaction['items'][number], 'id' | 'order_position'>
+		>
+	}
+}
+
+/**
+ * Simplifies updating the `pendingChanges` array.
+ * @param type `'transactions' | 'items'`
+ * @param id The `item` or `transaction` id.
+ * @param key The key of the item or transaction you're modifying.
+ * @param value optional, leaving undefined will delete the value from `pendingChanges`
+ */
+export type PendingChangeUpdater = <T extends keyof PendingChanges>(
+	type: T,
+	id: string,
+	key: keyof PendingChanges[T][number],
+	value?: string
+) => void
+
 export function TransactionManager() {
 	const [loaded, setLoaded] = useState<boolean>(false)
 
-	const [defTransactionData, setDefTransactionData] = useState<StateTransaction[] | null>(
-		null
+	const [transactionData, setTransactionData] = useState<StateTransaction[] | null>(null)
+	const [pendingChanges, setPendingChanges] = useState<PendingChanges>({
+		transactions: {},
+		items: {},
+	})
+
+	const updatePendingChanges: PendingChangeUpdater = useCallback(
+		<T extends keyof PendingChanges>(
+			type: T,
+			id: string,
+			key: keyof PendingChanges[T][number],
+			value?: string
+		) => {
+			setPendingChanges((prev) => {
+				const clone = structuredClone(prev)
+				const target = clone[type] as Record<
+					string,
+					Partial<PendingChanges[T][number]>
+				>
+
+				if (value !== undefined) {
+					target[id] ||= {}
+					target[id][key] = value as PendingChanges[T][number][typeof key]
+				} else if (target[id] !== undefined) {
+					delete target[id][key]
+					if (Object.keys(target[id]).length === 0) {
+						delete target[id]
+					}
+				} else {
+					delete target[id]
+				}
+
+				return clone
+			})
+		},
+		[]
 	)
-	const [curTransactionData, setCurTransactionData] = useState<StateTransaction[] | null>(
-		null
-	)
+
 	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
 
@@ -92,8 +149,7 @@ export function TransactionManager() {
 	useEffect(() => {
 		fetchAndLoadData(
 			setLoaded,
-			setDefTransactionData,
-			setCurTransactionData,
+			setTransactionData,
 			setFoldState,
 			setCategoryData,
 			setAccountData,
@@ -161,19 +217,12 @@ export function TransactionManager() {
 		[]
 	)
 
-	const defTransactionsOrganized = useMemo(() => {
-		if (defTransactionData !== null) {
-			return sortTransactions(curSortOrder, defTransactionData)
+	const transactionsOrganized = useMemo(() => {
+		if (transactionData !== null) {
+			return sortTransactions(curSortOrder, transactionData)
 		}
 		return null
-	}, [defTransactionData, curSortOrder])
-
-	const curTransactionsOrganized = useMemo(() => {
-		if (curTransactionData !== null) {
-			return sortTransactions(curSortOrder, curTransactionData)
-		}
-		return null
-	}, [curTransactionData, curSortOrder])
+	}, [transactionData, curSortOrder])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		return [
@@ -219,12 +268,11 @@ export function TransactionManager() {
 
 	if (
 		loaded &&
-		defTransactionsOrganized !== null &&
-		curTransactionsOrganized !== null &&
+		transactionsOrganized !== null &&
 		dropdownOptionsCategory !== null &&
 		dropdownOptionsAccount !== null
 	) {
-		if (defTransactionsOrganized.length === 0) {
+		if (transactionsOrganized.length === 0) {
 			grid = (
 				<p>
 					You do not have any transactions, click "Create new transaction" below to
@@ -234,57 +282,55 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			curTransactionsOrganized.forEach((groupedItem, groupedItemIndex) => {
+			transactionsOrganized.forEach((groupedItem, groupedItemIndex) => {
 				cells.push(<DateRow date={groupedItem.date} />)
 
-				groupedItem.transactions.forEach((curTransaction, index) => {
-					const defTransaction =
-						defTransactionsOrganized[groupedItemIndex].transactions[index]
-					if (curTransaction.items.length === 1) {
+				groupedItem.transactions.forEach((transaction, index) => {
+					if (transaction.items.length === 1) {
 						const props: SingleRowProps = {
-							curTransaction,
-							defTransaction,
+							transaction: transaction,
+							pendingChanges,
+							updatePendingChanges,
 							placeMarginAbove: index !== 0,
 							dropdownOptionsCategory,
 							dropdownOptionsAccount,
 							onResortMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
-								curTransaction,
+								transaction,
 								index,
 								updateTransactionSortOrder(groupedItem.date),
 								transactionRowsRef,
-								foldState[curTransaction.id],
+								foldState[transaction.id],
 								updateFoldState
 							),
-							setCurTransactionData,
 						}
 						cells.push(
 							<SingleRow
 								{...props}
-								ref={setTransactionRowRef(curTransaction.id)}
+								ref={setTransactionRowRef(transaction.id)}
 							/>
 						)
 					} else {
 						const props: MultiRowProps = {
-							transaction: curTransaction,
+							transaction: transaction,
 							dropdownOptionsCategory: dropdownOptionsCategory,
 							dropdownOptionsAccount: dropdownOptionsAccount,
-							onItemReorder: updateItemSortOrder(curTransaction, index),
-							folded: foldState[curTransaction.id],
+							onItemReorder: updateItemSortOrder(transaction, index),
+							folded: foldState[transaction.id],
 							playAnimation:
-								prevFoldStateRef.current[curTransaction.id] === undefined
+								prevFoldStateRef.current[transaction.id] === undefined
 									? false
-									: prevFoldStateRef.current[curTransaction.id] !==
-									  foldState[curTransaction.id],
+									: prevFoldStateRef.current[transaction.id] !==
+									  foldState[transaction.id],
 							placeMarginAbove: index !== 0,
 							updateFoldState,
 							onTransactionReorderMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
-								curTransaction,
+								transaction,
 								index,
 								updateTransactionSortOrder(groupedItem.date),
 								transactionRowsRef,
-								foldState[curTransaction.id],
+								foldState[transaction.id],
 								updateFoldState
 							),
 						}
@@ -292,7 +338,7 @@ export function TransactionManager() {
 						cells.push(
 							<MultiRow
 								{...props}
-								ref={setTransactionRowRef(curTransaction.id)}
+								ref={setTransactionRowRef(transaction.id)}
 							/>
 						)
 					}
