@@ -3,7 +3,7 @@ import { FetchedTransaction } from '@/database'
 import { useMemo, useRef, forwardRef, useEffect, useCallback } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
-import { FoldStateUpdater } from '../TransactionManager'
+import { FoldStateUpdater, StateTransaction } from '../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
@@ -11,7 +11,7 @@ import { handleItemReorder } from './func/handleItemReorder'
 import { foldRenderer } from './func/foldRenderer'
 
 export interface MultiRowProps {
-	transaction: FetchedTransaction
+	transaction: StateTransaction
 	placeMarginAbove: boolean
 	dropdownOptionsCategory: JDropdownTypes.Option[]
 	dropdownOptionsAccount: JDropdownTypes.Option[]
@@ -103,7 +103,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 
 	let sum = 0
 	const itemRows = props.transaction.items.map((item, itemIndex) => {
-		sum += item.amount
+		sum += Number(item.amount)
 
 		return [
 			<div

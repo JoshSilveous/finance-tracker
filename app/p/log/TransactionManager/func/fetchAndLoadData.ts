@@ -8,12 +8,12 @@ import {
 } from '@/database'
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
-import { FoldState, SortOrder } from '../TransactionManager'
+import { FoldState, SortOrder, StateTransaction } from '../TransactionManager'
 
 export async function fetchAndLoadData(
 	setLoaded: Dispatch<SetStateAction<boolean>>,
-	setDefTransactionData: Dispatch<SetStateAction<FetchedTransaction[] | null>>,
-	setCurTransactionData: Dispatch<SetStateAction<FetchedTransaction[] | null>>,
+	setDefTransactionData: Dispatch<SetStateAction<StateTransaction[] | null>>,
+	setCurTransactionData: Dispatch<SetStateAction<StateTransaction[] | null>>,
 	setFoldState: Dispatch<SetStateAction<FoldState>>,
 	setCategoryData: Dispatch<SetStateAction<FetchedCategory[] | null>>,
 	setAccountData: Dispatch<SetStateAction<FetchedAccount[] | null>>,
@@ -59,8 +59,19 @@ export async function fetchAndLoadData(
 				}
 			})
 
-			setDefTransactionData(transactions)
-			setCurTransactionData(transactions)
+			// convert FetchedTransaction to StateTransaction
+			const convertedTransactions: StateTransaction[] = transactions.map(
+				(transaction) => ({
+					...transaction,
+					items: transaction.items.map((item) => ({
+						...item,
+						amount: item.amount.toFixed(2),
+					})),
+				})
+			)
+
+			setDefTransactionData(convertedTransactions)
+			setCurTransactionData(convertedTransactions)
 			setCategoryData(categories)
 			setAccountData(accounts)
 

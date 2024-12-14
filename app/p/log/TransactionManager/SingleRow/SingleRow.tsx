@@ -12,16 +12,17 @@ import {
 	SetStateAction,
 	useEffect,
 } from 'react'
+import { StateTransaction } from '../TransactionManager'
 
 type Key = 'amount' | 'category_id' | 'account_id' | 'date' | 'name'
 export interface SingleRowProps {
-	curTransaction: FetchedTransaction
-	defTransaction: FetchedTransaction
+	curTransaction: StateTransaction
+	defTransaction: StateTransaction
 	placeMarginAbove: boolean
 	dropdownOptionsCategory: JDropdownTypes.Option[]
 	dropdownOptionsAccount: JDropdownTypes.Option[]
 	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
-	setCurTransactionData: Dispatch<SetStateAction<FetchedTransaction[] | null>>
+	setCurTransactionData: Dispatch<SetStateAction<StateTransaction[] | null>>
 }
 export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>(
 	(props, forwardedRef) => {
@@ -58,11 +59,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>(
 				} else if (key === 'amount') {
 					clone!.find(
 						(transaction) => transaction.id === props.curTransaction.id
-					)!.items[0][key as 'amount'] = parseInt(newVal)
-				} else {
-					clone!.find(
-						(transaction) => transaction.id === props.curTransaction.id
-					)!.items[0][key as 'category_id' | 'account_id'] = newVal
+					)!.items[0][key as 'category_id' | 'account_id' | 'amount'] = newVal
 				}
 
 				return clone

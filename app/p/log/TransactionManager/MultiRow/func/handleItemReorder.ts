@@ -2,13 +2,14 @@ import { FetchedTransaction } from '@/database'
 import { delay } from '@/utils'
 import s from '../MultiRow.module.scss'
 import { ItemRowRefs } from '../MultiRow'
+import { StateTransaction } from '../../TransactionManager'
 
 export const handleItemReorder =
 	(
-		item: FetchedTransaction['items'][number],
+		item: StateTransaction['items'][number],
 		itemRows: ItemRowRefs,
 		itemIndex: number,
-		transaction: FetchedTransaction,
+		transaction: StateTransaction,
 		handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
 	) =>
 	(e: React.MouseEvent<HTMLInputElement>) => {

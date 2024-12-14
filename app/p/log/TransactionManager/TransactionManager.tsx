@@ -11,6 +11,7 @@ import { MultiRow, MultiRowProps } from './MultiRow/MultiRow'
 import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
 import { DateRow } from './DateRow/DateRow'
 import { sortTransactions } from './func/organizeTransactions'
+import { JNumberAccounting } from '@/components/JForm'
 
 export type SortOrderItem = string | string[]
 export type SortOrder = {
@@ -23,7 +24,16 @@ export type FoldState = {
 	[id: string]: boolean
 }
 
-export type GroupedTransaction = { date: string; transactions: FetchedTransaction[] }
+/**
+ * {@link FetchedTransaction `FetchedTransaction`}, but `items.amount` is a `string` instead of `number`.
+ *
+ * This change is needed for the {@link JNumberAccounting `<JNumberAccounting />`} component to function correctly
+ */
+export interface StateTransaction extends Omit<FetchedTransaction, 'items'> {
+	items: (Omit<FetchedTransaction['items'][number], 'amount'> & { amount: string })[]
+}
+
+export type GroupedTransaction = { date: string; transactions: StateTransaction[] }
 
 /**
  * Used to update a specific transaction's `foldState` in a concise way.
@@ -35,12 +45,12 @@ export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => voi
 export function TransactionManager() {
 	const [loaded, setLoaded] = useState<boolean>(false)
 
-	const [defTransactionData, setDefTransactionData] = useState<
-		FetchedTransaction[] | null
-	>(null)
-	const [curTransactionData, setCurTransactionData] = useState<
-		FetchedTransaction[] | null
-	>(null)
+	const [defTransactionData, setDefTransactionData] = useState<StateTransaction[] | null>(
+		null
+	)
+	const [curTransactionData, setCurTransactionData] = useState<StateTransaction[] | null>(
+		null
+	)
 	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
 
@@ -122,7 +132,7 @@ export function TransactionManager() {
 	}, [accountData])
 
 	const updateItemSortOrder = useCallback(
-		(transaction: FetchedTransaction, transactionIndex: number) =>
+		(transaction: StateTransaction, transactionIndex: number) =>
 			(oldItemIndex: number, newItemIndex: number) => {
 				setCurSortOrder((prev) => {
 					const clone = structuredClone(prev)
