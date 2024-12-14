@@ -288,7 +288,7 @@ export function TransactionManager() {
 				groupedItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
 						const props: SingleRowProps = {
-							transaction: transaction,
+							transaction,
 							pendingChanges,
 							updatePendingChanges,
 							placeMarginAbove: index !== 0,
@@ -312,7 +312,9 @@ export function TransactionManager() {
 						)
 					} else {
 						const props: MultiRowProps = {
-							transaction: transaction,
+							transaction,
+							pendingChanges,
+							updatePendingChanges,
 							dropdownOptionsCategory: dropdownOptionsCategory,
 							dropdownOptionsAccount: dropdownOptionsAccount,
 							onItemReorder: updateItemSortOrder(transaction, index),

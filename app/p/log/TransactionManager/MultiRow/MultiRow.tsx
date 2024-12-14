@@ -3,7 +3,12 @@ import { FetchedTransaction } from '@/database'
 import { useMemo, useRef, forwardRef, useEffect, useCallback } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
-import { FoldStateUpdater, StateTransaction } from '../TransactionManager'
+import {
+	FoldStateUpdater,
+	PendingChanges,
+	PendingChangeUpdater,
+	StateTransaction,
+} from '../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
@@ -12,6 +17,8 @@ import { foldRenderer } from './func/foldRenderer'
 
 export interface MultiRowProps {
 	transaction: StateTransaction
+	pendingChanges: PendingChanges
+	updatePendingChanges: PendingChangeUpdater
 	placeMarginAbove: boolean
 	dropdownOptionsCategory: JDropdownTypes.Option[]
 	dropdownOptionsAccount: JDropdownTypes.Option[]
@@ -23,6 +30,17 @@ export interface MultiRowProps {
 	 */
 	updateFoldState: FoldStateUpdater
 	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
+}
+
+type LiveVals = {
+	date: string
+	name: string
+	items: {
+		name: string
+		amount: string
+		category_id: string
+		account_id: string
+	}[]
 }
 
 export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
@@ -100,6 +118,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((props, forwar
 		// runs when this component unmounts to prevent animation bugs (e.x. when a multi-row is reordered)
 		return render.cancel
 	}, [props.folded, props.playAnimation])
+
+	const liveVals: LiveVals = {
+		// live vals
+	}
 
 	let sum = 0
 	const itemRows = props.transaction.items.map((item, itemIndex) => {
