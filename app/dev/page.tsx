@@ -1,7 +1,9 @@
-import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
+'use client'
+import { JNumberAccounting } from '@/components/JForm'
+import { useState } from 'react'
 
 export default function Dev() {
-	const defaultDate = '1980-03-23'
+	const [val, setVal] = useState('100.2')
 	return (
 		<div
 			style={{
@@ -11,7 +13,15 @@ export default function Dev() {
 				justifyContent: 'center',
 			}}
 		>
-			<JDatePicker defaultValue={defaultDate} />
+			<JNumberAccounting
+				value={val}
+				onChange={(e) => {
+					setVal(e.target.value)
+					console.log('onchange fired')
+				}}
+				maxDigLeftOfDecimal={8}
+				maxDigRightOfDecimal={2}
+			/>
 		</div>
 	)
 }

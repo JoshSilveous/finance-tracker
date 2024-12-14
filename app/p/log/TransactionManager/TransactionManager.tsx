@@ -246,6 +246,7 @@ export function TransactionManager() {
 								foldState[curTransaction.id],
 								updateFoldState
 							),
+							setCurTransactionData,
 						}
 						cells.push(
 							<SingleRow
