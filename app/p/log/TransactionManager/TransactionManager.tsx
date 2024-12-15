@@ -69,12 +69,47 @@ export type PendingChangeUpdater = <T extends keyof PendingChanges>(
 
 export function TransactionManager() {
 	const [loaded, setLoaded] = useState<boolean>(false)
-
 	const [transactionData, setTransactionData] = useState<StateTransaction[] | null>(null)
 	const [pendingChanges, setPendingChanges] = useState<PendingChanges>({
 		transactions: {},
 		items: {},
 	})
+	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
+	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
+	const [defSortOrder, setDefSortOrder] = useState<SortOrder>({})
+	const [curSortOrder, setCurSortOrder] = useState<SortOrder>({})
+	const [counter, setCounter] = useState(0)
+	const [foldState, setFoldState] = useState<FoldState>({})
+
+	useEffect(() => {
+		fetchAndLoadData(
+			setLoaded,
+			setTransactionData,
+			setFoldState,
+			setCategoryData,
+			setAccountData,
+			setDefSortOrder,
+			setCurSortOrder
+		)
+	}, [])
+
+	/**
+	 * `prevFoldStateRef` is used to reference the previous render's fold state during
+	 * current render. This allows animations to be played only when foldState changes,
+	 * instead of every re-render
+	 */
+	const prevFoldStateRef = useRef<FoldState>({})
+	useEffect(() => {
+		prevFoldStateRef.current = foldState
+	}, [foldState])
+
+	/**
+	 * References the DOM elements of each transaction row. Used for resorting logic.
+	 */
+	const transactionRowsRef = useRef<TransactionRowsRef>({})
+	const setTransactionRowRef = (transaction_id: string) => (node: HTMLInputElement) => {
+		transactionRowsRef.current[transaction_id] = node
+	}
 
 	const updatePendingChanges: PendingChangeUpdater = useCallback(
 		<T extends keyof PendingChanges>(
@@ -108,32 +143,6 @@ export function TransactionManager() {
 		[]
 	)
 
-	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
-	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
-
-	const [defSortOrder, setDefSortOrder] = useState<SortOrder>({})
-	const [curSortOrder, setCurSortOrder] = useState<SortOrder>({})
-	const [counter, setCounter] = useState(0)
-
-	const [foldState, setFoldState] = useState<FoldState>({})
-	/**
-	 * `prevFoldStateRef` is used to reference the previous render's fold state during
-	 * current render. This allows animations to be played only when foldState changes,
-	 * instead of every re-render
-	 */
-	const prevFoldStateRef = useRef<FoldState>({})
-	useEffect(() => {
-		prevFoldStateRef.current = foldState
-	}, [foldState])
-
-	/**
-	 * References the DOM elements of each transaction row. Used for resorting logic.
-	 */
-	const transactionRowsRef = useRef<TransactionRowsRef>({})
-	const setTransactionRowRef = (transaction_id: string) => (node: HTMLInputElement) => {
-		transactionRowsRef.current[transaction_id] = node
-	}
-
 	/**
 	 * See {@link FoldStateUpdater}
 	 */
@@ -145,47 +154,6 @@ export function TransactionManager() {
 			return newState
 		})
 	}, [])
-
-	useEffect(() => {
-		fetchAndLoadData(
-			setLoaded,
-			setTransactionData,
-			setFoldState,
-			setCategoryData,
-			setAccountData,
-			setDefSortOrder,
-			setCurSortOrder
-		)
-	}, [])
-
-	const dropdownOptionsCategory: JDropdownTypes.Option[] | null = useMemo(() => {
-		if (categoryData === null) {
-			return null
-		} else {
-			const options = categoryData.map((cat) => {
-				return {
-					name: cat.name,
-					value: cat.id,
-				}
-			})
-			options.unshift({ name: 'None', value: 'none' })
-			return options
-		}
-	}, [categoryData])
-	const dropdownOptionsAccount: JDropdownTypes.Option[] | null = useMemo(() => {
-		if (accountData === null) {
-			return null
-		} else {
-			const options = accountData.map((act) => {
-				return {
-					name: act.name,
-					value: act.id,
-				}
-			})
-			options.unshift({ name: 'None', value: 'none' })
-			return options
-		}
-	}, [accountData])
 
 	const updateItemSortOrder = useCallback(
 		(transaction: StateTransaction, transactionIndex: number) =>
@@ -216,6 +184,35 @@ export function TransactionManager() {
 		},
 		[]
 	)
+
+	const dropdownOptionsCategory: JDropdownTypes.Option[] | null = useMemo(() => {
+		if (categoryData === null) {
+			return null
+		} else {
+			const options = categoryData.map((cat) => {
+				return {
+					name: cat.name,
+					value: cat.id,
+				}
+			})
+			options.unshift({ name: 'None', value: 'none' })
+			return options
+		}
+	}, [categoryData])
+	const dropdownOptionsAccount: JDropdownTypes.Option[] | null = useMemo(() => {
+		if (accountData === null) {
+			return null
+		} else {
+			const options = accountData.map((act) => {
+				return {
+					name: act.name,
+					value: act.id,
+				}
+			})
+			options.unshift({ name: 'None', value: 'none' })
+			return options
+		}
+	}, [accountData])
 
 	const transactionsOrganized = useMemo(() => {
 		if (transactionData !== null) {

@@ -27,7 +27,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 	const [prevVal, setPrevVal] = useState(props.value ? (props.value as string) : '')
 	useEffect(() => {
 		updateDisplayText()
-	}, [])
+	}, [props.value])
 
 	// adds error class to input, if errors are stacking it will remain until 0.5s after they stop stacking
 	let errorEffectQueue = 0

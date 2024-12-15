@@ -162,7 +162,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 	let sum = 0
 	const itemRows = p.transaction.items.map((item, itemIndex) => {
-		sum += Number(item.amount)
+		sum += Number(liveVals.items[item.id].amount.val)
 
 		return [
 			<div
@@ -276,6 +276,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>,
 		]
 	})
+
+	console.log('re-rendered, sum is', sum)
 
 	const firstRow = [
 		<div
