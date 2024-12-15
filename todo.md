@@ -5,6 +5,7 @@
     -   Set up PendingChange system
     -   Set up history system
     -   remove datasets
+    -   STRESS TEST RESORTING (esp when scrollheight overflows)
 
     -   fix this bug https://imgur.com/NO91QLm
     -   remove data tags

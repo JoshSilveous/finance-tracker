@@ -13,6 +13,7 @@ import {
 	FoldStateUpdater,
 	PendingChanges,
 	PendingChangeUpdater,
+	SortOrder,
 	StateTransaction,
 } from '../TransactionManager'
 import s from './MultiRow.module.scss'
@@ -36,6 +37,8 @@ export interface MultiRowProps {
 	 */
 	updateFoldState: FoldStateUpdater
 	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
+	transactionSortPosChanged: boolean
+	defSortOrder: SortOrder
 }
 
 export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
@@ -164,6 +167,14 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	const itemRows = p.transaction.items.map((item, itemIndex) => {
 		sum += Number(liveVals.items[item.id].amount.val)
 
+		const itemSortPosChanged =
+			(
+				p.defSortOrder[p.transaction.date].find(
+					(it) => it[0] === transaction_id
+				) as string[]
+			).findIndex((it) => it === item.id) !==
+			itemIndex + 1
+
 		return [
 			<div
 				className={s.cell_container}
@@ -173,7 +184,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				ref={addToItemRowsRef(item.id)}
 			>
 				<div
-					className={s.reorder_grabber}
+					className={`${s.reorder_grabber} ${itemSortPosChanged ? s.changed : ''}`}
 					onMouseDown={handleItemReorder(
 						item,
 						itemRowsRef.current,
@@ -276,8 +287,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>,
 		]
 	})
-
-	console.log('re-rendered, sum is', sum)
 
 	const firstRow = [
 		<div

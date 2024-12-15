@@ -18,6 +18,7 @@ export interface SingleRowProps {
 	dropdownOptionsCategory: JDropdownTypes.Option[]
 	dropdownOptionsAccount: JDropdownTypes.Option[]
 	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
+	sortPosChanged: boolean
 }
 export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwardedRef) => {
 	const item = p.transaction.items[0]
@@ -54,9 +55,9 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 
 	return (
 		<div className={s.container} ref={forwardedRef}>
-			<div className={`${s.cell_container} ${s.row_controller}`}>
+			<div className={`${s.cell_container} ${s.row_controller} `}>
 				<div
-					className={s.reorder_grabber}
+					className={`${s.reorder_grabber} ${p.sortPosChanged ? s.changed : ''}`}
 					onMouseDown={p.onResortMouseDown}
 					title='Grab and drag to reposition this item'
 				>

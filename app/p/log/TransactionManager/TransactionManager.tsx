@@ -214,7 +214,7 @@ export function TransactionManager() {
 		}
 	}, [accountData])
 
-	const transactionsOrganized = useMemo(() => {
+	const dataOrganized = useMemo(() => {
 		if (transactionData !== null) {
 			return sortTransactions(curSortOrder, transactionData)
 		}
@@ -265,11 +265,11 @@ export function TransactionManager() {
 
 	if (
 		loaded &&
-		transactionsOrganized !== null &&
+		dataOrganized !== null &&
 		dropdownOptionsCategory !== null &&
 		dropdownOptionsAccount !== null
 	) {
-		if (transactionsOrganized.length === 0) {
+		if (dataOrganized.length === 0) {
 			grid = (
 				<p>
 					You do not have any transactions, click "Create new transaction" below to
@@ -279,11 +279,18 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			transactionsOrganized.forEach((groupedItem, groupedItemIndex) => {
+			dataOrganized.forEach((groupedItem, groupedItemIndex) => {
 				cells.push(<DateRow date={groupedItem.date} />)
 
 				groupedItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
+						const sortPosChanged =
+							defSortOrder[transaction.date].findIndex(
+								(it) => it === transaction.id
+							) !== index
+						if (sortPosChanged) {
+							console.log('sortPosChanged on', transaction.name)
+						}
 						const props: SingleRowProps = {
 							transaction,
 							pendingChanges,
@@ -299,6 +306,7 @@ export function TransactionManager() {
 								foldState[transaction.id],
 								updateFoldState
 							),
+							sortPosChanged,
 						}
 						cells.push(
 							<SingleRow
@@ -307,6 +315,13 @@ export function TransactionManager() {
 							/>
 						)
 					} else {
+						const sortPosChanged =
+							defSortOrder[transaction.date].findIndex(
+								(it) => it[0] === transaction.id
+							) !== index
+						if (sortPosChanged) {
+							console.log('sortPosChanged on', transaction.name)
+						}
 						const props: MultiRowProps = {
 							transaction,
 							pendingChanges,
@@ -330,6 +345,8 @@ export function TransactionManager() {
 								foldState[transaction.id],
 								updateFoldState
 							),
+							transactionSortPosChanged: sortPosChanged,
+							defSortOrder,
 						}
 
 						cells.push(

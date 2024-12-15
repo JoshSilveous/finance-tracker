@@ -1,6 +1,12 @@
 .container {
 	display: contents;
 
+	.changed {
+		color: var(--font-color-changed) !important;
+		option {
+			color: var(--font-color) !important;
+		}
+	}
 	.cell_container {
 		width: 100%;
 		box-sizing: border-box; // have to use border-box to prevent form element overlaps
@@ -19,12 +25,6 @@
 		&.last_col {
 			padding-right: calc(var(--padding-val) * 2);
 			border-radius: 0 var(--border-radius) var(--border-radius) 0;
-		}
-		&.changed {
-			color: var(--font-color-changed);
-			option {
-				color: var(--font-color);
-			}
 		}
 
 		&.row_controller {
