@@ -1,7 +1,7 @@
 'use client'
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { moveItemInArray, removeFromArray } from '@/utils'
+import { moveItemInArray } from '@/utils'
 import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
@@ -291,7 +291,6 @@ export function TransactionManager() {
 							transaction,
 							pendingChanges,
 							updatePendingChanges,
-							placeMarginAbove: index !== 0,
 							dropdownOptionsCategory,
 							dropdownOptionsAccount,
 							onResortMouseDown: handleTransactionReorder(
@@ -324,7 +323,6 @@ export function TransactionManager() {
 									? false
 									: prevFoldStateRef.current[transaction.id] !==
 									  foldState[transaction.id],
-							placeMarginAbove: index !== 0,
 							updateFoldState,
 							onTransactionReorderMouseDown: handleTransactionReorder(
 								groupedItem.transactions,

@@ -19,6 +19,12 @@
 			width: 100%;
 			box-sizing: border-box; // have to use border-box to prevent form element overlaps
 			background-color: var(--bg-color-lighter-2);
+			&.changed {
+				color: var(--font-color-changed);
+				option {
+					color: var(--font-color);
+				}
+			}
 		}
 
 		&:not(.control) {

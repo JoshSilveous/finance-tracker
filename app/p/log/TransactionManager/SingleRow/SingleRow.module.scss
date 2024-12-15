@@ -20,8 +20,11 @@
 			padding-right: calc(var(--padding-val) * 2);
 			border-radius: 0 var(--border-radius) var(--border-radius) 0;
 		}
-		.pending_change {
+		&.changed {
 			color: var(--font-color-changed);
+			option {
+				color: var(--font-color);
+			}
 		}
 
 		&.row_controller {
