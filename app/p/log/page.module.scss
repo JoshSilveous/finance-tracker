@@ -1,12 +1,9 @@
 .main {
 	height: 100%;
 	.transaction_manager_container {
-		background-color: var(--bg-color-lighter-1);
-		width: fit-content;
-		border-radius: 20px;
-		border: 2px solid var(--bg-color-lighter-2);
-		max-height: 500px;
 		display: flex;
+		max-height: 500px;
 		flex-direction: column;
+		overflow: auto;
 	}
 }

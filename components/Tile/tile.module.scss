@@ -1,0 +1,9 @@
+.container {
+	background-color: var(--bg-color-lighter-1);
+	width: fit-content;
+	border-radius: 20px;
+	border: 2px solid var(--bg-color-lighter-2);
+	&.resizable {
+		resize: vertical;
+	}
+}
