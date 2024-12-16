@@ -20,9 +20,6 @@ export const handleItemReorder =
 
 		const gridElem = itemRows[0].cells[0]?.parentNode?.parentNode?.parentNode?.parentNode
 			?.parentNode as HTMLDivElement
-		console.log('gridElem:', gridElem)
-
-		console.log('gridElem', gridElem)
 
 		const offsetX =
 			grabberNode.offsetLeft +

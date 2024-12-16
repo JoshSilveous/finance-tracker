@@ -1,7 +1,7 @@
 'use client'
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { moveItemInArray } from '@/utils'
+import { areDeeplyEqual, moveItemInArray } from '@/utils'
 import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
@@ -11,7 +11,7 @@ import { MultiRow, MultiRowProps } from './MultiRow/MultiRow'
 import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
 import { DateRow } from './DateRow/DateRow'
 import { sortTransactions } from './func/organizeTransactions'
-import { JNumberAccounting } from '@/components/JForm'
+import { JButton, JNumberAccounting } from '@/components/JForm'
 import { useScrollbarWidth } from '@/utils/useScrollbarWidth'
 
 export function TransactionManager() {
@@ -34,7 +34,6 @@ export function TransactionManager() {
 	 */
 	useEffect(() => {
 		if (mainContainerRef.current !== null) {
-			console.log('SETTING WIDTH')
 			mainContainerRef.current.style.setProperty(
 				'--scrollbar-width',
 				useScrollbarWidth() + 'px'
@@ -186,6 +185,19 @@ export function TransactionManager() {
 		return null
 	}, [transactionData, curSortOrder])
 
+	const isChanged = useMemo(() => {
+		if (Object.keys(pendingChanges.transactions).length !== 0) {
+			return true
+		}
+		if (Object.keys(pendingChanges.items).length !== 0) {
+			return true
+		}
+		if (!areDeeplyEqual(curSortOrder, defSortOrder)) {
+			return true
+		}
+		return false
+	}, [pendingChanges, curSortOrder, defSortOrder])
+
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		return [
 			{
@@ -335,7 +347,22 @@ export function TransactionManager() {
 			) : (
 				<>
 					<div className={s.grid_container}>{grid}</div>
-					<div className={s.control_container}>test</div>
+					<div className={s.control_container}>
+						<JButton
+							jstyle='primary'
+							disabled={!isChanged}
+							className={s.discard_button}
+						>
+							Discard Changes
+						</JButton>
+						<JButton
+							jstyle='primary'
+							disabled={!isChanged}
+							className={s.save_button}
+						>
+							Save Changes
+						</JButton>
+					</div>
 				</>
 			)}
 		</div>

@@ -20,7 +20,7 @@ import {
 	isStandardError,
 	promptError,
 	useBgLoad,
-	arraysAreEqual,
+	areDeeplyEqual,
 	typedQuerySelectAll,
 } from '@/utils'
 import {
@@ -86,7 +86,7 @@ export function CategoryManager() {
 	const saveOptionIsAvailable = useMemo(() => {
 		return (
 			pendingChanges.length !== 0 ||
-			!arraysAreEqual(currentSortOrder, defaultSortOrder)
+			!areDeeplyEqual(currentSortOrder, defaultSortOrder)
 		)
 	}, [pendingChanges, currentSortOrder, defaultSortOrder])
 
@@ -243,7 +243,7 @@ export function CategoryManager() {
 					e.preventDefault()
 					if (
 						pendingChangesRef.current.length !== 0 ||
-						!arraysAreEqual(
+						!areDeeplyEqual(
 							currentSortOrderRef.current!,
 							defaultSortOrderRef.current!
 						)

@@ -4,14 +4,13 @@ import s from './tile.module.scss'
 interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	resizable?: boolean
 }
-export function Tile(p: TileProps) {
+export function Tile({ className, resizable, ...rest }: TileProps) {
 	return (
 		<div
-			className={`${s.container} ${p.resizable ? s.resizable : ''} ${
-				p.className ? p.className : ''
+			className={`${s.container} ${resizable ? s.resizable : ''} ${
+				className ? className : ''
 			}`}
-		>
-			{p.children}
-		</div>
+			{...rest}
+		/>
 	)
 }

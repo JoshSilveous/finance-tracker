@@ -1,0 +1,9 @@
+.main {
+	height: 100%;
+	.transaction_manager_container {
+		display: flex;
+		max-height: 500px;
+		flex-direction: column;
+		overflow: auto;
+	}
+}
