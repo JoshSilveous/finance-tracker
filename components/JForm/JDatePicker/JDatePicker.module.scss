@@ -19,6 +19,13 @@
 		appearance: none;
 		-webkit-appearance: none;
 		position: relative;
+
+		// Hide custom Calendar icon if using FireFox (as of writing, no way to hide firefox's default).
+		// I promise you, I googled. Looks like there used to be a way and it stopped working.
+		@-moz-document url-prefix() {
+			padding: 8px 10px;
+		}
+
 		&::-webkit-calendar-picker-indicator {
 			opacity: 0;
 			display: block;
@@ -45,6 +52,10 @@
 		pointer-events: none;
 		transition: scale 0.2s ease;
 		scale: 100%;
+
+		@-moz-document url-prefix() {
+			display: none;
+		}
 	}
 	&:focus-within {
 		input {
