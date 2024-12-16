@@ -27,15 +27,15 @@ export const handleTransactionReorder =
 			const childNodes = Array.from(rowNode.childNodes) as HTMLDivElement[]
 			return childNodes
 		}
+		const gridElem = transactionRowsRef.current[transaction.id]?.parentNode
+			?.parentNode as HTMLDivElement
 
 		const thisRowIndex = transactionIndex
 		const thisRow = getTransactionRow(transaction)
 		const allRows = otherTransactions.map((transaction) =>
 			getTransactionRow(transaction)
 		)
-		const otherRows = allRows.filter(
-			(item) => item[0].dataset['transaction_id'] !== transaction.id
-		)
+		const otherRows = allRows.toSpliced(thisRowIndex, 1)
 
 		let forceFolded = false
 		if (transaction.items.length > 1 && !folded) {
@@ -156,10 +156,14 @@ export const handleTransactionReorder =
 			}, 0)
 			return test
 		}
-		let closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
+		let closestBreakpointIndex = getClosestBreakpointIndex(
+			e.clientY + gridElem.scrollTop
+		)
 		putMarginGapOnRow(thisRowIndex)
 
 		function handleReorderMouseMove(e: MouseEvent) {
+			console.log('e.clientY', e.clientY, '\nelement', thisRow)
+
 			let leftOffset = 0
 			thisRow.forEach((node) => {
 				node.style.left = `${e.clientX - offsetX + leftOffset}px`
@@ -167,7 +171,9 @@ export const handleTransactionReorder =
 				leftOffset += node.clientWidth
 			})
 			const prevClosestBreakpointIndex = closestBreakpointIndex
-			closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
+			closestBreakpointIndex = getClosestBreakpointIndex(
+				e.clientY + gridElem.scrollTop
+			)
 			if (firstRun || prevClosestBreakpointIndex !== closestBreakpointIndex) {
 				putMarginGapOnRow(closestBreakpointIndex)
 			}

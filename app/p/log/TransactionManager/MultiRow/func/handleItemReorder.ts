@@ -19,6 +19,11 @@ export const handleItemReorder =
 		const thisRow = itemRows.find((ref) => ref.item_id === item.id)!.cells
 		const otherRows = allRows.filter((_, index) => index !== itemIndex)!
 
+		const gridElem = itemRows[0].cells[0]?.parentNode?.parentNode?.parentNode
+			?.parentNode as HTMLDivElement
+
+		console.log('gridElem:', gridElem)
+
 		const offsetX =
 			grabberNode.offsetLeft +
 			grabberNode.offsetWidth / 2 -
@@ -117,7 +122,9 @@ export const handleItemReorder =
 					: closestIndex
 			}, 0)
 		}
-		let closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
+		let closestBreakpointIndex = getClosestBreakpointIndex(
+			e.clientY + gridElem.scrollTop
+		)
 
 		putMarginGapOnRow(itemIndex)
 		function handleReorderMouseMove(e: MouseEvent) {
@@ -129,7 +136,9 @@ export const handleItemReorder =
 			})
 
 			const prevClosestBreakpointIndex = closestBreakpointIndex
-			closestBreakpointIndex = getClosestBreakpointIndex(e.clientY)
+			closestBreakpointIndex = getClosestBreakpointIndex(
+				e.clientY + gridElem.scrollTop
+			)
 			if (firstRun || prevClosestBreakpointIndex !== closestBreakpointIndex) {
 				putMarginGapOnRow(closestBreakpointIndex)
 			}
