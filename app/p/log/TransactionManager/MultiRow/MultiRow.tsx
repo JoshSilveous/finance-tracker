@@ -179,7 +179,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		return [
 			<div
 				className={s.cell_container}
-				data-parent_id={p.transaction.id}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-1`}
 				ref={addToItemRowsRef(item.id)}
@@ -202,7 +201,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>,
 			<div
 				className={s.cell_container}
-				data-parent_id={p.transaction.id}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-2`}
 				ref={addToItemRowsRef(item.id)}
@@ -213,7 +211,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				className={`${s.cell_container} ${
 					liveVals.items[item.id].name.changed ? s.changed : ''
 				}`}
-				data-parent_id={p.transaction.id}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-3`}
 				ref={addToItemRowsRef(item.id)}
@@ -230,14 +227,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				className={`${s.cell_container} ${
 					liveVals.items[item.id].amount.changed ? s.changed : ''
 				}`}
-				data-parent_id={p.transaction.id}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-4`}
 				ref={addToItemRowsRef(item.id)}
 			>
 				<JNumberAccounting
 					value={liveVals.items[item.id].amount.val}
-					data-rerender_tag={p.transaction.id}
 					onChange={handleChange}
 					onBlur={handleChange}
 					data-item_id={item.id}
@@ -248,7 +243,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				className={`${s.cell_container} ${
 					liveVals.items[item.id].category_id.changed ? s.changed : ''
 				}`}
-				data-parent_id={p.transaction.id}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-5`}
 				ref={addToItemRowsRef(item.id)}
@@ -270,7 +264,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				className={`${s.cell_container} ${
 					liveVals.items[item.id].account_id.changed ? s.changed : ''
 				}`}
-				data-parent_id={p.transaction.id}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-7`}
 				ref={addToItemRowsRef(item.id)}
@@ -292,11 +285,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	})
 
 	const firstRow = [
-		<div
-			className={`${s.cell_container} ${s.first_row}`}
-			key={`${p.transaction.id}-1`}
-			data-transaction_id={p.transaction.id}
-		>
+		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-1`}>
 			<div
 				className={`${s.reorder_grabber} ${
 					p.transactionSortPosChanged ? s.changed : ''
@@ -314,7 +303,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>
 			<div
 				className={`${s.fold_toggle} ${p.folded ? s.folded : ''}`}
-				data-transaction_id={p.transaction.id}
 				onClick={() => p.updateFoldState(p.transaction.id)}
 				title={p.folded ? 'Click to reveal items' : 'Click to hide items'}
 			>
@@ -326,7 +314,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				liveVals.date.changed ? s.changed : ''
 			}`}
 			key={`${p.transaction.id}-2`}
-			data-transaction_id={p.transaction.id}
 		>
 			<JDatePicker
 				value={liveVals.date.val}
@@ -340,7 +327,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				liveVals.name.changed ? s.changed : ''
 			}`}
 			key={`${p.transaction.id}-3`}
-			data-transaction_id={p.transaction.id}
 		>
 			<JInput
 				value={liveVals.name.val}
@@ -349,25 +335,13 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				data-key='name'
 			/>
 		</div>,
-		<div
-			className={`${s.cell_container} ${s.first_row}`}
-			key={`${p.transaction.id}-4`}
-			data-transaction_id={p.transaction.id}
-		>
+		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-4`}>
 			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
-		<div
-			className={`${s.cell_container} ${s.first_row}`}
-			key={`${p.transaction.id}-5`}
-			data-transaction_id={p.transaction.id}
-		>
+		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-5`}>
 			<JInput value={uniqueCategories.join(', ')} disabled minimalStyle />
 		</div>,
-		<div
-			className={`${s.cell_container} ${s.first_row}`}
-			key={`${p.transaction.id}-6`}
-			data-transaction_id={p.transaction.id}
-		>
+		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-6`}>
 			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
 		</div>,
 	]
@@ -386,7 +360,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				className={`${s.column} ${uniqueColumnClassNames[rowItemIndex]} ${
 					p.folded && !p.playAnimation ? s.folded : ''
 				}`}
-				data-transaction_id={p.transaction.id}
 				ref={addToColumnNodesRef}
 			>
 				{rowItem} {itemRows.map((itemRow) => itemRow[rowItemIndex])}
@@ -395,11 +368,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	})
 
 	return (
-		<div
-			className={s.container}
-			data-transaction_id={p.transaction.id}
-			ref={forwardedRef}
-		>
+		<div className={s.container} ref={forwardedRef}>
 			{columns}
 		</div>
 	)
