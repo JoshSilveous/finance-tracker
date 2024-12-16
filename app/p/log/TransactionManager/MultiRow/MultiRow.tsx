@@ -39,6 +39,7 @@ export interface MultiRowProps {
 	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	transactionSortPosChanged: boolean
 	defSortOrder: SortOrder
+	disableTransactionResort: boolean
 }
 
 export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
@@ -194,7 +195,9 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					)}
 					title='Grab and drag to reposition this item'
 				>
-					<ReorderIcon />
+					<button>
+						<ReorderIcon />
+					</button>
 				</div>
 			</div>,
 			<div
@@ -295,11 +298,19 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			data-transaction_id={p.transaction.id}
 		>
 			<div
-				className={s.reorder_grabber}
+				className={`${s.reorder_grabber} ${
+					p.transactionSortPosChanged ? s.changed : ''
+				}`}
 				onMouseDown={p.onTransactionReorderMouseDown}
-				title='Grab and drag to reposition this item'
+				title={
+					p.disableTransactionResort
+						? "Repositioning not allowed while there's only one transaction under this date"
+						: 'Grab and drag to reposition this item'
+				}
 			>
-				<ReorderIcon />
+				<button disabled={p.disableTransactionResort}>
+					<ReorderIcon />
+				</button>
 			</div>
 			<div
 				className={`${s.fold_toggle} ${p.folded ? s.folded : ''}`}

@@ -288,9 +288,6 @@ export function TransactionManager() {
 							defSortOrder[transaction.date].findIndex(
 								(it) => it === transaction.id
 							) !== index
-						if (sortPosChanged) {
-							console.log('sortPosChanged on', transaction.name)
-						}
 						const props: SingleRowProps = {
 							transaction,
 							pendingChanges,
@@ -307,6 +304,7 @@ export function TransactionManager() {
 								updateFoldState
 							),
 							sortPosChanged,
+							disableTransactionResort: groupedItem.transactions.length === 1,
 						}
 						cells.push(
 							<SingleRow
@@ -319,9 +317,6 @@ export function TransactionManager() {
 							defSortOrder[transaction.date].findIndex(
 								(it) => it[0] === transaction.id
 							) !== index
-						if (sortPosChanged) {
-							console.log('sortPosChanged on', transaction.name)
-						}
 						const props: MultiRowProps = {
 							transaction,
 							pendingChanges,
@@ -347,6 +342,7 @@ export function TransactionManager() {
 							),
 							transactionSortPosChanged: sortPosChanged,
 							defSortOrder,
+							disableTransactionResort: groupedItem.transactions.length === 1,
 						}
 
 						cells.push(

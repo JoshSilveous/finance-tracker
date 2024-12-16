@@ -19,6 +19,7 @@ export interface SingleRowProps {
 	dropdownOptionsAccount: JDropdownTypes.Option[]
 	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	sortPosChanged: boolean
+	disableTransactionResort: boolean
 }
 export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwardedRef) => {
 	const item = p.transaction.items[0]
@@ -59,9 +60,15 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				<div
 					className={`${s.reorder_grabber} ${p.sortPosChanged ? s.changed : ''}`}
 					onMouseDown={p.onResortMouseDown}
-					title='Grab and drag to reposition this item'
+					title={
+						p.disableTransactionResort
+							? "Repositioning not allowed while there's only one transaction under this date"
+							: 'Grab and drag to reposition this item'
+					}
 				>
-					<ReorderIcon />
+					<button disabled={p.disableTransactionResort}>
+						<ReorderIcon />
+					</button>
 				</div>
 			</div>
 			<div

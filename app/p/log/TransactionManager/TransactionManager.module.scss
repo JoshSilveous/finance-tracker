@@ -3,6 +3,7 @@
 	--gap-row-height: 10px;
 	.grid {
 		border-color: transparent;
+		max-height: calc(100vh - 200px);
 	}
 
 	.popped_out {
