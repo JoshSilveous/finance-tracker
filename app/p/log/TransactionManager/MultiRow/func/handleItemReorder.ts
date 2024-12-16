@@ -22,8 +22,6 @@ export const handleItemReorder =
 		const gridElem = itemRows[0].cells[0]?.parentNode?.parentNode?.parentNode
 			?.parentNode as HTMLDivElement
 
-		console.log('gridElem:', gridElem)
-
 		const offsetX =
 			grabberNode.offsetLeft +
 			grabberNode.offsetWidth / 2 -
@@ -56,10 +54,11 @@ export const handleItemReorder =
 			leftOffset += node.clientWidth
 		})
 
-		const breakpoints = otherRows.map((row) => row[0].offsetTop)
-		breakpoints.push(
-			breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
-		)
+		const breakpoints = (() => {
+			const arr = otherRows.map((row) => row[0].offsetTop)
+			arr.push(arr.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight)
+			return arr
+		})()
 
 		let firstRun = true
 		function putMarginGapOnRow(rowIndex: number | 'none') {
@@ -125,8 +124,67 @@ export const handleItemReorder =
 		let closestBreakpointIndex = getClosestBreakpointIndex(
 			e.clientY + gridElem.scrollTop
 		)
+		putMarginGapOnRow(closestBreakpointIndex)
 
-		putMarginGapOnRow(itemIndex)
+		const SCROLL_MARGIN = 50 // margin from top/bottom of grid container to activate scrolling effect
+		const SCROLL_SPEED_PER_SEC = 200
+		const SPEED_UP_AFTER_SEC = 0.5
+		const SPEED_UP_MULTIPLIER = 2
+
+		const scroll = (() => {
+			let isScrollingUp = false
+			let isScrollingDown = false
+
+			return {
+				startUp: async () => {
+					if (!isScrollingUp) {
+						isScrollingUp = true
+
+						let isSpedUp = false
+						delay(SPEED_UP_AFTER_SEC * 1000).then(() => {
+							isSpedUp = true
+						})
+
+						do {
+							if (isSpedUp) {
+								gridElem.scrollTop -=
+									(SCROLL_SPEED_PER_SEC / 100) * SPEED_UP_MULTIPLIER
+							} else {
+								gridElem.scrollTop -= SCROLL_SPEED_PER_SEC / 100
+							}
+							await delay(10)
+						} while (isScrollingUp)
+					}
+				},
+				stopUp: () => {
+					isScrollingUp = false
+				},
+				startDown: async () => {
+					if (!isScrollingDown) {
+						isScrollingDown = true
+
+						let isSpedUp = false
+						delay(SPEED_UP_AFTER_SEC * 1000).then(() => {
+							isSpedUp = true
+						})
+
+						do {
+							if (isSpedUp) {
+								gridElem.scrollTop +=
+									(SCROLL_SPEED_PER_SEC / 100) * SPEED_UP_MULTIPLIER
+							} else {
+								gridElem.scrollTop += SCROLL_SPEED_PER_SEC / 100
+							}
+							await delay(10)
+						} while (isScrollingDown)
+					}
+				},
+				stopDown: () => {
+					isScrollingDown = false
+				},
+			}
+		})()
+
 		function handleReorderMouseMove(e: MouseEvent) {
 			let leftOffset = 0
 			thisRow.forEach((node) => {
@@ -143,6 +201,18 @@ export const handleItemReorder =
 				putMarginGapOnRow(closestBreakpointIndex)
 			}
 			firstRun = false
+
+			if (e.clientY < gridElem.offsetTop + SCROLL_MARGIN) {
+				scroll.startUp()
+			} else {
+				scroll.stopUp()
+			}
+
+			if (e.clientY > gridElem.offsetTop + gridElem.offsetHeight - SCROLL_MARGIN) {
+				scroll.startDown()
+			} else {
+				scroll.stopDown()
+			}
 		}
 
 		function handleReorderMouseUp() {
@@ -154,6 +224,9 @@ export const handleItemReorder =
 				node.classList.remove(s.popped_out)
 			})
 
+			scroll.stopUp()
+			scroll.stopDown()
+
 			document.body.style.cursor = ''
 			window.removeEventListener('mousemove', handleReorderMouseMove)
 			window.removeEventListener('mouseup', handleReorderMouseUp)
@@ -163,8 +236,10 @@ export const handleItemReorder =
 				handleTransactionItemReorder(itemIndex, closestBreakpointIndex)
 			}
 		}
+
 		function handleRightClick(e: MouseEvent) {
 			e.preventDefault()
+
 			window.removeEventListener('mousemove', handleReorderMouseMove)
 			window.removeEventListener('mouseup', handleReorderMouseUp)
 			window.removeEventListener('contextmenu', handleRightClick)

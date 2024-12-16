@@ -55,6 +55,7 @@ export const handleTransactionReorder =
 
 		const originalRowHeight = parseInt(colStyle.height)
 		let calculatedRowHeight = 0
+
 		if (forceFolded) {
 			const firstRowCell = thisRow[1].children[0] as HTMLDivElement
 			calculatedRowHeight += firstRowCell.offsetHeight
@@ -64,20 +65,21 @@ export const handleTransactionReorder =
 			calculatedRowHeight = thisRow[1].offsetHeight
 		}
 
-		const breakpoints = otherRows.map((row, index) => {
-			if (forceFolded && index > thisRowIndex - 1) {
-				return (
-					row[0].offsetTop -
-					originalRowHeight +
-					calculatedRowHeight -
-					gapHeight / 2
-				)
-			}
-			return row[0].offsetTop - gapHeight / 2
-		})
-		breakpoints.push(
-			breakpoints.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight
-		)
+		const breakpoints = (() => {
+			const arr = otherRows.map((row, index) => {
+				if (forceFolded && index > thisRowIndex - 1) {
+					return (
+						row[0].offsetTop -
+						originalRowHeight +
+						calculatedRowHeight -
+						gapHeight / 2
+					)
+				}
+				return row[0].offsetTop - gapHeight / 2
+			})
+			arr.push(arr.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight)
+			return arr
+		})()
 
 		let leftOffset = 0
 		const startWidths = thisRow.map((item) => getComputedStyle(item).width)
@@ -159,11 +161,68 @@ export const handleTransactionReorder =
 		let closestBreakpointIndex = getClosestBreakpointIndex(
 			e.clientY + gridElem.scrollTop
 		)
-		putMarginGapOnRow(thisRowIndex)
+		putMarginGapOnRow(closestBreakpointIndex)
+
+		const SCROLL_MARGIN = 50 // margin from top/bottom of grid container to activate scrolling effect
+		const SCROLL_SPEED_PER_SEC = 200
+		const SPEED_UP_AFTER_SEC = 0.5
+		const SPEED_UP_MULTIPLIER = 2
+
+		const scroll = (() => {
+			let isScrollingUp = false
+			let isScrollingDown = false
+
+			return {
+				startUp: async () => {
+					if (!isScrollingUp) {
+						isScrollingUp = true
+
+						let isSpedUp = false
+						delay(SPEED_UP_AFTER_SEC * 1000).then(() => {
+							isSpedUp = true
+						})
+
+						do {
+							if (isSpedUp) {
+								gridElem.scrollTop -=
+									(SCROLL_SPEED_PER_SEC / 100) * SPEED_UP_MULTIPLIER
+							} else {
+								gridElem.scrollTop -= SCROLL_SPEED_PER_SEC / 100
+							}
+							await delay(10)
+						} while (isScrollingUp)
+					}
+				},
+				stopUp: () => {
+					isScrollingUp = false
+				},
+				startDown: async () => {
+					if (!isScrollingDown) {
+						isScrollingDown = true
+
+						let isSpedUp = false
+						delay(SPEED_UP_AFTER_SEC * 1000).then(() => {
+							isSpedUp = true
+						})
+
+						do {
+							if (isSpedUp) {
+								gridElem.scrollTop +=
+									(SCROLL_SPEED_PER_SEC / 100) * SPEED_UP_MULTIPLIER
+							} else {
+								gridElem.scrollTop += SCROLL_SPEED_PER_SEC / 100
+							}
+							await delay(10)
+						} while (isScrollingDown)
+					}
+				},
+				stopDown: () => {
+					isScrollingDown = false
+				},
+			}
+		})()
 
 		function handleReorderMouseMove(e: MouseEvent) {
-			console.log('e.clientY', e.clientY, '\nelement', thisRow)
-
 			let leftOffset = 0
 			thisRow.forEach((node) => {
 				node.style.left = `${e.clientX - offsetX + leftOffset}px`
@@ -178,6 +237,18 @@ export const handleTransactionReorder =
 				putMarginGapOnRow(closestBreakpointIndex)
 			}
 			firstRun = false
+
+			if (e.clientY < gridElem.offsetTop + SCROLL_MARGIN) {
+				scroll.startUp()
+			} else {
+				scroll.stopUp()
+			}
+
+			if (e.clientY > gridElem.offsetTop + gridElem.offsetHeight - SCROLL_MARGIN) {
+				scroll.startDown()
+			} else {
+				scroll.stopDown()
+			}
 		}
 
 		function handleReorderMouseUp() {
@@ -188,6 +259,9 @@ export const handleTransactionReorder =
 				node.style.left = ''
 				node.classList.remove(s.popped_out)
 			})
+
+			scroll.stopUp()
+			scroll.stopDown()
 
 			document.body.style.cursor = ''
 			window.removeEventListener('mousemove', handleReorderMouseMove)
@@ -201,6 +275,15 @@ export const handleTransactionReorder =
 				updateFoldState(transaction.id, false)
 			}
 		}
+
+		function handleRightClick(e: MouseEvent) {
+			e.preventDefault()
+
+			window.removeEventListener('mousemove', handleReorderMouseMove)
+			window.removeEventListener('mouseup', handleReorderMouseUp)
+			window.removeEventListener('contextmenu', handleRightClick)
+		}
 		window.addEventListener('mousemove', handleReorderMouseMove)
 		window.addEventListener('mouseup', handleReorderMouseUp)
+		window.addEventListener('contextmenu', handleRightClick)
 	}
