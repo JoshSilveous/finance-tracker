@@ -1,17 +1,12 @@
-import { FetchedTransaction } from '@/database'
 import s from '../TransactionManager.module.scss'
 import { delay } from '@/utils'
 import { MutableRefObject } from 'react'
-import {
-	FoldStateUpdater,
-	StateTransaction,
-	TransactionRowsRef,
-} from '../TransactionManager'
+import { FoldStateUpdater, FormTransaction, TransactionRowsRef } from '../TransactionManager'
 
 export const handleTransactionReorder =
 	(
-		otherTransactions: StateTransaction[],
-		transaction: StateTransaction,
+		otherTransactions: FormTransaction[],
+		transaction: FormTransaction,
 		transactionIndex: number,
 		updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
 		transactionRowsRef: MutableRefObject<TransactionRowsRef>,
@@ -22,7 +17,7 @@ export const handleTransactionReorder =
 		updateFoldState: FoldStateUpdater
 	) =>
 	(e: React.MouseEvent<HTMLDivElement>) => {
-		function getTransactionRow(transaction: StateTransaction) {
+		function getTransactionRow(transaction: FormTransaction) {
 			const rowNode = transactionRowsRef.current[transaction.id]!
 			const childNodes = Array.from(rowNode.childNodes) as HTMLDivElement[]
 			return childNodes

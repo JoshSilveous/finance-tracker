@@ -14,7 +14,7 @@ import {
 	PendingChanges,
 	PendingChangeUpdater,
 	SortOrder,
-	StateTransaction,
+	FormTransaction,
 } from '../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JInput, JNumberAccounting } from '@/components/JForm'
@@ -24,7 +24,7 @@ import { foldRenderer } from './func/foldRenderer'
 import { genLiveVals, LiveVals } from './genLiveVals'
 
 export interface MultiRowProps {
-	transaction: StateTransaction
+	transaction: FormTransaction
 	pendingChanges: PendingChanges
 	updatePendingChanges: PendingChangeUpdater
 	dropdownOptionsCategory: JDropdownTypes.Option[]

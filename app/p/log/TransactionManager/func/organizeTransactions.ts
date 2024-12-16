@@ -1,12 +1,12 @@
-import { GroupedTransaction, SortOrder, StateTransaction } from '../TransactionManager'
+import { GroupedTransaction, SortOrder, FormTransaction } from '../TransactionManager'
 
-export function sortTransactions(sortOrder: SortOrder, transactionData: StateTransaction[]) {
+export function sortTransactions(sortOrder: SortOrder, transactionData: FormTransaction[]) {
 	return Object.entries(sortOrder).map((entry) => {
 		return {
 			date: entry[0],
 			transactions: entry[1].map((sortItem) => {
 				if (Array.isArray(sortItem)) {
-					const newItems: StateTransaction['items'] = []
+					const newItems: FormTransaction['items'] = []
 					const thisTransaction = transactionData.find(
 						(item) => item.id === sortItem[0]
 					)!

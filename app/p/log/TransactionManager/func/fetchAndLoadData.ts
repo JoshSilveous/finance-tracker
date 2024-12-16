@@ -3,21 +3,15 @@ import {
 	fetchCategoryData,
 	FetchedAccount,
 	FetchedCategory,
-	FetchedTransaction,
 	fetchTransactionData,
 } from '@/database'
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
-import {
-	FoldState,
-	PendingChanges,
-	SortOrder,
-	StateTransaction,
-} from '../TransactionManager'
+import { FoldState, SortOrder, FormTransaction } from '../TransactionManager'
 
 export async function fetchAndLoadData(
 	setLoaded: Dispatch<SetStateAction<boolean>>,
-	setTransactionData: Dispatch<SetStateAction<StateTransaction[] | null>>,
+	setTransactionData: Dispatch<SetStateAction<FormTransaction[] | null>>,
 	setFoldState: Dispatch<SetStateAction<FoldState>>,
 	setCategoryData: Dispatch<SetStateAction<FetchedCategory[] | null>>,
 	setAccountData: Dispatch<SetStateAction<FetchedAccount[] | null>>,
@@ -64,7 +58,7 @@ export async function fetchAndLoadData(
 			})
 
 			// convert FetchedTransaction to StateTransaction
-			const convertedTransactions: StateTransaction[] = transactions.map(
+			const convertedTransactions: FormTransaction[] = transactions.map(
 				(transaction) => ({
 					...transaction,
 					items: transaction.items.map((item) => ({

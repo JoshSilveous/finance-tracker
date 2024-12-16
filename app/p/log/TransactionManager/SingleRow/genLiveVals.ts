@@ -1,4 +1,4 @@
-import { PendingChanges, StateTransaction } from '../TransactionManager'
+import { PendingChanges, FormTransaction } from '../TransactionManager'
 
 export type LiveVals = {
 	amount: { val: string; changed: boolean }
@@ -11,7 +11,7 @@ export type LiveVals = {
 /**
  * Packages together transaction / pendingChange data for easy access / management
  */
-export function genLiveVals(transaction: StateTransaction, pendingChanges: PendingChanges) {
+export function genLiveVals(transaction: FormTransaction, pendingChanges: PendingChanges) {
 	const transaction_id = transaction.id
 	const item = transaction.items[0]
 	const item_id = item.id

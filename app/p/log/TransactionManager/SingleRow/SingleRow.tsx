@@ -4,15 +4,11 @@ import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdow
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import s from './SingleRow.module.scss'
 import { ChangeEventHandler, forwardRef, useCallback, useMemo } from 'react'
-import {
-	PendingChanges,
-	StateTransaction,
-	PendingChangeUpdater,
-} from '../TransactionManager'
+import { PendingChanges, FormTransaction, PendingChangeUpdater } from '../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
 
 export interface SingleRowProps {
-	transaction: StateTransaction
+	transaction: FormTransaction
 	pendingChanges: PendingChanges
 	updatePendingChanges: PendingChangeUpdater
 	dropdownOptionsCategory: JDropdownTypes.Option[]

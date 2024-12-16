@@ -13,63 +13,9 @@ import { DateRow } from './DateRow/DateRow'
 import { sortTransactions } from './func/organizeTransactions'
 import { JNumberAccounting } from '@/components/JForm'
 
-export type SortOrderItem = string | string[]
-export type SortOrder = {
-	[date: string]: SortOrderItem[]
-}
-export type TransactionRowsRef = {
-	[id: string]: HTMLDivElement | null
-}
-export type FoldState = {
-	[id: string]: boolean
-}
-
-/**
- * {@link FetchedTransaction `FetchedTransaction`}, but `items.amount` is a `string` instead of `number`.
- *
- * This change is needed for the {@link JNumberAccounting `<JNumberAccounting />`} component to function correctly
- */
-export interface StateTransaction extends Omit<FetchedTransaction, 'items'> {
-	items: (Omit<FetchedTransaction['items'][number], 'amount'> & { amount: string })[]
-}
-
-export type GroupedTransaction = { date: string; transactions: StateTransaction[] }
-
-/**
- * Used to update a specific transaction's `foldState` in a concise way.
- * @param transaction_id
- * @param folded the value to set the `foldState` to. Leave undefined to toggle.
- */
-export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
-
-export type PendingChanges = {
-	transactions: {
-		[id: string]: Partial<Omit<StateTransaction, 'id' | 'items' | 'order_position'>>
-	}
-	items: {
-		[id: string]: Partial<
-			Omit<StateTransaction['items'][number], 'id' | 'order_position'>
-		>
-	}
-}
-
-/**
- * Simplifies updating the `pendingChanges` array.
- * @param type `'transactions' | 'items'`
- * @param id The `item` or `transaction` id.
- * @param key The key of the item or transaction you're modifying.
- * @param value optional, leaving undefined will delete the value from `pendingChanges`
- */
-export type PendingChangeUpdater = <T extends keyof PendingChanges>(
-	type: T,
-	id: string,
-	key: keyof PendingChanges[T][number],
-	value?: string
-) => void
-
 export function TransactionManager() {
 	const [loaded, setLoaded] = useState<boolean>(false)
-	const [transactionData, setTransactionData] = useState<StateTransaction[] | null>(null)
+	const [transactionData, setTransactionData] = useState<FormTransaction[] | null>(null)
 	const [pendingChanges, setPendingChanges] = useState<PendingChanges>({
 		transactions: {},
 		items: {},
@@ -111,6 +57,9 @@ export function TransactionManager() {
 		transactionRowsRef.current[transaction_id] = node
 	}
 
+	/**
+	 * see {@link PendingChangeUpdater `PendingChangeUpdater`} for usage
+	 */
 	const updatePendingChanges: PendingChangeUpdater = useCallback(
 		<T extends keyof PendingChanges>(
 			type: T,
@@ -143,9 +92,6 @@ export function TransactionManager() {
 		[]
 	)
 
-	/**
-	 * See {@link FoldStateUpdater}
-	 */
 	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {
 		setFoldState((prev) => {
 			const newState = structuredClone(prev)
@@ -155,8 +101,12 @@ export function TransactionManager() {
 		})
 	}, [])
 
+	/**
+	 * Updated the sort order of an item within a transaction
+	 * @param transaction
+	 */
 	const updateItemSortOrder = useCallback(
-		(transaction: StateTransaction, transactionIndex: number) =>
+		(transaction: FormTransaction, transactionIndex: number) =>
 			(oldItemIndex: number, newItemIndex: number) => {
 				setCurSortOrder((prev) => {
 					const clone = structuredClone(prev)
@@ -374,3 +324,138 @@ export function TransactionManager() {
 		</div>
 	)
 }
+/**
+ * Can either be a string (representing the transaction_id of a single-item) or an array of string (with the first item representing the transaction_id of a multi-item, and the following items representing the item_ids)
+ *
+ * @example ```ts
+ * const sortItems: SortOrderItem[] = ['single_1', 'single_2', ['multi_1', 'item_1', 'item_2', ...], 'single_3', ...]
+ * ```
+ */
+export type SortOrderItem = string | string[]
+
+/**
+ * An object that keeps the sort order, keyed by `date`.
+ *
+ * @example
+ * ```ts
+ * const sortOrder: SortOrder = {
+ *     "2024-12-03": ['transaction_1', 'transaction_2'],
+ *     "2024-12-02": [['transaction_3', 'item_1', 'item_2'], 'transaction_4']
+ * }
+ * ```
+ *
+ */
+export type SortOrder = {
+	[date: string]: SortOrderItem[]
+}
+
+/**
+ * References the parent row HTML elements of each transaction
+ */
+export type TransactionRowsRef = {
+	[id: string]: HTMLDivElement | null
+}
+
+/**
+ * Keeps track of multi-rows and whether or not they are folded.
+ *
+ * @example
+ * ```ts
+ * const foldState: FoldState = {
+ *     "transaction_1": false,
+ *     "transaction_2": true
+ * }
+ * ```
+ */
+export type FoldState = {
+	[id: string]: boolean
+}
+
+/**
+ * Form-friendly version of {@link FetchedTransaction `FetchedTransaction`}
+ *
+ * _`items.amount` is now a string instead of number_
+ *
+ * This change is needed for the {@link JNumberAccounting `<JNumberAccounting />`} component to function correctly
+ *
+ * Structure:
+ * ```ts
+ * interface FormTransaction {
+ *     id: string
+ *     date: string
+ *     name: string
+ *     order_position: number
+ *     items: {
+ *         id: string
+ *         account_id: string | null
+ *         category_id: string | null
+ *         name: string
+ *         amount: string
+ *         order_position: number
+ *     }[]
+ * }
+ * ```
+ */
+export interface FormTransaction extends Omit<FetchedTransaction, 'items'> {
+	items: (Omit<FetchedTransaction['items'][number], 'amount'> & { amount: string })[]
+}
+
+/**
+ * Transaction(s), grouped by date
+ */
+export type GroupedTransaction = { date: string; transactions: FormTransaction[] }
+
+/**
+ * Used to update a specific transaction's `foldState` in a concise way.
+ * @param transaction_id
+ * @param folded the value to set the `foldState` to. Leave undefined to toggle.
+ */
+export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
+
+/**
+ * An object that stores any pending changes the user made to the Transaction data. Keys for the `transactions` and `items` properties are added/removed dynamically using a {@link PendingChangeUpdater `PendingChangeUpdater`}.
+ *
+ * @example
+ * ```ts
+ * pendingChanges = {
+ *     transactions: {
+ *         "transaction_1": {
+ *             "name": "New Name",
+ *             "date": "2024-12-03"
+ *         }
+ *     },
+ *     items: {}
+ * }
+ * ```
+ */
+export type PendingChanges = {
+	transactions: {
+		[id: string]: Partial<Omit<FormTransaction, 'id' | 'items' | 'order_position'>>
+	}
+	items: {
+		[id: string]: Partial<
+			Omit<FormTransaction['items'][number], 'id' | 'order_position'>
+		>
+	}
+}
+
+/**
+ * Simplifies updating the `pendingChanges` array. Automatically adds/removes changes to keep pendingChanges minimized to relevant information.
+ *
+ * @param type `'transactions' | 'items'`
+ * @param id The `item` or `transaction` id.
+ * @param key The key of the item or transaction you're modifying.
+ * @param value optional, leaving undefined will delete the value from `pendingChanges`
+ *
+ * @example
+ * ```ts
+ * updatePendingChanges('transactions', transaction.id, 'name', 'Burger') // creates/updates "name" for specified transaction as needed
+ * updatePendingChanges('items', item.id, 'name') // removes "name" for specified item (implying the user has undone their change)
+ * ```
+ */
+export type PendingChangeUpdater = <T extends keyof PendingChanges>(
+	type: T,
+	id: string,
+	key: keyof PendingChanges[T][number],
+	value?: string
+) => void
