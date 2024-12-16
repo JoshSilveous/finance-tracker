@@ -1,0 +1,17 @@
+.scrollable_container {
+	height: 500px; /* Or any height less than the content's height to make it scrollable */
+	overflow: auto; /* Make the parent container scrollable */
+}
+
+.grid_container {
+	display: grid;
+	grid-template-rows: auto 1fr;
+	grid-template-columns: repeat(3, 1fr);
+}
+
+.grid_item.sticky {
+	position: sticky;
+	top: 0; /* Relative to the parent container's top */
+	z-index: 1;
+	background-color: white;
+}

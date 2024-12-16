@@ -201,36 +201,56 @@ export function TransactionManager() {
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		return [
 			{
-				content: <></>,
+				content: <div className={`${s.header_container} ${s.control}`}></div>,
 				defaultWidth: 75,
 				noResize: true,
 			},
 			{
-				content: <div className={`${s.header_container} ${s.first}`}>Date</div>,
+				content: (
+					<div className={`${s.header_container} ${s.first}`}>
+						<div className={s.text}>Date</div>
+					</div>
+				),
 				defaultWidth: 140,
 				minWidth: 105,
 				maxWidth: 150,
 			},
 			{
-				content: <div className={s.header_container}>Name</div>,
+				content: (
+					<div className={s.header_container}>
+						<div className={s.text}>Name</div>
+					</div>
+				),
 				defaultWidth: 260,
 				minWidth: 160,
 				maxWidth: 300,
 			},
 			{
-				content: <div className={s.header_container}>Amount</div>,
+				content: (
+					<div className={s.header_container}>
+						<div className={s.text}>Amount</div>
+					</div>
+				),
 				defaultWidth: 140,
 				minWidth: 95,
 				maxWidth: 160,
 			},
 			{
-				content: <div className={s.header_container}>Category</div>,
+				content: (
+					<div className={s.header_container}>
+						<div className={s.text}>Category</div>
+					</div>
+				),
 				defaultWidth: 170,
 				minWidth: 110,
 				maxWidth: 200,
 			},
 			{
-				content: <div className={`${s.header_container} ${s.last}`}>Account</div>,
+				content: (
+					<div className={`${s.header_container} ${s.last}`}>
+						<div className={s.text}>Account</div>
+					</div>
+				),
 				defaultWidth: 170,
 				minWidth: 110,
 				maxWidth: 200,
@@ -336,6 +356,7 @@ export function TransactionManager() {
 				cells: cells,
 				noBorders: true,
 				maxTableWidth: 1000,
+				stickyHeaders: true,
 			}
 			grid = <JGrid className={s.grid} {...gridConfig} />
 		}

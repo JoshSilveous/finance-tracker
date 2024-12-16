@@ -65,6 +65,7 @@ export namespace JGridTypes {
 		minColumnWidth?: number
 		maxTableWidth?: number
 		onResize?: ColumnResizeEventHandler
+		stickyHeaders?: boolean
 	}
 	export type ColumnResizeEventHandler = (e: ColumnResizeEvent) => void
 	export interface ColumnResizeEvent {
@@ -82,6 +83,7 @@ export function JGrid({
 	noBorders,
 	maxTableWidth,
 	onResize,
+	stickyHeaders,
 }: JGridTypes.Props) {
 	const [columnWidths, setColumnWidths] = useState(
 		headers.map((header) => header.defaultWidth)
@@ -99,7 +101,7 @@ export function JGrid({
 				return (
 					<div
 						key={index}
-						className={`${s.cell} ${s.header}`}
+						className={`${s.cell} ${s.header} ${stickyHeaders ? s.sticky : ''}`}
 						style={{
 							gridColumn: `${index + 1} / ${index + 2}`,
 							borderRightWidth: isRightColumn && noOuterBorders ? '0px' : '',
