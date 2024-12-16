@@ -12,6 +12,7 @@ import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
 import { DateRow } from './DateRow/DateRow'
 import { sortTransactions } from './func/organizeTransactions'
 import { JNumberAccounting } from '@/components/JForm'
+import { useScrollbarWidth } from '@/utils/useScrollbarWidth'
 
 export function TransactionManager() {
 	const [loaded, setLoaded] = useState<boolean>(false)
@@ -24,8 +25,22 @@ export function TransactionManager() {
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
 	const [defSortOrder, setDefSortOrder] = useState<SortOrder>({})
 	const [curSortOrder, setCurSortOrder] = useState<SortOrder>({})
-	const [counter, setCounter] = useState(0)
 	const [foldState, setFoldState] = useState<FoldState>({})
+
+	const mainContainerRef = useRef<HTMLDivElement | null>(null)
+
+	/**
+	 * Sets the `--scrollbar-width` css variable, used for smooth scrollbar animations across any browser
+	 */
+	useEffect(() => {
+		if (mainContainerRef.current !== null) {
+			console.log('SETTING WIDTH')
+			mainContainerRef.current.style.setProperty(
+				'--scrollbar-width',
+				useScrollbarWidth() + 'px'
+			)
+		}
+	}, [mainContainerRef, loaded])
 
 	useEffect(() => {
 		fetchAndLoadData(
@@ -174,12 +189,12 @@ export function TransactionManager() {
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		return [
 			{
-				content: <div className={s.header_container}>CNTRL</div>,
+				content: <></>,
 				defaultWidth: 75,
 				noResize: true,
 			},
 			{
-				content: <div className={s.header_container}>Date</div>,
+				content: <div className={`${s.header_container} ${s.first}`}>Date</div>,
 				defaultWidth: 140,
 				minWidth: 105,
 				maxWidth: 150,
@@ -203,7 +218,7 @@ export function TransactionManager() {
 				maxWidth: 200,
 			},
 			{
-				content: <div className={s.header_container}>Account</div>,
+				content: <div className={`${s.header_container} ${s.last}`}>Account</div>,
 				defaultWidth: 170,
 				minWidth: 110,
 				maxWidth: 200,
@@ -314,13 +329,15 @@ export function TransactionManager() {
 		}
 	}
 	return (
-		<div className={s.main}>
-			<button onClick={() => setCounter((prev) => prev + 1)}>
-				Counter: {counter}
-			</button>
-			TransactionManager
-			{!loaded && <div>Loading...</div>}
-			<div>{grid}</div>
+		<div className={s.main} ref={mainContainerRef}>
+			{!loaded ? (
+				<div className={s.loading_container}>Loading...</div>
+			) : (
+				<>
+					<div className={s.grid_container}>{grid}</div>
+					<div className={s.control_container}>test</div>
+				</>
+			)}
 		</div>
 	)
 }

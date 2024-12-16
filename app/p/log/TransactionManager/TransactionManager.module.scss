@@ -1,26 +1,84 @@
 .main {
-	height: 100%;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	padding: 20px 0;
+
+	--control-row-height: 60px;
 	--gap-row-height: 10px;
-	.grid {
-		border-color: transparent;
-		max-height: calc(100vh - 200px);
+	/* SCROLLBAR EFFECTS */
+	--scrollbar-width: 15px; // this is a "default" value, which gets overridden once the component renders with the calculated scrollbar width (since this varies between browsers).
+	padding-right: calc(20px - var(--scrollbar-width));
+	transition: padding-right 0.3s ease;
+	.grid_container {
+		padding-right: 0;
+		// reserves space for the scrollbar even when it's not rendered
+		scrollbar-gutter: stable;
+
+		transition: padding-right 0.3s ease, scrollbar-color 0.3s ease;
+		overflow: hidden;
+		scrollbar-color: transparent transparent;
+	}
+	&:hover {
+		padding-right: 10px;
+		.grid_container {
+			overflow-y: auto;
+			padding-right: 10px;
+			scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
+		}
 	}
 
-	.popped_out {
-		display: flex;
-		position: absolute;
-		z-index: 999;
-
-		&:not(.row_controller) {
-			box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
-		}
-		&.row_controller {
-			filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
-		}
+	.loading_container {
+		padding: 10px 20px;
+		text-align: center;
 	}
 
-	/* RE-ORDERING ROW EFFECT STYLES */
-	.transitions {
-		transition: margin 0.2s ease;
+	.grid_container {
+		max-height: calc(100% - var(--control-row-height));
+
+		.grid {
+			border-color: transparent;
+
+			.header_container {
+				position: sticky;
+				padding: 5px 10px;
+				background-color: var(--bg-color-lighter-2);
+				width: 100%;
+				margin: 0 px;
+				text-align: center;
+				&.first {
+					border-radius: 5px 0 0 5px;
+					margin-right: 2.5px;
+				}
+				&.last {
+					border-radius: 0 5px 5px 0;
+					margin-left: 2.5px;
+				}
+				&:not(.first, .last) {
+					margin: 0 2.5px;
+				}
+			}
+			.popped_out {
+				display: flex;
+				position: absolute;
+				z-index: 999;
+
+				&:not(.row_controller) {
+					box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+				}
+				&.row_controller {
+					filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
+				}
+			}
+
+			/* RE-ORDERING ROW EFFECT STYLES */
+			.transitions {
+				transition: margin 0.2s ease;
+			}
+		}
+	}
+	.control_container {
+		height: var(--control-row-height);
 	}
 }

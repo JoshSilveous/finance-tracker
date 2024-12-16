@@ -22,7 +22,7 @@ export const handleTransactionReorder =
 			const childNodes = Array.from(rowNode.childNodes) as HTMLDivElement[]
 			return childNodes
 		}
-		const gridElem = transactionRowsRef.current[transaction.id]?.parentNode
+		const gridElem = transactionRowsRef.current[transaction.id]?.parentNode?.parentNode
 			?.parentNode as HTMLDivElement
 
 		const thisRowIndex = transactionIndex
@@ -60,7 +60,7 @@ export const handleTransactionReorder =
 			calculatedRowHeight = thisRow[1].offsetHeight
 		}
 
-		const breakpoints = (() => {
+		const breakpoints: number[] = (() => {
 			const arr = otherRows.map((row, index) => {
 				if (forceFolded && index > thisRowIndex - 1) {
 					return (

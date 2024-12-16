@@ -18,8 +18,11 @@ export const handleItemReorder =
 		const thisRow = itemRows.find((ref) => ref.item_id === item.id)!.cells
 		const otherRows = allRows.filter((_, index) => index !== itemIndex)!
 
-		const gridElem = itemRows[0].cells[0]?.parentNode?.parentNode?.parentNode
+		const gridElem = itemRows[0].cells[0]?.parentNode?.parentNode?.parentNode?.parentNode
 			?.parentNode as HTMLDivElement
+		console.log('gridElem:', gridElem)
+
+		console.log('gridElem', gridElem)
 
 		const offsetX =
 			grabberNode.offsetLeft +
@@ -53,7 +56,7 @@ export const handleItemReorder =
 			leftOffset += node.clientWidth
 		})
 
-		const breakpoints = (() => {
+		const breakpoints: number[] = (() => {
 			const arr = otherRows.map((row) => row[0].offsetTop)
 			arr.push(arr.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight)
 			return arr

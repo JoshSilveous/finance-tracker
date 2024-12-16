@@ -1,9 +1,12 @@
-.container {
-	padding: 12px;
-}
 .main {
-	display: flex;
-	align-items: center;
-	justify-content: center;
 	height: 100%;
+	.transaction_manager_container {
+		background-color: var(--bg-color-lighter-1);
+		width: fit-content;
+		border-radius: 20px;
+		border: 2px solid var(--bg-color-lighter-2);
+		max-height: 500px;
+		display: flex;
+		flex-direction: column;
+	}
 }
