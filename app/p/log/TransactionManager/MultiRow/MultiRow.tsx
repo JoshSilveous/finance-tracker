@@ -11,7 +11,6 @@ import {
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import {
-	FoldStateUpdater,
 	PendingChanges,
 	PendingChangeUpdater,
 	SortOrder,
@@ -24,6 +23,7 @@ import { handleItemReorder } from './func/handleItemReorder'
 import { foldRenderer } from './func/foldRenderer'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../func/history'
+import { FoldStateUpdater } from '../hooks/useTransactionManagerFoldState'
 
 export interface MultiRowProps {
 	transaction: FormTransaction

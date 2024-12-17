@@ -14,14 +14,15 @@ import { sortTransactions } from './func/organizeTransactions'
 import { JButton, JNumberAccounting } from '@/components/JForm'
 import { useScrollbarWidth } from '@/utils/useScrollbarWidth'
 import { useTransactionManagerHistory } from './hooks/useTransactionManagerHistory'
+import {
+	FoldState,
+	useTransactionManagerFoldState,
+} from './hooks/useTransactionManagerFoldState'
 
 export function TransactionManager() {
 	const [loaded, setLoaded] = useState<boolean>(false)
 	const [transactionData, setTransactionData] = useState<FormTransaction[] | null>(null)
 	const transactionDataRef = useRef<FormTransaction[] | null>([])
-	useEffect(() => {
-		transactionDataRef.current = transactionData
-	}, [transactionData])
 	const [pendingChanges, setPendingChanges] = useState<PendingChanges>({
 		transactions: {},
 		items: {},
@@ -30,8 +31,11 @@ export function TransactionManager() {
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
 	const [defSortOrder, setDefSortOrder] = useState<SortOrder>({})
 	const [curSortOrder, setCurSortOrder] = useState<SortOrder>({})
-	const [foldState, setFoldState] = useState<FoldState>({})
+	const foldState = useTransactionManagerFoldState()
 
+	useEffect(() => {
+		transactionDataRef.current = transactionData
+	}, [transactionData])
 	/**
 	 * see {@link PendingChangeUpdater `PendingChangeUpdater`} for usage
 	 */
@@ -85,7 +89,7 @@ export function TransactionManager() {
 		fetchAndLoadData(
 			setLoaded,
 			setTransactionData,
-			setFoldState,
+			foldState.set,
 			setCategoryData,
 			setAccountData,
 			setDefSortOrder,
@@ -100,8 +104,8 @@ export function TransactionManager() {
 	 */
 	const prevFoldStateRef = useRef<FoldState>({})
 	useEffect(() => {
-		prevFoldStateRef.current = foldState
-	}, [foldState])
+		prevFoldStateRef.current = foldState.cur
+	}, [foldState.cur])
 
 	/**
 	 * References the DOM elements of each transaction row. Used for resorting logic.
@@ -116,15 +120,6 @@ export function TransactionManager() {
 		setCurSortOrder,
 		updatePendingChanges
 	)
-
-	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {
-		setFoldState((prev) => {
-			const newState = structuredClone(prev)
-			newState[transaction_id] =
-				folded !== undefined ? folded : !newState[transaction_id]
-			return newState
-		})
-	}, [])
 
 	/**
 	 * Updated the sort order of an item within a transaction
@@ -325,8 +320,8 @@ export function TransactionManager() {
 								index,
 								updateTransactionSortOrder(groupedItem.date),
 								transactionRowsRef,
-								foldState[transaction.id],
-								updateFoldState
+								foldState.cur[transaction.id],
+								foldState.update
 							),
 							sortPosChanged,
 							disableTransactionResort: groupedItem.transactions.length === 1,
@@ -349,21 +344,21 @@ export function TransactionManager() {
 							updatePendingChanges,
 							dropdownOptions,
 							onItemReorder: updateItemSortOrder(transaction, index),
-							folded: foldState[transaction.id],
+							folded: foldState.cur[transaction.id],
 							playAnimation:
 								prevFoldStateRef.current[transaction.id] === undefined
 									? false
 									: prevFoldStateRef.current[transaction.id] !==
-									  foldState[transaction.id],
-							updateFoldState,
+									  foldState.cur[transaction.id],
+							updateFoldState: foldState.update,
 							onTransactionReorderMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
 								transaction,
 								index,
 								updateTransactionSortOrder(groupedItem.date),
 								transactionRowsRef,
-								foldState[transaction.id],
-								updateFoldState
+								foldState.cur[transaction.id],
+								foldState.update
 							),
 							transactionSortPosChanged: sortPosChanged,
 							defSortOrder,
@@ -451,21 +446,6 @@ export type TransactionRowsRef = {
 }
 
 /**
- * Keeps track of multi-rows and whether or not they are folded.
- *
- * @example
- * ```ts
- * const foldState: FoldState = {
- *     "transaction_1": false,
- *     "transaction_2": true
- * }
- * ```
- */
-export type FoldState = {
-	[id: string]: boolean
-}
-
-/**
  * Form-friendly version of {@link FetchedTransaction `FetchedTransaction`}
  *
  * _`items.amount` is now a string instead of number_
@@ -498,13 +478,6 @@ export interface FormTransaction extends Omit<FetchedTransaction, 'items'> {
  * Transaction(s), grouped by date
  */
 export type GroupedTransaction = { date: string; transactions: FormTransaction[] }
-
-/**
- * Used to update a specific transaction's `foldState` in a concise way.
- * @param transaction_id
- * @param folded the value to set the `foldState` to. Leave undefined to toggle.
- */
-export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
 
 /**
  * An object that stores any pending changes the user made to the Transaction data. Keys for the `transactions` and `items` properties are added/removed dynamically using a {@link PendingChangeUpdater `PendingChangeUpdater`}.

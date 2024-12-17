@@ -29,7 +29,6 @@ export function useTransactionManagerHistory(
 		() => ({
 			undo: () => {
 				const item = historyStackRef.current!.undoStack.at(-1)
-				console.log('undo ran', item, historyStackRef.current!)
 				if (item !== undefined) {
 					switch (item.type) {
 						case 'transaction_position_change': {
@@ -131,7 +130,6 @@ export function useTransactionManagerHistory(
 				}
 			},
 			redo: () => {
-				console.log('redo ran')
 				const item = historyStackRef.current!.redoStack[0]
 				if (item !== undefined) {
 					switch (item.type) {
@@ -237,7 +235,6 @@ export function useTransactionManagerHistory(
 				}
 			},
 			add: (item: HistoryItem) => {
-				console.log('add ran')
 				setHistoryStack((prev) => {
 					const clone = structuredClone(prev)
 					clone.undoStack.push(item)
