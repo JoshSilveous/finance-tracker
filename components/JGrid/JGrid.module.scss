@@ -32,7 +32,7 @@
 					&.sticky {
 						position: sticky;
 						top: 0;
-						z-index: 1;
+						z-index: 2;
 					}
 					user-select: none;
 					font-weight: 700;
@@ -54,6 +54,10 @@
 			justify-content: flex-end;
 			pointer-events: none;
 			border-color: inherit;
+			&.sticky {
+				position: sticky;
+				top: 0;
+			}
 
 			.grabber {
 				pointer-events: all;

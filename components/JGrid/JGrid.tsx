@@ -118,7 +118,7 @@ export function JGrid({
 		if (header.noResize) {
 			return (
 				<div
-					className={s.measurer}
+					className={`${s.measurer} ${stickyHeaders ? s.sticky : ''}`}
 					key={index}
 					style={{ gridColumn: `${index + 1} / ${index + 2}` }}
 				/>
@@ -242,7 +242,7 @@ export function JGrid({
 
 		return (
 			<div
-				className={s.measurer}
+				className={`${s.measurer} ${stickyHeaders ? s.sticky : ''}`}
 				key={index}
 				style={{ gridColumn: `${index + 1} / ${index + 2}` }}
 			>
