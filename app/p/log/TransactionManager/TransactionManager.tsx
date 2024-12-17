@@ -13,7 +13,7 @@ import { DateRow } from './DateRow/DateRow'
 import { sortTransactions } from './func/organizeTransactions'
 import { JButton, JNumberAccounting } from '@/components/JForm'
 import { useScrollbarWidth } from '@/utils/useScrollbarWidth'
-import { genHistoryController, HistoryState } from './func/history'
+import { useTransactionManagerHistory } from './hooks/useTransactionManagerHistory'
 
 export function TransactionManager() {
 	const [loaded, setLoaded] = useState<boolean>(false)
@@ -32,15 +32,40 @@ export function TransactionManager() {
 	const [curSortOrder, setCurSortOrder] = useState<SortOrder>({})
 	const [foldState, setFoldState] = useState<FoldState>({})
 
-	const [historyStack, setHistoryStack] = useState<HistoryState>({
-		undoStack: [],
-		redoStack: [],
-	})
-	const historyStackRef = useRef<HistoryState>()
-	useEffect(() => {
-		historyStackRef.current = historyStack
-		console.log('historyStack:', historyStack)
-	}, [historyStack])
+	/**
+	 * see {@link PendingChangeUpdater `PendingChangeUpdater`} for usage
+	 */
+	const updatePendingChanges: PendingChangeUpdater = useCallback(
+		<T extends keyof PendingChanges>(
+			type: T,
+			id: string,
+			key: keyof PendingChanges[T][number],
+			value?: string
+		) => {
+			setPendingChanges((prev) => {
+				const clone = structuredClone(prev)
+				const target = clone[type] as Record<
+					string,
+					Partial<PendingChanges[T][number]>
+				>
+
+				if (value !== undefined) {
+					target[id] ||= {}
+					target[id][key] = value as PendingChanges[T][number][typeof key]
+				} else if (target[id] !== undefined) {
+					delete target[id][key]
+					if (Object.keys(target[id]).length === 0) {
+						delete target[id]
+					}
+				} else {
+					delete target[id]
+				}
+
+				return clone
+			})
+		},
+		[]
+	)
 
 	const mainContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -86,50 +111,11 @@ export function TransactionManager() {
 		transactionRowsRef.current[transaction_id] = node
 	}
 
-	/**
-	 * see {@link PendingChangeUpdater `PendingChangeUpdater`} for usage
-	 */
-	const updatePendingChanges: PendingChangeUpdater = useCallback(
-		<T extends keyof PendingChanges>(
-			type: T,
-			id: string,
-			key: keyof PendingChanges[T][number],
-			value?: string
-		) => {
-			setPendingChanges((prev) => {
-				const clone = structuredClone(prev)
-				const target = clone[type] as Record<
-					string,
-					Partial<PendingChanges[T][number]>
-				>
-
-				if (value !== undefined) {
-					target[id] ||= {}
-					target[id][key] = value as PendingChanges[T][number][typeof key]
-				} else if (target[id] !== undefined) {
-					delete target[id][key]
-					if (Object.keys(target[id]).length === 0) {
-						delete target[id]
-					}
-				} else {
-					delete target[id]
-				}
-
-				return clone
-			})
-		},
-		[]
+	const historyController = useTransactionManagerHistory(
+		transactionDataRef,
+		setCurSortOrder,
+		updatePendingChanges
 	)
-
-	const historyController = useMemo(() => {
-		return genHistoryController(
-			transactionDataRef,
-			historyStackRef,
-			setCurSortOrder,
-			setHistoryStack,
-			updatePendingChanges
-		)
-	}, [transactionData])
 
 	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {
 		setFoldState((prev) => {
