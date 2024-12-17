@@ -3,19 +3,26 @@ import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import s from './SingleRow.module.scss'
-import { ChangeEventHandler, forwardRef, useCallback, useMemo } from 'react'
+import {
+	ChangeEventHandler,
+	FocusEventHandler,
+	forwardRef,
+	useCallback,
+	useMemo,
+} from 'react'
 import { PendingChanges, FormTransaction, PendingChangeUpdater } from '../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
+import { HistoryController } from '../func/history'
 
 export interface SingleRowProps {
 	transaction: FormTransaction
 	pendingChanges: PendingChanges
 	updatePendingChanges: PendingChangeUpdater
-	dropdownOptionsCategory: JDropdownTypes.Option[]
-	dropdownOptionsAccount: JDropdownTypes.Option[]
+	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	sortPosChanged: boolean
 	disableTransactionResort: boolean
+	historyController: HistoryController
 }
 export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwardedRef) => {
 	const item = p.transaction.items[0]
@@ -24,31 +31,71 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 		() => genLiveVals(p.transaction, p.pendingChanges),
 		[p.transaction, p.pendingChanges]
 	)
+	const eventHandlers = useMemo(() => {
+		return {
+			onChange: ((e) => {
+				const key = e.target.dataset.key as keyof LiveVals
+				const item_id = item.id
+				const newVal = e.target.value
 
-	const onChange: ChangeEventHandler<HTMLInputElement | HTMLSelectElement> = useCallback(
-		(e) => {
-			const key = e.target.dataset.key as keyof LiveVals
-			const item_id = item.id
-			const newVal = e.target.value
+				if (key === 'date' || key === 'name') {
+					const origVal = p.transaction[key]
+					if (origVal !== newVal) {
+						p.updatePendingChanges('transactions', p.transaction.id, key, newVal)
+					} else {
+						p.updatePendingChanges('transactions', p.transaction.id, key)
+					}
+				} else if (
+					key === 'amount' ||
+					key === 'category_id' ||
+					key === 'account_id'
+				) {
+					const origVal = p.transaction.items.find((item) => item.id === item_id)![
+						key
+					]
+					if (origVal !== newVal) {
+						p.updatePendingChanges('items', item_id, key, newVal)
+					} else {
+						p.updatePendingChanges('items', item_id, key)
+					}
+				}
+			}) as ChangeEventHandler<HTMLInputElement | HTMLSelectElement>,
+			onBlur: ((e) => {
+				const key = e.target.dataset.key as keyof LiveVals
+				const item_id = item.id
+				const newVal = e.target.value
+				const oldVal = e.target.dataset.value_on_focus
 
-			if (key === 'date' || key === 'name') {
-				const origVal = p.transaction[key]
-				if (origVal !== newVal) {
-					p.updatePendingChanges('transactions', p.transaction.id, key, newVal)
-				} else {
-					p.updatePendingChanges('transactions', p.transaction.id, key)
+				if (oldVal !== undefined && newVal !== oldVal) {
+					if (key === 'date' || key === 'name') {
+						p.historyController.add({
+							type: 'transaction_value_change',
+							transaction_id: p.transaction.id,
+							key,
+							oldVal,
+							newVal,
+						})
+					} else if (
+						key === 'amount' ||
+						key === 'category_id' ||
+						key === 'account_id'
+					) {
+						p.historyController.add({
+							type: 'item_value_change',
+							transaction_id: p.transaction.id,
+							item_id: item_id,
+							key,
+							oldVal,
+							newVal,
+						})
+					}
 				}
-			} else if (key === 'amount' || key === 'category_id' || key === 'account_id') {
-				const origVal = p.transaction.items.find((item) => item.id === item_id)![key]
-				if (origVal !== newVal) {
-					p.updatePendingChanges('items', item_id, key, newVal)
-				} else {
-					p.updatePendingChanges('items', item_id, key)
-				}
-			}
-		},
-		[]
-	)
+			}) as FocusEventHandler<HTMLInputElement | HTMLSelectElement>,
+			onFocus: ((e) => {
+				e.target.dataset.value_on_focus = e.target.value
+			}) as FocusEventHandler<HTMLInputElement | HTMLSelectElement>,
+		}
+	}, [])
 
 	return (
 		<div className={s.container} ref={forwardedRef}>
@@ -74,9 +121,9 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			>
 				<JDatePicker
 					value={liveVals.date.val}
+					data-transaction_id={p.transaction.id}
 					data-key='date'
-					onChange={onChange}
-					onBlur={onChange}
+					{...eventHandlers}
 				/>
 			</div>
 			<div
@@ -86,9 +133,9 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			>
 				<JInput
 					value={liveVals.name.val}
+					data-transaction_id={p.transaction.id}
 					data-key='name'
-					onChange={onChange}
-					onBlur={onChange}
+					{...eventHandlers}
 				/>
 			</div>
 			<div
@@ -98,11 +145,12 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			>
 				<JNumberAccounting
 					value={liveVals.amount.val}
+					data-transaction_id={p.transaction.id}
+					data-item_id={p.transaction.items[0].id}
 					data-key='amount'
-					onChange={onChange}
-					onBlur={onChange}
 					maxDigLeftOfDecimal={8}
 					maxDigRightOfDecimal={2}
+					{...eventHandlers}
 				/>
 			</div>
 			<div
@@ -111,15 +159,16 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				}`}
 			>
 				<JDropdown
-					options={p.dropdownOptionsCategory}
+					options={p.dropdownOptions.category}
 					value={
 						liveVals.category_id.val !== null
 							? liveVals.category_id.val
 							: undefined
 					}
+					data-transaction_id={p.transaction.id}
+					data-item_id={p.transaction.items[0].id}
 					data-key='category_id'
-					onChange={onChange}
-					onBlur={onChange}
+					{...eventHandlers}
 				/>
 			</div>
 			<div
@@ -128,15 +177,16 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				}`}
 			>
 				<JDropdown
-					options={p.dropdownOptionsAccount}
+					options={p.dropdownOptions.account}
 					value={
 						liveVals.account_id.val !== null
 							? liveVals.account_id.val
 							: undefined
 					}
+					data-transaction_id={p.transaction.id}
+					data-item_id={p.transaction.items[0].id}
 					data-key='account_id'
-					onChange={onChange}
-					onBlur={onChange}
+					{...eventHandlers}
 				/>
 			</div>
 		</div>

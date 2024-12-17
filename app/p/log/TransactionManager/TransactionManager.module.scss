@@ -6,7 +6,6 @@
 	padding: var(--main-padding) 0;
 
 	--main-padding: 20px;
-	--control-row-height: 120px;
 	--gap-row-height: 10px;
 
 	.control_container {
@@ -15,7 +14,7 @@
 		display: flex;
 		align-items: flex-end;
 		justify-content: flex-end;
-		padding: calc(var(--main-padding) / 2) 0 0 var(--main-padding);
+		padding: var(--main-padding) 0 0 var(--main-padding);
 		padding-right: calc(
 			var(--main-padding) - (var(--main-padding) - var(--scrollbar-width))
 		);

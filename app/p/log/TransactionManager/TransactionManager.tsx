@@ -13,10 +13,15 @@ import { DateRow } from './DateRow/DateRow'
 import { sortTransactions } from './func/organizeTransactions'
 import { JButton, JNumberAccounting } from '@/components/JForm'
 import { useScrollbarWidth } from '@/utils/useScrollbarWidth'
+import { genHistoryController, HistoryState } from './func/history'
 
 export function TransactionManager() {
 	const [loaded, setLoaded] = useState<boolean>(false)
 	const [transactionData, setTransactionData] = useState<FormTransaction[] | null>(null)
+	const transactionDataRef = useRef<FormTransaction[] | null>([])
+	useEffect(() => {
+		transactionDataRef.current = transactionData
+	}, [transactionData])
 	const [pendingChanges, setPendingChanges] = useState<PendingChanges>({
 		transactions: {},
 		items: {},
@@ -26,6 +31,16 @@ export function TransactionManager() {
 	const [defSortOrder, setDefSortOrder] = useState<SortOrder>({})
 	const [curSortOrder, setCurSortOrder] = useState<SortOrder>({})
 	const [foldState, setFoldState] = useState<FoldState>({})
+
+	const [historyStack, setHistoryStack] = useState<HistoryState>({
+		undoStack: [],
+		redoStack: [],
+	})
+	const historyStackRef = useRef<HistoryState>()
+	useEffect(() => {
+		historyStackRef.current = historyStack
+		console.log('historyStack:', historyStack)
+	}, [historyStack])
 
 	const mainContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -106,6 +121,16 @@ export function TransactionManager() {
 		[]
 	)
 
+	const historyController = useMemo(() => {
+		return genHistoryController(
+			transactionDataRef,
+			historyStackRef,
+			setCurSortOrder,
+			setHistoryStack,
+			updatePendingChanges
+		)
+	}, [transactionData])
+
 	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {
 		setFoldState((prev) => {
 			const newState = structuredClone(prev)
@@ -133,9 +158,17 @@ export function TransactionManager() {
 
 					return clone
 				})
+				historyController.add({
+					type: 'item_position_change',
+					transaction_id: transaction.id,
+					date: transaction.date,
+					oldIndex: oldItemIndex,
+					newIndex: newItemIndex,
+				})
 			},
 		[]
 	)
+
 	const updateTransactionSortOrder = useCallback(
 		(date: string) => (oldIndex: number, newIndex: number) => {
 			setCurSortOrder((prev) => {
@@ -145,40 +178,50 @@ export function TransactionManager() {
 
 				return clone
 			})
+			historyController.add({
+				type: 'transaction_position_change',
+				date: date,
+				oldIndex: oldIndex,
+				newIndex: newIndex,
+			})
 		},
 		[]
 	)
 
-	const dropdownOptionsCategory: JDropdownTypes.Option[] | null = useMemo(() => {
-		if (categoryData === null) {
-			return null
-		} else {
-			const options = categoryData.map((cat) => {
-				return {
-					name: cat.name,
-					value: cat.id,
+	const dropdownOptions = useMemo(() => {
+		return {
+			category: (() => {
+				if (categoryData === null) {
+					return []
+				} else {
+					const options = categoryData.map((cat) => {
+						return {
+							name: cat.name,
+							value: cat.id,
+						}
+					})
+					options.unshift({ name: 'None', value: 'none' })
+					return options
 				}
-			})
-			options.unshift({ name: 'None', value: 'none' })
-			return options
-		}
-	}, [categoryData])
-	const dropdownOptionsAccount: JDropdownTypes.Option[] | null = useMemo(() => {
-		if (accountData === null) {
-			return null
-		} else {
-			const options = accountData.map((act) => {
-				return {
-					name: act.name,
-					value: act.id,
+			})() as JDropdownTypes.Option[],
+			account: (() => {
+				if (accountData === null) {
+					return []
+				} else {
+					const options = accountData.map((act) => {
+						return {
+							name: act.name,
+							value: act.id,
+						}
+					})
+					options.unshift({ name: 'None', value: 'none' })
+					return options
 				}
-			})
-			options.unshift({ name: 'None', value: 'none' })
-			return options
+			})() as JDropdownTypes.Option[],
 		}
-	}, [accountData])
+	}, [categoryData, accountData])
 
-	const dataOrganized = useMemo(() => {
+	const sortedData = useMemo(() => {
 		if (transactionData !== null) {
 			return sortTransactions(curSortOrder, transactionData)
 		}
@@ -201,7 +244,12 @@ export function TransactionManager() {
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		return [
 			{
-				content: <div className={`${s.header_container} ${s.control}`}></div>,
+				content: (
+					<div className={`${s.header_container} ${s.control}`}>
+						<button onClick={historyController.undo}>U</button>
+						<button onClick={historyController.redo}>R</button>
+					</div>
+				),
 				defaultWidth: 75,
 				noResize: true,
 			},
@@ -260,13 +308,8 @@ export function TransactionManager() {
 
 	let grid: ReactNode
 
-	if (
-		loaded &&
-		dataOrganized !== null &&
-		dropdownOptionsCategory !== null &&
-		dropdownOptionsAccount !== null
-	) {
-		if (dataOrganized.length === 0) {
+	if (loaded && sortedData !== null) {
+		if (sortedData.length === 0) {
 			grid = (
 				<p>
 					You do not have any transactions, click "Create new transaction" below to
@@ -276,7 +319,7 @@ export function TransactionManager() {
 		} else {
 			const cells: JGridTypes.Props['cells'] = []
 
-			dataOrganized.forEach((groupedItem, groupedItemIndex) => {
+			sortedData.forEach((groupedItem, groupedItemIndex) => {
 				cells.push(<DateRow date={groupedItem.date} />)
 
 				groupedItem.transactions.forEach((transaction, index) => {
@@ -289,8 +332,7 @@ export function TransactionManager() {
 							transaction,
 							pendingChanges,
 							updatePendingChanges,
-							dropdownOptionsCategory,
-							dropdownOptionsAccount,
+							dropdownOptions,
 							onResortMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
 								transaction,
@@ -302,6 +344,7 @@ export function TransactionManager() {
 							),
 							sortPosChanged,
 							disableTransactionResort: groupedItem.transactions.length === 1,
+							historyController,
 						}
 						cells.push(
 							<SingleRow
@@ -318,8 +361,7 @@ export function TransactionManager() {
 							transaction,
 							pendingChanges,
 							updatePendingChanges,
-							dropdownOptionsCategory: dropdownOptionsCategory,
-							dropdownOptionsAccount: dropdownOptionsAccount,
+							dropdownOptions,
 							onItemReorder: updateItemSortOrder(transaction, index),
 							folded: foldState[transaction.id],
 							playAnimation:
@@ -340,6 +382,7 @@ export function TransactionManager() {
 							transactionSortPosChanged: sortPosChanged,
 							defSortOrder,
 							disableTransactionResort: groupedItem.transactions.length === 1,
+							historyController,
 						}
 
 						cells.push(

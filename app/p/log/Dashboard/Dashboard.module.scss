@@ -2,7 +2,7 @@
 	height: 100%;
 	.transaction_manager_container {
 		display: flex;
-		max-height: 800px;
+		max-height: calc(100vh - 60px - 20px);
 		flex-direction: column;
 		overflow: auto;
 	}
