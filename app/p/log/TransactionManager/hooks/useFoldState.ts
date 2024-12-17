@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-export function useTransactionManagerFoldState() {
+export function useFoldState() {
 	const [foldState, setFoldState] = useState<FoldState>({})
 
 	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {

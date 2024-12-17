@@ -10,11 +10,17 @@ import {
 import { FormTransaction, SortOrder, PendingChangeUpdater } from '../TransactionManager'
 import { moveItemInArray } from '@/utils'
 
-export function useTransactionManagerHistory(
-	transactionDataRef: MutableRefObject<FormTransaction[] | null>,
-	setCurSortOrder: Dispatch<SetStateAction<SortOrder>>,
+export interface UseHistoryProps {
+	transactionDataRef: MutableRefObject<FormTransaction[] | null>
+	setCurSortOrder: Dispatch<SetStateAction<SortOrder>>
 	updatePendingChanges: PendingChangeUpdater
-) {
+}
+
+export function useHistory({
+	transactionDataRef,
+	setCurSortOrder,
+	updatePendingChanges,
+}: UseHistoryProps) {
 	const [historyStack, setHistoryStack] = useState<HistoryState>({
 		undoStack: [],
 		redoStack: [],

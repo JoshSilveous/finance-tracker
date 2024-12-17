@@ -13,65 +13,52 @@ import { DateRow } from './DateRow/DateRow'
 import { sortTransactions } from './func/organizeTransactions'
 import { JButton, JNumberAccounting } from '@/components/JForm'
 import { useScrollbarWidth } from '@/utils/useScrollbarWidth'
-import { useTransactionManagerHistory } from './hooks/useTransactionManagerHistory'
-import {
-	FoldState,
-	useTransactionManagerFoldState,
-} from './hooks/useTransactionManagerFoldState'
+import { useHistory } from './hooks/useHistory'
+import { FoldState, useFoldState } from './hooks/useFoldState'
+import { usePendingChanges } from './hooks/usePendingChanges'
+import { useSortOrder } from './hooks/useSortOrder'
 
 export function TransactionManager() {
+	const mainContainerRef = useRef<HTMLDivElement | null>(null)
+	const transactionDataRef = useRef<FormTransaction[] | null>([])
+	const prevFoldStateRef = useRef<FoldState>({})
+	const transactionRowsRef = useRef<TransactionRowsRef>({})
+
 	const [loaded, setLoaded] = useState<boolean>(false)
 	const [transactionData, setTransactionData] = useState<FormTransaction[] | null>(null)
-	const transactionDataRef = useRef<FormTransaction[] | null>([])
-	const [pendingChanges, setPendingChanges] = useState<PendingChanges>({
-		transactions: {},
-		items: {},
-	})
 	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
-	const [defSortOrder, setDefSortOrder] = useState<SortOrder>({})
-	const [curSortOrder, setCurSortOrder] = useState<SortOrder>({})
-	const foldState = useTransactionManagerFoldState()
+
+	const foldState = useFoldState()
+	const pendingChanges = usePendingChanges()
+	const sortOrder = useSortOrder({
+		afterTransactionPositionChange: (date, oldIndex, newIndex) => {
+			historyController.add({
+				type: 'transaction_position_change',
+				date: date,
+				oldIndex: oldIndex,
+				newIndex: newIndex,
+			})
+		},
+		afterItemPositionChange: (transaction, oldItemIndex, newItemIndex) => {
+			historyController.add({
+				type: 'item_position_change',
+				transaction_id: transaction.id,
+				date: transaction.date,
+				oldIndex: oldItemIndex,
+				newIndex: newItemIndex,
+			})
+		},
+	})
+	const historyController = useHistory({
+		transactionDataRef,
+		setCurSortOrder: sortOrder.setCurrent,
+		updatePendingChanges: pendingChanges.update,
+	})
 
 	useEffect(() => {
 		transactionDataRef.current = transactionData
 	}, [transactionData])
-	/**
-	 * see {@link PendingChangeUpdater `PendingChangeUpdater`} for usage
-	 */
-	const updatePendingChanges: PendingChangeUpdater = useCallback(
-		<T extends keyof PendingChanges>(
-			type: T,
-			id: string,
-			key: keyof PendingChanges[T][number],
-			value?: string
-		) => {
-			setPendingChanges((prev) => {
-				const clone = structuredClone(prev)
-				const target = clone[type] as Record<
-					string,
-					Partial<PendingChanges[T][number]>
-				>
-
-				if (value !== undefined) {
-					target[id] ||= {}
-					target[id][key] = value as PendingChanges[T][number][typeof key]
-				} else if (target[id] !== undefined) {
-					delete target[id][key]
-					if (Object.keys(target[id]).length === 0) {
-						delete target[id]
-					}
-				} else {
-					delete target[id]
-				}
-
-				return clone
-			})
-		},
-		[]
-	)
-
-	const mainContainerRef = useRef<HTMLDivElement | null>(null)
 
 	/**
 	 * Sets the `--scrollbar-width` css variable, used for smooth scrollbar animations across any browser
@@ -92,8 +79,8 @@ export function TransactionManager() {
 			foldState.set,
 			setCategoryData,
 			setAccountData,
-			setDefSortOrder,
-			setCurSortOrder
+			sortOrder.setDefault,
+			sortOrder.setCurrent
 		)
 	}, [])
 
@@ -102,7 +89,6 @@ export function TransactionManager() {
 	 * current render. This allows animations to be played only when foldState changes,
 	 * instead of every re-render
 	 */
-	const prevFoldStateRef = useRef<FoldState>({})
 	useEffect(() => {
 		prevFoldStateRef.current = foldState.cur
 	}, [foldState.cur])
@@ -110,64 +96,9 @@ export function TransactionManager() {
 	/**
 	 * References the DOM elements of each transaction row. Used for resorting logic.
 	 */
-	const transactionRowsRef = useRef<TransactionRowsRef>({})
 	const setTransactionRowRef = (transaction_id: string) => (node: HTMLInputElement) => {
 		transactionRowsRef.current[transaction_id] = node
 	}
-
-	const historyController = useTransactionManagerHistory(
-		transactionDataRef,
-		setCurSortOrder,
-		updatePendingChanges
-	)
-
-	/**
-	 * Updated the sort order of an item within a transaction
-	 * @param transaction
-	 */
-	const updateItemSortOrder = useCallback(
-		(transaction: FormTransaction, transactionIndex: number) =>
-			(oldItemIndex: number, newItemIndex: number) => {
-				setCurSortOrder((prev) => {
-					const clone = structuredClone(prev)
-
-					const thisTransactionOrder = clone[transaction.date][
-						transactionIndex
-					] as string[]
-
-					moveItemInArray(thisTransactionOrder, oldItemIndex + 1, newItemIndex + 1)
-
-					return clone
-				})
-				historyController.add({
-					type: 'item_position_change',
-					transaction_id: transaction.id,
-					date: transaction.date,
-					oldIndex: oldItemIndex,
-					newIndex: newItemIndex,
-				})
-			},
-		[]
-	)
-
-	const updateTransactionSortOrder = useCallback(
-		(date: string) => (oldIndex: number, newIndex: number) => {
-			setCurSortOrder((prev) => {
-				const clone = structuredClone(prev)
-
-				moveItemInArray(clone[date], oldIndex, newIndex)
-
-				return clone
-			})
-			historyController.add({
-				type: 'transaction_position_change',
-				date: date,
-				oldIndex: oldIndex,
-				newIndex: newIndex,
-			})
-		},
-		[]
-	)
 
 	const dropdownOptions = useMemo(() => {
 		return {
@@ -204,23 +135,23 @@ export function TransactionManager() {
 
 	const sortedData = useMemo(() => {
 		if (transactionData !== null) {
-			return sortTransactions(curSortOrder, transactionData)
+			return sortTransactions(sortOrder.cur, transactionData)
 		}
 		return null
-	}, [transactionData, curSortOrder])
+	}, [transactionData, sortOrder.cur])
 
 	const isChanged = useMemo(() => {
-		if (Object.keys(pendingChanges.transactions).length !== 0) {
+		if (Object.keys(pendingChanges.cur.transactions).length !== 0) {
 			return true
 		}
-		if (Object.keys(pendingChanges.items).length !== 0) {
+		if (Object.keys(pendingChanges.cur.items).length !== 0) {
 			return true
 		}
-		if (!areDeeplyEqual(curSortOrder, defSortOrder)) {
+		if (!areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
 			return true
 		}
 		return false
-	}, [pendingChanges, curSortOrder, defSortOrder])
+	}, [pendingChanges.cur, sortOrder.cur, sortOrder.def])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		return [
@@ -306,19 +237,19 @@ export function TransactionManager() {
 				groupedItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
 						const sortPosChanged =
-							defSortOrder[transaction.date].findIndex(
+							sortOrder.def[transaction.date].findIndex(
 								(it) => it === transaction.id
 							) !== index
 						const props: SingleRowProps = {
 							transaction,
-							pendingChanges,
-							updatePendingChanges,
+							pendingChanges: pendingChanges.cur,
+							updatePendingChanges: pendingChanges.update,
 							dropdownOptions,
 							onResortMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
 								transaction,
 								index,
-								updateTransactionSortOrder(groupedItem.date),
+								sortOrder.updateTransaction(groupedItem.date),
 								transactionRowsRef,
 								foldState.cur[transaction.id],
 								foldState.update
@@ -335,15 +266,15 @@ export function TransactionManager() {
 						)
 					} else {
 						const sortPosChanged =
-							defSortOrder[transaction.date].findIndex(
+							sortOrder.def[transaction.date].findIndex(
 								(it) => it[0] === transaction.id
 							) !== index
 						const props: MultiRowProps = {
 							transaction,
-							pendingChanges,
-							updatePendingChanges,
+							pendingChanges: pendingChanges.cur,
+							updatePendingChanges: pendingChanges.update,
 							dropdownOptions,
-							onItemReorder: updateItemSortOrder(transaction, index),
+							onItemReorder: sortOrder.updateItem(transaction, index),
 							folded: foldState.cur[transaction.id],
 							playAnimation:
 								prevFoldStateRef.current[transaction.id] === undefined
@@ -355,13 +286,13 @@ export function TransactionManager() {
 								groupedItem.transactions,
 								transaction,
 								index,
-								updateTransactionSortOrder(groupedItem.date),
+								sortOrder.updateTransaction(groupedItem.date),
 								transactionRowsRef,
 								foldState.cur[transaction.id],
 								foldState.update
 							),
 							transactionSortPosChanged: sortPosChanged,
-							defSortOrder,
+							defSortOrder: sortOrder.def,
 							disableTransactionResort: groupedItem.transactions.length === 1,
 							historyController,
 						}

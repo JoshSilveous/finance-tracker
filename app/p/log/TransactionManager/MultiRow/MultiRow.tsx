@@ -23,7 +23,7 @@ import { handleItemReorder } from './func/handleItemReorder'
 import { foldRenderer } from './func/foldRenderer'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../func/history'
-import { FoldStateUpdater } from '../hooks/useTransactionManagerFoldState'
+import { FoldStateUpdater } from '../hooks/useFoldState'
 
 export interface MultiRowProps {
 	transaction: FormTransaction
