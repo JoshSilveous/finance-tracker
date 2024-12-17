@@ -1,22 +1,20 @@
 'use client'
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { areDeeplyEqual, moveItemInArray } from '@/utils'
+import { areDeeplyEqual, getScrollbarWidth } from '@/utils'
 import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { handleTransactionReorder } from './func/handleTransactionReorder'
-import { fetchAndLoadData } from './func/fetchAndLoadData'
-import { MultiRow, MultiRowProps } from './MultiRow/MultiRow'
-import { SingleRow, SingleRowProps } from './SingleRow/SingleRow'
-import { DateRow } from './DateRow/DateRow'
-import { sortTransactions } from './func/organizeTransactions'
+import { handleTransactionReorder, fetchAndLoadData, sortTransactions } from './func'
+import { DateRow, MultiRowProps, MultiRow, SingleRow, SingleRowProps } from './components'
 import { JButton, JNumberAccounting } from '@/components/JForm'
-import { useScrollbarWidth } from '@/utils/useScrollbarWidth'
-import { useHistory } from './hooks/useHistory'
-import { FoldState, useFoldState } from './hooks/useFoldState'
-import { usePendingChanges } from './hooks/usePendingChanges'
-import { useSortOrder } from './hooks/useSortOrder'
+import {
+	useHistory,
+	FoldState,
+	useFoldState,
+	usePendingChanges,
+	useSortOrder,
+} from './hooks'
 
 export function TransactionManager() {
 	const mainContainerRef = useRef<HTMLDivElement | null>(null)
@@ -67,7 +65,7 @@ export function TransactionManager() {
 		if (mainContainerRef.current !== null) {
 			mainContainerRef.current.style.setProperty(
 				'--scrollbar-width',
-				useScrollbarWidth() + 'px'
+				getScrollbarWidth() + 'px'
 			)
 		}
 	}, [mainContainerRef, loaded])

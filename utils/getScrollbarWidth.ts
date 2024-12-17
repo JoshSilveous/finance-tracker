@@ -3,7 +3,7 @@
 /**
  * Returns the width of the client's scrollbar (by injecting an invisible div then removing it)
  */
-export function useScrollbarWidth() {
+export function getScrollbarWidth() {
 	// Create a temporary div element
 	const tempDiv = document.createElement('div')
 
