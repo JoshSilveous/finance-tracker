@@ -15,6 +15,7 @@ import {
 	useFoldState,
 	usePendingChanges,
 	useSortOrder,
+	useKeyListener,
 } from './hooks'
 
 export function TransactionManager() {
@@ -53,6 +54,26 @@ export function TransactionManager() {
 		transactionDataRef,
 		setCurSortOrder: sortOrder.setCurrent,
 		updatePendingChanges: pendingChanges.update,
+	})
+
+	useKeyListener({
+		listeners: [
+			{
+				char: 'Z',
+				ctrlKey: true,
+				run: () => {
+					console.log('RUNN')
+				},
+			},
+			{
+				char: 'Z',
+				ctrlKey: true,
+				shiftKey: true,
+				run: () => {
+					console.log('RUNN 2')
+				},
+			},
+		],
 	})
 
 	useEffect(() => {
