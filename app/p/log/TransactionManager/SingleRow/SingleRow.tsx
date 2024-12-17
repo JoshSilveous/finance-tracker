@@ -10,9 +10,10 @@ import {
 	useCallback,
 	useMemo,
 } from 'react'
-import { PendingChanges, FormTransaction, PendingChangeUpdater } from '../TransactionManager'
+import { FormTransaction } from '../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
-import { HistoryController } from '../func/history'
+import { HistoryController } from '../hooks/useHistory'
+import { PendingChanges, PendingChangeUpdater } from '../hooks/usePendingChanges'
 
 export interface SingleRowProps {
 	transaction: FormTransaction

@@ -1,4 +1,5 @@
-import { GroupedTransaction, SortOrder, FormTransaction } from '../TransactionManager'
+import { SortOrder } from '../hooks/useSortOrder'
+import { GroupedTransaction, FormTransaction } from '../TransactionManager'
 
 export function sortTransactions(sortOrder: SortOrder, transactionData: FormTransaction[]) {
 	return Object.entries(sortOrder).map((entry) => {

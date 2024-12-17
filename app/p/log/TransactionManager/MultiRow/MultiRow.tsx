@@ -10,20 +10,17 @@ import {
 } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
-import {
-	PendingChanges,
-	PendingChangeUpdater,
-	SortOrder,
-	FormTransaction,
-} from '../TransactionManager'
+import { FormTransaction } from '../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { handleItemReorder } from './func/handleItemReorder'
 import { foldRenderer } from './func/foldRenderer'
 import { genLiveVals, LiveVals } from './genLiveVals'
-import { HistoryController } from '../func/history'
 import { FoldStateUpdater } from '../hooks/useFoldState'
+import { HistoryController } from '../hooks/useHistory'
+import { PendingChanges, PendingChangeUpdater } from '../hooks/usePendingChanges'
+import { SortOrder } from '../hooks/useSortOrder'
 
 export interface MultiRowProps {
 	transaction: FormTransaction

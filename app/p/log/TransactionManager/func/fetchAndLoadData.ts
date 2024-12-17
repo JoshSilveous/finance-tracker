@@ -7,7 +7,9 @@ import {
 } from '@/database'
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
-import { FoldState, SortOrder, FormTransaction } from '../TransactionManager'
+import { FormTransaction } from '../TransactionManager'
+import { FoldState } from '../hooks/useFoldState'
+import { SortOrder } from '../hooks/useSortOrder'
 
 export async function fetchAndLoadData(
 	setLoaded: Dispatch<SetStateAction<boolean>>,

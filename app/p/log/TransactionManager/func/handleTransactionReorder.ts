@@ -1,7 +1,8 @@
 import s from '../TransactionManager.module.scss'
 import { delay } from '@/utils'
 import { MutableRefObject } from 'react'
-import { FoldStateUpdater, FormTransaction, TransactionRowsRef } from '../TransactionManager'
+import { FormTransaction, TransactionRowsRef } from '../TransactionManager'
+import { FoldStateUpdater } from '../hooks/useFoldState'
 
 export const handleTransactionReorder =
 	(

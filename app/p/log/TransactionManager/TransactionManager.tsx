@@ -344,30 +344,6 @@ export function TransactionManager() {
 		</div>
 	)
 }
-/**
- * Can either be a string (representing the transaction_id of a single-item) or an array of string (with the first item representing the transaction_id of a multi-item, and the following items representing the item_ids)
- *
- * @example ```ts
- * const sortItems: SortOrderItem[] = ['single_1', 'single_2', ['multi_1', 'item_1', 'item_2', ...], 'single_3', ...]
- * ```
- */
-export type SortOrderItem = string | string[]
-
-/**
- * An object that keeps the sort order, keyed by `date`.
- *
- * @example
- * ```ts
- * const sortOrder: SortOrder = {
- *     "2024-12-03": ['transaction_1', 'transaction_2'],
- *     "2024-12-02": [['transaction_3', 'item_1', 'item_2'], 'transaction_4']
- * }
- * ```
- *
- */
-export type SortOrder = {
-	[date: string]: SortOrderItem[]
-}
 
 /**
  * References the parent row HTML elements of each transaction
@@ -409,51 +385,3 @@ export interface FormTransaction extends Omit<FetchedTransaction, 'items'> {
  * Transaction(s), grouped by date
  */
 export type GroupedTransaction = { date: string; transactions: FormTransaction[] }
-
-/**
- * An object that stores any pending changes the user made to the Transaction data. Keys for the `transactions` and `items` properties are added/removed dynamically using a {@link PendingChangeUpdater `PendingChangeUpdater`}.
- *
- * @example
- * ```ts
- * pendingChanges = {
- *     transactions: {
- *         "transaction_1": {
- *             "name": "New Name",
- *             "date": "2024-12-03"
- *         }
- *     },
- *     items: {}
- * }
- * ```
- */
-export type PendingChanges = {
-	transactions: {
-		[id: string]: Partial<Omit<FormTransaction, 'id' | 'items' | 'order_position'>>
-	}
-	items: {
-		[id: string]: Partial<
-			Omit<FormTransaction['items'][number], 'id' | 'order_position'>
-		>
-	}
-}
-
-/**
- * Simplifies updating the `pendingChanges` array. Automatically adds/removes changes to keep pendingChanges minimized to relevant information.
- *
- * @param type `'transactions' | 'items'`
- * @param id The `item` or `transaction` id.
- * @param key The key of the item or transaction you're modifying.
- * @param value optional, leaving undefined will delete the value from `pendingChanges`
- *
- * @example
- * ```ts
- * updatePendingChanges('transactions', transaction.id, 'name', 'Burger') // creates/updates "name" for specified transaction as needed
- * updatePendingChanges('items', item.id, 'name') // removes "name" for specified item (implying the user has undone their change)
- * ```
- */
-export type PendingChangeUpdater = <T extends keyof PendingChanges>(
-	type: T,
-	id: string,
-	key: keyof PendingChanges[T][number],
-	value?: string
-) => void
