@@ -39,6 +39,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				const item_id = item.id
 				const newVal = e.target.value
 
+				p.historyController.clearRedo()
+
 				if (key === 'date' || key === 'name') {
 					const origVal = p.transaction[key]
 					if (origVal !== newVal) {

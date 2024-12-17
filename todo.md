@@ -2,18 +2,16 @@
 
     -   Add control to delete rows
     -   Add control to delete transaction items
-    -   Set up PendingChange system
     -   Set up history system
-    -   remove datasets
-    -   STRESS TEST RESORTING (esp when scrollheight overflows)
 
     -   fix this bug https://imgur.com/NO91QLm
-    -   remove data tags
 
--   Model how the transaction log will look / work
 -   Switch preferred column widths to localStorage instead of DB
 
 -   TransactionManager
+    -   Set up PendingChange system
+    -   remove datasets
+    -   STRESS TEST RESORTING (esp when scrollheight overflows)
     -   Add control to fold/unfold multi-rows
     -   Add control to resort multi-rows
     -   Make margins when resorting fit row size exactly ( + use linear transitions for less wobbling)

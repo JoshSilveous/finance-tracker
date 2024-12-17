@@ -10,17 +10,15 @@ import {
 } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
-import { FormTransaction } from '../TransactionManager'
+import { FormTransaction } from '../../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { handleItemReorder } from './func/handleItemReorder'
-import { foldRenderer } from './func/foldRenderer'
 import { genLiveVals, LiveVals } from './genLiveVals'
-import { FoldStateUpdater } from '../hooks/useFoldState'
-import { HistoryController } from '../hooks/useHistory'
-import { PendingChanges, PendingChangeUpdater } from '../hooks/usePendingChanges'
-import { SortOrder } from '../hooks/useSortOrder'
+import { PendingChanges, PendingChangeUpdater } from '../../hooks/usePendingChanges'
+import { SortOrder, FoldStateUpdater, HistoryController } from '../../hooks'
+import { foldRenderer } from './func/foldRenderer'
+import { handleItemReorder } from './func/handleItemReorder'
 
 export interface MultiRowProps {
 	transaction: FormTransaction
@@ -134,6 +132,9 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				const item_id = e.target.dataset.item_id
 				const newVal = e.target.value
 
+				p.historyController.clearRedo()
+
+				// update pendingChanges
 				if (item_id === undefined) {
 					if (key === 'date' || key === 'name') {
 						const origVal = p.transaction[key]

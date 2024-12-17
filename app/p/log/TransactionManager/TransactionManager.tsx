@@ -7,6 +7,7 @@ import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { handleTransactionReorder, fetchAndLoadData, sortTransactions } from './func'
 import { DateRow, MultiRowProps, MultiRow, SingleRow, SingleRowProps } from './components'
+import { default as UndoRedoIcon } from '@/public/undo_redo.svg'
 import { JButton, JNumberAccounting } from '@/components/JForm'
 import {
 	useHistory,
@@ -58,10 +59,10 @@ export function TransactionManager() {
 		transactionDataRef.current = transactionData
 	}, [transactionData])
 
-	/**
-	 * Sets the `--scrollbar-width` css variable, used for smooth scrollbar animations across any browser
-	 */
 	useEffect(() => {
+		/**
+		 * Sets the `--scrollbar-width` css variable, used for smooth scrollbar animations across any browser
+		 */
 		if (mainContainerRef.current !== null) {
 			mainContainerRef.current.style.setProperty(
 				'--scrollbar-width',
@@ -82,19 +83,19 @@ export function TransactionManager() {
 		)
 	}, [])
 
-	/**
-	 * `prevFoldStateRef` is used to reference the previous render's fold state during
-	 * current render. This allows animations to be played only when foldState changes,
-	 * instead of every re-render
-	 */
 	useEffect(() => {
+		/**
+		 * `prevFoldStateRef` is used to reference the previous render's fold state during
+		 * current render. This allows animations to be played only when foldState changes,
+		 * instead of every re-render
+		 */
 		prevFoldStateRef.current = foldState.cur
 	}, [foldState.cur])
 
-	/**
-	 * References the DOM elements of each transaction row. Used for resorting logic.
-	 */
 	const setTransactionRowRef = (transaction_id: string) => (node: HTMLInputElement) => {
+		/**
+		 * References the DOM elements of each transaction row. Used for resorting logic.
+		 */
 		transactionRowsRef.current[transaction_id] = node
 	}
 
@@ -152,12 +153,27 @@ export function TransactionManager() {
 	}, [pendingChanges.cur, sortOrder.cur, sortOrder.def])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
+		console.log('re-running memo')
 		return [
 			{
 				content: (
 					<div className={`${s.header_container} ${s.control}`}>
-						<button onClick={historyController.undo}>U</button>
-						<button onClick={historyController.redo}>R</button>
+						<button
+							className={s.undo}
+							onClick={historyController.undo}
+							disabled={historyController.undoDisabled}
+							title='Undo most recent change'
+						>
+							<UndoRedoIcon />
+						</button>
+						<button
+							className={s.redo}
+							onClick={historyController.redo}
+							disabled={historyController.redoDisabled}
+							title='Redo most recent change'
+						>
+							<UndoRedoIcon />
+						</button>
 					</div>
 				),
 				defaultWidth: 75,
@@ -214,7 +230,7 @@ export function TransactionManager() {
 				maxWidth: 200,
 			},
 		]
-	}, [])
+	}, [historyController.undoDisabled, historyController.redoDisabled])
 
 	let grid: ReactNode
 

@@ -32,6 +32,7 @@ export function useHistory({
 
 	useEffect(() => {
 		historyStackRef.current = historyStack
+		console.log('history stack update', historyStack)
 	}, [historyStack])
 
 	const undo = useCallback(() => {
@@ -239,10 +240,25 @@ export function useHistory({
 		})
 	}, [])
 
+	const clearRedo = useCallback(() => {
+		setHistoryStack((prev) => {
+			const clone = structuredClone(prev)
+			clone.redoStack = []
+			return clone
+		})
+	}, [])
+
 	const undoDisabled = historyStack.undoStack.length === 0
 	const redoDisabled = historyStack.redoStack.length === 0
 
-	return { undo, redo, add, undoDisabled, redoDisabled } as HistoryController
+	return {
+		undo,
+		redo,
+		add,
+		clearRedo,
+		undoDisabled,
+		redoDisabled,
+	} as HistoryController
 }
 
 export type HistoryItem =
@@ -293,6 +309,7 @@ export type HistoryController = {
 	 * Adds a new item to the `undo` array, and clears the `redo` array.
 	 */
 	add: (item: HistoryItem) => {}
+	clearRedo: () => void
 	undoDisabled: boolean
 	redoDisabled: boolean
 }
