@@ -20,6 +20,7 @@ interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export function JNumberAccounting(props: JNumberAccountingProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
+	const containerRef = useRef<HTMLDivElement>(null)
 	const displayRef = useRef<HTMLDivElement>(null)
 	const [showParenthesis, setShowParenthesis] = useState(false)
 	const [isFocused, setIsFocused] = useState(false)
@@ -36,11 +37,11 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 		if (errorEffectQueue === 1) {
 			let prevErrorEffectQueue = errorEffectQueue
 			while (errorEffectQueue > 0) {
-				inputRef.current!.classList.add(s.error)
+				containerRef.current!.classList.add(s.error)
 				await delay(300)
 				if (errorEffectQueue === prevErrorEffectQueue) {
 					errorEffectQueue = 0
-					inputRef.current!.classList.remove(s.error)
+					containerRef.current!.classList.remove(s.error)
 				}
 				errorEffectQueue--
 				prevErrorEffectQueue = errorEffectQueue
@@ -133,6 +134,7 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 			className={`${s.main} ${props.className ? props.className : ''} ${
 				props.minimalStyle ? s.minimal_style : ''
 			} ${props.disabled ? s.disabled : ''}`}
+			ref={containerRef}
 		>
 			<span className={s.dollar_symbol}>$</span>
 			<div className={s.left_parenthesis} hidden={!(showParenthesis && showFormatted)}>
