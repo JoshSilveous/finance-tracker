@@ -9,7 +9,7 @@ import {
 	useCallback,
 } from 'react'
 import { FormTransaction } from '../TransactionManager'
-import { moveItemInArray } from '@/utils'
+import { areDeeplyEqual, moveItemInArray } from '@/utils'
 import { PendingChangeUpdater } from './usePendingChanges'
 import { SortOrder } from './useSortOrder'
 
@@ -235,15 +235,47 @@ export function useHistory({
 		setHistoryStack((prev) => {
 			const clone = structuredClone(prev)
 			clone.undoStack.push(item)
-			clone.redoStack = [] // clear redo stack whenever a new item is added
 			return clone
 		})
 	}, [])
 
 	const clearRedo = useCallback(() => {
+		if (historyStackRef.current.redoStack.length > 0) {
+			setHistoryStack((prev) => {
+				const clone = structuredClone(prev)
+				clone.redoStack = []
+				return clone
+			})
+		}
+	}, [])
+
+	const upsert = useCallback((item: HistoryItem) => {
 		setHistoryStack((prev) => {
 			const clone = structuredClone(prev)
-			clone.redoStack = []
+			const recentItem = clone.undoStack.at(-1)
+
+			if (
+				recentItem !== undefined &&
+				item.type !== 'item_position_change' &&
+				item.type !== 'transaction_position_change' &&
+				recentItem.type !== 'item_position_change' &&
+				recentItem.type !== 'transaction_position_change'
+			) {
+				let recentItemCopy = structuredClone(recentItem) as any
+				let thisItemCopy = structuredClone(item) as any
+
+				delete recentItemCopy.oldVal
+				delete recentItemCopy.newVal
+				delete thisItemCopy.oldVal
+				delete thisItemCopy.newVal
+
+				if (areDeeplyEqual(recentItemCopy, thisItemCopy)) {
+					console.log('true')
+					recentItem.newVal = item.newVal
+					return clone
+				}
+			}
+			clone.undoStack.push(item)
 			return clone
 		})
 	}, [])
@@ -256,6 +288,7 @@ export function useHistory({
 		redo,
 		add,
 		clearRedo,
+		upsert,
 		undoDisabled,
 		redoDisabled,
 	} as HistoryController
@@ -308,8 +341,9 @@ export type HistoryController = {
 	/**
 	 * Adds a new item to the `undo` array, and clears the `redo` array.
 	 */
-	add: (item: HistoryItem) => {}
+	add: (item: HistoryItem) => void
 	clearRedo: () => void
+	upsert: (item: HistoryItem) => void
 	undoDisabled: boolean
 	redoDisabled: boolean
 }

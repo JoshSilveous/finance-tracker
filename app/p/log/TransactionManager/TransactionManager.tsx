@@ -61,17 +61,14 @@ export function TransactionManager() {
 			{
 				char: 'Z',
 				ctrlKey: true,
-				run: () => {
-					console.log('RUNN')
-				},
+				shiftKey: false,
+				run: historyController.undo,
 			},
 			{
 				char: 'Z',
 				ctrlKey: true,
 				shiftKey: true,
-				run: () => {
-					console.log('RUNN 2')
-				},
+				run: historyController.redo,
 			},
 		],
 	})
@@ -174,7 +171,6 @@ export function TransactionManager() {
 	}, [pendingChanges.cur, sortOrder.cur, sortOrder.def])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
-		console.log('re-running memo')
 		return [
 			{
 				content: (

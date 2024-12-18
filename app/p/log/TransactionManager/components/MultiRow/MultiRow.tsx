@@ -166,18 +166,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						}
 					}
 				}
-			}) as ChangeEventHandler<HTMLInputElement | HTMLSelectElement>,
-			onBlur: ((e) => {
-				const key = e.target.dataset.key as
-					| keyof LiveVals
-					| keyof LiveVals['items'][number]
-				const item_id = e.target.dataset.item_id
-				const newVal = e.target.value
-				const oldVal = e.target.dataset.value_on_focus
 
+				// update history
+				const oldVal = e.target.dataset.value_on_focus
 				if (oldVal !== undefined && newVal !== oldVal) {
 					if (key === 'date') {
-						p.historyController.add({
+						p.historyController.upsert({
 							type: 'transaction_value_change',
 							transaction_id: p.transaction.id,
 							key,
@@ -185,7 +179,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							newVal,
 						})
 					} else if (key === 'name' && item_id === undefined) {
-						p.historyController.add({
+						p.historyController.upsert({
 							type: 'transaction_value_change',
 							transaction_id: p.transaction.id,
 							key,
@@ -199,7 +193,49 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							key === 'account_id') &&
 						item_id !== undefined
 					) {
-						p.historyController.add({
+						p.historyController.upsert({
+							type: 'item_value_change',
+							transaction_id: p.transaction.id,
+							item_id: item_id,
+							key,
+							oldVal,
+							newVal,
+						})
+					}
+				}
+			}) as ChangeEventHandler<HTMLInputElement | HTMLSelectElement>,
+			onBlur: ((e) => {
+				const key = e.target.dataset.key as
+					| keyof LiveVals
+					| keyof LiveVals['items'][number]
+				const item_id = e.target.dataset.item_id
+				const newVal = e.target.value
+				const oldVal = e.target.dataset.value_on_focus
+				if (oldVal !== undefined && newVal !== oldVal) {
+					if (key === 'date') {
+						p.historyController.upsert({
+							type: 'transaction_value_change',
+							transaction_id: p.transaction.id,
+							key,
+							oldVal,
+							newVal,
+						})
+					} else if (key === 'name' && item_id === undefined) {
+						p.historyController.upsert({
+							type: 'transaction_value_change',
+							transaction_id: p.transaction.id,
+							key,
+							oldVal,
+							newVal,
+						})
+					} else if (
+						(key === 'name' ||
+							key === 'amount' ||
+							key === 'category_id' ||
+							key === 'account_id') &&
+						item_id !== undefined
+					) {
+						p.historyController.upsert({
 							type: 'item_value_change',
 							transaction_id: p.transaction.id,
 							item_id: item_id,
