@@ -171,6 +171,8 @@ export function TransactionManager() {
 	}, [pendingChanges.cur, sortOrder.cur, sortOrder.def])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
+		const undoTitle = 'Undo most recent change.\nShortcut: CTRL + Z'
+		const redoTitle = 'Redo most recent change.\nShortcut: CTRL + ALT + Z'
 		return [
 			{
 				content: (
@@ -179,7 +181,7 @@ export function TransactionManager() {
 							className={s.undo}
 							onClick={historyController.undo}
 							disabled={historyController.undoDisabled}
-							title='Undo most recent change'
+							title={undoTitle}
 						>
 							<UndoRedoIcon />
 						</button>
@@ -187,7 +189,7 @@ export function TransactionManager() {
 							className={s.redo}
 							onClick={historyController.redo}
 							disabled={historyController.redoDisabled}
-							title='Redo most recent change'
+							title={redoTitle}
 						>
 							<UndoRedoIcon />
 						</button>

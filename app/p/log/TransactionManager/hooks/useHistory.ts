@@ -3,7 +3,6 @@ import {
 	Dispatch,
 	SetStateAction,
 	useState,
-	useMemo,
 	useEffect,
 	useRef,
 	useCallback,
@@ -239,6 +238,20 @@ export function useHistory({
 		})
 	}, [])
 
+	const clearUndo = useCallback(() => {
+		if (historyStackRef.current.undoStack.length > 0) {
+			setHistoryStack((prev) => {
+				const clone = structuredClone(prev)
+				clone.undoStack = []
+				return clone
+			})
+		}
+	}, [])
+
+	const clear = useCallback(() => {
+		setHistoryStack({ undoStack: [], redoStack: [] })
+	}, [])
+
 	const clearRedo = useCallback(() => {
 		if (historyStackRef.current.redoStack.length > 0) {
 			setHistoryStack((prev) => {
@@ -276,6 +289,7 @@ export function useHistory({
 				}
 			}
 			clone.undoStack.push(item)
+			clone.redoStack = []
 			return clone
 		})
 	}, [])
@@ -287,8 +301,10 @@ export function useHistory({
 		undo,
 		redo,
 		add,
-		clearRedo,
 		upsert,
+		clearUndo,
+		clearRedo,
+		clear,
 		undoDisabled,
 		redoDisabled,
 	} as HistoryController
@@ -342,8 +358,28 @@ export type HistoryController = {
 	 * Adds a new item to the `undo` array, and clears the `redo` array.
 	 */
 	add: (item: HistoryItem) => void
-	clearRedo: () => void
+	/**
+	 * Adds a new item to the `undo` array, or updates the most recent item in the `undo` array if all properties are the same (besides newVal).
+	 */
 	upsert: (item: HistoryItem) => void
+	/**
+	 * clears the `undo` array
+	 */
+	clearUndo: () => void
+	/**
+	 * clears the `redo` array
+	 */
+	clearRedo: () => void
+	/**
+	 * clears the `undo` and `redo` array
+	 */
+	clear: () => void
+	/**
+	 * `true` if the `undo` array is empty, otherwise `false`
+	 */
 	undoDisabled: boolean
+	/**
+	 * `true` if the `redo` array is empty, otherwise `false`
+	 */
 	redoDisabled: boolean
 }

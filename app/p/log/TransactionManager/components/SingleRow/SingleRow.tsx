@@ -41,6 +41,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 
 				p.historyController.clearRedo()
 
+				// update pendingChanges
 				if (key === 'date' || key === 'name') {
 					const origVal = p.transaction[key]
 					if (origVal !== newVal) {
@@ -62,16 +63,12 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						p.updatePendingChanges('items', item_id, key)
 					}
 				}
-			}) as ChangeEventHandler<HTMLInputElement | HTMLSelectElement>,
-			onBlur: ((e) => {
-				const key = e.target.dataset.key as keyof LiveVals
-				const item_id = item.id
-				const newVal = e.target.value
-				const oldVal = e.target.dataset.value_on_focus
 
+				// update history
+				const oldVal = e.target.dataset.value_on_focus
 				if (oldVal !== undefined && newVal !== oldVal) {
 					if (key === 'date' || key === 'name') {
-						p.historyController.add({
+						p.historyController.upsert({
 							type: 'transaction_value_change',
 							transaction_id: p.transaction.id,
 							key,
@@ -83,7 +80,38 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						key === 'category_id' ||
 						key === 'account_id'
 					) {
-						p.historyController.add({
+						p.historyController.upsert({
+							type: 'item_value_change',
+							transaction_id: p.transaction.id,
+							item_id: item_id,
+							key,
+							oldVal,
+							newVal,
+						})
+					}
+				}
+			}) as ChangeEventHandler<HTMLInputElement | HTMLSelectElement>,
+			onBlur: ((e) => {
+				const key = e.target.dataset.key as keyof LiveVals
+				const item_id = item.id
+				const newVal = e.target.value
+				const oldVal = e.target.dataset.value_on_focus
+
+				if (oldVal !== undefined && newVal !== oldVal) {
+					if (key === 'date' || key === 'name') {
+						p.historyController.upsert({
+							type: 'transaction_value_change',
+							transaction_id: p.transaction.id,
+							key,
+							oldVal,
+							newVal,
+						})
+					} else if (
+						key === 'amount' ||
+						key === 'category_id' ||
+						key === 'account_id'
+					) {
+						p.historyController.upsert({
 							type: 'item_value_change',
 							transaction_id: p.transaction.id,
 							item_id: item_id,
