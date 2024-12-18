@@ -1,9 +1,6 @@
 import { ReactNode } from 'react'
 import s from './JRadio.module.scss'
-interface JRadioProps extends React.HTMLProps<HTMLInputElement> {
-	id: string
-	children?: ReactNode
-}
+interface JRadioProps extends React.HTMLProps<HTMLInputElement> {}
 
 export function JRadio(props: JRadioProps) {
 	return (
