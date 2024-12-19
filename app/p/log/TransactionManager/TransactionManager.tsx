@@ -117,7 +117,7 @@ export function TransactionManager() {
 		transactionRowsRef.current[transaction_id] = node
 	}
 
-	const dropdownOptions = useMemo(() => {
+	const dropdownOptions: DropdownOptions = useMemo(() => {
 		return {
 			category: (() => {
 				if (categoryData === null) {
@@ -132,7 +132,7 @@ export function TransactionManager() {
 					options.unshift({ name: 'None', value: 'none' })
 					return options
 				}
-			})() as JDropdownTypes.Option[],
+			})(),
 			account: (() => {
 				if (accountData === null) {
 					return []
@@ -146,7 +146,7 @@ export function TransactionManager() {
 					options.unshift({ name: 'None', value: 'none' })
 					return options
 				}
-			})() as JDropdownTypes.Option[],
+			})(),
 		}
 	}, [categoryData, accountData])
 
@@ -265,7 +265,9 @@ export function TransactionManager() {
 			const cells: JGridTypes.Props['cells'] = []
 
 			sortedData.forEach((groupedItem, groupedItemIndex) => {
-				cells.push(<DateRow date={groupedItem.date} />)
+				cells.push(
+					<DateRow date={groupedItem.date} dropdownOptions={dropdownOptions} />
+				)
 
 				groupedItem.transactions.forEach((transaction, index) => {
 					if (transaction.items.length === 1) {
@@ -418,3 +420,8 @@ export interface FormTransaction extends Omit<FetchedTransaction, 'items'> {
  * Transaction(s), grouped by date
  */
 export type GroupedTransaction = { date: string; transactions: FormTransaction[] }
+
+export type DropdownOptions = {
+	category: JDropdownTypes.Option[]
+	account: JDropdownTypes.Option[]
+}

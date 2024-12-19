@@ -4,15 +4,19 @@ import { formatDate } from '@/utils/formatDate'
 import { JButton } from '@/components/JForm'
 import { createPopup } from '@/utils'
 import { NewTransactionForm } from './NewTransactionForm/NewTransactionForm'
+import { DropdownOptions } from '../../TransactionManager'
 
 interface DateRowProps {
 	date: string
+	dropdownOptions: DropdownOptions
 }
-export function DateRow({ date }: DateRowProps) {
+export function DateRow({ date, dropdownOptions }: DateRowProps) {
 	const { day, year, month } = formatDate(date)
 
 	const handleNewTransactionClick = () => {
-		const popup = createPopup(<NewTransactionForm defaultDate={date} />)
+		const popup = createPopup(
+			<NewTransactionForm defaultDate={date} dropdownOptions={dropdownOptions} />
+		)
 		popup.trigger()
 	}
 
