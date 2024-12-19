@@ -29,11 +29,6 @@ export function useHistory({
 	})
 	const historyStackRef = useRef<HistoryState>(historyStack)
 
-	useEffect(() => {
-		historyStackRef.current = historyStack
-		console.log('history stack update', historyStack)
-	}, [historyStack])
-
 	const undo = useCallback(() => {
 		if (historyStackRef.current.undoStack.length !== 0) {
 			const item = historyStackRef.current.undoStack.at(-1)

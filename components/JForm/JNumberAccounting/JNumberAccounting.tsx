@@ -1,38 +1,46 @@
-'use client'
-import {
-	ChangeEvent,
-	FocusEvent,
-	InputHTMLAttributes,
-	MouseEvent,
-	useEffect,
-	useRef,
-	useState,
-} from 'react'
-import { addCommas, delay } from '@/utils'
+import { InputHTMLAttributes, useCallback, useEffect, useRef, useState } from 'react'
 import s from './JNumberAccounting.module.scss'
-import { evaluate } from 'mathjs'
+import { addCommas, delay } from '@/utils'
 
 interface JNumberAccountingProps extends InputHTMLAttributes<HTMLInputElement> {
-	minimalStyle?: boolean
 	maxDigLeftOfDecimal?: number
 	maxDigRightOfDecimal?: number
+	minimalStyle?: boolean
+	value: string | number
 }
 
-export function JNumberAccounting(props: JNumberAccountingProps) {
-	const inputRef = useRef<HTMLInputElement>(null)
-	const containerRef = useRef<HTMLDivElement>(null)
-	const displayRef = useRef<HTMLDivElement>(null)
-	const [showParenthesis, setShowParenthesis] = useState(false)
-	const [isFocused, setIsFocused] = useState(false)
+export function JNumberAccounting({
+	maxDigLeftOfDecimal,
+	maxDigRightOfDecimal = 2,
+	minimalStyle,
+	className,
+	value: propValue,
+	onChange: propsOnChange,
+	onFocus: propsOnFocus,
+	onBlur: propsOnBlur,
+	...rest
+}: JNumberAccountingProps) {
+	const inputRef = useRef<HTMLInputElement | null>(null)
+	const containerRef = useRef<HTMLDivElement | null>(null)
+	const [value, setValue] = useState('')
+	const valueRef = useRef<string | null>(null)
 	const [isHovering, setIsHovering] = useState(false)
-	const [prevVal, setPrevVal] = useState(props.value ? (props.value as string) : '')
-	useEffect(() => {
-		updateDisplayText()
-	}, [props.value])
+	const [isFocused, setIsFocused] = useState(false)
 
-	// adds error class to input, if errors are stacking it will remain until 0.5s after they stop stacking
+	useEffect(() => {
+		if (isFocused) {
+			inputRef.current!.focus()
+		}
+	}, [isFocused])
+	useEffect(() => {
+		valueRef.current = value
+	}, [value])
+	useEffect(() => {
+		setValue(typeof propValue === 'number' ? propValue.toString() : propValue)
+	}, [propValue])
+
 	let errorEffectQueue = 0
-	async function runErrorEffect() {
+	const errorEffect = useCallback(async () => {
 		errorEffectQueue++
 		if (errorEffectQueue === 1) {
 			let prevErrorEffectQueue = errorEffectQueue
@@ -47,121 +55,99 @@ export function JNumberAccounting(props: JNumberAccountingProps) {
 				prevErrorEffectQueue = errorEffectQueue
 			}
 		}
-	}
+	}, [errorEffectQueue])
 
-	function updateDisplayText() {
-		const valFloat = Number(inputRef.current!.value)
-		if (isNaN(valFloat)) {
-			inputRef.current!.value = prevVal
-			updateDisplayText()
-		} else {
-			const valRounded = valFloat.toFixed(2)
-			inputRef.current!.value = valRounded
-
-			let newDisplayVal = addCommas(valRounded)
-
-			if (valFloat < 0) {
-				newDisplayVal = newDisplayVal.slice(1)
-				setShowParenthesis(true)
-			} else {
-				setShowParenthesis(false)
+	const onChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const newVal = e.target.value
+			if (newVal !== '' && validate(newVal) === false) {
+				errorEffect()
+				return
 			}
 
-			displayRef.current!.innerText = newDisplayVal
-		}
-	}
+			const [left, right] = newVal.split('.')
+			if (
+				(maxDigLeftOfDecimal !== undefined &&
+					left.replace(/-/g, '').length > maxDigLeftOfDecimal) ||
+				(right !== undefined && right.length > maxDigRightOfDecimal)
+			) {
+				errorEffect()
+			} else {
+				setValue(newVal)
+				if (propsOnChange !== undefined) {
+					propsOnChange(e)
+				}
+			}
+		},
+		[maxDigLeftOfDecimal, maxDigRightOfDecimal]
+	)
 
-	function handleMouseEnter(e: MouseEvent<HTMLInputElement>) {
-		setIsHovering(true)
-		if (props.onMouseEnter) {
-			props.onMouseEnter(e)
+	const validate = useCallback((val: string) => {
+		// Check if the value only contains numbers, '-', or '.'
+		if (!/^[0-9.-]+$/.test(val)) {
+			console.log('fail 1')
+			return false
 		}
-	}
-	function handleMouseLeave(e: MouseEvent<HTMLInputElement>) {
-		setIsHovering(false)
-		if (props.onMouseLeave) {
-			props.onMouseLeave(e)
-		}
-	}
-	function handleBlur(e: FocusEvent<HTMLInputElement>) {
-		setIsFocused(false)
-		e.target.value = parseFloat(evaluate(e.target.value)).toFixed(2)
-		updateDisplayText()
-		if (props.onBlur) {
-			props.onBlur(e)
-		}
-	}
 
-	function handleFocus(e: FocusEvent<HTMLInputElement>) {
+		// Check if it contains only ONE or ZERO of '-' and '.'
+		if (/([-].*[-])|([.].*[.])/.test(val)) {
+			console.log('fail 2')
+			return false
+		}
+
+		// Check if '-' is present NOT at the front of the string
+		if (/.+-.*|^.*[^-]-.*$/.test(val)) {
+			console.log('fail 3')
+			return false
+		}
+
+		return true
+	}, [])
+
+	const onFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
 		setIsFocused(true)
-		setPrevVal(e.target.value)
-		if (props.onFocus) {
-			props.onFocus(e)
+		if (propsOnFocus !== undefined) {
+			propsOnFocus(e)
 		}
-	}
-	function handleChange(e: ChangeEvent<HTMLInputElement>) {
-		const input = e.target.value
-		const prevInput = e.target.dataset['val_before_change']!
-		let sanitizedInput = input.replace(/[^0-9+\-./*()]/g, '')
-
-		if (input !== sanitizedInput) {
-			runErrorEffect()
+	}, [])
+	const onBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+		setIsFocused(false)
+		if (valueRef.current !== Number(valueRef.current!).toFixed(2)) {
+			setValue((prev) => Number(prev).toFixed(2))
 		}
 
-		let [digLeft, digRight = 0] = sanitizedInput.split('.').map((it) => it.length)
-
-		if (
-			(props.maxDigLeftOfDecimal !== undefined &&
-				digLeft > props.maxDigLeftOfDecimal) ||
-			(props.maxDigRightOfDecimal !== undefined &&
-				digRight > props.maxDigRightOfDecimal)
-		) {
-			runErrorEffect()
-			sanitizedInput = prevInput
+		if (propsOnBlur !== undefined) {
+			propsOnBlur(e)
 		}
-
-		if (props.onChange && sanitizedInput !== prevInput) {
-			props.onChange(e)
-		}
-		e.target.value = sanitizedInput
-		e.target.dataset['input_before_change'] = sanitizedInput
-	}
-
-	const showFormatted = !(isHovering || isFocused)
+	}, [])
 
 	return (
 		<div
-			className={`${s.main} ${props.className ? props.className : ''} ${
-				props.minimalStyle ? s.minimal_style : ''
-			} ${props.disabled ? s.disabled : ''}`}
+			className={`${s.main} ${
+				(isHovering || isFocused) && !rest.disabled ? s.reveal_input : ''
+			} ${minimalStyle ? s.minimal_style : ''} ${rest.disabled ? s.disabled : ''} ${
+				className ? className : ''
+			}`}
+			onMouseEnter={() => setIsHovering(true)}
+			onMouseLeave={() => setIsHovering(false)}
 			ref={containerRef}
 		>
-			<span className={s.dollar_symbol}>$</span>
-			<div className={s.left_parenthesis} hidden={!(showParenthesis && showFormatted)}>
-				(
-			</div>
-			<div className={s.formatted} hidden={!showFormatted} ref={displayRef} />
 			<input
-				{...props}
-				ref={inputRef}
 				type='text'
-				onChange={handleChange}
-				onBlur={handleBlur}
-				onFocus={handleFocus}
-				onMouseEnter={handleMouseEnter}
-				onMouseLeave={handleMouseLeave}
-				data-val_before_change={props.value ? props.value : ''}
-				style={
-					showFormatted
-						? { color: 'transparent', userSelect: 'none' }
-						: { color: 'inherit' }
-				}
+				onChange={onChange}
+				value={value}
+				ref={inputRef}
+				onFocus={onFocus}
+				onBlur={onBlur}
+				{...rest}
 			/>
-			<div
-				className={s.right_parenthesis}
-				hidden={!(showParenthesis && showFormatted)}
-			>
-				)
+			<div className={s.formatted} tabIndex={0} onFocus={() => setIsFocused(true)}>
+				<div>{addCommas(value.replace(/-/g, ''))}</div>
+			</div>
+			<div className={s.decals}>
+				<div className={s.dollar_symbol}>$</div>
+				<div className={s.left_parenthesis}>{/-\d+/.test(value) ? '(' : ''}</div>
+				<div className={s.right_parenthesis}>{/-\d+/.test(value) ? ')' : ''}</div>
 			</div>
 		</div>
 	)
