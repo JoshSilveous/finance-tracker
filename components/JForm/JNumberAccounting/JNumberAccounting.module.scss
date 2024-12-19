@@ -75,12 +75,11 @@
 		}
 	}
 	.formatted {
-		user-select: none;
 		margin: 0;
 		display: flex;
 		div {
-			overflow: hidden;
-			text-overflow: ellipsis;
+			overflow-x: scroll;
+			scrollbar-width: none;
 		}
 	}
 
@@ -113,8 +112,8 @@
 	}
 	&.disabled {
 		color: var(--font-color-disabled);
+		cursor: not-allowed;
 		input {
-			cursor: not-allowed;
 			&:focus,
 			&:active {
 				box-shadow: inset 0 0 0 0.5px rgba(229, 229, 229, 0.2);

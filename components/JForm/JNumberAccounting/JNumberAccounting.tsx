@@ -142,7 +142,7 @@ export function JNumberAccounting({
 				{...rest}
 			/>
 			<div className={s.formatted} tabIndex={0} onFocus={() => setIsFocused(true)}>
-				<div>{addCommas(value.replace(/-/g, ''))}</div>
+				<div>{addCommas(Number(value).toFixed(2).replace(/-/g, ''))}</div>
 			</div>
 			<div className={s.decals}>
 				<div className={s.dollar_symbol}>$</div>
