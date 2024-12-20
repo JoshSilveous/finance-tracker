@@ -31,7 +31,7 @@
 	}
 	&:not(.reveal_input) {
 		input {
-			display: none;
+			opacity: 0;
 		}
 	}
 

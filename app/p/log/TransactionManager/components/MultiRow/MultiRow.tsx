@@ -122,7 +122,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		() => genLiveVals(p.transaction, p.pendingChanges),
 		[p.transaction, p.pendingChanges]
 	)
-	console.log('liveVals:', liveVals)
 
 	const eventHandlers = useMemo(() => {
 		return {
@@ -137,7 +136,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 				// update pendingChanges
 				if (item_id === undefined) {
-					console.log('1')
 					if (key === 'date' || key === 'name') {
 						const origVal = p.transaction[key]
 						if (origVal !== newVal) {

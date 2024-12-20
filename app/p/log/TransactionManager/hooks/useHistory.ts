@@ -28,6 +28,9 @@ export function useHistory({
 		redoStack: [],
 	})
 	const historyStackRef = useRef<HistoryState>(historyStack)
+	useEffect(() => {
+		historyStackRef.current = historyStack
+	}, [historyStack])
 
 	const undo = useCallback(() => {
 		if (historyStackRef.current.undoStack.length !== 0) {
@@ -278,7 +281,6 @@ export function useHistory({
 				delete thisItemCopy.newVal
 
 				if (areDeeplyEqual(recentItemCopy, thisItemCopy)) {
-					console.log('true')
 					recentItem.newVal = item.newVal
 					return clone
 				}

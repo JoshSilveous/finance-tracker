@@ -85,19 +85,16 @@ export function JNumberAccounting({
 	const validate = useCallback((val: string) => {
 		// Check if the value only contains numbers, '-', or '.'
 		if (!/^[0-9.-]+$/.test(val)) {
-			console.log('fail 1')
 			return false
 		}
 
 		// Check if it contains only ONE or ZERO of '-' and '.'
 		if (/([-].*[-])|([.].*[.])/.test(val)) {
-			console.log('fail 2')
 			return false
 		}
 
 		// Check if '-' is present NOT at the front of the string
 		if (/.+-.*|^.*[^-]-.*$/.test(val)) {
-			console.log('fail 3')
 			return false
 		}
 
@@ -135,13 +132,14 @@ export function JNumberAccounting({
 			<input
 				type='text'
 				onChange={onChange}
+				inputMode='decimal'
 				value={value}
 				ref={inputRef}
 				onFocus={onFocus}
 				onBlur={onBlur}
 				{...rest}
 			/>
-			<div className={s.formatted} tabIndex={0} onFocus={() => setIsFocused(true)}>
+			<div className={s.formatted}>
 				<div>{addCommas(Number(value).toFixed(2).replace(/-/g, ''))}</div>
 			</div>
 			<div className={s.decals}>
