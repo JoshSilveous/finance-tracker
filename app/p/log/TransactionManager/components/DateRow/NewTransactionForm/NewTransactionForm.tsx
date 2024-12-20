@@ -106,7 +106,7 @@ export function NewTransactionForm({
 				</div>
 				{isMultiItems ? (
 					<MultiItemGrid
-						{...{ items: formData.items, handleChange, dropdownOptions }}
+						{...{ formData, handleChange, dropdownOptions, setFormData }}
 					/>
 				) : (
 					<div className={s.items_container}>

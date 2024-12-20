@@ -1,56 +1,67 @@
-import { delay } from '@/utils'
-import s from '../MultiRow.module.scss'
-import { ItemRowRefs } from '../MultiRow'
-import { FormTransaction } from '../../../TransactionManager'
+import { Dispatch, SetStateAction } from 'react'
+import { TransactionFormData } from './NewTransactionForm'
+import s from './NewTransactionForm.module.scss'
+import { delay, moveItemInArray } from '@/utils'
 
-export const handleItemReorder =
+export const handleReorder =
 	(
-		item: FormTransaction['items'][number],
-		itemRows: ItemRowRefs,
-		itemIndex: number,
-		transaction: FormTransaction,
-		handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
+		formData: TransactionFormData,
+		setFormData: Dispatch<SetStateAction<TransactionFormData>>,
+		itemRows: HTMLDivElement[],
+		thisRowIndex: number
 	) =>
-	(e: React.MouseEvent<HTMLInputElement>) => {
-		const grabberNode = e.currentTarget as HTMLDivElement
+	(e: React.MouseEvent<HTMLButtonElement>) => {
+		const grabberNode = e.currentTarget as HTMLButtonElement
 		const grabberContainerNode = grabberNode.parentElement as HTMLDivElement
-		const allRows = itemRows.map((ref) => ref.cells)
-		const thisRow = itemRows.find((ref) => ref.item_id === item.id)!.cells
-		const otherRows = allRows.filter((_, index) => index !== itemIndex)!
 
-		const gridElem = itemRows[0].cells[0]?.parentNode?.parentNode?.parentNode?.parentNode
+		const allRows = itemRows.map(
+			(itemRow) => Array.from(itemRow.children) as HTMLDivElement[]
+		)
+		const thisRow = allRows[thisRowIndex]
+		const otherRows = allRows.filter((_, index) => index !== thisRowIndex)!
+		const gridElem = allRows[0][0].parentNode?.parentNode?.parentNode as HTMLDivElement
+		const popupContainer = gridElem.parentNode?.parentNode?.parentNode
 			?.parentNode as HTMLDivElement
+		const popupContainerStyles = getComputedStyle(popupContainer)
+		console.log('popupContainer', popupContainer)
+		const popupContainerOffsetX =
+			parseInt(popupContainerStyles.left) -
+			parseInt(popupContainerStyles.width) / 2 -
+			20
+		const popupContainerOffsetY =
+			parseInt(popupContainerStyles.top) -
+			parseInt(popupContainerStyles.height) / 2 -
+			20
 
 		const offsetX =
 			grabberNode.offsetLeft +
 			grabberNode.offsetWidth / 2 -
-			grabberContainerNode.offsetLeft -
-			4
+			grabberContainerNode.offsetLeft
 		const offsetY =
 			grabberNode.offsetTop +
 			grabberNode.offsetHeight / 2 -
-			grabberContainerNode.offsetTop +
-			4
+			grabberContainerNode.offsetTop
+		console.log(
+			'popupContainerOffsetX',
+			popupContainerOffsetX,
+			'\nopopupContainerOffsetY',
+			popupContainerOffsetY,
+			'new',
+			popupContainer.offsetLeft,
+			popupContainer.offsetTop
+		)
 
 		let leftOffset = 0
+		const rowWidths = thisRow.map((node) => parseInt(getComputedStyle(node).width))
+		// console.log(thisRow.map((item, index) => [item, rowWidths[index]]))
 		thisRow.forEach((node, index) => {
-			let widthOffset = 0
 			// patches for minor visual issues. after a few hours, i decided it wasn't worth the time troubleshooting the css for this
-			if (index === 1) {
-				widthOffset += 8
-			}
-			if (index > 1) {
-				widthOffset += 5
-			}
-			if (index === 5) {
-				widthOffset += 2.5
-			}
 
-			node.style.width = `${node.offsetWidth + widthOffset}px`
-			node.style.left = `${e.clientX - offsetX + leftOffset}px`
-			node.style.top = `${e.clientY - offsetY}px`
+			node.style.width = `${rowWidths[index]}px`
+			node.style.left = `${e.clientX - popupContainerOffsetX - offsetX + leftOffset}px`
+			node.style.top = `${e.clientY - popupContainerOffsetY - offsetY}px`
 			node.classList.add(s.popped_out)
-			leftOffset += node.clientWidth
+			leftOffset += rowWidths[index]
 		})
 
 		const breakpoints: number[] = (() => {
@@ -93,7 +104,7 @@ export const handleItemReorder =
 				})
 			}
 			// if hovering over last row
-			else if (rowIndex === transaction.items.length - 2) {
+			else if (rowIndex === formData.items.length - 2) {
 				otherRows.at(-1)!.forEach((node) => {
 					node.classList.add(s.margin_bottom_double)
 				})
@@ -121,7 +132,7 @@ export const handleItemReorder =
 			}, 0)
 		}
 		let closestBreakpointIndex = getClosestBreakpointIndex(
-			e.clientY + gridElem.scrollTop
+			e.clientY - popupContainerOffsetY + gridElem.scrollTop
 		)
 		putMarginGapOnRow(closestBreakpointIndex)
 
@@ -185,29 +196,29 @@ export const handleItemReorder =
 		})()
 
 		function handleReorderMouseMove(e: MouseEvent) {
+			const trueX = e.clientX - popupContainerOffsetX
+			const trueY = e.clientY - popupContainerOffsetY
 			let leftOffset = 0
-			thisRow.forEach((node) => {
-				node.style.left = `${e.clientX - offsetX + leftOffset}px`
-				node.style.top = `${e.clientY - offsetY}px`
-				leftOffset += node.clientWidth
+			thisRow.forEach((node, index) => {
+				node.style.left = `${trueX - offsetX + leftOffset}px`
+				node.style.top = `${trueY - offsetY}px`
+				leftOffset += rowWidths[index]
 			})
 
 			const prevClosestBreakpointIndex = closestBreakpointIndex
-			closestBreakpointIndex = getClosestBreakpointIndex(
-				e.clientY + gridElem.scrollTop
-			)
+			closestBreakpointIndex = getClosestBreakpointIndex(trueY + gridElem.scrollTop)
 			if (firstRun || prevClosestBreakpointIndex !== closestBreakpointIndex) {
 				putMarginGapOnRow(closestBreakpointIndex)
 			}
 			firstRun = false
 
-			if (e.clientY < gridElem.offsetTop + SCROLL_MARGIN) {
+			if (trueY < gridElem.offsetTop + SCROLL_MARGIN) {
 				scroll.startUp()
 			} else {
 				scroll.stopUp()
 			}
 
-			if (e.clientY > gridElem.offsetTop + gridElem.offsetHeight - SCROLL_MARGIN) {
+			if (trueY > gridElem.offsetTop + gridElem.offsetHeight - SCROLL_MARGIN) {
 				scroll.startDown()
 			} else {
 				scroll.stopDown()
@@ -216,12 +227,12 @@ export const handleItemReorder =
 
 		function handleReorderMouseUp() {
 			putMarginGapOnRow('none')
-			thisRow.forEach((node) => {
-				node.style.width = ''
-				node.style.top = ''
-				node.style.left = ''
-				node.classList.remove(s.popped_out)
-			})
+			// thisRow.forEach((node) => {
+			// 	node.style.width = ''
+			// 	node.style.top = ''
+			// 	node.style.left = ''
+			// 	node.classList.remove(s.popped_out)
+			// })
 
 			scroll.stopUp()
 			scroll.stopDown()
@@ -231,8 +242,12 @@ export const handleItemReorder =
 			window.removeEventListener('mouseup', handleReorderMouseUp)
 			window.removeEventListener('contextmenu', handleRightClick)
 
-			if (itemIndex !== closestBreakpointIndex) {
-				handleTransactionItemReorder(itemIndex, closestBreakpointIndex)
+			if (thisRowIndex !== closestBreakpointIndex) {
+				setFormData((prev) => {
+					const clone = structuredClone(prev)
+					moveItemInArray(clone.items, thisRowIndex, closestBreakpointIndex)
+					return clone
+				})
 			}
 		}
 

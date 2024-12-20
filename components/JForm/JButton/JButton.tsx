@@ -10,6 +10,7 @@ interface JButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export function JButton({ jstyle, loading, ...props }: JButtonProps) {
 	return (
 		<button
+			type='button'
 			{...props}
 			className={`${props.className} ${s.jbutton} ${s[jstyle]} ${
 				loading ? s.loading : ''
