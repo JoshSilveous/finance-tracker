@@ -35,9 +35,10 @@ export function JNumberAccounting({
 	useEffect(() => {
 		valueRef.current = value
 	}, [value])
+
 	useEffect(() => {
 		setValue(typeof propValue === 'number' ? propValue.toString() : propValue)
-	}, [propValue])
+	}, [propValue, value])
 
 	let errorEffectQueue = 0
 	const errorEffect = useCallback(async () => {

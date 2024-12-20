@@ -129,7 +129,7 @@ export function TransactionManager() {
 							value: cat.id,
 						}
 					})
-					options.unshift({ name: 'None', value: 'none' })
+					options.unshift({ name: '', value: '' })
 					return options
 				}
 			})(),
@@ -143,7 +143,7 @@ export function TransactionManager() {
 							value: act.id,
 						}
 					})
-					options.unshift({ name: 'None', value: 'none' })
+					options.unshift({ name: '', value: '' })
 					return options
 				}
 			})(),

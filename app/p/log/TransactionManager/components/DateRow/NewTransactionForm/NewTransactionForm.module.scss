@@ -1,16 +1,29 @@
 .main {
+	min-width: 400px;
 	.split_col {
 		display: flex;
 		gap: 20px;
 		& > * {
-			width: 235px;
+			width: 100%;
 		}
 	}
-	.item {
-		display: flex;
-		gap: 20px;
-		& > * {
-			width: 150px;
+	.items_container {
+		.item {
+			display: flex;
+			gap: 20px;
+			& > * {
+				width: 100%;
+			}
+		}
+
+		&.multi_item {
+			.item {
+				gap: 10px;
+			}
+			.control_container {
+				width: 50px;
+				display: flex;
+			}
 		}
 	}
 }
