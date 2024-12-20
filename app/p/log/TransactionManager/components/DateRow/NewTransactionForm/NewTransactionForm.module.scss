@@ -1,0 +1,16 @@
+.main {
+	.split_col {
+		display: flex;
+		gap: 20px;
+		& > * {
+			width: 235px;
+		}
+	}
+	.item {
+		display: flex;
+		gap: 20px;
+		& > * {
+			width: 150px;
+		}
+	}
+}
