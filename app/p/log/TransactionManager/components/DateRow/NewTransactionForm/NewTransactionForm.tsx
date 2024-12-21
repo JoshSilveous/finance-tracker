@@ -5,7 +5,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
 import { DropdownOptions } from '../../../TransactionManager'
 import { MultiItemGrid } from './MultiItemGrid'
-import { delay } from '@/utils'
+import { createPopup, delay, isStandardError, promptError } from '@/utils'
+import { insertTransactionAndItems } from '@/database'
 
 export interface TransactionFormData {
 	name: string
@@ -37,14 +38,15 @@ export function NewTransactionForm({
 	})
 	const [isMultiItems, setIsMultiItems] = useState(false)
 	const [missingItems, setMissingItems] = useState<string[]>([])
+	const [submitting, setSubmitting] = useState(false)
 
 	// check if form is ready to submit
 	useEffect(() => {
 		const updatedMissingItems = []
-		if (formData.name === '') {
+		if (formData.name.trim() === '') {
 			updatedMissingItems.push('transaction-name')
 		}
-		if (formData.date === '') {
+		if (formData.date.trim() === '') {
 			updatedMissingItems.push('transaction-date')
 		}
 		if (!isMultiItems) {
@@ -53,7 +55,7 @@ export function NewTransactionForm({
 			}
 		} else {
 			formData.items.forEach((item, index) => {
-				if (item.name === '') {
+				if (item.name.trim() === '') {
 					updatedMissingItems.push(`item-name-${index}`)
 				}
 				if (item.amount === '') {
@@ -105,7 +107,7 @@ export function NewTransactionForm({
 			}
 		}, [])
 
-	const handleSubmit: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+	const handleSubmit: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
 		if (missingItems.length !== 0) {
 			const node = e.currentTarget
 
@@ -138,6 +140,21 @@ export function NewTransactionForm({
 				})
 				node.classList.remove(s.error_shake, s.error)
 			})
+		} else {
+			setSubmitting(true)
+			try {
+				await insertTransactionAndItems(formData)
+				setSubmitting(false)
+			} catch (e) {
+				if (isStandardError(e)) {
+					promptError(
+						'Error occurred while creating your transaction.',
+						e.message,
+						'Check your internet connection, and try refreshing the page.'
+					)
+					console.error(e)
+				}
+			}
 		}
 	}
 
@@ -214,6 +231,7 @@ export function NewTransactionForm({
 					<JButton
 						jstyle={missingItems.length !== 0 ? 'secondary' : 'primary'}
 						onClick={handleSubmit}
+						loading={submitting}
 					>
 						Create
 					</JButton>

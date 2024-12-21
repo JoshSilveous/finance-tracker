@@ -1,7 +1,7 @@
 'use client'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { areDeeplyEqual, getScrollbarWidth } from '@/utils'
+import { areDeeplyEqual, createPopup, getScrollbarWidth } from '@/utils'
 import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
@@ -17,6 +17,7 @@ import {
 	useSortOrder,
 	useKeyListener,
 } from './hooks'
+import { NewTransactionForm } from './components/DateRow/NewTransactionForm/NewTransactionForm'
 
 export function TransactionManager() {
 	const mainContainerRef = useRef<HTMLDivElement | null>(null)
@@ -254,14 +255,7 @@ export function TransactionManager() {
 	let grid: ReactNode
 
 	if (loaded && sortedData !== null) {
-		if (sortedData.length === 0) {
-			grid = (
-				<p>
-					You do not have any transactions, click "Create new transaction" below to
-					get started!
-				</p>
-			)
-		} else {
+		if (sortedData.length !== 0) {
 			const cells: JGridTypes.Props['cells'] = []
 
 			sortedData.forEach((groupedItem, groupedItemIndex) => {
@@ -355,6 +349,27 @@ export function TransactionManager() {
 		<div className={s.main} ref={mainContainerRef}>
 			{!loaded ? (
 				<div className={s.loading_container}>Loading...</div>
+			) : sortedData!.length === 0 ? (
+				<div>
+					<div>
+						You do not have any transactions, click "Create new transaction"
+						below to get started!
+					</div>
+					<JButton
+						jstyle='primary'
+						onClick={() => {
+							const popup = createPopup(
+								<NewTransactionForm
+									dropdownOptions={dropdownOptions}
+									defaultDate={new Date().toISOString().split('T')[0]}
+								/>
+							)
+							popup.trigger()
+						}}
+					>
+						Create new transaction
+					</JButton>
+				</div>
 			) : (
 				<>
 					<div className={s.grid_container}>{grid}</div>

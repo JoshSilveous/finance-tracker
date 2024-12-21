@@ -24,7 +24,7 @@ export async function fetchAndLoadData(
 	Promise.all([fetchTransactionData(), fetchCategoryData(), fetchAccountData()])
 		.then((res) => {
 			const [transactions, categories, accounts] = res
-
+			console.log('ads')
 			// generate default sort order
 			const sortOrder: SortOrder = {}
 			transactions.forEach((transaction) => {
@@ -81,12 +81,14 @@ export async function fetchAndLoadData(
 			setLoaded(true)
 		})
 		.catch((e) => {
+			console.log(e)
 			if (isStandardError(e)) {
 				promptError(
 					'An unexpected error has occurred while fetching your data from the database:',
 					e.message,
 					'Try refreshing the page to resolve this issue.'
 				)
+				console.error(e.message)
 			}
 		})
 }

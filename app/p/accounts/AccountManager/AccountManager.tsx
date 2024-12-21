@@ -171,6 +171,7 @@ export function AccountManager() {
 							e.message,
 							'Try refreshing the page to resolve this issue.'
 						)
+						console.error(e.message)
 					} else {
 						console.error(e)
 					}

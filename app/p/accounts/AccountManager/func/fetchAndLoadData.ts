@@ -36,6 +36,7 @@ export async function fetchAndLoadData(
 							e.message,
 							'Try refreshing the page to resolve this issue.'
 						)
+						console.error(e.message)
 					}
 				}
 			} else {
@@ -44,6 +45,7 @@ export async function fetchAndLoadData(
 					e.message,
 					'Try refreshing the page to resolve this issue.'
 				)
+				console.error(e.message)
 			}
 		}
 	}
@@ -61,6 +63,7 @@ export async function fetchAndLoadData(
 				e.message,
 				'Try refreshing the page to resolve this issue.'
 			)
+			console.error(e.message)
 		} else {
 			console.error(e)
 		}

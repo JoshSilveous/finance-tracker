@@ -13,7 +13,9 @@ export async function fetchAccountData() {
 		.from('accounts')
 		.select('id, name, order_position, starting_amount')
 		.order('order_position')
+
 	if (error) {
+		console.log('this err')
 		throw new Error(error.message)
 	}
 	return data as FetchedAccount[]

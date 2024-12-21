@@ -1,6 +1,6 @@
 import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import s from './DeleteForm.module.scss'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, ChangeEventHandler, useEffect, useState } from 'react'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import {
 	deleteCategoryAndTransactions,
@@ -45,6 +45,7 @@ export function DeleteForm({ category_name, category_id, afterDelete }: DeleteFo
 						e.message,
 						'Try refreshing the page to resolve this issue.'
 					)
+					console.error(e.message)
 				} else {
 					console.error(e)
 				}
@@ -74,6 +75,7 @@ export function DeleteForm({ category_name, category_id, afterDelete }: DeleteFo
 							e.message,
 							'Try refreshing the page to resolve this issue.'
 						)
+						console.error(e.message)
 					} else {
 						console.error(e)
 					}
@@ -105,7 +107,7 @@ export function DeleteForm({ category_name, category_id, afterDelete }: DeleteFo
 				}
 			}
 		}
-		const handleDropdownChange: JDropdownTypes.ChangeEventHandler = (e) => {
+		const handleDropdownChange: ChangeEventHandler<HTMLSelectElement> = (e) => {
 			if (e.target.value === '') {
 				setReadyToConfirm(false)
 				setCategoryToChangeTo(undefined)
@@ -187,6 +189,7 @@ export function DeleteForm({ category_name, category_id, afterDelete }: DeleteFo
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)
+									console.error(e.message)
 								} else {
 									console.error(e)
 								}
@@ -207,6 +210,7 @@ export function DeleteForm({ category_name, category_id, afterDelete }: DeleteFo
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)
+									console.error(e.message)
 								} else {
 									console.error(e)
 								}
@@ -227,6 +231,7 @@ export function DeleteForm({ category_name, category_id, afterDelete }: DeleteFo
 										e.message,
 										'Try refreshing the page to resolve this issue.'
 									)
+									console.error(e.message)
 								} else {
 									console.error(e)
 								}
