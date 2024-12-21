@@ -5,6 +5,7 @@
     -   Set up history system
 
     -   fix this bug https://imgur.com/NO91QLm
+    -   fix this https://i.imgur.com/sAXGkIZ.gif
 
 -   Switch preferred column widths to localStorage instead of DB
 
