@@ -6,7 +6,7 @@ import { default as DeleteIcon } from '@/public/delete.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import s from './NewTransactionForm.module.scss'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
-import { Dispatch, SetStateAction, useRef } from 'react'
+import { Dispatch, SetStateAction, useCallback, useMemo, useRef } from 'react'
 import { handleReorder } from './handleReorder'
 import { removeFromArray } from '@/utils'
 
@@ -23,75 +23,81 @@ export function MultiItemGrid({
 	setFormData,
 }: MultiItemGridProps) {
 	const itemRowsRef = useRef<HTMLDivElement[]>([])
-	const addToItemRowsRef = (node: HTMLDivElement) => {
+	const addToItemRowsRef = useCallback((node: HTMLDivElement) => {
 		if (node !== null) {
 			itemRowsRef.current.push(node)
 		}
-	}
+	}, [])
 
 	itemRowsRef.current = [] // wipe refs every re-render
-	const headers: JGridTypes.Header[] = [
-		{
-			content: <div className={s.header_container} />,
-			defaultWidth: 50,
-			noResize: true,
-		},
-		{
-			content: (
-				<div className={`${s.header_container} ${s.first}`}>
-					<div className={s.text}>Name</div>
-				</div>
-			),
-			defaultWidth: 125,
-			minWidth: 125,
-			maxWidth: 175,
-		},
-		{
-			content: (
-				<div className={s.header_container}>
-					<div className={s.text}>Amount</div>
-				</div>
-			),
-			defaultWidth: 100,
-			minWidth: 80,
-			maxWidth: 150,
-		},
-		{
-			content: (
-				<div className={s.header_container}>
-					<div className={s.text}>Category</div>
-				</div>
-			),
-			defaultWidth: 100,
-			minWidth: 80,
-			maxWidth: 150,
-		},
-		{
-			content: (
-				<div className={`${s.header_container} ${s.last}`}>
-					<div className={s.text}>Account</div>
-				</div>
-			),
-			defaultWidth: 100,
-			minWidth: 80,
-			maxWidth: 150,
-		},
-	]
+	const headers: JGridTypes.Header[] = useMemo(
+		() => [
+			{
+				content: <div className={s.header_container} />,
+				defaultWidth: 50,
+				noResize: true,
+			},
+			{
+				content: (
+					<div className={`${s.header_container} ${s.first}`}>
+						<div className={s.text}>Name</div>
+					</div>
+				),
+				defaultWidth: 125,
+				minWidth: 125,
+				maxWidth: 175,
+			},
+			{
+				content: (
+					<div className={s.header_container}>
+						<div className={s.text}>Amount</div>
+					</div>
+				),
+				defaultWidth: 100,
+				minWidth: 80,
+				maxWidth: 150,
+			},
+			{
+				content: (
+					<div className={s.header_container}>
+						<div className={s.text}>Category</div>
+					</div>
+				),
+				defaultWidth: 100,
+				minWidth: 80,
+				maxWidth: 150,
+			},
+			{
+				content: (
+					<div className={`${s.header_container} ${s.last}`}>
+						<div className={s.text}>Account</div>
+					</div>
+				),
+				defaultWidth: 100,
+				minWidth: 80,
+				maxWidth: 150,
+			},
+		],
+		[]
+	)
 
-	const addNewItem = () => {
+	const addNewItem = useCallback(() => {
 		setFormData((prev) => {
 			const clone = structuredClone(prev)
 			clone.items.push({ name: '', amount: '', category_id: '', account_id: '' })
 			return clone
 		})
-	}
-	const deleteItem = (index: number) => () => {
-		setFormData((prev) => {
-			const clone = structuredClone(prev)
-			clone.items = removeFromArray(clone.items, index)
-			return clone
-		})
-	}
+	}, [])
+	const deleteItem = useCallback(
+		(index: number) => () => {
+			setFormData((prev) => {
+				const clone = structuredClone(prev)
+				clone.items = removeFromArray(clone.items, index)
+				return clone
+			})
+		},
+		[]
+	)
 	const cells: JGridTypes.Row[] = formData.items.map((item, index) => (
 		<div className={s.item_row} ref={addToItemRowsRef}>
 			<div className={`${s.control_container} ${index === 0 ? s.first_row : ''}`}>
@@ -164,8 +170,6 @@ export function MultiItemGrid({
 			</JButton>
 		</div>
 	)
-
-	cells.push()
 
 	const gridConfig: JGridTypes.Props = {
 		headers,
