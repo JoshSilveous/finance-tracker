@@ -1,7 +1,7 @@
-import { JInput, JNumberAccounting } from '@/components/JForm'
+import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import s from './NewTransactionForm.module.scss'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
 import { DropdownOptions } from '../../../TransactionManager'
 import { MultiItemGrid } from './MultiItemGrid'
@@ -35,6 +35,31 @@ export function NewTransactionForm({
 		items: [{ name: '', amount: '', category_id: '', account_id: '' }],
 	})
 	const [isMultiItems, setIsMultiItems] = useState(false)
+	const [isMissingItems, setIsMissingItems] = useState(true)
+
+	// check if form is ready to submit
+	useEffect(() => {
+		const missingData = isMultiItems
+			? !(
+					formData.name !== '' &&
+					formData.date !== '' &&
+					formData.items.every((item) => {
+						console.log(item, item.name !== '', item.amount !== '')
+						return item.name !== '' && item.amount !== ''
+					})
+			  )
+			: !(
+					formData.name !== '' &&
+					formData.date !== '' &&
+					formData.items[0].amount !== ''
+			  )
+
+		if (isMissingItems && !missingData) {
+			setIsMissingItems(false)
+		} else if (!isMissingItems && missingData) {
+			setIsMissingItems(true)
+		}
+	}, [formData, isMultiItems])
 
 	const handleChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement> = (
 		e
@@ -140,6 +165,12 @@ export function NewTransactionForm({
 						</div>
 					</div>
 				)}
+				<div className={s.button_container}>
+					<JButton jstyle='secondary'>Go Back</JButton>
+					<JButton jstyle='primary' disabled={isMissingItems}>
+						Create
+					</JButton>
+				</div>
 			</form>
 		</div>
 	)

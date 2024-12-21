@@ -23,7 +23,6 @@ export const handleReorder =
 		const popupContainer = gridElem.parentNode?.parentNode?.parentNode
 			?.parentNode as HTMLDivElement
 		const popupContainerStyles = getComputedStyle(popupContainer)
-		console.log('popupContainer', popupContainer)
 		const popupContainerOffsetX =
 			parseInt(popupContainerStyles.left) -
 			parseInt(popupContainerStyles.width) / 2 -
@@ -41,27 +40,11 @@ export const handleReorder =
 			grabberNode.offsetTop +
 			grabberNode.offsetHeight / 2 -
 			grabberContainerNode.offsetTop
-		console.log(
-			'popupContainerOffsetX',
-			popupContainerOffsetX,
-			'\nopopupContainerOffsetY',
-			popupContainerOffsetY,
-			'new',
-			popupContainer.offsetLeft,
-			popupContainer.offsetTop
-		)
 
-		let leftOffset = 0
+		// let leftOffset = 0
 		const rowWidths = thisRow.map((node) => parseInt(getComputedStyle(node).width))
-		// console.log(thisRow.map((item, index) => [item, rowWidths[index]]))
-		thisRow.forEach((node, index) => {
-			// patches for minor visual issues. after a few hours, i decided it wasn't worth the time troubleshooting the css for this
-
-			node.style.width = `${rowWidths[index]}px`
-			node.style.left = `${e.clientX - popupContainerOffsetX - offsetX + leftOffset}px`
-			node.style.top = `${e.clientY - popupContainerOffsetY - offsetY}px`
+		thisRow.forEach((node) => {
 			node.classList.add(s.popped_out)
-			leftOffset += rowWidths[index]
 		})
 
 		const breakpoints: number[] = (() => {
@@ -131,9 +114,30 @@ export const handleReorder =
 					: closestIndex
 			}, 0)
 		}
+
+		function positionRow(clientX: number, clientY: number) {
+			let leftOffset = 0
+			thisRow.forEach((node, index) => {
+				node.style.width = `${rowWidths[index]}px`
+				node.style.left = `${
+					clientX - popupContainerOffsetX - offsetX + leftOffset
+				}px`
+				node.style.top = `${clientY - popupContainerOffsetY - offsetY}px`
+				leftOffset +=
+					rowWidths[index] +
+					parseFloat(getComputedStyle(node).paddingLeft) +
+					parseFloat(getComputedStyle(node).paddingRight)
+				console.log(
+					parseFloat(getComputedStyle(node).paddingLeft) +
+						parseFloat(getComputedStyle(node).paddingRight)
+				)
+			})
+		}
 		let closestBreakpointIndex = getClosestBreakpointIndex(
 			e.clientY - popupContainerOffsetY + gridElem.scrollTop
 		)
+
+		positionRow(e.clientX, e.clientY)
 		putMarginGapOnRow(closestBreakpointIndex)
 
 		const SCROLL_MARGIN = 50 // margin from top/bottom of grid container to activate scrolling effect
@@ -196,14 +200,8 @@ export const handleReorder =
 		})()
 
 		function handleReorderMouseMove(e: MouseEvent) {
-			const trueX = e.clientX - popupContainerOffsetX
 			const trueY = e.clientY - popupContainerOffsetY
-			let leftOffset = 0
-			thisRow.forEach((node, index) => {
-				node.style.left = `${trueX - offsetX + leftOffset}px`
-				node.style.top = `${trueY - offsetY}px`
-				leftOffset += rowWidths[index]
-			})
+			positionRow(e.clientX, e.clientY)
 
 			const prevClosestBreakpointIndex = closestBreakpointIndex
 			closestBreakpointIndex = getClosestBreakpointIndex(trueY + gridElem.scrollTop)
@@ -227,12 +225,12 @@ export const handleReorder =
 
 		function handleReorderMouseUp() {
 			putMarginGapOnRow('none')
-			// thisRow.forEach((node) => {
-			// 	node.style.width = ''
-			// 	node.style.top = ''
-			// 	node.style.left = ''
-			// 	node.classList.remove(s.popped_out)
-			// })
+			thisRow.forEach((node) => {
+				node.style.width = ''
+				node.style.top = ''
+				node.style.left = ''
+				node.classList.remove(s.popped_out)
+			})
 
 			scroll.stopUp()
 			scroll.stopDown()
