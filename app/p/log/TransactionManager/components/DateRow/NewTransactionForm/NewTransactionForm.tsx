@@ -1,13 +1,14 @@
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import s from './NewTransactionForm.module.scss'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { useCallback, useEffect, useState } from 'react'
+import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
 import { DropdownOptions } from '../../../TransactionManager'
 import { MultiItemGrid } from './MultiItemGrid'
-import { createPopup, delay, isStandardError, promptError } from '@/utils'
+import { delay, isStandardError, promptError, setKeyListenerContext } from '@/utils'
 import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
+import { useFocusLoop } from '@/utils/focusLoop/focusLoop'
 
 export interface TransactionFormData {
 	name: string
@@ -37,9 +38,18 @@ export function NewTransactionForm({
 		date: defaultDate,
 		items: [{ name: '', amount: '', category_id: '', account_id: '' }],
 	})
+	const firstFocusRef = useRef<HTMLInputElement | null>(null)
+	const lastFocusRef = useRef<HTMLButtonElement | null>(null)
 	const [isMultiItems, setIsMultiItems] = useState(false)
 	const [missingItems, setMissingItems] = useState<string[]>([])
 	const [submitting, setSubmitting] = useState(false)
+
+	useFocusLoop(firstFocusRef, lastFocusRef)
+
+	useEffect(() => {
+		firstFocusRef.current!.focus()
+		setKeyListenerContext('NewTransactionForm')
+	}, [])
 
 	// check if form is ready to submit
 	useEffect(() => {
@@ -170,6 +180,7 @@ export function NewTransactionForm({
 							id='transaction-name'
 							onChange={handleChange}
 							value={formData.name}
+							ref={firstFocusRef}
 						/>
 					</div>
 					<div className={s.date_container}>
@@ -233,6 +244,7 @@ export function NewTransactionForm({
 					jstyle={missingItems.length !== 0 ? 'secondary' : 'primary'}
 					onClick={handleSubmit}
 					loading={submitting}
+					ref={lastFocusRef}
 				>
 					Create
 				</JButton>

@@ -1,5 +1,4 @@
 export * from './useFoldState'
 export * from './useHistory'
-export * from './useKeyListener'
 export * from './usePendingChanges'
 export * from './useSortOrder'
