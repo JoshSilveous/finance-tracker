@@ -1,0 +1,45 @@
+.main {
+	--size: 20px;
+	--checkmark-scale: 70%;
+	--transition-speed: 0.2s;
+
+	position: relative;
+	width: var(--size);
+	height: var(--size);
+	transition: transform 0.1s ease;
+	&:active {
+		transform: translateY(2px);
+	}
+	input {
+		appearance: none;
+		position: relative;
+		height: 100%;
+		width: 100%;
+		border: 3px solid var(--font-color);
+		border-radius: 4px;
+		margin: 0px;
+		cursor: pointer;
+		display: inline-block;
+		box-shadow: inset 0px 0px 0px 0px var(--font-color);
+		transition: box-shadow var(--transition-speed) ease,
+			background-color var(--transition-speed) ease;
+		&:checked {
+			background-color: var(--font-color) !important;
+			box-shadow: inset 0px 0px 0px calc(var(--size) / 2) var(--font-color);
+		}
+	}
+	.checkmark_container {
+		height: 100%;
+		width: 100%;
+		pointer-events: none;
+		color: var(--bg-color);
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		display: inline-block;
+		opacity: 100%;
+		svg {
+			scale: var(--checkmark-scale);
+		}
+	}
+}
