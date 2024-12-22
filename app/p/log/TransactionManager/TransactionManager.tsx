@@ -1,7 +1,15 @@
 'use client'
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import s from './TransactionManager.module.scss'
-import { areDeeplyEqual, createPopup, getScrollbarWidth } from '@/utils'
+import {
+	areDeeplyEqual,
+	createPopup,
+	getScrollbarWidth,
+	addIsolatedKeyListeners,
+	IsolatedKeyListener,
+	removeIsolatedKeyListeners,
+	setKeyListenerContext,
+} from '@/utils'
 import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
@@ -15,7 +23,6 @@ import {
 	useFoldState,
 	usePendingChanges,
 	useSortOrder,
-	useKeyListener,
 } from './hooks'
 import { NewTransactionForm } from './components/DateRow/NewTransactionForm/NewTransactionForm'
 
@@ -29,6 +36,34 @@ export function TransactionManager() {
 	const [transactionData, setTransactionData] = useState<FormTransaction[] | null>(null)
 	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
+
+	const makeActiveContext = useCallback(() => {
+		setKeyListenerContext('TransactionManager')
+	}, [])
+	useEffect(() => {
+		// set up key listeners
+		const undoListener: IsolatedKeyListener = {
+			context: 'TransactionManager',
+			char: 'Z',
+			ctrlKey: true,
+			shiftKey: false,
+			run: historyController.undo,
+		}
+
+		const redoListener: IsolatedKeyListener = {
+			context: 'TransactionManager',
+			char: 'Z',
+			ctrlKey: true,
+			shiftKey: true,
+			run: historyController.redo,
+		}
+		addIsolatedKeyListeners([undoListener, redoListener])
+		makeActiveContext()
+
+		return () => {
+			removeIsolatedKeyListeners([undoListener, redoListener])
+		}
+	}, [])
 
 	const foldState = useFoldState()
 	const pendingChanges = usePendingChanges()
@@ -55,23 +90,6 @@ export function TransactionManager() {
 		transactionDataRef,
 		setCurSortOrder: sortOrder.setCurrent,
 		updatePendingChanges: pendingChanges.update,
-	})
-
-	useKeyListener({
-		listeners: [
-			{
-				char: 'Z',
-				ctrlKey: true,
-				shiftKey: false,
-				run: historyController.undo,
-			},
-			{
-				char: 'Z',
-				ctrlKey: true,
-				shiftKey: true,
-				run: historyController.redo,
-			},
-		],
 	})
 
 	useEffect(() => {
@@ -346,7 +364,12 @@ export function TransactionManager() {
 		}
 	}
 	return (
-		<div className={s.main} ref={mainContainerRef}>
+		<div
+			className={s.main}
+			ref={mainContainerRef}
+			onClick={makeActiveContext}
+			onKeyDown={makeActiveContext}
+		>
 			{!loaded ? (
 				<div className={s.loading_container}>Loading...</div>
 			) : sortedData!.length === 0 ? (
