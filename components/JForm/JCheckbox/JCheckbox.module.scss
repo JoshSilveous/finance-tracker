@@ -20,12 +20,17 @@
 		margin: 0px;
 		cursor: pointer;
 		display: inline-block;
+		outline: 0px solid transparent;
 		box-shadow: inset 0px 0px 0px 0px var(--font-color);
 		transition: box-shadow var(--transition-speed) ease,
-			background-color var(--transition-speed) ease;
+			background-color var(--transition-speed) ease, outline 0.1s ease;
 		&:checked {
 			background-color: var(--font-color) !important;
 			box-shadow: inset 0px 0px 0px calc(var(--size) / 2) var(--font-color);
+		}
+		&:focus,
+		&:active {
+			outline: 2px solid var(--font-color);
 		}
 	}
 	.checkmark_container {

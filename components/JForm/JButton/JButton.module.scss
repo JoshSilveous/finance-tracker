@@ -1,7 +1,6 @@
 .jbutton {
 	cursor: pointer;
-	transition: background-color 0.15s ease, outline-color 0.15s ease,
-		outline-width 0.15s ease, transform 0.05s ease;
+	transition: background-color 0.15s ease, outline 0.1s ease, transform 0.05s ease;
 	color: var(--font-color);
 	font-family: inherit;
 	height: 36px;
@@ -9,44 +8,38 @@
 	width: 100%;
 	padding: 8px 12px;
 	border-radius: 3px;
-	outline: solid;
-	outline-width: 1px;
 	border: 0;
 	font-weight: 600;
+	outline: 0px solid transparent;
+	box-shadow: inset 0 0 0 1px var(--input-border-color);
 
-	&:focus {
-		outline-width: 3px;
-	}
 	&:active {
 		transform: translateY(2px);
 	}
 
+	&:focus,
+	&:active {
+		outline: 2px solid var(--font-color);
+	}
+
 	&:disabled {
 		background-color: var(--bg-color-lighter-1);
-		outline-color: var(--bg-color-lighter-2);
 		color: var(--font-color-disabled);
 		cursor: not-allowed;
 
-		&:hover,
-		&:focus {
-			outline-width: 1px;
-		}
 		&:active {
 			transform: translateY(0px);
 		}
 	}
 	&.invisible {
 		background-color: transparent;
-		outline-width: 0px;
 	}
 
 	&.primary:not(:disabled) {
 		background-color: var(--prim-bg);
-		outline-color: var(--prim-bg-dark-1);
 
 		&:hover {
 			background-color: var(--prim-bg-light-1);
-			outline-color: var(--prim-bg);
 		}
 		&.loading {
 			cursor: progress;
@@ -55,10 +48,8 @@
 	}
 	&.secondary:not(:disabled) {
 		background-color: var(--bg-color-lighter-1);
-		outline-color: var(--bg-color-lighter-2);
 		&:hover {
 			background-color: var(--bg-color-lighter-2);
-			outline-color: var(--bg-color-lighter-3);
 		}
 		&.loading {
 			cursor: progress;

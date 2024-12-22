@@ -12,13 +12,18 @@
 		width: 100%;
 		padding: 8px 30px 8px 10px;
 		border-radius: 3px;
-		outline: none;
+		outline: 0px solid transparent;
 		box-shadow: inset 0 0 0 0.5px var(--input-border-color);
 		border: 0;
-		transition: box-shadow 0.15s ease;
+		transition: box-shadow 0.15s ease, outline 0.1s ease;
 		appearance: none;
 		-webkit-appearance: none;
 		position: relative;
+		&:focus,
+		&:active {
+			box-shadow: inset 0 0 0 2px var(--input-border-color);
+			outline: 2px solid var(--font-color);
+		}
 
 		// Hide custom Calendar icon if using FireFox (as of writing, no way to hide firefox's default).
 		// I promise you, I googled. Looks like there used to be a way and it stopped working.
@@ -57,13 +62,8 @@
 			display: none;
 		}
 	}
-	&:focus-within {
-		input {
-			box-shadow: inset 0 0 0 2px var(--input-border-color);
-		}
-		.icon_container {
-			scale: 120%;
-		}
+	&:focus-within .icon_container {
+		scale: 120%;
 	}
 	&.minimal_style {
 		input {
@@ -81,7 +81,7 @@
 			cursor: not-allowed;
 			&:focus,
 			&:active {
-				box-shadow: inset 0 0 0 0.5px var(--input-border-color);
+				box-shadow: inset 0 0 0 1px var(--input-border-color);
 			}
 		}
 	}

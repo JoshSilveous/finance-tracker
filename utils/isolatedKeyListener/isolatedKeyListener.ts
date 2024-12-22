@@ -76,4 +76,7 @@ function listenerDistributor(e: KeyboardEvent) {
 	})
 }
 
-window.addEventListener('keydown', listenerDistributor)
+// prevents attempts to run on the node server
+if (typeof window !== 'undefined') {
+	window.addEventListener('keydown', listenerDistributor)
+}
