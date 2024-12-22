@@ -1,4 +1,10 @@
-import { DetailedHTMLProps, InputHTMLAttributes, useCallback, useState } from 'react'
+import {
+	DetailedHTMLProps,
+	forwardRef,
+	InputHTMLAttributes,
+	useCallback,
+	useState,
+} from 'react'
 import s from './JCheckbox.module.scss'
 import { default as CheckmarkIcon } from '@/public/checkmark.svg'
 
@@ -12,36 +18,35 @@ interface JCheckboxProps
 	 */
 	bgColor: string
 }
-export function JCheckbox({
-	bgColor,
-	style,
-	onChange: propsOnChange,
-	...rest
-}: JCheckboxProps) {
-	const [isChecked, setIsChecked] = useState(
-		rest.checked !== undefined ? rest.checked : false
-	)
+export const JCheckbox = forwardRef<HTMLInputElement, JCheckboxProps>(
+	({ bgColor, style, onChange: propsOnChange, ...rest }, ref) => {
+		const [isChecked, setIsChecked] = useState(
+			rest.checked !== undefined ? rest.checked : false
+		)
 
-	const onChange: React.ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
-		setIsChecked(e.target.checked)
-		if (propsOnChange !== undefined) {
-			propsOnChange(e)
-		}
-	}, [])
-	return (
-		<div className={s.main}>
-			<input
-				type='checkbox'
-				style={{ backgroundColor: bgColor, ...style }}
-				onChange={onChange}
-				{...rest}
-			/>
-			<div
-				style={{ color: bgColor }}
-				className={`${s.checkmark_container} ${isChecked ? s.checked : ''}`}
-			>
-				<CheckmarkIcon />
+		const onChange: React.ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
+			setIsChecked(e.target.checked)
+			if (propsOnChange !== undefined) {
+				propsOnChange(e)
+			}
+		}, [])
+		return (
+			<div className={s.main}>
+				<input
+					type='checkbox'
+					ref={ref}
+					style={{ backgroundColor: bgColor, ...style }}
+					onChange={onChange}
+					{...rest}
+				/>
+				<div
+					style={{ color: bgColor }}
+					className={`${s.checkmark_container} ${isChecked ? s.checked : ''}`}
+				>
+					<CheckmarkIcon />
+				</div>
 			</div>
-		</div>
-	)
-}
+		)
+	}
+)
+JCheckbox.displayName = 'JCheckbox'
