@@ -7,6 +7,7 @@ import { DropdownOptions } from '../../../TransactionManager'
 import { MultiItemGrid } from './MultiItemGrid'
 import { createPopup, delay, isStandardError, promptError } from '@/utils'
 import { insertTransactionAndItems } from '@/database'
+import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 
 export interface TransactionFormData {
 	name: string
@@ -163,7 +164,7 @@ export function NewTransactionForm({
 			<h2>Create New Transaction</h2>
 			<form>
 				<div className={s.split_col}>
-					<div>
+					<div className={s.name_container}>
 						<label htmlFor='transaction-name'>Name:</label>
 						<JInput
 							id='transaction-name'
@@ -171,7 +172,7 @@ export function NewTransactionForm({
 							value={formData.name}
 						/>
 					</div>
-					<div>
+					<div className={s.date_container}>
 						<label htmlFor='transaction-date'>Date:</label>
 						<JDatePicker
 							id='transaction-date'
@@ -180,11 +181,10 @@ export function NewTransactionForm({
 						/>
 					</div>
 				</div>
-				<div>
+				<div className={s.multiple_toggle_container}>
 					<label htmlFor='multiple-items'>Multiple Items?</label>
-					{/* need a jcheckbox */}
-					<input
-						type='checkbox'
+					<JCheckbox
+						bgColor='var(--popup-bg-color)'
 						id='multiple-items'
 						checked={isMultiItems}
 						onChange={(e) => setIsMultiItems(e.target.checked)}
@@ -226,17 +226,17 @@ export function NewTransactionForm({
 						</div>
 					</div>
 				)}
-				<div className={s.button_container}>
-					<JButton jstyle='secondary'>Go Back</JButton>
-					<JButton
-						jstyle={missingItems.length !== 0 ? 'secondary' : 'primary'}
-						onClick={handleSubmit}
-						loading={submitting}
-					>
-						Create
-					</JButton>
-				</div>
 			</form>
+			<div className={s.button_container}>
+				<JButton jstyle='secondary'>Go Back</JButton>
+				<JButton
+					jstyle={missingItems.length !== 0 ? 'secondary' : 'primary'}
+					onClick={handleSubmit}
+					loading={submitting}
+				>
+					Create
+				</JButton>
+			</div>
 		</div>
 	)
 }

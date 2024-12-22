@@ -1,12 +1,22 @@
 .main {
 	--spacing: 20px;
-	min-width: 400px;
+	height: 432px;
+	max-width: calc(100vw - 50px);
+	max-height: calc(100vh - 50px);
+	display: flex;
+	flex-direction: column;
 	.split_col {
 		display: flex;
 		gap: var(--spacing);
 		& > * {
 			width: 100%;
 		}
+	}
+	.multiple_toggle_container {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing);
+		margin: calc(var(--spacing) / 2) 0;
 	}
 	.items_container {
 		.item {
@@ -26,7 +36,7 @@
 
 				padding-bottom: 10px;
 				scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
-				max-height: 200px;
+				max-height: 180px;
 				overflow-y: auto;
 				.header_container {
 					.text {
@@ -36,6 +46,7 @@
 					padding: var(--padding-val) calc(var(--padding-val) / 2);
 					width: 100%;
 					background-color: var(--bg-color-lighter-2);
+					transform: translateY(-2px);
 					box-sizing: border-box;
 					text-align: center;
 					min-height: 42px;
@@ -191,7 +202,10 @@
 	.button_container {
 		display: flex;
 		gap: var(--spacing);
-		padding-top: var(--spacing);
+		margin-top: auto;
+		& > * {
+			margin-top: 20px;
+		}
 	}
 	.error_shake {
 		animation: shake 0.2s ease infinite;
