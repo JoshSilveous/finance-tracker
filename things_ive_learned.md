@@ -15,3 +15,5 @@ this is just a loose list i'm keeping. eventually i'll make a beautiful linkedin
 -   use JSDocs for most of your documentation. ESPECIALLY on any reusable functions or components.
 
 -   did i mention css modules are amazing
+
+-   for gods sake use Prettier and ESLint

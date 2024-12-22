@@ -1,4 +1,4 @@
-import { ChangeEvent, DetailedHTMLProps, forwardRef, InputHTMLAttributes } from 'react'
+import { DetailedHTMLProps, forwardRef, InputHTMLAttributes } from 'react'
 import s from './JDatePicker.module.scss'
 import { default as CalendarIcon } from '@/public/calendar.svg'
 

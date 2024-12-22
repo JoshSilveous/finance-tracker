@@ -1,4 +1,4 @@
-import { forwardRef, ReactNode } from 'react'
+import { forwardRef } from 'react'
 import s from './JRadio.module.scss'
 interface JRadioProps extends React.HTMLProps<HTMLInputElement> {}
 
@@ -11,3 +11,4 @@ export const JRadio = forwardRef<HTMLInputElement, JRadioProps>((props, ref) => 
 		</label>
 	)
 })
+JRadio.displayName = 'JRadio'
