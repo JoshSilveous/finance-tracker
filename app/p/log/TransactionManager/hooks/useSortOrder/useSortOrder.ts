@@ -45,7 +45,17 @@ export function useSortOrder({
 	}, [curSortOrder])
 
 	/* TRANSACTION REORDERING LOGIC */
+
+	// used to re-gain focus on the reorder node after re-renders
 	const [transactionToFocusOn, setTransactionToFocusOn] = useState('')
+	useEffect(() => {
+		if (transactionToFocusOn !== '') {
+			transactionReorderRefs.current[transactionToFocusOn].focus()
+			setTransactionToFocusOn('')
+		}
+	}, [transactionToFocusOn])
+
+	// holds references to all of the transaction reorder buttons
 	const transactionReorderRefs = useRef<{ [id: string]: HTMLElement }>({})
 	const handleTransactionReorderKeydown = useCallback(
 		(transaction: FormTransaction) => (e: KeyboardEvent) => {
@@ -54,7 +64,8 @@ export function useSortOrder({
 			)
 
 			if (e.key === 'ArrowUp' && transactionIndex !== 0) {
-				updateTransactionSortOrder(transaction.date)(
+				updateTransactionSortOrder(
+					transaction.date,
 					transactionIndex,
 					transactionIndex - 1
 				)
@@ -63,7 +74,8 @@ export function useSortOrder({
 				e.key === 'ArrowDown' &&
 				transactionIndex !== curSortOrderRef.current![transaction.date].length - 1
 			) {
-				updateTransactionSortOrder(transaction.date)(
+				updateTransactionSortOrder(
+					transaction.date,
 					transactionIndex,
 					transactionIndex + 1
 				)
@@ -82,15 +94,19 @@ export function useSortOrder({
 			return transactionReorderMouseEffect(
 				transaction,
 				transactionIndex,
-				updateTransactionSortOrder(transaction.date),
 				transactionRowsRef,
 				folded,
 				updateFoldState,
-				e
+				e,
+				(oldIndex, newIndex) => {
+					updateTransactionSortOrder(transaction.date, oldIndex, newIndex)
+					setTransactionToFocusOn(transaction.id)
+				}
 			)
 		},
 		[]
 	)
+	// applied to each transaction reorder node
 	const addToTransactionReorderRefs = useCallback(
 		(transaction: FormTransaction) => (node: HTMLElement | null) => {
 			if (node !== null && transactionReorderRefs.current[transaction.id] !== node) {
@@ -108,19 +124,26 @@ export function useSortOrder({
 		},
 		[]
 	)
-	useEffect(() => {
-		if (transactionToFocusOn !== '') {
-			transactionReorderRefs.current[transactionToFocusOn].focus()
-			setTransactionToFocusOn('')
-		}
-	}, [transactionToFocusOn])
 	/* END TRANSACTION REORDERING LOGIC */
-
+	//
+	//
+	//
 	/* ITEM REORDERING LOGIC */
+
+	// used to re-gain focus on the reorder node after re-renders
 	const [itemToFocusOn, setItemToFocusOn] = useState<{
 		transaction_id: string
 		item_id: string
 	} | null>(null)
+	useEffect(() => {
+		if (itemToFocusOn !== null) {
+			const { transaction_id, item_id } = itemToFocusOn
+			itemReorderRefs.current[transaction_id][item_id].focus()
+			setItemToFocusOn(null)
+		}
+	}, [itemToFocusOn])
+
+	// holds references to all of the item reorder buttons
 	const itemReorderRefs = useRef<{
 		[transaction_id: string]: { [item_id: string]: HTMLElement }
 	}>({})
@@ -143,7 +166,9 @@ export function useSortOrder({
 						).findIndex((sortItem) => sortItem === item.id) - 1
 
 					if (e.key === 'ArrowUp' && itemIndex !== 0) {
-						updateItemSortOrder(transaction, transactionIndex)(
+						updateItemSortOrder(
+							transaction,
+							transactionIndex,
 							itemIndex,
 							itemIndex - 1
 						)
@@ -161,7 +186,9 @@ export function useSortOrder({
 							).length -
 								2
 					) {
-						updateItemSortOrder(transaction, transactionIndex)(
+						updateItemSortOrder(
+							transaction,
+							transactionIndex,
 							itemIndex,
 							itemIndex + 1
 						)
@@ -196,12 +223,24 @@ export function useSortOrder({
 					itemRowsRef.current,
 					itemIndex - 1,
 					transaction,
-					updateItemSortOrder(transaction, transactionIndex),
-					e
+					e,
+					(oldIndex, newIndex) => {
+						updateItemSortOrder(
+							transaction,
+							transactionIndex,
+							oldIndex,
+							newIndex
+						)
+						setItemToFocusOn({
+							transaction_id: transaction.id,
+							item_id: item.id,
+						})
+					}
 				)
 			},
 		[]
 	)
+	// applied to each item reorder node
 	const addToItemReorderRefs = useCallback(
 		(
 				transaction: FormTransaction,
@@ -229,40 +268,33 @@ export function useSortOrder({
 		[]
 	)
 
-	useEffect(() => {
-		if (itemToFocusOn !== null) {
-			const { transaction_id, item_id } = itemToFocusOn
-			itemReorderRefs.current[transaction_id][item_id].focus()
-			setItemToFocusOn(null)
-		}
-	}, [itemToFocusOn])
 	/* END ITEM REORDERING LOGIC */
 
-	/**
-	 * Updates the sort order of an item within a transaction
-	 * @param transaction
-	 */
 	const updateItemSortOrder = useCallback(
-		(transaction: FormTransaction, transactionIndex: number) =>
-			(oldItemIndex: number, newItemIndex: number) => {
-				setCurSortOrder((prev) => {
-					const clone = structuredClone(prev)
+		(
+			transaction: FormTransaction,
+			transactionIndex: number,
+			oldItemIndex: number,
+			newItemIndex: number
+		) => {
+			setCurSortOrder((prev) => {
+				const clone = structuredClone(prev)
 
-					const thisTransactionOrder = clone[transaction.date][
-						transactionIndex
-					] as string[]
+				const thisTransactionOrder = clone[transaction.date][
+					transactionIndex
+				] as string[]
 
-					moveItemInArray(thisTransactionOrder, oldItemIndex + 1, newItemIndex + 1)
+				moveItemInArray(thisTransactionOrder, oldItemIndex + 1, newItemIndex + 1)
 
-					return clone
-				})
-				afterItemPositionChange(transaction, oldItemIndex, newItemIndex)
-			},
+				return clone
+			})
+			afterItemPositionChange(transaction, oldItemIndex, newItemIndex)
+		},
 		[]
 	)
 
 	const updateTransactionSortOrder = useCallback(
-		(date: string) => (oldIndex: number, newIndex: number) => {
+		(date: string, oldIndex: number, newIndex: number) => {
 			setCurSortOrder((prev) => {
 				const clone = structuredClone(prev)
 
@@ -280,8 +312,6 @@ export function useSortOrder({
 		setCurrent: setCurSortOrder,
 		cur: curSortOrder,
 		def: defSortOrder,
-		updateItem: updateItemSortOrder,
-		updateTransaction: updateTransactionSortOrder,
 		addToTransactionReorderRefs,
 		addToItemReorderRefs,
 	} as SortOrder.Controller
@@ -334,29 +364,10 @@ export namespace SortOrder {
 		 */
 		def: State
 
-		addToItemReorderRefs: (
-			transaction: FormTransaction,
-			item: FormTransaction['items'][number],
-			itemRowsRef: MutableRefObject<ItemRowRefs>
-		) => (node: HTMLElement | null) => void
-
-		/**
-		 * Generates an {@link ItemUpdater `ItemUpdater`} function that is used to update an item's position in the parent transaction's sort order
-		 * @param transaction The parent transaction of the items that will use the `ItemUpdater`
-		 * @param transactionIndex  The index of the parent transaction of the items that will use the `ItemUpdater`
-		 * @returns an {@link ItemUpdater `ItemUpdater`} function
-		 */
-		updateItem: (transaction: FormTransaction, transactionIndex: number) => ItemUpdater
-		/**
-		 * Generates a {@link TransactionUpdater `TransactionUpdater`} function that is used to update a transaction's position in the sort order
-		 * @param date the date that this transaction exists under
-		 * @returns a {@link TransactionUpdater `TransactionUpdater`} function
-		 */
-		updateTransaction: (date: string) => TransactionUpdater
 		/**
 		 * Generates a {@link TransactionReorderRefAdder `TransactionReorderRefAdder`} function that is meant to be applied to every Transaction Reorder button ref.
 		 *
-		 * This will add a keydown listener that allows reordering using the up/down arrow keys.
+		 * This will add a keydown listener that allows reordering using the up/down arrow keys, as well as a mousedown listener for drag-and-drop reordering.
 		 * @param date The date this transaction exists within
 		 * @param transaction_id The ID of this transaction
 		 * @param transactionIndex The index of this transaction (within this date)
@@ -365,19 +376,30 @@ export namespace SortOrder {
 		addToTransactionReorderRefs: (
 			transaction: FormTransaction
 		) => TransactionReorderRefAdder
-	}
-	/**
-	 * Used to update an item's position within it's parent's sort order. This function is generated by the {@link SortOrderController.updateItem `updateItem`} method.
-	 */
-	export type ItemUpdater = (oldItemIndex: number, newItemIndex: number) => void
 
-	/**
-	 * Used to update a transaction's position in the sort order. This function is generated by the {@link SortOrderController.updateTransaction `updateItem`} method.
-	 */
-	export type TransactionUpdater = (oldIndex: number, newIndex: number) => void
+		/**
+		 * Generates a {@link ItemReorderRefAdder `ItemReorderRefAdder`} function that is meant to be applied to every Item Reorder button ref.
+		 *
+		 * This will add a keydown listener that allows reordering using the up/down arrow keys, as well as a mousedown listener for drag-and-drop reordering.
+		 * @param transaction The transaction this item belongs to
+		 * @param item The item this button is referencing
+		 * @param itemRowsRef The `ref` of all of the item row nodes, used in drag-and-drop resorting logic
+		 * @returns a {@link ItemReorderRefAdder `ItemReorderRefAdder`} function
+		 */
+		addToItemReorderRefs: (
+			transaction: FormTransaction,
+			item: FormTransaction['items'][number],
+			itemRowsRef: MutableRefObject<ItemRowRefs>
+		) => (node: HTMLElement | null) => void
+	}
 
 	/**
 	 * Apply to the `ref` attribute of the buttons used to control Transaction sort order position.
 	 */
 	export type TransactionReorderRefAdder = (node: HTMLElement | null) => void
+
+	/**
+	 * Apply to the `ref` attribute of the buttons used to control Item sort order position.
+	 */
+	export type ItemReorderRefAdder = (node: HTMLElement | null) => void
 }

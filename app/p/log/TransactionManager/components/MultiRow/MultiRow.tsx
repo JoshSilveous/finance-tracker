@@ -270,13 +270,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			>
 				<div
 					className={`${s.reorder_grabber} ${itemSortPosChanged ? s.changed : ''}`}
-					// onMouseDown={handleItemReorder(
-					// 	item,
-					// 	itemRowsRef.current,
-					// 	itemIndex,
-					// 	p.transaction,
-					// 	p.sortOrder.updateItem(p.transaction, p.transactionIndex)
-					// )}
 					title='Grab and drag to reposition this item'
 				>
 					<JButton

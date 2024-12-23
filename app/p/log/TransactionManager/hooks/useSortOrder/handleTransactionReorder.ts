@@ -7,11 +7,11 @@ import { FoldStateUpdater } from '../useFoldState'
 export const transactionReorderMouseEffect = (
 	transaction: FormTransaction,
 	transactionIndex: number,
-	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void,
 	transactionRowsRef: MutableRefObject<TransactionRowsRef>,
 	folded: boolean,
 	updateFoldState: FoldStateUpdater,
-	e: MouseEvent
+	e: MouseEvent,
+	updateTransactionSortOrder: (oldIndex: number, newIndex: number) => void
 ) => {
 	const gridElem = transactionRowsRef.current[transaction.id]?.parentNode?.parentNode
 		?.parentNode as HTMLDivElement

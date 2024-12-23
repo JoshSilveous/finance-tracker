@@ -8,8 +8,8 @@ export function itemReorderMouseEffect(
 	itemRows: ItemRowRefs,
 	itemIndex: number,
 	transaction: FormTransaction,
-	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void,
-	e: MouseEvent
+	e: MouseEvent,
+	handleTransactionItemReorder: (oldIndex: number, newIndex: number) => void
 ) {
 	const grabberNode = (e.currentTarget as HTMLButtonElement)
 		.parentElement as HTMLDivElement
