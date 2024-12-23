@@ -10,7 +10,7 @@ import {
 import { FormTransaction } from '../TransactionManager'
 import { areDeeplyEqual, moveItemInArray } from '@/utils'
 import { PendingChanges } from './usePendingChanges'
-import { SortOrder } from './useSortOrder'
+import { SortOrder } from './'
 
 export interface UseHistoryProps {
 	transactionDataRef: MutableRefObject<FormTransaction[] | null>
@@ -23,14 +23,15 @@ export function useHistory({
 	setCurSortOrder,
 	updatePendingChanges,
 }: UseHistoryProps) {
-	const [historyStack, setHistoryStack] = useState<HistoryState>({
-		undoStack: [],
-		redoStack: [],
-	})
-	const historyStackRef = useRef<HistoryState>(historyStack)
-	useEffect(() => {
-		historyStackRef.current = historyStack
-	}, [historyStack])
+	// const [historyStack, setHistoryStack] = useState<HistoryState>({
+	// 	undoStack: [],
+	// 	redoStack: [],
+	// })
+	// const historyStackRef = useRef<HistoryState>(historyStack)
+	// useEffect(() => {
+	// 	historyStackRef.current = historyStack
+	// }, [historyStack])
+	const historyStackRef = useRef<HistoryState>({ undoStack: [], redoStack: [] })
 
 	const undo = useCallback(() => {
 		if (historyStackRef.current.undoStack.length !== 0) {
@@ -119,12 +120,14 @@ export function useHistory({
 						break
 					}
 				}
-				setHistoryStack((prev) => {
-					const clone = structuredClone(prev)
-					const thisItem = clone.undoStack.pop()!
-					clone.redoStack.unshift(thisItem)
-					return clone
-				})
+				// setHistoryStack((prev) => {
+				// 	const clone = structuredClone(prev)
+				// 	const thisItem = clone.undoStack.pop()!
+				// 	clone.redoStack.unshift(thisItem)
+				// 	return clone
+				// })
+				const thisItem = historyStackRef.current.undoStack.pop()!
+				historyStackRef.current.redoStack.unshift(thisItem)
 			}
 		}
 	}, [])
@@ -218,81 +221,114 @@ export function useHistory({
 						break
 					}
 				}
-				setHistoryStack((prev) => {
-					const clone = structuredClone(prev)
-					const thisItem = clone.redoStack.shift()!
-					clone.undoStack.push(thisItem)
-					return clone
-				})
+				// setHistoryStack((prev) => {
+				// 	const clone = structuredClone(prev)
+				// 	const thisItem = clone.redoStack.shift()!
+				// 	clone.undoStack.push(thisItem)
+				// 	return clone
+				// })
+				const thisItem = historyStackRef.current.redoStack.shift()!
+				historyStackRef.current.undoStack.push(thisItem)
 			}
 		}
 	}, [])
 
 	const add = useCallback((item: HistoryItem) => {
-		setHistoryStack((prev) => {
-			const clone = structuredClone(prev)
-			clone.undoStack.push(item)
-			return clone
-		})
+		// setHistoryStack((prev) => {
+		// 	const clone = structuredClone(prev)
+		// 	clone.undoStack.push(item)
+		// 	return clone
+		// })
+		historyStackRef.current.undoStack.push(item)
 	}, [])
 
 	const clearUndo = useCallback(() => {
 		if (historyStackRef.current.undoStack.length > 0) {
-			setHistoryStack((prev) => {
-				const clone = structuredClone(prev)
-				clone.undoStack = []
-				return clone
-			})
+			// setHistoryStack((prev) => {
+			// 	const clone = structuredClone(prev)
+			// 	clone.undoStack = []
+			// 	return clone
+			// })
+			historyStackRef.current.undoStack = []
 		}
 	}, [])
 
 	const clear = useCallback(() => {
-		setHistoryStack({ undoStack: [], redoStack: [] })
+		// setHistoryStack({ undoStack: [], redoStack: [] })
+
+		historyStackRef.current.undoStack = []
+		historyStackRef.current.redoStack = []
 	}, [])
 
 	const clearRedo = useCallback(() => {
 		if (historyStackRef.current.redoStack.length > 0) {
-			setHistoryStack((prev) => {
-				const clone = structuredClone(prev)
-				clone.redoStack = []
-				return clone
-			})
+			// setHistoryStack((prev) => {
+			// 	const clone = structuredClone(prev)
+			// 	clone.redoStack = []
+			// 	return clone
+			// })
+			historyStackRef.current.redoStack = []
 		}
 	}, [])
 
 	const upsert = useCallback((item: HistoryItem) => {
-		setHistoryStack((prev) => {
-			const clone = structuredClone(prev)
-			const recentItem = clone.undoStack.at(-1)
+		// setHistoryStack((prev) => {
+		// 	const clone = structuredClone(prev)
+		// 	const recentItem = clone.undoStack.at(-1)
 
-			if (
-				recentItem !== undefined &&
-				item.type !== 'item_position_change' &&
-				item.type !== 'transaction_position_change' &&
-				recentItem.type !== 'item_position_change' &&
-				recentItem.type !== 'transaction_position_change'
-			) {
-				let recentItemCopy = structuredClone(recentItem) as any
-				let thisItemCopy = structuredClone(item) as any
+		// 	if (
+		// 		recentItem !== undefined &&
+		// 		item.type !== 'item_position_change' &&
+		// 		item.type !== 'transaction_position_change' &&
+		// 		recentItem.type !== 'item_position_change' &&
+		// 		recentItem.type !== 'transaction_position_change'
+		// 	) {
+		// 		let recentItemCopy = structuredClone(recentItem) as any
+		// 		let thisItemCopy = structuredClone(item) as any
 
-				delete recentItemCopy.oldVal
-				delete recentItemCopy.newVal
-				delete thisItemCopy.oldVal
-				delete thisItemCopy.newVal
+		// 		delete recentItemCopy.oldVal
+		// 		delete recentItemCopy.newVal
+		// 		delete thisItemCopy.oldVal
+		// 		delete thisItemCopy.newVal
 
-				if (areDeeplyEqual(recentItemCopy, thisItemCopy)) {
-					recentItem.newVal = item.newVal
-					return clone
-				}
+		// 		if (areDeeplyEqual(recentItemCopy, thisItemCopy)) {
+		// 			recentItem.newVal = item.newVal
+		// 			return clone
+		// 		}
+		// 	}
+		// 	clone.undoStack.push(item)
+		// 	clone.redoStack = []
+		// 	return clone
+		// })
+
+		const recentItem = historyStackRef.current.undoStack.at(-1)
+
+		if (
+			recentItem !== undefined &&
+			item.type !== 'item_position_change' &&
+			item.type !== 'transaction_position_change' &&
+			recentItem.type !== 'item_position_change' &&
+			recentItem.type !== 'transaction_position_change'
+		) {
+			let recentItemCopy = structuredClone(recentItem) as any
+			let thisItemCopy = structuredClone(item) as any
+
+			delete recentItemCopy.oldVal
+			delete recentItemCopy.newVal
+			delete thisItemCopy.oldVal
+			delete thisItemCopy.newVal
+
+			if (areDeeplyEqual(recentItemCopy, thisItemCopy)) {
+				recentItem.newVal = item.newVal
+				return
 			}
-			clone.undoStack.push(item)
-			clone.redoStack = []
-			return clone
-		})
+		}
+		historyStackRef.current.undoStack.push(item)
+		historyStackRef.current.redoStack = []
 	}, [])
 
-	const undoDisabled = historyStack.undoStack.length === 0
-	const redoDisabled = historyStack.redoStack.length === 0
+	const undoDisabled = () => historyStackRef.current.undoStack.length === 0
+	const redoDisabled = () => historyStackRef.current.redoStack.length === 0
 
 	return {
 		undo,
@@ -372,11 +408,11 @@ export type HistoryController = {
 	 */
 	clear: () => void
 	/**
-	 * `true` if the `undo` array is empty, otherwise `false`
+	 * returns `true` if the `undo` array is empty, otherwise `false`
 	 */
-	undoDisabled: boolean
+	undoDisabled: () => boolean
 	/**
-	 * `true` if the `redo` array is empty, otherwise `false`
+	 * returns `true` if the `redo` array is empty, otherwise `false`
 	 */
-	redoDisabled: boolean
+	redoDisabled: () => boolean
 }

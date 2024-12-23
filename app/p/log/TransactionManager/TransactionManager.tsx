@@ -37,6 +37,8 @@ export function TransactionManager() {
 	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
 
+	console.log('re-rendered')
+
 	const makeActiveContext = useCallback(() => {
 		setKeyListenerContext('TransactionManager')
 	}, [])
@@ -203,7 +205,7 @@ export function TransactionManager() {
 							jstyle='invisible'
 							className={s.undo}
 							onClick={historyController.undo}
-							disabled={historyController.undoDisabled}
+							disabled={historyController.undoDisabled()}
 							title={undoTitle}
 						>
 							<UndoRedoIcon />
@@ -212,7 +214,7 @@ export function TransactionManager() {
 							jstyle='invisible'
 							className={s.redo}
 							onClick={historyController.redo}
-							disabled={historyController.redoDisabled}
+							disabled={historyController.redoDisabled()}
 							title={redoTitle}
 						>
 							<UndoRedoIcon />
