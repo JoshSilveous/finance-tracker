@@ -8,8 +8,7 @@ import {
 import { isStandardError, promptError } from '@/utils'
 import { Dispatch, SetStateAction } from 'react'
 import { FormTransaction } from '../TransactionManager'
-import { FoldState } from '../hooks/useFoldState'
-import { SortOrder } from '../hooks/useSortOrder'
+import { SortOrder, FoldState } from '../hooks/'
 
 export async function fetchAndLoadData(
 	setLoaded: Dispatch<SetStateAction<boolean>>,
@@ -24,7 +23,6 @@ export async function fetchAndLoadData(
 	Promise.all([fetchTransactionData(), fetchCategoryData(), fetchAccountData()])
 		.then((res) => {
 			const [transactions, categories, accounts] = res
-			console.log('ads')
 			// generate default sort order
 			const sortOrder: SortOrder.State = {}
 			transactions.forEach((transaction) => {
@@ -81,7 +79,6 @@ export async function fetchAndLoadData(
 			setLoaded(true)
 		})
 		.catch((e) => {
-			console.log(e)
 			if (isStandardError(e)) {
 				promptError(
 					'An unexpected error has occurred while fetching your data from the database:',

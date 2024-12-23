@@ -3,10 +3,12 @@ import { delay } from '@/utils'
 import { MutableRefObject } from 'react'
 import { FormTransaction, TransactionRowsRef } from '../../TransactionManager'
 import { FoldStateUpdater } from '../useFoldState'
+import { SortOrder } from './useSortOrder'
 
 export const transactionReorderMouseEffect = (
 	transaction: FormTransaction,
 	transactionIndex: number,
+	sortOrder: SortOrder.State[number],
 	transactionRowsRef: MutableRefObject<TransactionRowsRef>,
 	folded: boolean,
 	updateFoldState: FoldStateUpdater,
@@ -16,23 +18,28 @@ export const transactionReorderMouseEffect = (
 	const gridElem = transactionRowsRef.current[transaction.id]?.parentNode?.parentNode
 		?.parentNode as HTMLDivElement
 
-	const thisRowIndex = transactionIndex
-	const thisRow = Array.from(
-		transactionRowsRef.current[transaction.id]!.childNodes
-	) as HTMLDivElement[]
-	const allRows = Object.entries(transactionRowsRef.current!).map(
-		([_key, val]) => Array.from(val!.childNodes) as HTMLDivElement[]
+	const sortOrderSlimmed = sortOrder.map((sortItem) =>
+		Array.isArray(sortItem) ? sortItem[0] : sortItem
 	)
-	const otherRows = allRows.toSpliced(thisRowIndex, 1)
+	const transactionRowsRefSorted = Object.entries(transactionRowsRef.current!).sort(
+		(a, b) => {
+			return sortOrderSlimmed.indexOf(a[0]) - sortOrderSlimmed.indexOf(b[0])
+		}
+	)
+
+	const allRows = transactionRowsRefSorted.map(
+		(item) => Array.from(item[1]!.childNodes) as HTMLDivElement[]
+	)
+	const thisRow = allRows[transactionIndex]
+	const otherRows = allRows.toSpliced(transactionIndex, 1)
 
 	let forceFolded = false
-	console.log('checking folded,', folded)
 	if (transaction.items.length > 1 && !folded) {
 		updateFoldState(transaction.id, true)
 		forceFolded = true
 	}
 
-	const grabberNode = e.currentTarget as HTMLDivElement
+	const grabberNode = e.currentTarget as HTMLButtonElement
 
 	const offsetX =
 		grabberNode.offsetWidth / 2 + grabberNode.offsetLeft - thisRow[0].offsetLeft
@@ -56,7 +63,7 @@ export const transactionReorderMouseEffect = (
 
 	const breakpoints: number[] = (() => {
 		const arr = otherRows.map((row, index) => {
-			if (forceFolded && index > thisRowIndex - 1) {
+			if (forceFolded && index > transactionIndex - 1) {
 				return (
 					row[0].offsetTop -
 					originalRowHeight +
@@ -69,6 +76,7 @@ export const transactionReorderMouseEffect = (
 		arr.push(arr.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight)
 		return arr
 	})()
+	console.log('breakpoints:', breakpoints)
 
 	let leftOffset = 0
 	const startWidths = thisRow.map((item) => getComputedStyle(item).width)
@@ -106,19 +114,23 @@ export const transactionReorderMouseEffect = (
 		}
 
 		rowIndex--
+		console.log('rowIndex:', rowIndex, 'otherRows.length', otherRows.length)
 
 		// if hovering over first row
 		if (rowIndex === -1) {
+			console.log('hovering over first row')
 			otherRows[0].forEach((node) => {
 				node.style.marginTop = marginSize + 'px'
 			})
 		}
 		// if hovering over last row
-		else if (rowIndex === allRows.length - 2) {
+		else if (rowIndex === otherRows.length - 1) {
+			console.log('hovering over last row')
 			otherRows.at(-1)!.forEach((node) => {
 				node.style.marginBottom = marginSize + 'px'
 			})
 		} else {
+			console.log('hovering over mid row')
 			otherRows[rowIndex].forEach(
 				(node) => (node.style.marginBottom = marginSize / 2 + 'px')
 			)
@@ -251,8 +263,8 @@ export const transactionReorderMouseEffect = (
 		window.removeEventListener('mousemove', handleReorderMouseMove)
 		window.removeEventListener('mouseup', handleReorderMouseUp)
 
-		if (thisRowIndex !== closestBreakpointIndex) {
-			updateTransactionSortOrder(thisRowIndex, closestBreakpointIndex)
+		if (transactionIndex !== closestBreakpointIndex) {
+			updateTransactionSortOrder(transactionIndex, closestBreakpointIndex)
 		}
 
 		if (forceFolded) {

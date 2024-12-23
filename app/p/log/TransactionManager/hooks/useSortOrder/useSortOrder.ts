@@ -94,6 +94,7 @@ export function useSortOrder({
 			return transactionReorderMouseEffect(
 				transaction,
 				transactionIndex,
+				curSortOrderRef.current![transaction.date],
 				transactionRowsRef,
 				folded,
 				updateFoldState,

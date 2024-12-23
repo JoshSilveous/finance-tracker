@@ -15,7 +15,6 @@ export async function fetchAccountData() {
 		.order('order_position')
 
 	if (error) {
-		console.log('this err')
 		throw new Error(error.message)
 	}
 	return data as FetchedAccount[]

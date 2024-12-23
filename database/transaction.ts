@@ -119,7 +119,6 @@ export async function insertTransactionAndItems(transaction: InsertTransactionEn
 	if (itemError) {
 		throw new Error(itemError.message)
 	}
-	console.log('items:', itemData)
 
 	return
 }

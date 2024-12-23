@@ -13,7 +13,6 @@ export async function fetchCategoryData() {
 		.select('id, name, order_position')
 		.order('order_position')
 	if (error) {
-		console.log('this err')
 		throw new Error(error.message)
 	}
 	return data as FetchedCategory[]
