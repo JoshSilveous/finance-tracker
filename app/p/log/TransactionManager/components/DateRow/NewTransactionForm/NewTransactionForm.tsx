@@ -24,6 +24,8 @@ export interface TransactionFormData {
 interface NewTransactionFormProps {
 	defaultDate: string
 	dropdownOptions: DropdownOptions
+	forceClosePopup: () => void
+	setRefreshRequired: () => void
 }
 
 type Type = 'transaction' | 'item'
@@ -32,6 +34,8 @@ type Key = 'name' | 'date' | 'amount' | 'category_id' | 'account_id'
 export function NewTransactionForm({
 	defaultDate,
 	dropdownOptions,
+	forceClosePopup,
+	setRefreshRequired,
 }: NewTransactionFormProps) {
 	const [formData, setFormData] = useState<TransactionFormData>({
 		name: '',
@@ -156,6 +160,7 @@ export function NewTransactionForm({
 			try {
 				await insertTransactionAndItems(formData)
 				setSubmitting(false)
+				setRefreshRequired()
 			} catch (e) {
 				if (isStandardError(e)) {
 					promptError(
@@ -239,7 +244,9 @@ export function NewTransactionForm({
 				)}
 			</form>
 			<div className={s.button_container}>
-				<JButton jstyle='secondary'>Go Back</JButton>
+				<JButton jstyle='secondary' onClick={forceClosePopup}>
+					Go Back
+				</JButton>
 				<JButton
 					jstyle={missingItems.length !== 0 ? 'secondary' : 'primary'}
 					onClick={handleSubmit}

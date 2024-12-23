@@ -14,8 +14,27 @@ export function DateRow({ date, dropdownOptions }: DateRowProps) {
 	const { day, year, month } = formatDate(date)
 
 	const handleNewTransactionClick = () => {
+		let refreshRequired = false
+		const setRefreshRequired = () => {
+			refreshRequired = true
+		}
+
+		const afterPopupClosed = () => {
+			console.log('popup closed, refreshRequired: ', refreshRequired)
+		}
+
 		const popup = createPopup(
-			<NewTransactionForm defaultDate={date} dropdownOptions={dropdownOptions} />
+			<NewTransactionForm
+				defaultDate={date}
+				dropdownOptions={dropdownOptions}
+				forceClosePopup={() => {
+					popup.close()
+					afterPopupClosed()
+				}}
+				setRefreshRequired={setRefreshRequired}
+			/>,
+			'normal',
+			afterPopupClosed
 		)
 		popup.trigger()
 	}
