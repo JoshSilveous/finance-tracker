@@ -1,5 +1,7 @@
 -   TransactionManager
 
+    -   NEXT: move transaction reorder logic to sortOrder
+
     -   Add control to delete rows
     -   Add control to delete transaction items
     -   Set up history system
