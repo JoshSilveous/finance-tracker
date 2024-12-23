@@ -23,13 +23,15 @@ export function MultiItemGrid({
 	setFormData,
 }: MultiItemGridProps) {
 	const itemRowsRef = useRef<HTMLDivElement[]>([])
-	const addToItemRowsRef = useCallback((node: HTMLDivElement) => {
-		if (node !== null) {
-			itemRowsRef.current.push(node)
-		}
-	}, [])
+	const addToItemRowsRef = useCallback(
+		(itemIndex: number) => (node: HTMLDivElement) => {
+			if (node !== null) {
+				itemRowsRef.current[itemIndex] = node
+			}
+		},
+		[]
+	)
 
-	itemRowsRef.current = [] // wipe refs every re-render
 	const headers: JGridTypes.Header[] = useMemo(
 		() => [
 			{
@@ -99,7 +101,7 @@ export function MultiItemGrid({
 		[]
 	)
 	const cells: JGridTypes.Row[] = formData.items.map((item, index) => (
-		<div className={s.item_row} ref={addToItemRowsRef}>
+		<div className={s.item_row} ref={addToItemRowsRef(index)}>
 			<div className={`${s.control_container} ${index === 0 ? s.first_row : ''}`}>
 				<div className={s.reorder_grabber}>
 					<button

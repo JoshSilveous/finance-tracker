@@ -19,6 +19,7 @@ export const handleReorder =
 		)
 		const thisRow = allRows[thisRowIndex]
 		const otherRows = allRows.filter((_, index) => index !== thisRowIndex)!
+
 		const gridElem = allRows[0][0].parentNode?.parentNode?.parentNode as HTMLDivElement
 		const popupContainer = gridElem.parentNode?.parentNode?.parentNode
 			?.parentNode as HTMLDivElement
@@ -41,7 +42,6 @@ export const handleReorder =
 			grabberNode.offsetHeight / 2 -
 			grabberContainerNode.offsetTop
 
-		// let leftOffset = 0
 		const rowWidths = thisRow.map((node) => parseInt(getComputedStyle(node).width))
 		thisRow.forEach((node) => {
 			node.classList.add(s.popped_out)
@@ -127,10 +127,6 @@ export const handleReorder =
 					rowWidths[index] +
 					parseFloat(getComputedStyle(node).paddingLeft) +
 					parseFloat(getComputedStyle(node).paddingRight)
-				console.log(
-					parseFloat(getComputedStyle(node).paddingLeft) +
-						parseFloat(getComputedStyle(node).paddingRight)
-				)
 			})
 		}
 		let closestBreakpointIndex = getClosestBreakpointIndex(
