@@ -126,7 +126,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				e.target.dataset.value_on_focus = e.target.value
 			}) as FocusEventHandler<HTMLInputElement | HTMLSelectElement>,
 		}
-	}, [])
+	}, [p.transaction])
 
 	return (
 		<div className={s.container} ref={forwardedRef}>

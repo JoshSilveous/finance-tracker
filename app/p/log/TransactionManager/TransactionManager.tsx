@@ -37,8 +37,6 @@ export function TransactionManager() {
 	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
 
-	console.log('re-rendered')
-
 	const makeActiveContext = useCallback(() => {
 		setKeyListenerContext('TransactionManager')
 	}, [])

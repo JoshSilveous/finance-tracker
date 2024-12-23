@@ -37,11 +37,6 @@ export interface MultiRowProps {
 export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
 
 export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedRef) => {
-	if (p.transaction.name === 'El Vac') {
-		console.log(`ren "${p.transaction.name}" folded:${p.folded} play:${p.playAnimation}`)
-	}
-	const transaction_id = p.transaction.id
-
 	const columnNodesRef = useRef<(HTMLDivElement | null)[]>([])
 	const addToColumnNodesRef = useCallback((node: HTMLDivElement) => {
 		if (node && !columnNodesRef.current.includes(node)) {
@@ -139,12 +134,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						if (origVal !== newVal) {
 							p.pendingChanges.update(
 								'transactions',
-								transaction_id,
+								p.transaction.id,
 								key,
 								newVal
 							)
 						} else {
-							p.pendingChanges.update('transactions', transaction_id, key)
+							p.pendingChanges.update('transactions', p.transaction.id, key)
 						}
 					} else {
 					}
@@ -250,7 +245,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				e.target.dataset.value_on_focus = e.target.value
 			}) as FocusEventHandler<HTMLInputElement | HTMLSelectElement>,
 		}
-	}, [])
+	}, [p.transaction])
 
 	let sum = 0
 	const itemRows = p.transaction.items.map((item, itemIndex) => {
@@ -259,7 +254,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		const itemSortPosChanged =
 			(
 				p.defSortOrder[p.transaction.date].find(
-					(it) => it[0] === transaction_id
+					(it) => it[0] === p.transaction.id
 				) as string[]
 			).findIndex((it) => it === item.id) !==
 			itemIndex + 1
@@ -306,7 +301,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				<JInput
 					value={liveVals.items[item.id].name.val}
 					data-item_id={item.id}
-					data-transaction_id={transaction_id}
+					data-transaction_id={p.transaction.id}
 					data-key='name'
 					{...eventHandlers}
 				/>
@@ -322,7 +317,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				<JNumberAccounting
 					value={liveVals.items[item.id].amount.val}
 					data-item_id={item.id}
-					data-transaction_id={transaction_id}
+					data-transaction_id={p.transaction.id}
 					data-key='amount'
 					{...eventHandlers}
 				/>
@@ -343,7 +338,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: 'none'
 					}
 					data-item_id={item.id}
-					data-transaction_id={transaction_id}
+					data-transaction_id={p.transaction.id}
 					data-key='category_id'
 					{...eventHandlers}
 				/>
@@ -364,7 +359,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: 'none'
 					}
 					data-item_id={item.id}
-					data-transaction_id={transaction_id}
+					data-transaction_id={p.transaction.id}
 					data-key='account_id'
 					{...eventHandlers}
 				/>
@@ -408,7 +403,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		>
 			<JDatePicker
 				value={liveVals.date.val}
-				data-transaction_id={transaction_id}
+				data-transaction_id={p.transaction.id}
 				data-key='date'
 				{...eventHandlers}
 			/>
@@ -421,7 +416,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		>
 			<JInput
 				value={liveVals.name.val}
-				data-transaction_id={transaction_id}
+				data-transaction_id={p.transaction.id}
 				data-key='name'
 				{...eventHandlers}
 			/>
