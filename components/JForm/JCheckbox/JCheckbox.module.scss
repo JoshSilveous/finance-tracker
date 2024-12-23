@@ -28,8 +28,9 @@
 			background-color: var(--font-color) !important;
 			box-shadow: inset 0px 0px 0px calc(var(--size) / 2) var(--font-color);
 		}
-		&:focus,
-		&:active {
+
+		&:focus:not(:disabled),
+		&:active:not(:disabled) {
 			outline: 2px solid var(--font-color);
 		}
 	}

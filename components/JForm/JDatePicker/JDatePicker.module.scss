@@ -19,8 +19,8 @@
 		appearance: none;
 		-webkit-appearance: none;
 		position: relative;
-		&:focus,
-		&:active {
+		&:focus:not(:disabled),
+		&:active:not(:disabled) {
 			box-shadow: inset 0 0 0 2px var(--input-border-color);
 			outline: 2px solid var(--font-color);
 		}

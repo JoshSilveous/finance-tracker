@@ -75,8 +75,9 @@
 	}
 	outline: 0px solid transparent;
 	transition: outline 0.1s ease;
-	&:focus-within,
-	&:active {
+
+	&:focus-within:not(.disabled),
+	&:active:not(.disabled) {
 		outline: 2px solid var(--font-color);
 	}
 	.formatted {

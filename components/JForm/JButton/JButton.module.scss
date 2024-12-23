@@ -17,8 +17,8 @@
 		transform: translateY(2px);
 	}
 
-	&:focus,
-	&:active {
+	&:focus:not(:disabled),
+	&:active:not(:disabled) {
 		outline: 2px solid var(--font-color);
 	}
 
@@ -33,6 +33,7 @@
 	}
 	&.invisible {
 		background-color: transparent;
+		box-shadow: inset 0 0 0 0px var(--input-border-color);
 	}
 
 	&.primary:not(:disabled) {
