@@ -8,7 +8,7 @@ import { MultiItemGrid } from './MultiItemGrid'
 import { delay, isStandardError, promptError, setKeyListenerContext } from '@/utils'
 import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
-import { useFocusLoop } from '@/utils/focusLoop/focusLoop'
+import { useFocusLoop } from '@/utils/focusLoop/useFocusLoop'
 
 export interface TransactionFormData {
 	name: string

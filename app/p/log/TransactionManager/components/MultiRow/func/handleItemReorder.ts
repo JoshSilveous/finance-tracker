@@ -230,6 +230,7 @@ export const handleItemReorder =
 			window.removeEventListener('mousemove', handleReorderMouseMove)
 			window.removeEventListener('mouseup', handleReorderMouseUp)
 			window.removeEventListener('contextmenu', handleRightClick)
+			window.removeEventListener('keydown', handleKeyDown)
 
 			if (itemIndex !== closestBreakpointIndex) {
 				handleTransactionItemReorder(itemIndex, closestBreakpointIndex)
@@ -243,7 +244,13 @@ export const handleItemReorder =
 			window.removeEventListener('mouseup', handleReorderMouseUp)
 			window.removeEventListener('contextmenu', handleRightClick)
 		}
+		function handleKeyDown(e: KeyboardEvent) {
+			// cancel on key down
+			closestBreakpointIndex = itemIndex
+			handleReorderMouseUp()
+		}
 		window.addEventListener('mousemove', handleReorderMouseMove)
 		window.addEventListener('mouseup', handleReorderMouseUp)
 		window.addEventListener('contextmenu', handleRightClick)
+		window.addEventListener('keydown', handleKeyDown)
 	}

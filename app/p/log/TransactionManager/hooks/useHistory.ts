@@ -14,7 +14,7 @@ import { SortOrder } from './useSortOrder'
 
 export interface UseHistoryProps {
 	transactionDataRef: MutableRefObject<FormTransaction[] | null>
-	setCurSortOrder: Dispatch<SetStateAction<SortOrder>>
+	setCurSortOrder: Dispatch<SetStateAction<SortOrder.State>>
 	updatePendingChanges: PendingChangeUpdater
 }
 

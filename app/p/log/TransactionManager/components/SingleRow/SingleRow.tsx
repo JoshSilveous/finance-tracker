@@ -1,15 +1,9 @@
-import { JInput, JNumberAccounting } from '@/components/JForm'
+import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import s from './SingleRow.module.scss'
-import {
-	ChangeEventHandler,
-	FocusEventHandler,
-	forwardRef,
-	useCallback,
-	useMemo,
-} from 'react'
+import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo } from 'react'
 import { FormTransaction } from '../../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../../hooks/useHistory'
@@ -140,9 +134,9 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							: 'Grab and drag to reposition this item'
 					}
 				>
-					<button disabled={p.disableTransactionResort}>
+					<JButton jstyle='invisible' disabled={p.disableTransactionResort}>
 						<ReorderIcon />
-					</button>
+					</JButton>
 				</div>
 			</div>
 			<div

@@ -7,12 +7,13 @@ import {
 	useCallback,
 	ChangeEventHandler,
 	FocusEventHandler,
+	KeyboardEventHandler,
 } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { FormTransaction } from '../../TransactionManager'
 import s from './MultiRow.module.scss'
-import { JInput, JNumberAccounting } from '@/components/JForm'
+import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { PendingChanges, PendingChangeUpdater } from '../../hooks/usePendingChanges'
@@ -22,21 +23,19 @@ import { handleItemReorder } from './func/handleItemReorder'
 
 export interface MultiRowProps {
 	transaction: FormTransaction
+	transactionIndex: number
 	pendingChanges: PendingChanges
 	updatePendingChanges: PendingChangeUpdater
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
-	onItemReorder: (oldIndex: number, newIndex: number) => void
 	folded: boolean
 	playAnimation: boolean
-	/**
-	 * See {@link FoldStateUpdater}
-	 */
 	updateFoldState: FoldStateUpdater
 	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	transactionSortPosChanged: boolean
-	defSortOrder: SortOrder
+	defSortOrder: SortOrder.State
 	disableTransactionResort: boolean
 	historyController: HistoryController
+	sortOrder: SortOrder.Controller
 }
 
 export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
@@ -280,13 +279,29 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						itemRowsRef.current,
 						itemIndex,
 						p.transaction,
-						p.onItemReorder
+						p.sortOrder.updateItem(p.transaction, p.transactionIndex)
 					)}
+					onKeyDown={(e) => {
+						if (e.key === 'ArrowUp' && itemIndex !== 0) {
+							p.sortOrder.updateItem(p.transaction, p.transactionIndex)(
+								itemIndex,
+								itemIndex - 1
+							)
+						} else if (
+							e.key === 'ArrowDown' &&
+							itemIndex !== p.transaction.items.length - 1
+						) {
+							p.sortOrder.updateItem(p.transaction, p.transactionIndex)(
+								itemIndex,
+								itemIndex + 1
+							)
+						}
+					}}
 					title='Grab and drag to reposition this item'
 				>
-					<button>
+					<JButton jstyle='invisible'>
 						<ReorderIcon />
-					</button>
+					</JButton>
 				</div>
 			</div>,
 			<div
@@ -387,9 +402,17 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						: 'Grab and drag to reposition this item'
 				}
 			>
-				<button disabled={p.disableTransactionResort}>
+				<JButton
+					jstyle='invisible'
+					disabled={p.disableTransactionResort}
+					ref={p.sortOrder.addToTransactionReorderRefs(
+						p.transaction.date,
+						p.transaction.id,
+						p.transactionIndex
+					)}
+				>
 					<ReorderIcon />
-				</button>
+				</JButton>
 			</div>
 			<div
 				className={`${s.fold_toggle} ${p.folded ? s.folded : ''}`}

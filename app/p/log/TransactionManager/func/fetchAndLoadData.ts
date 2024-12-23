@@ -17,8 +17,8 @@ export async function fetchAndLoadData(
 	setFoldState: Dispatch<SetStateAction<FoldState>>,
 	setCategoryData: Dispatch<SetStateAction<FetchedCategory[] | null>>,
 	setAccountData: Dispatch<SetStateAction<FetchedAccount[] | null>>,
-	setDefSortOrder: Dispatch<SetStateAction<SortOrder>>,
-	setCurSortOrder: Dispatch<SetStateAction<SortOrder>>
+	setDefSortOrder: Dispatch<SetStateAction<SortOrder.State>>,
+	setCurSortOrder: Dispatch<SetStateAction<SortOrder.State>>
 ) {
 	setLoaded(false)
 	Promise.all([fetchTransactionData(), fetchCategoryData(), fetchAccountData()])
@@ -26,7 +26,7 @@ export async function fetchAndLoadData(
 			const [transactions, categories, accounts] = res
 			console.log('ads')
 			// generate default sort order
-			const sortOrder: SortOrder = {}
+			const sortOrder: SortOrder.State = {}
 			transactions.forEach((transaction) => {
 				if (sortOrder[transaction.date] === undefined) {
 					if (transaction.items.length > 1) {

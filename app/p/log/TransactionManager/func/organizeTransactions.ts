@@ -1,7 +1,10 @@
 import { SortOrder } from '../hooks/useSortOrder'
 import { GroupedTransaction, FormTransaction } from '../TransactionManager'
 
-export function sortTransactions(sortOrder: SortOrder, transactionData: FormTransaction[]) {
+export function sortTransactions(
+	sortOrder: SortOrder.State,
+	transactionData: FormTransaction[]
+) {
 	return Object.entries(sortOrder).map((entry) => {
 		return {
 			date: entry[0],

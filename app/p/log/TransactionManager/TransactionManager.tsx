@@ -196,22 +196,24 @@ export function TransactionManager() {
 			{
 				content: (
 					<div className={`${s.header_container} ${s.control}`}>
-						<button
+						<JButton
+							jstyle='invisible'
 							className={s.undo}
 							onClick={historyController.undo}
 							disabled={historyController.undoDisabled}
 							title={undoTitle}
 						>
 							<UndoRedoIcon />
-						</button>
-						<button
+						</JButton>
+						<JButton
+							jstyle='invisible'
 							className={s.redo}
 							onClick={historyController.redo}
 							disabled={historyController.redoDisabled}
 							title={redoTitle}
 						>
 							<UndoRedoIcon />
-						</button>
+						</JButton>
 					</div>
 				),
 				defaultWidth: 75,
@@ -281,12 +283,12 @@ export function TransactionManager() {
 					<DateRow date={groupedItem.date} dropdownOptions={dropdownOptions} />
 				)
 
-				groupedItem.transactions.forEach((transaction, index) => {
+				groupedItem.transactions.forEach((transaction, transactionIndex) => {
 					if (transaction.items.length === 1) {
 						const sortPosChanged =
 							sortOrder.def[transaction.date].findIndex(
 								(it) => it === transaction.id
-							) !== index
+							) !== transactionIndex
 						const props: SingleRowProps = {
 							transaction,
 							pendingChanges: pendingChanges.cur,
@@ -295,7 +297,7 @@ export function TransactionManager() {
 							onResortMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
 								transaction,
-								index,
+								transactionIndex,
 								sortOrder.updateTransaction(groupedItem.date),
 								transactionRowsRef,
 								foldState.cur[transaction.id],
@@ -315,13 +317,13 @@ export function TransactionManager() {
 						const sortPosChanged =
 							sortOrder.def[transaction.date].findIndex(
 								(it) => it[0] === transaction.id
-							) !== index
+							) !== transactionIndex
 						const props: MultiRowProps = {
 							transaction,
+							transactionIndex,
 							pendingChanges: pendingChanges.cur,
 							updatePendingChanges: pendingChanges.update,
 							dropdownOptions,
-							onItemReorder: sortOrder.updateItem(transaction, index),
 							folded: foldState.cur[transaction.id],
 							playAnimation:
 								prevFoldStateRef.current[transaction.id] === undefined
@@ -332,7 +334,7 @@ export function TransactionManager() {
 							onTransactionReorderMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
 								transaction,
-								index,
+								transactionIndex,
 								sortOrder.updateTransaction(groupedItem.date),
 								transactionRowsRef,
 								foldState.cur[transaction.id],
@@ -342,6 +344,7 @@ export function TransactionManager() {
 							defSortOrder: sortOrder.def,
 							disableTransactionResort: groupedItem.transactions.length === 1,
 							historyController,
+							sortOrder,
 						}
 
 						cells.push(
