@@ -7,12 +7,11 @@ import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo } from 'reac
 import { FormTransaction } from '../../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../../hooks/useHistory'
-import { PendingChanges, PendingChangeUpdater } from '../../hooks/usePendingChanges'
+import { PendingChanges } from '../../hooks/usePendingChanges'
 
 export interface SingleRowProps {
 	transaction: FormTransaction
-	pendingChanges: PendingChanges
-	updatePendingChanges: PendingChangeUpdater
+	pendingChanges: PendingChanges.Controller
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	sortPosChanged: boolean
@@ -23,8 +22,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 	const item = p.transaction.items[0]
 
 	const liveVals = useMemo(
-		() => genLiveVals(p.transaction, p.pendingChanges),
-		[p.transaction, p.pendingChanges]
+		() => genLiveVals(p.transaction, p.pendingChanges.cur),
+		[p.transaction, p.pendingChanges.cur]
 	)
 	const eventHandlers = useMemo(() => {
 		return {
@@ -39,9 +38,14 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				if (key === 'date' || key === 'name') {
 					const origVal = p.transaction[key]
 					if (origVal !== newVal) {
-						p.updatePendingChanges('transactions', p.transaction.id, key, newVal)
+						p.pendingChanges.update(
+							'transactions',
+							p.transaction.id,
+							key,
+							newVal
+						)
 					} else {
-						p.updatePendingChanges('transactions', p.transaction.id, key)
+						p.pendingChanges.update('transactions', p.transaction.id, key)
 					}
 				} else if (
 					key === 'amount' ||
@@ -52,9 +56,9 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						key
 					]
 					if (origVal !== newVal) {
-						p.updatePendingChanges('items', item_id, key, newVal)
+						p.pendingChanges.update('items', item_id, key, newVal)
 					} else {
-						p.updatePendingChanges('items', item_id, key)
+						p.pendingChanges.update('items', item_id, key)
 					}
 				}
 

@@ -34,10 +34,7 @@ export function useSortOrder({
 		curSortOrderRef.current = curSortOrder
 	}, [curSortOrder])
 
-	/**
-	 * Contains a string used to focus on a transaction's reorder grabber after arrowkeys are used to re-order the transactions
-	 */
-	const [focusOnTransaction, setFocusOnTransaction] = useState('')
+	const [transactionToFocusOn, setTransactionToFocusOn] = useState('')
 	const transactionReorderRefs = useRef<{ [id: string]: HTMLElement }>({})
 	const addToTransactionReorderRefs =
 		(date: string, transaction_id: string, transactionIndex: number) =>
@@ -52,7 +49,7 @@ export function useSortOrder({
 							transactionIndex,
 							transactionIndex - 1
 						)
-						setFocusOnTransaction(transaction_id)
+						setTransactionToFocusOn(transaction_id)
 					} else if (
 						e.key === 'ArrowDown' &&
 						transactionIndex !== curSortOrderRef.current![date].length - 1
@@ -61,7 +58,7 @@ export function useSortOrder({
 							transactionIndex,
 							transactionIndex + 1
 						)
-						setFocusOnTransaction(transaction_id)
+						setTransactionToFocusOn(transaction_id)
 					}
 				})
 			} else {
@@ -69,11 +66,11 @@ export function useSortOrder({
 			}
 		}
 	useEffect(() => {
-		if (focusOnTransaction !== '') {
-			transactionReorderRefs.current[focusOnTransaction].focus()
-			setFocusOnTransaction('')
+		if (transactionToFocusOn !== '') {
+			transactionReorderRefs.current[transactionToFocusOn].focus()
+			setTransactionToFocusOn('')
 		}
-	}, [focusOnTransaction])
+	}, [transactionToFocusOn])
 
 	/**
 	 * Updates the sort order of an item within a transaction

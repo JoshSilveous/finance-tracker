@@ -16,7 +16,7 @@ import s from './MultiRow.module.scss'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { genLiveVals, LiveVals } from './genLiveVals'
-import { PendingChanges, PendingChangeUpdater } from '../../hooks/usePendingChanges'
+import { PendingChanges } from '../../hooks/usePendingChanges'
 import { SortOrder, FoldStateUpdater, HistoryController } from '../../hooks'
 import { foldRenderer } from './func/foldRenderer'
 import { handleItemReorder } from './func/handleItemReorder'
@@ -24,8 +24,7 @@ import { handleItemReorder } from './func/handleItemReorder'
 export interface MultiRowProps {
 	transaction: FormTransaction
 	transactionIndex: number
-	pendingChanges: PendingChanges
-	updatePendingChanges: PendingChangeUpdater
+	pendingChanges: PendingChanges.Controller
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	folded: boolean
 	playAnimation: boolean
@@ -118,8 +117,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 	// re-calculates the displayed value (from default transaction or pendingChange)
 	const liveVals = useMemo(
-		() => genLiveVals(p.transaction, p.pendingChanges),
-		[p.transaction, p.pendingChanges]
+		() => genLiveVals(p.transaction, p.pendingChanges.cur),
+		[p.transaction, p.pendingChanges.cur]
 	)
 
 	const eventHandlers = useMemo(() => {
@@ -138,14 +137,14 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					if (key === 'date' || key === 'name') {
 						const origVal = p.transaction[key]
 						if (origVal !== newVal) {
-							p.updatePendingChanges(
+							p.pendingChanges.update(
 								'transactions',
 								transaction_id,
 								key,
 								newVal
 							)
 						} else {
-							p.updatePendingChanges('transactions', transaction_id, key)
+							p.pendingChanges.update('transactions', transaction_id, key)
 						}
 					} else {
 					}
@@ -160,9 +159,9 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							(item) => item.id === item_id
 						)![key]
 						if (origVal !== newVal) {
-							p.updatePendingChanges('items', item_id, key, newVal)
+							p.pendingChanges.update('items', item_id, key, newVal)
 						} else {
-							p.updatePendingChanges('items', item_id, key)
+							p.pendingChanges.update('items', item_id, key)
 						}
 					} else {
 					}

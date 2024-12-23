@@ -16,7 +16,10 @@ export type LiveVals = {
 /**
  * Packages together transaction / pendingChange data for easy access / management
  */
-export function genLiveVals(transaction: FormTransaction, pendingChanges: PendingChanges) {
+export function genLiveVals(
+	transaction: FormTransaction,
+	pendingChanges: PendingChanges.State
+) {
 	const transaction_id = transaction.id
 	return {
 		date: {

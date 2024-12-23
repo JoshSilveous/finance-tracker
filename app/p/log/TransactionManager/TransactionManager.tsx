@@ -291,8 +291,7 @@ export function TransactionManager() {
 							) !== transactionIndex
 						const props: SingleRowProps = {
 							transaction,
-							pendingChanges: pendingChanges.cur,
-							updatePendingChanges: pendingChanges.update,
+							pendingChanges,
 							dropdownOptions,
 							onResortMouseDown: handleTransactionReorder(
 								groupedItem.transactions,
@@ -321,8 +320,7 @@ export function TransactionManager() {
 						const props: MultiRowProps = {
 							transaction,
 							transactionIndex,
-							pendingChanges: pendingChanges.cur,
-							updatePendingChanges: pendingChanges.update,
+							pendingChanges,
 							dropdownOptions,
 							folded: foldState.cur[transaction.id],
 							playAnimation:

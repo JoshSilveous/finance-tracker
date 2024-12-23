@@ -9,13 +9,13 @@ import {
 } from 'react'
 import { FormTransaction } from '../TransactionManager'
 import { areDeeplyEqual, moveItemInArray } from '@/utils'
-import { PendingChangeUpdater } from './usePendingChanges'
+import { PendingChanges } from './usePendingChanges'
 import { SortOrder } from './useSortOrder'
 
 export interface UseHistoryProps {
 	transactionDataRef: MutableRefObject<FormTransaction[] | null>
 	setCurSortOrder: Dispatch<SetStateAction<SortOrder.State>>
-	updatePendingChanges: PendingChangeUpdater
+	updatePendingChanges: PendingChanges.Updater
 }
 
 export function useHistory({
