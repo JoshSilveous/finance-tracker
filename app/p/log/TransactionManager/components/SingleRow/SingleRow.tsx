@@ -8,6 +8,7 @@ import { FormTransaction } from '../../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../../hooks/useHistory'
 import { PendingChanges } from '../../hooks/usePendingChanges'
+import { SortOrder } from '../../hooks'
 
 export interface SingleRowProps {
 	transaction: FormTransaction
@@ -17,6 +18,7 @@ export interface SingleRowProps {
 	sortPosChanged: boolean
 	disableTransactionResort: boolean
 	historyController: HistoryController
+	sortOrder: SortOrder.Controller
 }
 export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwardedRef) => {
 	const item = p.transaction.items[0]
@@ -138,7 +140,11 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							: 'Grab and drag to reposition this item'
 					}
 				>
-					<JButton jstyle='invisible' disabled={p.disableTransactionResort}>
+					<JButton
+						jstyle='invisible'
+						disabled={p.disableTransactionResort}
+						ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
+					>
 						<ReorderIcon />
 					</JButton>
 				</div>

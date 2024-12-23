@@ -7,7 +7,6 @@ import {
 	useCallback,
 	ChangeEventHandler,
 	FocusEventHandler,
-	KeyboardEventHandler,
 } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
@@ -19,7 +18,6 @@ import { genLiveVals, LiveVals } from './genLiveVals'
 import { PendingChanges } from '../../hooks/usePendingChanges'
 import { SortOrder, FoldStateUpdater, HistoryController } from '../../hooks'
 import { foldRenderer } from './func/foldRenderer'
-import { handleItemReorder } from './func/handleItemReorder'
 
 export interface MultiRowProps {
 	transaction: FormTransaction
@@ -273,32 +271,23 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			>
 				<div
 					className={`${s.reorder_grabber} ${itemSortPosChanged ? s.changed : ''}`}
-					onMouseDown={handleItemReorder(
-						item,
-						itemRowsRef.current,
-						itemIndex,
-						p.transaction,
-						p.sortOrder.updateItem(p.transaction, p.transactionIndex)
-					)}
-					onKeyDown={(e) => {
-						if (e.key === 'ArrowUp' && itemIndex !== 0) {
-							p.sortOrder.updateItem(p.transaction, p.transactionIndex)(
-								itemIndex,
-								itemIndex - 1
-							)
-						} else if (
-							e.key === 'ArrowDown' &&
-							itemIndex !== p.transaction.items.length - 1
-						) {
-							p.sortOrder.updateItem(p.transaction, p.transactionIndex)(
-								itemIndex,
-								itemIndex + 1
-							)
-						}
-					}}
+					// onMouseDown={handleItemReorder(
+					// 	item,
+					// 	itemRowsRef.current,
+					// 	itemIndex,
+					// 	p.transaction,
+					// 	p.sortOrder.updateItem(p.transaction, p.transactionIndex)
+					// )}
 					title='Grab and drag to reposition this item'
 				>
-					<JButton jstyle='invisible'>
+					<JButton
+						jstyle='invisible'
+						ref={p.sortOrder.addToItemReorderRefs(
+							p.transaction,
+							item,
+							itemRowsRef
+						)}
+					>
 						<ReorderIcon />
 					</JButton>
 				</div>
@@ -404,11 +393,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				<JButton
 					jstyle='invisible'
 					disabled={p.disableTransactionResort}
-					ref={p.sortOrder.addToTransactionReorderRefs(
-						p.transaction.date,
-						p.transaction.id,
-						p.transactionIndex
-					)}
+					ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
 				>
 					<ReorderIcon />
 				</JButton>

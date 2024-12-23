@@ -305,6 +305,7 @@ export function TransactionManager() {
 							sortPosChanged,
 							disableTransactionResort: groupedItem.transactions.length === 1,
 							historyController,
+							sortOrder,
 						}
 						cells.push(
 							<SingleRow
