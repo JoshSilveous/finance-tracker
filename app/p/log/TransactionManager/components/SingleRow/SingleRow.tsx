@@ -14,7 +14,7 @@ export interface SingleRowProps {
 	transaction: FormTransaction
 	pendingChanges: PendingChanges.Controller
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
-	onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
+	// onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	sortPosChanged: boolean
 	disableTransactionResort: boolean
 	historyController: HistoryController
@@ -133,7 +133,6 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div className={`${s.cell_container} ${s.row_controller} `}>
 				<div
 					className={`${s.reorder_grabber} ${p.sortPosChanged ? s.changed : ''}`}
-					onMouseDown={p.onResortMouseDown}
 					title={
 						p.disableTransactionResort
 							? "Repositioning not allowed while there's only one transaction under this date"

@@ -8,11 +8,16 @@ import {
 	useRef,
 	useState,
 } from 'react'
-import { FormTransaction } from '../../TransactionManager'
+import { FormTransaction, TransactionRowsRef } from '../../TransactionManager'
 import { ItemRowRefs } from '../../components'
-import { handleItemReorder } from './mousedownHandlers'
+import { itemReorderMouseEffect } from './handleItemReorder'
+import { FoldStateGetter, FoldStateUpdater } from '../useFoldState'
+import { transactionReorderMouseEffect } from './handleTransactionReorder'
 
 export interface UseSortOrderProps {
+	getFoldState: FoldStateGetter
+	updateFoldState: FoldStateUpdater
+	transactionRowsRef: MutableRefObject<TransactionRowsRef>
 	afterTransactionPositionChange: (
 		date: string,
 		oldIndex: number,
@@ -26,6 +31,9 @@ export interface UseSortOrderProps {
 }
 
 export function useSortOrder({
+	getFoldState,
+	updateFoldState,
+	transactionRowsRef,
 	afterTransactionPositionChange,
 	afterItemPositionChange,
 }: UseSortOrderProps) {
@@ -39,38 +47,63 @@ export function useSortOrder({
 	/* TRANSACTION REORDERING LOGIC */
 	const [transactionToFocusOn, setTransactionToFocusOn] = useState('')
 	const transactionReorderRefs = useRef<{ [id: string]: HTMLElement }>({})
+	const handleTransactionReorderKeydown = useCallback(
+		(transaction: FormTransaction) => (e: KeyboardEvent) => {
+			const transactionIndex = curSortOrderRef.current![transaction.date].findIndex(
+				(sortItem) => Array.isArray(sortItem) && sortItem[0] === transaction.id
+			)
+
+			if (e.key === 'ArrowUp' && transactionIndex !== 0) {
+				updateTransactionSortOrder(transaction.date)(
+					transactionIndex,
+					transactionIndex - 1
+				)
+				setTransactionToFocusOn(transaction.id)
+			} else if (
+				e.key === 'ArrowDown' &&
+				transactionIndex !== curSortOrderRef.current![transaction.date].length - 1
+			) {
+				updateTransactionSortOrder(transaction.date)(
+					transactionIndex,
+					transactionIndex + 1
+				)
+				setTransactionToFocusOn(transaction.id)
+			}
+		},
+		[]
+	)
+	const handleTransactionReorderMousedown = useCallback(
+		(transaction: FormTransaction) => (e: MouseEvent) => {
+			const transactionIndex = curSortOrderRef.current![transaction.date].findIndex(
+				(sortItem) => Array.isArray(sortItem) && sortItem[0] === transaction.id
+			)
+			const folded = getFoldState(transaction.id)
+
+			return transactionReorderMouseEffect(
+				transaction,
+				transactionIndex,
+				updateTransactionSortOrder(transaction.date),
+				transactionRowsRef,
+				folded,
+				updateFoldState,
+				e
+			)
+		},
+		[]
+	)
 	const addToTransactionReorderRefs = useCallback(
 		(transaction: FormTransaction) => (node: HTMLElement | null) => {
 			if (node !== null && transactionReorderRefs.current[transaction.id] !== node) {
 				transactionReorderRefs.current[transaction.id] = node
 
-				// add key listener
-				node.addEventListener('keydown', (e) => {
-					const transactionIndex = curSortOrderRef.current![
-						transaction.date
-					].findIndex(
-						(sortItem) =>
-							Array.isArray(sortItem) && sortItem[0] === transaction.id
-					)
-
-					if (e.key === 'ArrowUp' && transactionIndex !== 0) {
-						updateTransactionSortOrder(transaction.date)(
-							transactionIndex,
-							transactionIndex - 1
-						)
-						setTransactionToFocusOn(transaction.id)
-					} else if (
-						e.key === 'ArrowDown' &&
-						transactionIndex !==
-							curSortOrderRef.current![transaction.date].length - 1
-					) {
-						updateTransactionSortOrder(transaction.date)(
-							transactionIndex,
-							transactionIndex + 1
-						)
-						setTransactionToFocusOn(transaction.id)
-					}
-				})
+				node.addEventListener(
+					'keydown',
+					handleTransactionReorderKeydown(transaction)
+				)
+				node.addEventListener(
+					'mousedown',
+					handleTransactionReorderMousedown(transaction)
+				)
 			}
 		},
 		[]
@@ -158,7 +191,7 @@ export function useSortOrder({
 					curSortOrderRef.current![transaction.date][transactionIndex] as string[]
 				).findIndex((sortItem) => sortItem === item.id)
 
-				return handleItemReorder(
+				return itemReorderMouseEffect(
 					item,
 					itemRowsRef.current,
 					itemIndex - 1,

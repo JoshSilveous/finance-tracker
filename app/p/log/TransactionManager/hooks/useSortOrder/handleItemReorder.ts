@@ -3,7 +3,7 @@ import multiRowStyles from '../../components/MultiRow/MultiRow.module.scss'
 import { ItemRowRefs } from '../../components'
 import { FormTransaction } from '../../TransactionManager'
 
-export function handleItemReorder(
+export function itemReorderMouseEffect(
 	item: FormTransaction['items'][number],
 	itemRows: ItemRowRefs,
 	itemIndex: number,

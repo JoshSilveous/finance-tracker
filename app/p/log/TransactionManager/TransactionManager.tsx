@@ -68,6 +68,9 @@ export function TransactionManager() {
 	const foldState = useFoldState()
 	const pendingChanges = usePendingChanges()
 	const sortOrder = useSortOrder({
+		transactionRowsRef,
+		getFoldState: foldState.get,
+		updateFoldState: foldState.update,
 		afterTransactionPositionChange: (date, oldIndex, newIndex) => {
 			historyController.add({
 				type: 'transaction_position_change',
@@ -293,15 +296,6 @@ export function TransactionManager() {
 							transaction,
 							pendingChanges,
 							dropdownOptions,
-							onResortMouseDown: handleTransactionReorder(
-								groupedItem.transactions,
-								transaction,
-								transactionIndex,
-								sortOrder.updateTransaction(groupedItem.date),
-								transactionRowsRef,
-								foldState.cur[transaction.id],
-								foldState.update
-							),
 							sortPosChanged,
 							disableTransactionResort: groupedItem.transactions.length === 1,
 							historyController,
@@ -330,15 +324,6 @@ export function TransactionManager() {
 									: prevFoldStateRef.current[transaction.id] !==
 									  foldState.cur[transaction.id],
 							updateFoldState: foldState.update,
-							onTransactionReorderMouseDown: handleTransactionReorder(
-								groupedItem.transactions,
-								transaction,
-								transactionIndex,
-								sortOrder.updateTransaction(groupedItem.date),
-								transactionRowsRef,
-								foldState.cur[transaction.id],
-								foldState.update
-							),
 							transactionSortPosChanged: sortPosChanged,
 							defSortOrder: sortOrder.def,
 							disableTransactionResort: groupedItem.transactions.length === 1,

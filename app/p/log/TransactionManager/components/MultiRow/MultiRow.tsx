@@ -27,7 +27,6 @@ export interface MultiRowProps {
 	folded: boolean
 	playAnimation: boolean
 	updateFoldState: FoldStateUpdater
-	onTransactionReorderMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	transactionSortPosChanged: boolean
 	defSortOrder: SortOrder.State
 	disableTransactionResort: boolean
@@ -383,7 +382,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				className={`${s.reorder_grabber} ${
 					p.transactionSortPosChanged ? s.changed : ''
 				}`}
-				onMouseDown={p.onTransactionReorderMouseDown}
 				title={
 					p.disableTransactionResort
 						? "Repositioning not allowed while there's only one transaction under this date"

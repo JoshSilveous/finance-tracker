@@ -1,7 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function useFoldState() {
 	const [foldState, setFoldState] = useState<FoldState>({})
+	const foldStateRef = useRef<FoldState>({})
+	useEffect(() => {
+		foldStateRef.current = foldState
+	}, [foldState])
 
 	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {
 		setFoldState((prev) => {
@@ -12,10 +16,16 @@ export function useFoldState() {
 		})
 	}, [])
 
+	const getFoldState: FoldStateGetter = useCallback(
+		(transaction_id: string) => foldStateRef.current[transaction_id],
+		[]
+	)
+
 	return {
 		cur: foldState,
 		set: setFoldState,
 		update: updateFoldState,
+		get: getFoldState,
 	}
 }
 
@@ -40,3 +50,5 @@ export type FoldState = {
  * @param folded the value to set the `foldState` to. Leave undefined to toggle.
  */
 export type FoldStateUpdater = (transaction_id: string, folded?: boolean) => void
+
+export type FoldStateGetter = (transaction_id: string) => boolean
