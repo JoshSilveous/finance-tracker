@@ -37,6 +37,9 @@ export interface MultiRowProps {
 export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
 
 export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedRef) => {
+	if (p.transaction.name === 'El Vac') {
+		console.log(`ren "${p.transaction.name}" folded:${p.folded} play:${p.playAnimation}`)
+	}
 	const transaction_id = p.transaction.id
 
 	const columnNodesRef = useRef<(HTMLDivElement | null)[]>([])
@@ -96,7 +99,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	// paint fold state / animation after dom renders
 	useEffect(() => {
 		const columnNodes = columnNodesRef.current as HTMLDivElement[]
-		const render = foldRenderer(columnNodes, p.transaction.id)
+		const render = foldRenderer(columnNodes)
 
 		if (p.folded && p.playAnimation) {
 			render.foldAnimated()
@@ -390,7 +393,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				</JButton>
 			</div>
 			<div
-				className={`${s.fold_toggle} ${p.folded ? s.folded : ''}`}
+				className={`${s.fold_toggle} ${p.folded || p.playAnimation ? s.folded : ''}`}
 				onClick={() => p.updateFoldState(p.transaction.id)}
 				title={p.folded ? 'Click to reveal items' : 'Click to hide items'}
 			>

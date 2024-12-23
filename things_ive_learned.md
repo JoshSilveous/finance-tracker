@@ -17,3 +17,5 @@ this is just a loose list i'm keeping. eventually i'll make a beautiful linkedin
 -   did i mention css modules are amazing
 
 -   for gods sake use Prettier and ESLint
+
+-   React DevTools are worth learning (helped me figure out why a hugely complex component was re-rendering twice)

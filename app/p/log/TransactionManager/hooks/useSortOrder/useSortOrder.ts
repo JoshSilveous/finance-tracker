@@ -47,13 +47,20 @@ export function useSortOrder({
 	/* TRANSACTION REORDERING LOGIC */
 
 	// used to re-gain focus on the reorder node after re-renders
-	const [transactionToFocusOn, setTransactionToFocusOn] = useState('')
+	const transactionToFocusOnRef = useRef<string>('')
+	// const [transactionToFocusOn, setTransactionToFocusOn] = useState('')
+	// useEffect(() => {
+	// 	if (transactionToFocusOn !== '') {
+	// 		transactionReorderRefs.current[transactionToFocusOn].focus()
+	// 		setTransactionToFocusOn('')
+	// 	}
+	// }, [transactionToFocusOn])
 	useEffect(() => {
-		if (transactionToFocusOn !== '') {
-			transactionReorderRefs.current[transactionToFocusOn].focus()
-			setTransactionToFocusOn('')
+		if (transactionToFocusOnRef.current !== '') {
+			transactionReorderRefs.current[transactionToFocusOnRef.current].focus()
+			transactionToFocusOnRef.current = ''
 		}
-	}, [transactionToFocusOn])
+	}, [transactionToFocusOnRef.current])
 
 	// holds references to all of the transaction reorder buttons
 	const transactionReorderRefs = useRef<{ [id: string]: HTMLElement }>({})
@@ -69,7 +76,8 @@ export function useSortOrder({
 					transactionIndex,
 					transactionIndex - 1
 				)
-				setTransactionToFocusOn(transaction.id)
+				// setTransactionToFocusOn(transaction.id)
+				transactionToFocusOnRef.current = transaction.id
 			} else if (
 				e.key === 'ArrowDown' &&
 				transactionIndex !== curSortOrderRef.current![transaction.date].length - 1
@@ -79,7 +87,8 @@ export function useSortOrder({
 					transactionIndex,
 					transactionIndex + 1
 				)
-				setTransactionToFocusOn(transaction.id)
+				// setTransactionToFocusOn(transaction.id)
+				transactionToFocusOnRef.current = transaction.id
 			}
 		},
 		[]
@@ -101,7 +110,8 @@ export function useSortOrder({
 				e,
 				(oldIndex, newIndex) => {
 					updateTransactionSortOrder(transaction.date, oldIndex, newIndex)
-					setTransactionToFocusOn(transaction.id)
+					// setTransactionToFocusOn(transaction.id)
+					transactionToFocusOnRef.current = transaction.id
 				}
 			)
 		},

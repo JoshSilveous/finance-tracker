@@ -5,7 +5,7 @@ import s from '../MultiRow.module.scss'
  * Generates an instance used to present different fold effects to the user.
  * Run `cancel()` when MultiRow component unmounts to prevent overlaps when multiple actions are done with quick succession
  */
-export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: string) {
+export function foldRenderer(columnNodes: HTMLDivElement[]) {
 	const foldAnimationTime = 500
 
 	let cancelled = false
@@ -31,6 +31,9 @@ export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: stri
 	}
 
 	function foldAnimated() {
+		const foldToggleNode = columnNodes[0].children[0].children[1]
+		foldToggleNode.classList.add(s.folded)
+
 		// columnNodes[1] is arbitrary, any columnNode will do
 		const cells = Array.from(columnNodes[1].children) as HTMLDivElement[]
 		const firstRowHeight =
@@ -59,6 +62,13 @@ export function foldRenderer(columnNodes: HTMLDivElement[], transaction_id: stri
 	}
 
 	function unfoldAnimated() {
+		// remove foldToggle class after a delay to make sure the arrow spins after re-rendering at different positions in the sort
+		const foldToggleNode = columnNodes[0].children[0].children[1]
+		foldToggleNode.classList.add(s.folded)
+		delay(10).then(() => {
+			foldToggleNode.classList.remove(s.folded)
+		})
+
 		// columnNodes[1] is arbitrary, any columnNode will do
 		const cells = Array.from(columnNodes[1].children) as HTMLDivElement[]
 		const firstRowHeight =

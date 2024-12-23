@@ -76,7 +76,6 @@ export const transactionReorderMouseEffect = (
 		arr.push(arr.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight)
 		return arr
 	})()
-	console.log('breakpoints:', breakpoints)
 
 	let leftOffset = 0
 	const startWidths = thisRow.map((item) => getComputedStyle(item).width)
@@ -113,28 +112,22 @@ export const transactionReorderMouseEffect = (
 			return
 		}
 
-		rowIndex--
-		console.log('rowIndex:', rowIndex, 'otherRows.length', otherRows.length)
-
 		// if hovering over first row
-		if (rowIndex === -1) {
-			console.log('hovering over first row')
+		if (rowIndex === 0) {
 			otherRows[0].forEach((node) => {
 				node.style.marginTop = marginSize + 'px'
 			})
 		}
 		// if hovering over last row
-		else if (rowIndex === otherRows.length - 1) {
-			console.log('hovering over last row')
+		else if (rowIndex === otherRows.length) {
 			otherRows.at(-1)!.forEach((node) => {
 				node.style.marginBottom = marginSize + 'px'
 			})
 		} else {
-			console.log('hovering over mid row')
-			otherRows[rowIndex].forEach(
+			otherRows[rowIndex - 1].forEach(
 				(node) => (node.style.marginBottom = marginSize / 2 + 'px')
 			)
-			otherRows[rowIndex + 1].forEach(
+			otherRows[rowIndex].forEach(
 				(node) => (node.style.marginTop = marginSize / 2 + 'px')
 			)
 		}
