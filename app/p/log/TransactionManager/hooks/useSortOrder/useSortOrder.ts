@@ -67,7 +67,10 @@ export function useSortOrder({
 	const handleTransactionReorderKeydown = useCallback(
 		(transaction: FormTransaction) => (e: KeyboardEvent) => {
 			const transactionIndex = curSortOrderRef.current![transaction.date].findIndex(
-				(sortItem) => Array.isArray(sortItem) && sortItem[0] === transaction.id
+				(sortItem) =>
+					Array.isArray(sortItem)
+						? sortItem[0] === transaction.id
+						: sortItem === transaction.id
 			)
 
 			if (e.key === 'ArrowUp' && transactionIndex !== 0) {
@@ -96,8 +99,12 @@ export function useSortOrder({
 	const handleTransactionReorderMousedown = useCallback(
 		(transaction: FormTransaction) => (e: MouseEvent) => {
 			const transactionIndex = curSortOrderRef.current![transaction.date].findIndex(
-				(sortItem) => Array.isArray(sortItem) && sortItem[0] === transaction.id
+				(sortItem) =>
+					Array.isArray(sortItem)
+						? sortItem[0] === transaction.id
+						: sortItem === transaction.id
 			)
+
 			const folded = getFoldState(transaction.id)
 
 			return transactionReorderMouseEffect(

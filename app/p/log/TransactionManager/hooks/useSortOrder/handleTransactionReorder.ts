@@ -21,11 +21,11 @@ export const transactionReorderMouseEffect = (
 	const sortOrderSlimmed = sortOrder.map((sortItem) =>
 		Array.isArray(sortItem) ? sortItem[0] : sortItem
 	)
-	const transactionRowsRefSorted = Object.entries(transactionRowsRef.current!).sort(
-		(a, b) => {
+	const transactionRowsRefSorted = Object.entries(transactionRowsRef.current!)
+		.filter((item) => sortOrderSlimmed.includes(item[0]))
+		.sort((a, b) => {
 			return sortOrderSlimmed.indexOf(a[0]) - sortOrderSlimmed.indexOf(b[0])
-		}
-	)
+		})
 
 	const allRows = transactionRowsRefSorted.map(
 		(item) => Array.from(item[1]!.childNodes) as HTMLDivElement[]
