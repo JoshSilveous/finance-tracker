@@ -25,7 +25,7 @@ interface NewTransactionFormProps {
 	defaultDate: string
 	dropdownOptions: DropdownOptions
 	forceClosePopup: () => void
-	setRefreshRequired: () => void
+	setRefreshRequired?: () => void
 }
 
 type Type = 'transaction' | 'item'
@@ -47,6 +47,7 @@ export function NewTransactionForm({
 	const [isMultiItems, setIsMultiItems] = useState(false)
 	const [missingItems, setMissingItems] = useState<string[]>([])
 	const [submitting, setSubmitting] = useState(false)
+	const [creationFinished, setCreationFinished] = useState(false)
 
 	useFocusLoop(firstFocusRef, lastFocusRef)
 
@@ -160,7 +161,10 @@ export function NewTransactionForm({
 			try {
 				await insertTransactionAndItems(formData)
 				setSubmitting(false)
-				setRefreshRequired()
+				if (setRefreshRequired) {
+					setRefreshRequired()
+				}
+				setCreationFinished(true)
 			} catch (e) {
 				if (isStandardError(e)) {
 					promptError(
@@ -174,88 +178,117 @@ export function NewTransactionForm({
 		}
 	}
 
+	const handleCreateAnother = useCallback(() => {
+		setFormData({
+			name: '',
+			date: defaultDate,
+			items: [{ name: '', amount: '', category_id: '', account_id: '' }],
+		})
+		setCreationFinished(false)
+	}, [])
+
 	return (
 		<div className={s.main}>
 			<h2>Create New Transaction</h2>
-			<form>
-				<div className={s.split_col}>
-					<div className={s.name_container}>
-						<label htmlFor='transaction-name'>Name:</label>
-						<JInput
-							id='transaction-name'
-							onChange={handleChange}
-							value={formData.name}
-							ref={firstFocusRef}
-						/>
-					</div>
-					<div className={s.date_container}>
-						<label htmlFor='transaction-date'>Date:</label>
-						<JDatePicker
-							id='transaction-date'
-							onChange={handleChange}
-							value={formData.date}
-						/>
-					</div>
-				</div>
-				<div className={s.multiple_toggle_container}>
-					<label htmlFor='multiple-items'>Multiple Items?</label>
-					<JCheckbox
-						bgColor='var(--popup-bg-color)'
-						id='multiple-items'
-						checked={isMultiItems}
-						onChange={(e) => setIsMultiItems(e.target.checked)}
-					/>
-				</div>
-				{isMultiItems ? (
-					<MultiItemGrid
-						{...{ formData, handleChange, dropdownOptions, setFormData }}
-					/>
-				) : (
-					<div className={s.items_container}>
-						<div className={s.item}>
-							<div>
-								<label htmlFor='item-amount-0'>Amount:</label>
-								<JNumberAccounting
-									id='item-amount-0'
-									value={formData.items[0].amount}
+			{!creationFinished ? (
+				<>
+					<form>
+						<div className={s.split_col}>
+							<div className={s.name_container}>
+								<label htmlFor='transaction-name'>Name:</label>
+								<JInput
+									id='transaction-name'
 									onChange={handleChange}
+									value={formData.name}
+									ref={firstFocusRef}
 								/>
 							</div>
-							<div>
-								<label htmlFor='item-category_id-0'>Category:</label>
-								<JDropdown
-									id='item-category_id-0'
-									options={dropdownOptions.category}
-									value={formData.items[0].category_id}
+							<div className={s.date_container}>
+								<label htmlFor='transaction-date'>Date:</label>
+								<JDatePicker
+									id='transaction-date'
 									onChange={handleChange}
-								/>
-							</div>
-							<div>
-								<label htmlFor='item-account_id-0'>Account:</label>
-								<JDropdown
-									id='item-account_id-0'
-									options={dropdownOptions.account}
-									value={formData.items[0].account_id}
-									onChange={handleChange}
+									value={formData.date}
 								/>
 							</div>
 						</div>
+						<div className={s.multiple_toggle_container}>
+							<label htmlFor='multiple-items'>Multiple Items?</label>
+							<JCheckbox
+								bgColor='var(--popup-bg-color)'
+								id='multiple-items'
+								checked={isMultiItems}
+								onChange={(e) => setIsMultiItems(e.target.checked)}
+							/>
+						</div>
+						{isMultiItems ? (
+							<MultiItemGrid
+								{...{ formData, handleChange, dropdownOptions, setFormData }}
+							/>
+						) : (
+							<div className={s.items_container}>
+								<div className={s.item}>
+									<div>
+										<label htmlFor='item-amount-0'>Amount:</label>
+										<JNumberAccounting
+											id='item-amount-0'
+											value={formData.items[0].amount}
+											onChange={handleChange}
+										/>
+									</div>
+									<div>
+										<label htmlFor='item-category_id-0'>Category:</label>
+										<JDropdown
+											id='item-category_id-0'
+											options={dropdownOptions.category}
+											value={formData.items[0].category_id}
+											onChange={handleChange}
+										/>
+									</div>
+									<div>
+										<label htmlFor='item-account_id-0'>Account:</label>
+										<JDropdown
+											id='item-account_id-0'
+											options={dropdownOptions.account}
+											value={formData.items[0].account_id}
+											onChange={handleChange}
+										/>
+									</div>
+								</div>
+							</div>
+						)}
+					</form>
+					<div className={s.button_container}>
+						<JButton jstyle='secondary' onClick={forceClosePopup}>
+							Go Back
+						</JButton>
+						<JButton
+							jstyle={missingItems.length !== 0 ? 'secondary' : 'primary'}
+							onClick={handleSubmit}
+							loading={submitting}
+							ref={lastFocusRef}
+						>
+							Create
+						</JButton>
 					</div>
-				)}
-			</form>
-			<div className={s.button_container}>
-				<JButton jstyle='secondary' onClick={forceClosePopup}>
-					Go Back
-				</JButton>
-				<JButton
-					jstyle={missingItems.length !== 0 ? 'secondary' : 'primary'}
-					onClick={handleSubmit}
-					loading={submitting}
-					ref={lastFocusRef}
-				>
-					Create
-				</JButton>
-			</div>
+				</>
+			) : (
+				<>
+					<h3>Transaction successfully created.</h3>
+					<div className={s.button_container}>
+						<JButton jstyle='secondary' onClick={forceClosePopup}>
+							Exit
+						</JButton>
+						<JButton
+							jstyle='primary'
+							onClick={handleCreateAnother}
+							ref={lastFocusRef}
+						>
+							Create Another
+						</JButton>
+					</div>
+				</>
+			)}
 		</div>
 	)
 }

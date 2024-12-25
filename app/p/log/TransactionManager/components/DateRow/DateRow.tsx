@@ -9,8 +9,9 @@ import { DropdownOptions } from '../../TransactionManager'
 interface DateRowProps {
 	date: string
 	dropdownOptions: DropdownOptions
+	refreshData: () => void
 }
-export function DateRow({ date, dropdownOptions }: DateRowProps) {
+export function DateRow({ date, dropdownOptions, refreshData }: DateRowProps) {
 	const { day, year, month } = formatDate(date)
 
 	const handleNewTransactionClick = () => {
@@ -21,6 +22,9 @@ export function DateRow({ date, dropdownOptions }: DateRowProps) {
 
 		const afterPopupClosed = () => {
 			console.log('popup closed, refreshRequired: ', refreshRequired)
+			if (refreshRequired) {
+				refreshData()
+			}
 		}
 
 		const popup = createPopup(

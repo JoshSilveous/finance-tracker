@@ -111,7 +111,7 @@ export function TransactionManager() {
 		}
 	}, [mainContainerRef, loaded])
 
-	useEffect(() => {
+	const refreshData = useCallback(() => {
 		fetchAndLoadData(
 			setLoaded,
 			setTransactionData,
@@ -121,6 +121,9 @@ export function TransactionManager() {
 			sortOrder.setDefault,
 			sortOrder.setCurrent
 		)
+	}, [])
+	useEffect(() => {
+		refreshData()
 	}, [])
 
 	useEffect(() => {
@@ -283,7 +286,11 @@ export function TransactionManager() {
 
 			sortedData.forEach((groupedItem, groupedItemIndex) => {
 				cells.push(
-					<DateRow date={groupedItem.date} dropdownOptions={dropdownOptions} />
+					<DateRow
+						date={groupedItem.date}
+						dropdownOptions={dropdownOptions}
+						refreshData={refreshData}
+					/>
 				)
 
 				groupedItem.transactions.forEach((transaction, transactionIndex) => {
@@ -372,6 +379,7 @@ export function TransactionManager() {
 								<NewTransactionForm
 									dropdownOptions={dropdownOptions}
 									defaultDate={new Date().toISOString().split('T')[0]}
+									forceClosePopup={() => popup.close()}
 								/>
 							)
 							popup.trigger()
