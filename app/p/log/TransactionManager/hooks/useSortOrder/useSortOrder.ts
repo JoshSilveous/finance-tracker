@@ -48,22 +48,16 @@ export function useSortOrder({
 
 	// used to re-gain focus on the reorder node after re-renders
 	const transactionToFocusOnRef = useRef<string>('')
-	// const [transactionToFocusOn, setTransactionToFocusOn] = useState('')
-	// useEffect(() => {
-	// 	if (transactionToFocusOn !== '') {
-	// 		transactionReorderRefs.current[transactionToFocusOn].focus()
-	// 		setTransactionToFocusOn('')
-	// 	}
-	// }, [transactionToFocusOn])
-	useEffect(() => {
-		if (transactionToFocusOnRef.current !== '') {
-			transactionReorderRefs.current[transactionToFocusOnRef.current].focus()
-			transactionToFocusOnRef.current = ''
-		}
-	}, [transactionToFocusOnRef.current])
 
 	// holds references to all of the transaction reorder buttons
-	const transactionReorderRefs = useRef<{ [id: string]: HTMLElement }>({})
+	const newTransactionReorderRefs = useRef<
+		{
+			transaction_id: string
+			node: HTMLButtonElement
+			keydownListener: (e: KeyboardEvent) => void
+			mousedownListener: (e: MouseEvent) => void
+		}[]
+	>([])
 	const handleTransactionReorderKeydown = useCallback(
 		(transaction: FormTransaction) => (e: KeyboardEvent) => {
 			const transactionIndex = curSortOrderRef.current![transaction.date].findIndex(
@@ -74,23 +68,23 @@ export function useSortOrder({
 			)
 
 			if (e.key === 'ArrowUp' && transactionIndex !== 0) {
+				e.preventDefault()
 				updateTransactionSortOrder(
 					transaction.date,
 					transactionIndex,
 					transactionIndex - 1
 				)
-				// setTransactionToFocusOn(transaction.id)
 				transactionToFocusOnRef.current = transaction.id
 			} else if (
 				e.key === 'ArrowDown' &&
 				transactionIndex !== curSortOrderRef.current![transaction.date].length - 1
 			) {
+				e.preventDefault()
 				updateTransactionSortOrder(
 					transaction.date,
 					transactionIndex,
 					transactionIndex + 1
 				)
-				// setTransactionToFocusOn(transaction.id)
 				transactionToFocusOnRef.current = transaction.id
 			}
 		},
@@ -126,18 +120,49 @@ export function useSortOrder({
 	)
 	// applied to each transaction reorder node
 	const addToTransactionReorderRefs = useCallback(
-		(transaction: FormTransaction) => (node: HTMLElement | null) => {
-			if (node !== null && transactionReorderRefs.current[transaction.id] !== node) {
-				transactionReorderRefs.current[transaction.id] = node
+		(transaction: FormTransaction) => (node: HTMLButtonElement | null) => {
+			if (node !== null) {
+				const thisNodeRefIndex = newTransactionReorderRefs.current.findIndex(
+					(item) => item.node === node
+				)
+				if (thisNodeRefIndex !== -1) {
+					const thisNodeRef = newTransactionReorderRefs.current[thisNodeRefIndex]
+					if (thisNodeRef.transaction_id !== transaction.id) {
+						// node already exists, other info needs updated
+						node.removeEventListener('keydown', thisNodeRef.keydownListener)
+						node.removeEventListener('mousedown', thisNodeRef.mousedownListener)
 
-				node.addEventListener(
-					'keydown',
-					handleTransactionReorderKeydown(transaction)
-				)
-				node.addEventListener(
-					'mousedown',
-					handleTransactionReorderMousedown(transaction)
-				)
+						const keydownListener = handleTransactionReorderKeydown(transaction)
+						const mousedownListener =
+							handleTransactionReorderMousedown(transaction)
+
+						node.addEventListener('keydown', keydownListener)
+						node.addEventListener('mousedown', mousedownListener)
+
+						thisNodeRef.transaction_id = transaction.id
+						thisNodeRef.keydownListener = keydownListener
+						thisNodeRef.mousedownListener = mousedownListener
+					}
+				} else {
+					// node not in array yet
+
+					const keydownListener = handleTransactionReorderKeydown(transaction)
+					const mousedownListener = handleTransactionReorderMousedown(transaction)
+
+					node.addEventListener('keydown', keydownListener)
+					node.addEventListener('mousedown', mousedownListener)
+
+					newTransactionReorderRefs.current.push({
+						transaction_id: transaction.id,
+						node: node,
+						keydownListener,
+						mousedownListener,
+					})
+				}
+				if (transactionToFocusOnRef.current === transaction.id) {
+					node.focus()
+					transactionToFocusOnRef.current = ''
+				}
 			}
 		},
 		[]
@@ -184,6 +209,7 @@ export function useSortOrder({
 						).findIndex((sortItem) => sortItem === item.id) - 1
 
 					if (e.key === 'ArrowUp' && itemIndex !== 0) {
+						e.preventDefault()
 						updateItemSortOrder(
 							transaction,
 							transactionIndex,
@@ -204,6 +230,7 @@ export function useSortOrder({
 							).length -
 								2
 					) {
+						e.preventDefault()
 						updateItemSortOrder(
 							transaction,
 							transactionIndex,
@@ -408,16 +435,16 @@ export namespace SortOrder {
 			transaction: FormTransaction,
 			item: FormTransaction['items'][number],
 			itemRowsRef: MutableRefObject<ItemRowRefs>
-		) => (node: HTMLElement | null) => void
+		) => ItemReorderRefAdder
 	}
 
 	/**
 	 * Apply to the `ref` attribute of the buttons used to control Transaction sort order position.
 	 */
-	export type TransactionReorderRefAdder = (node: HTMLElement | null) => void
+	export type TransactionReorderRefAdder = (node: HTMLButtonElement | null) => void
 
 	/**
 	 * Apply to the `ref` attribute of the buttons used to control Item sort order position.
 	 */
-	export type ItemReorderRefAdder = (node: HTMLElement | null) => void
+	export type ItemReorderRefAdder = (node: HTMLButtonElement | null) => void
 }
