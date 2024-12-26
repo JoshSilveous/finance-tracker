@@ -10,17 +10,18 @@ interface JButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 import React, { forwardRef } from 'react'
 
 export const JButton = forwardRef<HTMLButtonElement, JButtonProps>(
-	({ jstyle, loading, ...props }, ref) => {
+	({ jstyle, loading, onClick, ...rest }, ref) => {
 		return (
 			<button
 				ref={ref}
 				type='button'
-				{...props}
-				className={`${props.className} ${s.jbutton} ${s[jstyle]} ${
+				{...rest}
+				className={`${rest.className} ${s.jbutton} ${s[jstyle]} ${
 					loading ? s.loading : ''
 				}`}
+				onClick={onClick && !loading ? onClick : undefined}
 			>
-				{loading ? <LoadingAnim /> : props.children}
+				{loading ? <LoadingAnim /> : rest.children}
 			</button>
 		)
 	}

@@ -57,7 +57,7 @@ export async function fetchAndLoadData(
 				}
 			})
 
-			// convert FetchedTransaction to StateTransaction
+			// convert FetchedTransaction to FormTransaction
 			const convertedTransactions: FormTransaction[] = transactions.map(
 				(transaction) => ({
 					...transaction,

@@ -9,11 +9,18 @@ import {
 	IsolatedKeyListener,
 	removeIsolatedKeyListeners,
 	setKeyListenerContext,
+	promptError,
+	isStandardError,
 } from '@/utils'
 import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { handleTransactionReorder, fetchAndLoadData, sortTransactions } from './func'
+import {
+	handleTransactionReorder,
+	fetchAndLoadData,
+	sortTransactions,
+	saveChanges,
+} from './func'
 import { DateRow, MultiRowProps, MultiRow, SingleRow, SingleRowProps } from './components'
 import { default as UndoRedoIcon } from '@/public/undo_redo.svg'
 import { JButton, JNumberAccounting } from '@/components/JForm'
@@ -36,6 +43,7 @@ export function TransactionManager() {
 	const [transactionData, setTransactionData] = useState<FormTransaction[] | null>(null)
 	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
+	const [isSaving, setIsSaving] = useState(false)
 
 	const makeActiveContext = useCallback(() => {
 		setKeyListenerContext('TransactionManager')
@@ -111,7 +119,9 @@ export function TransactionManager() {
 		}
 	}, [mainContainerRef, loaded])
 
-	const refreshData = useCallback(() => {
+	const refreshData = () => {
+		pendingChanges.clear()
+		historyController.clear()
 		fetchAndLoadData(
 			setLoaded,
 			setTransactionData,
@@ -121,7 +131,7 @@ export function TransactionManager() {
 			sortOrder.setDefault,
 			sortOrder.setCurrent
 		)
-	}, [])
+	}
 	useEffect(() => {
 		refreshData()
 	}, [])
@@ -140,6 +150,30 @@ export function TransactionManager() {
 		 * References the DOM elements of each transaction row. Used for resorting logic.
 		 */
 		transactionRowsRef.current[transaction_id] = node
+	}
+
+	const handleDiscardChanges = () => {
+		pendingChanges.clear()
+		historyController.clear()
+	}
+
+	const handleSaveChanges = async () => {
+		console.log('handleSave called')
+		setIsSaving(true)
+		try {
+			await saveChanges(pendingChanges, sortOrder, transactionDataRef)
+			setIsSaving(false)
+			refreshData()
+		} catch (e) {
+			if (isStandardError(e)) {
+				promptError(
+					'Error occured while saving your data',
+					e.message,
+					'Try refreshing your browser'
+				)
+			}
+			setIsSaving(false)
+		}
 	}
 
 	const dropdownOptions: DropdownOptions = useMemo(() => {
@@ -396,6 +430,7 @@ export function TransactionManager() {
 							jstyle='primary'
 							disabled={!isChanged}
 							className={s.discard_button}
+							onClick={handleDiscardChanges}
 						>
 							Discard Changes
 						</JButton>
@@ -403,6 +438,8 @@ export function TransactionManager() {
 							jstyle='primary'
 							disabled={!isChanged}
 							className={s.save_button}
+							loading={isSaving}
+							onClick={handleSaveChanges}
 						>
 							Save Changes
 						</JButton>

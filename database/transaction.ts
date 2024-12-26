@@ -29,17 +29,6 @@ export async function fetchTransactionData() {
 	return filteredData
 }
 
-export interface InsertTransactionEntry {
-	name: string
-	date: string
-	items: {
-		name: string
-		amount: string
-		category_id: string
-		account_id: string
-	}[]
-}
-
 export async function getTransactionsCount(date?: string) {
 	const { count, error } =
 		date === undefined
@@ -55,6 +44,16 @@ export async function getTransactionsCount(date?: string) {
 	return count as number
 }
 
+export interface InsertTransactionEntry {
+	name: string
+	date: string
+	items: {
+		name: string
+		amount: string
+		category_id: string
+		account_id: string
+	}[]
+}
 export async function insertTransactionAndItems(transaction: InsertTransactionEntry) {
 	if (transaction.name.trim() === '') {
 		throw new Error('Transaction Name cannot be empty!')
@@ -99,7 +98,7 @@ export async function insertTransactionAndItems(transaction: InsertTransactionEn
 
 	const newTransactionID = transactionData[0].id
 
-	const newPackagesItems = transaction.items.map((item, index) => {
+	const newPackagedItems = transaction.items.map((item, index) => {
 		return {
 			name: item.name.trim() === '' ? null : item.name,
 			amount: Number(item.amount),
@@ -113,7 +112,7 @@ export async function insertTransactionAndItems(transaction: InsertTransactionEn
 
 	const { data: itemData, error: itemError } = await supabase
 		.from('transaction_items')
-		.insert(newPackagesItems)
+		.insert(newPackagedItems)
 		.select('id')
 
 	if (itemError) {
@@ -121,4 +120,68 @@ export async function insertTransactionAndItems(transaction: InsertTransactionEn
 	}
 
 	return
+}
+
+export interface UpsertTransactionEntry {
+	id: string
+	name: string
+	date: string
+	order_position: number
+}
+export interface UpsertItemEntry {
+	id: string
+	name: string | null
+	amount: string
+	category_id: string | null
+	account_id: string | null
+	order_position: number
+	transaction_id: string
+}
+export async function upsertTransactionsAndItems(
+	transactions: UpsertTransactionEntry[],
+	items: UpsertItemEntry[]
+) {
+	const user_id = await getUserID()
+
+	const transactionUpdatesWithUserID = transactions.map((transaction) => {
+		return {
+			...transaction,
+			user_id: user_id,
+		}
+	})
+	const itemUpdatesWithUserID = items.map((item) => {
+		return {
+			...item,
+			user_id: user_id,
+		}
+	})
+
+	const transactionUpsert = supabase
+		.from('transactions')
+		.upsert(transactionUpdatesWithUserID, {
+			defaultToNull: false,
+			onConflict: 'id',
+			ignoreDuplicates: false,
+		})
+	const itemUpsert = supabase.from('transaction_items').upsert(itemUpdatesWithUserID, {
+		defaultToNull: false,
+		onConflict: 'id',
+		ignoreDuplicates: false,
+	})
+
+	return Promise.all([transactionUpsert, itemUpsert])
+		.then(([transactionRes, itemRes]) => {
+			if (transactionRes.error) {
+				console.error(transactionRes.error)
+				throw new Error(transactionRes.error.message)
+			}
+			if (itemRes.error) {
+				console.error(itemRes.error)
+				throw new Error(itemRes.error.message)
+			}
+		})
+		.catch((e) => {
+			console.error(e)
+			throw new Error(e.message)
+		})
 }
