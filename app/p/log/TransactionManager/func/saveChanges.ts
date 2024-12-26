@@ -52,7 +52,7 @@ export async function saveChanges(
 
 	// package up transaction changes
 	const packagedTransactions: UpsertTransactionEntry[] = Object.entries(
-		pendingChanges.cur.transactions
+		pendingChanges.curChanges.transactions
 	).map(([id, changes]) => {
 		const original = transactionData.current!.find(
 			(transaction) => transaction.id === id
@@ -85,48 +85,48 @@ export async function saveChanges(
 	})
 
 	// package up transaction changes
-	const packagedItems: UpsertItemEntry[] = Object.entries(pendingChanges.cur.items).map(
-		([id, changes]) => {
-			const origTransaction = transactionData.current!.find((transaction) =>
-				transaction.items.some((item) => item.id === id)
-			)!
-			const origItem = origTransaction.items.find((item) => item.id === id)!
-			const newOrderPositionUpdateIndex = itemPositionUpdates.findIndex(
-				(it) => it.id === id
-			)
-			if (newOrderPositionUpdateIndex !== -1) {
-				itemPositionUpdates.splice(newOrderPositionUpdateIndex, 1)
-			}
-			const order_position =
-				newOrderPositionUpdateIndex !== -1
-					? itemPositionUpdates[newOrderPositionUpdateIndex].order_position
-					: origItem.order_position
-
-			const name = changes.name !== undefined ? changes.name : origItem.name
-			const category_id =
-				changes.category_id !== undefined
-					? changes.category_id !== ''
-						? changes.category_id
-						: null
-					: origItem.category_id
-			const account_id =
-				changes.account_id !== undefined
-					? changes.account_id !== ''
-						? changes.account_id
-						: null
-					: origItem.account_id
-
-			return {
-				id,
-				order_position,
-				name,
-				category_id,
-				account_id,
-				amount: changes.amount !== undefined ? changes.amount : origItem.amount,
-				transaction_id: origTransaction.id,
-			}
+	const packagedItems: UpsertItemEntry[] = Object.entries(
+		pendingChanges.curChanges.items
+	).map(([id, changes]) => {
+		const origTransaction = transactionData.current!.find((transaction) =>
+			transaction.items.some((item) => item.id === id)
+		)!
+		const origItem = origTransaction.items.find((item) => item.id === id)!
+		const newOrderPositionUpdateIndex = itemPositionUpdates.findIndex(
+			(it) => it.id === id
+		)
+		if (newOrderPositionUpdateIndex !== -1) {
+			itemPositionUpdates.splice(newOrderPositionUpdateIndex, 1)
 		}
-	)
+		const order_position =
+			newOrderPositionUpdateIndex !== -1
+				? itemPositionUpdates[newOrderPositionUpdateIndex].order_position
+				: origItem.order_position
+
+		const name = changes.name !== undefined ? changes.name : origItem.name
+		const category_id =
+			changes.category_id !== undefined
+				? changes.category_id !== ''
+					? changes.category_id
+					: null
+				: origItem.category_id
+		const account_id =
+			changes.account_id !== undefined
+				? changes.account_id !== ''
+					? changes.account_id
+					: null
+				: origItem.account_id
+
+		return {
+			id,
+			order_position,
+			name,
+			category_id,
+			account_id,
+			amount: changes.amount !== undefined ? changes.amount : origItem.amount,
+			transaction_id: origTransaction.id,
+		}
+	})
 	// add remaining transaction order position updates
 	itemPositionUpdates.forEach((thisItem) => {
 		const origTransaction = transactionData.current!.find((transaction) =>

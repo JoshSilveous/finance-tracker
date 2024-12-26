@@ -100,7 +100,7 @@ export function TransactionManager() {
 	const historyController = useHistory({
 		transactionDataRef,
 		setCurSortOrder: sortOrder.setCurrent,
-		updatePendingChanges: pendingChanges.update,
+		updatePendingChanges: pendingChanges.updateChange,
 	})
 
 	useEffect(() => {
@@ -120,7 +120,7 @@ export function TransactionManager() {
 	}, [mainContainerRef, loaded])
 
 	const refreshData = () => {
-		pendingChanges.clear()
+		pendingChanges.clearAll()
 		historyController.clear()
 		fetchAndLoadData(
 			setLoaded,
@@ -153,7 +153,7 @@ export function TransactionManager() {
 	}
 
 	const handleDiscardChanges = () => {
-		pendingChanges.clear()
+		pendingChanges.clearAll()
 		historyController.clear()
 	}
 
@@ -217,17 +217,17 @@ export function TransactionManager() {
 	}, [transactionData, sortOrder.cur])
 
 	const isChanged = useMemo(() => {
-		if (Object.keys(pendingChanges.cur.transactions).length !== 0) {
+		if (Object.keys(pendingChanges.curChanges.transactions).length !== 0) {
 			return true
 		}
-		if (Object.keys(pendingChanges.cur.items).length !== 0) {
+		if (Object.keys(pendingChanges.curChanges.items).length !== 0) {
 			return true
 		}
 		if (!areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
 			return true
 		}
 		return false
-	}, [pendingChanges.cur, sortOrder.cur, sortOrder.def])
+	}, [pendingChanges.curChanges, sortOrder.cur, sortOrder.def])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		const undoTitle = 'Undo most recent change.\nShortcut: CTRL + Z'
@@ -318,14 +318,17 @@ export function TransactionManager() {
 		if (sortedData.length !== 0) {
 			const cells: JGridTypes.Props['cells'] = []
 
+			let gridRow = 2
 			sortedData.forEach((groupedItem, groupedItemIndex) => {
 				cells.push(
 					<DateRow
 						date={groupedItem.date}
 						dropdownOptions={dropdownOptions}
 						refreshData={refreshData}
+						gridRow={gridRow}
 					/>
 				)
+				gridRow++
 
 				groupedItem.transactions.forEach((transaction, transactionIndex) => {
 					if (transaction.items.length === 1) {
@@ -341,6 +344,7 @@ export function TransactionManager() {
 							disableTransactionResort: groupedItem.transactions.length === 1,
 							historyController,
 							sortOrder,
+							gridRow,
 						}
 						cells.push(
 							<SingleRow
@@ -370,6 +374,7 @@ export function TransactionManager() {
 							disableTransactionResort: groupedItem.transactions.length === 1,
 							historyController,
 							sortOrder,
+							gridRow,
 						}
 
 						cells.push(
@@ -379,6 +384,7 @@ export function TransactionManager() {
 							/>
 						)
 					}
+					gridRow++
 				})
 			})
 			const gridConfig: JGridTypes.Props = {

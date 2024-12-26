@@ -6,8 +6,12 @@ export function usePendingChanges() {
 		transactions: {},
 		items: {},
 	})
+	const [pendingDeletions, setPendingDeletions] = useState<{
+		transactions: string[]
+		items: string[]
+	}>({ transactions: [], items: [] })
 
-	const update: PendingChanges.Updater = useCallback(
+	const updateChange: PendingChanges.Updater = useCallback(
 		<T extends keyof PendingChanges.State>(
 			type: T,
 			id: string,
@@ -39,7 +43,39 @@ export function usePendingChanges() {
 		[]
 	)
 
-	const clear = useCallback(() => {
+	const addDeletion = (type: 'item' | 'transaction', id: string) => {
+		setPendingDeletions((prev) => {
+			const clone = structuredClone(prev)
+			if (type === 'item') {
+				clone.items.push(id)
+			} else {
+				clone.transactions.push(id)
+			}
+			return clone
+		})
+	}
+
+	const removeDeletion = (type: 'item' | 'transaction', id: string) => {
+		setPendingDeletions((prev) => {
+			const clone = structuredClone(prev)
+			if (type === 'item') {
+				const index = clone.items.findIndex((item_id) => item_id === id)
+				if (index !== -1) {
+					clone.items.splice(index, 1)
+				}
+			} else {
+				const index = clone.transactions.findIndex(
+					(transaction_id) => transaction_id === id
+				)
+				if (index !== -1) {
+					clone.transactions.splice(index, 1)
+				}
+			}
+			return clone
+		})
+	}
+
+	const clearAll = useCallback(() => {
 		setPendingChanges({
 			transactions: {},
 			items: {},
@@ -47,9 +83,12 @@ export function usePendingChanges() {
 	}, [])
 
 	return {
-		cur: pendingChanges,
-		update,
-		clear,
+		curChanges: pendingChanges,
+		updateChange,
+		clearAll,
+		curDeletions: pendingDeletions,
+		addDeletion,
+		removeDeletion,
 	} as PendingChanges.Controller
 }
 
@@ -119,7 +158,7 @@ export namespace PendingChanges {
 		 * }
 		 * ```
 		 */
-		cur: State
+		curChanges: State
 		/**
 		 * Simplifies updating the `pendingChanges` array. Automatically adds/removes changes to keep pendingChanges minimized to relevant information.
 		 *
@@ -134,8 +173,14 @@ export namespace PendingChanges {
 		 * updatePendingChanges('items', item.id, 'name') // removes "name" for specified item (implying the user has undone their change)
 		 * ```
 		 */
-		update: Updater
-		clear: Clearer
+		updateChange: Updater
+		clearAll: Clearer
+		curDeletions: {
+			transactions: string[]
+			items: string[]
+		}
+		addDeletion: (type: 'item' | 'transaction', id: string) => void
+		removeDeletion: (type: 'item' | 'transaction', id: string) => void
 	}
 
 	/**

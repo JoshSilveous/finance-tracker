@@ -1,37 +1,40 @@
 .main {
-	margin-top: calc(var(--gap-row-height) * 2);
-	margin-bottom: calc(var(--gap-row-height) / 2);
-	grid-column: 2 / 7;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	.date_container {
-		font-size: 20px;
+	display: contents;
+	.content {
+		margin-top: calc(var(--gap-row-height) * 2);
+		margin-bottom: calc(var(--gap-row-height) / 2);
+		grid-column: 2 / 7;
 		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		.date_container {
+			font-size: 20px;
+			display: flex;
 
-		.weekday {
-			&::after {
-				content: ',\00a0';
+			.weekday {
+				&::after {
+					content: ',\00a0';
+				}
+			}
+			.month {
+				&::after {
+					content: '\00a0';
+				}
+			}
+			.day {
+				font-weight: 500;
+			}
+			.suffix {
+				vertical-align: text-top; /* Positions the text as superscript */
+				font-size: 0.75em;
+				&::after {
+					content: '\00a0';
+				}
+			}
+			.year {
 			}
 		}
-		.month {
-			&::after {
-				content: '\00a0';
-			}
+		.new_transaction_container {
 		}
-		.day {
-			font-weight: 500;
-		}
-		.suffix {
-			vertical-align: text-top; /* Positions the text as superscript */
-			font-size: 0.75em;
-			&::after {
-				content: '\00a0';
-			}
-		}
-		.year {
-		}
-	}
-	.new_transaction_container {
 	}
 }

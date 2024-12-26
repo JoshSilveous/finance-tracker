@@ -10,8 +10,9 @@ interface DateRowProps {
 	date: string
 	dropdownOptions: DropdownOptions
 	refreshData: () => void
+	gridRow: number
 }
-export function DateRow({ date, dropdownOptions, refreshData }: DateRowProps) {
+export function DateRow({ date, dropdownOptions, refreshData, gridRow }: DateRowProps) {
 	const { day, year, month } = formatDate(date)
 
 	const handleNewTransactionClick = () => {
@@ -44,18 +45,20 @@ export function DateRow({ date, dropdownOptions, refreshData }: DateRowProps) {
 	}
 
 	return (
-		<div className={s.main}>
-			<div className={s.date_container}>
-				<div className={s.weekday}>{day.long}</div>
-				<div className={s.month}>{month.short}</div>
-				<div className={s.day}>{day.num}</div>
-				<div className={s.suffix}>{day.suffix}</div>
-				<div className={s.year}>{year}</div>
-			</div>
-			<div className={s.new_transaction_container}>
-				<JButton jstyle='secondary' onClick={handleNewTransactionClick}>
-					Create New Transaction
-				</JButton>
+		<div className={s.main} style={{ gridRow: `${gridRow} / ${gridRow + 1}` }}>
+			<div className={s.content}>
+				<div className={s.date_container}>
+					<div className={s.weekday}>{day.long}</div>
+					<div className={s.month}>{month.short}</div>
+					<div className={s.day}>{day.num}</div>
+					<div className={s.suffix}>{day.suffix}</div>
+					<div className={s.year}>{year}</div>
+				</div>
+				<div className={s.new_transaction_container}>
+					<JButton jstyle='secondary' onClick={handleNewTransactionClick}>
+						Create New Transaction
+					</JButton>
+				</div>
 			</div>
 		</div>
 	)

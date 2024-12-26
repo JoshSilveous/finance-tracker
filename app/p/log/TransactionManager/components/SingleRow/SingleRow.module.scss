@@ -7,12 +7,12 @@
 			color: var(--font-color) !important;
 		}
 	}
+	--padding-val: 2.5px;
+	--margin-top: 10px;
+	--border-radius: 5px;
 	.cell_container {
 		width: 100%;
 		box-sizing: border-box; // have to use border-box to prevent form element overlaps
-		--padding-val: 2.5px;
-		--margin-top: 10px;
-		--border-radius: 5px;
 		margin-top: var(--gap-row-height);
 
 		background-color: var(--bg-color-lighter-2);
@@ -70,6 +70,80 @@
 					color: var(--font-color-changed);
 				}
 			}
+		}
+	}
+
+	// Delete overlay effects
+	--delete-overlay-transition-time: 0.2s;
+	.delete_overlay {
+		display: contents;
+		grid-column: 2 / -1;
+		z-index: 1;
+		margin-top: var(--gap-row-height);
+		border-radius: var(--border-radius);
+
+		&:not(.visible) {
+			.blur {
+				backdrop-filter: blur(0px);
+			}
+			& > * {
+				margin-top: 0 !important;
+				padding: 0 !important;
+				pointer-events: none !important;
+				opacity: 0% !important;
+			}
+		}
+		.blur {
+			grid-column: 2 / -1;
+			z-index: 1;
+			margin-top: var(--gap-row-height);
+			border-radius: var(--border-radius);
+			border-radius: var(--border-radius);
+			transition: backdrop-filter var(--delete-overlay-transition-time) ease;
+			backdrop-filter: blur(2px);
+		}
+		.color_overlay {
+			grid-column: 2 / -1;
+			z-index: 1;
+			margin-top: var(--gap-row-height);
+			border-radius: var(--border-radius);
+			transition: opacity var(--delete-overlay-transition-time) ease;
+			background-color: var(--bg-color-lighter-1);
+			opacity: 80%;
+		}
+		.text {
+			grid-column: 2 / 6;
+			margin-top: var(--gap-row-height);
+			border-radius: var(--border-radius);
+			z-index: 2;
+			padding: 0 calc(var(--padding-val) * 8);
+			box-sizing: border-box;
+			transition: opacity var(--delete-overlay-transition-time) ease;
+			opacity: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+		.button_container {
+			grid-column: 6 / 7;
+			margin-top: var(--gap-row-height);
+			border-radius: var(--border-radius);
+			z-index: 2;
+			padding: 0 calc(var(--padding-val) * 8);
+			box-sizing: border-box;
+			transition: opacity var(--delete-overlay-transition-time) ease;
+			opacity: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+	}
+	.cell_container.row_controller {
+		opacity: 100%;
+		transition: opacity var(--delete-overlay-transition-time) ease;
+		&.hidden {
+			opacity: 0%;
+			pointer-events: none;
 		}
 	}
 }

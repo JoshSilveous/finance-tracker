@@ -32,6 +32,7 @@ export interface MultiRowProps {
 	disableTransactionResort: boolean
 	historyController: HistoryController
 	sortOrder: SortOrder.Controller
+	gridRow: number
 }
 
 export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
@@ -112,8 +113,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 	// re-calculates the displayed value (from default transaction or pendingChange)
 	const liveVals = useMemo(
-		() => genLiveVals(p.transaction, p.pendingChanges.cur),
-		[p.transaction, p.pendingChanges.cur]
+		() => genLiveVals(p.transaction, p.pendingChanges.curChanges),
+		[p.transaction, p.pendingChanges.curChanges]
 	)
 
 	const eventHandlers = useMemo(() => {
@@ -132,14 +133,18 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					if (key === 'date' || key === 'name') {
 						const origVal = p.transaction[key]
 						if (origVal !== newVal) {
-							p.pendingChanges.update(
+							p.pendingChanges.updateChange(
 								'transactions',
 								p.transaction.id,
 								key,
 								newVal
 							)
 						} else {
-							p.pendingChanges.update('transactions', p.transaction.id, key)
+							p.pendingChanges.updateChange(
+								'transactions',
+								p.transaction.id,
+								key
+							)
 						}
 					} else {
 					}
@@ -154,9 +159,9 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							(item) => item.id === item_id
 						)![key]
 						if (origVal !== newVal) {
-							p.pendingChanges.update('items', item_id, key, newVal)
+							p.pendingChanges.updateChange('items', item_id, key, newVal)
 						} else {
-							p.pendingChanges.update('items', item_id, key)
+							p.pendingChanges.updateChange('items', item_id, key)
 						}
 					} else {
 					}
@@ -454,7 +459,11 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	})
 
 	return (
-		<div className={s.container} ref={forwardedRef}>
+		<div
+			className={s.container}
+			style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
+			ref={forwardedRef}
+		>
 			{columns}
 		</div>
 	)
