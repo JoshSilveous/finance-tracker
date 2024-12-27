@@ -42,11 +42,70 @@
 			margin-left: calc(var(--padding-val) * 2);
 			button {
 				padding: 0 calc(var(--padding-val) * 4);
-				width: fit-content;
+				width: 4px;
 				overflow: visible;
 				svg {
 					height: 15px;
 					overflow: visible;
+				}
+			}
+
+			.options {
+				transition: height 0.2s ease, width 0.2s ease, background-color 0.2s ease,
+					border-width 0.2s ease;
+			}
+			&:not(.revealed) {
+				position: relative;
+				.options {
+					display: none;
+					border-radius: var(--border-radius);
+					padding: var(--padding-val) calc(var(--padding-val) * 2);
+					box-sizing: border-box;
+					position: absolute;
+					top: 0;
+					right: 0;
+					width: 26px;
+					height: 46px;
+					background-color: var(--bg-color-lighter-1);
+					border: var(--border-width) solid var(--font-color);
+					z-index: 1;
+					display: flex;
+					flex-direction: column;
+					.close_button_container {
+						padding-top: calc(var(--padding-val) - var(--border-width));
+						align-self: flex-end;
+						button {
+							box-sizing: border-box;
+							padding: 0 calc(var(--padding-val) * 3 - var(--border-width));
+						}
+					}
+				}
+			}
+			&.revealed {
+				position: relative;
+				.options {
+					--border-width: 3px;
+					border-radius: var(--border-radius);
+					padding: var(--padding-val) calc(var(--padding-val) * 2);
+					box-sizing: border-box;
+					position: absolute;
+					top: 0;
+					right: 0;
+					width: 200px;
+					height: 300px;
+					background-color: var(--bg-color-lighter-3);
+					border: var(--border-width) solid var(--font-color);
+					z-index: 1;
+					display: flex;
+					flex-direction: column;
+					.close_button_container {
+						padding-top: calc(var(--padding-val) - var(--border-width));
+						align-self: flex-end;
+						button {
+							box-sizing: border-box;
+							padding: 0 calc(var(--padding-val) * 3 - var(--border-width));
+						}
+					}
 				}
 			}
 		}

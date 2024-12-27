@@ -5,7 +5,14 @@ import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
 import { default as OptionsIcon } from '@/public/options-vertical.svg'
 import s from './SingleRow.module.scss'
-import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } from 'react'
+import {
+	ChangeEventHandler,
+	FocusEventHandler,
+	forwardRef,
+	useMemo,
+	useRef,
+	useState,
+} from 'react'
 import { FormTransaction } from '../../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../../hooks/useHistory'
@@ -27,6 +34,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 	const item = p.transaction.items[0]
 	const undoDeleteRef = useRef<HTMLButtonElement>(null)
 	const dateSelectRef = useRef<HTMLInputElement>(null)
+	const [testOpen, setTestOpen] = useState(false)
 
 	const liveVals = useMemo(
 		() => genLiveVals(p.transaction, p.pendingChanges.curChanges),
@@ -279,12 +287,22 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div
 				className={`${s.cell_container} ${s.more_controls_container} ${
 					isPendingDeletion ? s.hidden : ''
-				}`}
+				} ${testOpen ? s.revealed : ''}`}
 				style={genGridStyle()}
 			>
-				<JButton jstyle='invisible'>
+				<JButton jstyle='invisible' onClick={() => setTestOpen((prev) => !prev)}>
 					<OptionsIcon />
 				</JButton>
+				<div className={s.options}>
+					<div className={s.close_button_container}>
+						<JButton
+							jstyle='invisible'
+							onClick={() => setTestOpen((prev) => !prev)}
+						>
+							<OptionsIcon />
+						</JButton>
+					</div>
+				</div>
 			</div>
 			<div className={`${s.delete_overlay} ${isPendingDeletion ? s.visible : ''}`}>
 				<div
