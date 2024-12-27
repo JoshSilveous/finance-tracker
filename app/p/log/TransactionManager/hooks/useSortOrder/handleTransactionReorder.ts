@@ -84,8 +84,8 @@ export const transactionReorderMouseEffect = (
 		node.style.left = `${e.clientX - offsetX + leftOffset}px`
 		node.style.top = `${e.clientY - offsetY}px`
 		node.classList.add(s.popped_out)
-		if (nodeIndex === 0) {
-			node.classList.add(s.row_controller)
+		if (nodeIndex === 0 || nodeIndex === thisRow.length - 2) {
+			node.classList.add(s.drop_shadow)
 		}
 		leftOffset += node.clientWidth
 	})

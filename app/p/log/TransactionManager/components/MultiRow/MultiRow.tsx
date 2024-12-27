@@ -487,9 +487,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
 		</div>,
 		<div
-			className={`${s.cell_container} ${s.more_controls_container} ${
+			className={`${s.cell_container} ${s.first_row} ${s.more_controls_container} ${
 				isPendingDeletion ? s.hidden : ''
 			}`}
+			key={`${p.transaction.id}-7`}
 		>
 			<JButton jstyle='invisible'>
 				<OptionsIcon />

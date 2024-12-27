@@ -152,10 +152,10 @@
 				position: absolute;
 				z-index: 999;
 
-				&:not(.row_controller) {
+				&:not(.drop_shadow) {
 					box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
 				}
-				&.row_controller {
+				&.drop_shadow {
 					filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
 				}
 			}
