@@ -1,6 +1,5 @@
 import { MutableRefObject } from 'react'
 import { Change } from '../AccountManager'
-import { evaluate } from 'mathjs'
 import { FetchedAccount, upsertAccounts } from '@/database'
 
 export async function saveChanges(
@@ -23,8 +22,7 @@ export async function saveChanges(
 			starting_amount:
 				change.new.starting_amount === undefined
 					? thisAccount.starting_amount
-					: Math.round(parseFloat(evaluate(change.new.starting_amount)) * 100) /
-					  100,
+					: Math.round(parseFloat(change.new.starting_amount) * 100) / 100,
 		}
 	})
 

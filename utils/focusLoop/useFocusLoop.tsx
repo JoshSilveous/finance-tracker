@@ -1,4 +1,3 @@
-import { isArray } from 'mathjs'
 import { RefObject, useEffect } from 'react'
 
 /**
@@ -19,12 +18,12 @@ export function useFocusLoop({
 	lastRef: RefObject<HTMLElement | HTMLElement[]>
 	lastRefIndex?: number
 }) {
-	if (isArray(firstRef.current) && firstRefIndex === undefined) {
+	if (Array.isArray(firstRef.current) && firstRefIndex === undefined) {
 		throw new Error(
 			'firstRefIndex must be defined if firstRef is referencing an array of nodes!'
 		)
 	}
-	if (isArray(lastRef.current) && lastRefIndex === undefined) {
+	if (Array.isArray(lastRef.current) && lastRefIndex === undefined) {
 		throw new Error(
 			'lastRefIndex must be defined if lastRef is referencing an array of nodes!'
 		)

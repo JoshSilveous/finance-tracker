@@ -1,6 +1,5 @@
 import { MutableRefObject } from 'react'
 import { Change } from '../CategoryManager'
-import { evaluate } from 'mathjs'
 import { FetchedCategory, upsertCategories } from '@/database'
 
 export async function saveChanges(
