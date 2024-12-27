@@ -49,7 +49,7 @@ export function NewTransactionForm({
 	const [submitting, setSubmitting] = useState(false)
 	const [creationFinished, setCreationFinished] = useState(false)
 
-	useFocusLoop(firstFocusRef, lastFocusRef)
+	useFocusLoop({ firstRef: firstFocusRef, lastRef: lastFocusRef })
 
 	useEffect(() => {
 		firstFocusRef.current!.focus()

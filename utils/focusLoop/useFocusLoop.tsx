@@ -1,25 +1,52 @@
+import { isArray } from 'mathjs'
 import { RefObject, useEffect } from 'react'
 
 /**
  * Creates a focus loop that will restrict `tab` navigation between two nodes.
- * @param firstRef The `ref` that points to the first node in the loop
- * @param lastRef  The `ref` that points to the last node in the loop
+ * @param firstRef The `ref` that points to the first node in the loop, or an array of nodes
+ * @param firstRefIndex Required if `firstRef` points to an array of nodes instead of a single node
+ * @param lastRef  The `ref` that points to the last node in the loop, or an array of nodes
+ * @param lastRefIndex Required if `lastRef` points to an array of nodes instead of a single node
  */
-export function useFocusLoop(
-	firstRef: RefObject<HTMLElement>,
-	lastRef: RefObject<HTMLElement>
-) {
+export function useFocusLoop({
+	firstRef,
+	firstRefIndex,
+	lastRef,
+	lastRefIndex,
+}: {
+	firstRef: RefObject<HTMLElement | HTMLElement[]>
+	firstRefIndex?: number
+	lastRef: RefObject<HTMLElement | HTMLElement[]>
+	lastRefIndex?: number
+}) {
+	if (isArray(firstRef.current) && firstRefIndex === undefined) {
+		throw new Error(
+			'firstRefIndex must be defined if firstRef is referencing an array of nodes!'
+		)
+	}
+	if (isArray(lastRef.current) && lastRefIndex === undefined) {
+		throw new Error(
+			'lastRefIndex must be defined if lastRef is referencing an array of nodes!'
+		)
+	}
+	const firstNode = Array.isArray(firstRef.current)
+		? firstRef.current[firstRefIndex!]
+		: firstRef.current
+	const lastNode = Array.isArray(lastRef.current)
+		? lastRef.current[lastRefIndex!]
+		: lastRef.current
+
 	useEffect(() => {
-		if (firstRef.current !== null && lastRef.current !== null) {
-			firstRef.current.addEventListener('keydown', onFirstRefKeydown)
-			lastRef.current.addEventListener('keydown', onLastRefKeyboard)
+		if (firstNode && lastNode) {
+			firstNode.addEventListener('keydown', onFirstRefKeydown)
+			lastNode.addEventListener('keydown', onLastRefKeyboard)
 		}
 
 		function onFirstRefKeydown(e: KeyboardEvent) {
 			if (e.key === 'Tab' && e.shiftKey) {
 				e.preventDefault()
-				if (lastRef.current !== null) {
-					lastRef.current.focus()
+				if (lastNode) {
+					lastNode.focus()
 				}
 			}
 		}
@@ -27,17 +54,17 @@ export function useFocusLoop(
 		function onLastRefKeyboard(e: KeyboardEvent) {
 			if (e.key === 'Tab' && !e.shiftKey) {
 				e.preventDefault()
-				if (firstRef.current !== null) {
-					firstRef.current.focus()
+				if (firstNode) {
+					firstNode.focus()
 				}
 			}
 		}
 
 		return () => {
-			if (firstRef.current !== null && lastRef.current !== null) {
-				firstRef.current.removeEventListener('keydown', onFirstRefKeydown)
-				lastRef.current.removeEventListener('keydown', onLastRefKeyboard)
+			if (firstNode && lastNode) {
+				firstNode.removeEventListener('keydown', onFirstRefKeydown)
+				lastNode.removeEventListener('keydown', onLastRefKeyboard)
 			}
 		}
-	}, [firstRef.current, lastRef.current])
+	}, [firstNode, lastNode])
 }

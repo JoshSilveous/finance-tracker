@@ -315,7 +315,7 @@ export function TransactionManager() {
 						<div />
 					</div>
 				),
-				defaultWidth: 33,
+				defaultWidth: 50,
 				noResize: true,
 			},
 		]

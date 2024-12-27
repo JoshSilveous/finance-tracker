@@ -1,0 +1,111 @@
+.main {
+	--transition-time: 0.5s; // also defined in OptionsMenu.tsx, update there as well
+	--popout-padding: 7.5px;
+	--toggle-width: 26px;
+	--toggle-height: 26px;
+
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	position: relative;
+	width: var(--toggle-width);
+	height: var(--toggle-height);
+	.popout {
+		transition: height var(--transition-time) ease, width var(--transition-time) ease,
+			border-radius var(--transition-time) ease;
+		position: absolute;
+		width: var(--toggle-width);
+		height: var(--toggle-height);
+		top: 0;
+		right: 0;
+		z-index: 3;
+		background-color: var(--bg-color-lighter-1);
+		border-radius: 3px;
+		display: flex;
+		flex-direction: column;
+		outline: 0px solid var(--font-color);
+		overflow: hidden;
+		&:focus-within {
+			outline: 2px solid var(--font-color);
+		}
+		.top_container {
+			flex-shrink: 0;
+			width: var(--toggle-width);
+			height: var(--toggle-height);
+			display: flex;
+			justify-content: space-between;
+			width: 100%;
+			button {
+				flex-shrink: 0;
+				width: var(--toggle-width);
+				height: var(--toggle-height);
+				overflow: visible;
+				svg {
+					height: 15px;
+					width: 15px;
+					overflow: visible;
+				}
+				&:focus {
+					outline-color: transparent;
+				}
+			}
+			.title_container {
+				flex-shrink: 1;
+				overflow: hidden;
+				pointer-events: none;
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				.title {
+					margin-left: var(--popout-padding);
+				}
+			}
+		}
+		.options_container {
+			padding: calc(var(--popout-padding) / 2);
+			flex-shrink: 1;
+			width: 100%;
+			box-sizing: border-box;
+			align-self: flex-end;
+			overflow: hidden;
+
+			.option {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: var(--popout-padding);
+				width: 100%;
+				.icon_container {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+				.text_container {
+				}
+			}
+		}
+		&.revealed {
+			z-index: 4;
+			top: 0;
+			right: 0;
+			background-color: var(--bg-color-lighter-1);
+			border-radius: var(--border-radius);
+			outline: 2px solid var(--font-color);
+			.top_container {
+				button:focus {
+					outline: 2px solid var(--font-color);
+				}
+			}
+		}
+		&.transitioning {
+			z-index: 4;
+			outline: 2px solid var(--font-color);
+		}
+		&:not(.revealed, .transitioning) {
+			background-color: transparent;
+			.options_container {
+				display: none;
+			}
+		}
+	}
+}

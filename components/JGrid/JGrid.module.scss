@@ -32,7 +32,7 @@
 					&.sticky {
 						position: sticky;
 						top: 0;
-						z-index: 2;
+						z-index: 5;
 					}
 					user-select: none;
 					font-weight: 700;
@@ -48,7 +48,7 @@
 			}
 		}
 		.measurer {
-			z-index: 2;
+			z-index: 5;
 			grid-row: 1 / 2;
 			display: flex;
 			justify-content: flex-end;

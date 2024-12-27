@@ -3,12 +3,12 @@ import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
-import { default as OptionsIcon } from '@/public/options-vertical.svg'
 import s from './SingleRow.module.scss'
 import {
 	ChangeEventHandler,
 	FocusEventHandler,
 	forwardRef,
+	useEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -18,6 +18,7 @@ import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../../hooks/useHistory'
 import { PendingChanges } from '../../hooks/usePendingChanges'
 import { SortOrder } from '../../hooks'
+import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 
 export interface SingleRowProps {
 	transaction: FormTransaction
@@ -34,7 +35,6 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 	const item = p.transaction.items[0]
 	const undoDeleteRef = useRef<HTMLButtonElement>(null)
 	const dateSelectRef = useRef<HTMLInputElement>(null)
-	const [testOpen, setTestOpen] = useState(false)
 
 	const liveVals = useMemo(
 		() => genLiveVals(p.transaction, p.pendingChanges.curChanges),
@@ -287,22 +287,34 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div
 				className={`${s.cell_container} ${s.more_controls_container} ${
 					isPendingDeletion ? s.hidden : ''
-				} ${testOpen ? s.revealed : ''}`}
+				}`}
 				style={genGridStyle()}
 			>
-				<JButton jstyle='invisible' onClick={() => setTestOpen((prev) => !prev)}>
-					<OptionsIcon />
-				</JButton>
-				<div className={s.options}>
-					<div className={s.close_button_container}>
-						<JButton
-							jstyle='invisible'
-							onClick={() => setTestOpen((prev) => !prev)}
-						>
-							<OptionsIcon />
-						</JButton>
-					</div>
-				</div>
+				<OptionsMenu
+					width={150}
+					test_transaction_id={p.transaction.id}
+					className={s.more_controls}
+					options={[
+						{
+							text: 'Delete',
+							icon: <DeleteIcon />,
+							onClick: () => console.log('deleted!'),
+							className: s.delete,
+						},
+						{
+							text: 'Delete',
+							icon: <DeleteIcon />,
+							onClick: () => console.log('deleted!'),
+							className: s.delete,
+						},
+						{
+							text: 'Delete',
+							icon: <DeleteIcon />,
+							onClick: () => console.log('deleted!'),
+							className: s.delete,
+						},
+					]}
+				/>
 			</div>
 			<div className={`${s.delete_overlay} ${isPendingDeletion ? s.visible : ''}`}>
 				<div
