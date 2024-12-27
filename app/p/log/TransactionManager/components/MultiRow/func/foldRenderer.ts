@@ -31,7 +31,8 @@ export function foldRenderer(columnNodes: HTMLDivElement[]) {
 	}
 
 	function foldAnimated() {
-		const foldToggleNode = columnNodes[0].children[0].children[1]
+		const foldToggleNode = columnNodes[0].children[0].children[2]
+		console.log('foldToggleNode', foldToggleNode)
 		foldToggleNode.classList.add(s.folded)
 
 		// columnNodes[1] is arbitrary, any columnNode will do
@@ -63,7 +64,7 @@ export function foldRenderer(columnNodes: HTMLDivElement[]) {
 
 	function unfoldAnimated() {
 		// remove foldToggle class after a delay to make sure the arrow spins after re-rendering at different positions in the sort
-		const foldToggleNode = columnNodes[0].children[0].children[1]
+		const foldToggleNode = columnNodes[0].children[0].children[2]
 		foldToggleNode.classList.add(s.folded)
 		delay(10).then(() => {
 			foldToggleNode.classList.remove(s.folded)

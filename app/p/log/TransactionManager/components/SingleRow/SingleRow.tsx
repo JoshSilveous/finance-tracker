@@ -2,6 +2,7 @@ import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { default as ReorderIcon } from '@/public/reorder.svg'
+import { default as DeleteIcon } from '@/public/delete.svg'
 import s from './SingleRow.module.scss'
 import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } from 'react'
 import { FormTransaction } from '../../TransactionManager'
@@ -156,6 +157,20 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					isPendingDeletion ? s.hidden : ''
 				}`}
 			>
+				<div className={s.delete_container}>
+					<JButton
+						jstyle='invisible'
+						onClick={() => {
+							p.pendingChanges.addDeletion('transaction', p.transaction.id)
+							if (undoDeleteRef.current !== null) {
+								undoDeleteRef.current.focus()
+							}
+						}}
+						tabIndex={isPendingDeletion ? -1 : undefined}
+					>
+						<DeleteIcon />
+					</JButton>
+				</div>
 				<div
 					className={`${s.reorder_grabber} ${p.sortPosChanged ? s.changed : ''}`}
 					title={
@@ -171,20 +186,6 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						tabIndex={isPendingDeletion ? -1 : undefined}
 					>
 						<ReorderIcon />
-					</JButton>
-				</div>
-				<div className={s.delete_container}>
-					<JButton
-						jstyle='invisible'
-						onClick={() => {
-							p.pendingChanges.addDeletion('transaction', p.transaction.id)
-							if (undoDeleteRef.current !== null) {
-								undoDeleteRef.current.focus()
-							}
-						}}
-						tabIndex={isPendingDeletion ? -1 : undefined}
-					>
-						D
 					</JButton>
 				</div>
 			</div>
@@ -302,6 +303,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							}
 						}}
 						ref={undoDeleteRef}
+						tabIndex={isPendingDeletion ? undefined : -1}
 					>
 						Undo Delete
 					</JButton>

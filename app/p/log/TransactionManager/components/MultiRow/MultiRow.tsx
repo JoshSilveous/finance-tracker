@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
+import { default as DeleteIcon } from '@/public/delete.svg'
 import { FormTransaction } from '../../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
@@ -91,6 +92,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		})
 		return arr
 	}, [p.dropdownOptions.account, p.transaction])
+
+	const undoDeleteRef = useRef<HTMLButtonElement>(null)
+	const dateSelectRef = useRef<HTMLInputElement>(null)
+	const isPendingDeletion = p.pendingChanges.curDeletions.transactions.some(
+		(id) => id === p.transaction.id
+	)
 
 	// paint fold state / animation after dom renders
 	useEffect(() => {
@@ -266,7 +273,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 		return [
 			<div
-				className={s.cell_container}
+				className={`${s.cell_container} ${isPendingDeletion ? s.hidden : ''}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-1`}
 				ref={addToItemRowsRef(item.id)}
@@ -282,6 +289,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							item,
 							itemRowsRef
 						)}
+						tabIndex={isPendingDeletion ? -1 : undefined}
 					>
 						<ReorderIcon />
 					</JButton>
@@ -308,6 +316,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					data-item_id={item.id}
 					data-transaction_id={p.transaction.id}
 					data-key='name'
+					tabIndex={isPendingDeletion ? -1 : undefined}
 					{...eventHandlers}
 				/>
 			</div>,
@@ -324,6 +333,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					data-item_id={item.id}
 					data-transaction_id={p.transaction.id}
 					data-key='amount'
+					tabIndex={isPendingDeletion ? -1 : undefined}
 					{...eventHandlers}
 				/>
 			</div>,
@@ -345,6 +355,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					data-item_id={item.id}
 					data-transaction_id={p.transaction.id}
 					data-key='category_id'
+					tabIndex={isPendingDeletion ? -1 : undefined}
 					{...eventHandlers}
 				/>
 			</div>,
@@ -366,6 +377,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					data-item_id={item.id}
 					data-transaction_id={p.transaction.id}
 					data-key='account_id'
+					tabIndex={isPendingDeletion ? -1 : undefined}
 					{...eventHandlers}
 				/>
 			</div>,
@@ -373,7 +385,29 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	})
 
 	const firstRow = [
-		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-1`}>
+		<div
+			className={`${s.cell_container} ${s.first_row} ${
+				isPendingDeletion ? s.hidden : ''
+			}`}
+			key={`${p.transaction.id}-1`}
+		>
+			<div className={s.delete_container}>
+				<JButton
+					jstyle='invisible'
+					onClick={() => {
+						p.pendingChanges.addDeletion('transaction', p.transaction.id)
+						if (undoDeleteRef.current !== null) {
+							undoDeleteRef.current.focus()
+						}
+						if (!p.folded) {
+							p.updateFoldState(p.transaction.id, true)
+						}
+					}}
+					tabIndex={isPendingDeletion ? -1 : undefined}
+				>
+					<DeleteIcon />
+				</JButton>
+			</div>
 			<div
 				className={`${s.reorder_grabber} ${
 					p.transactionSortPosChanged ? s.changed : ''
@@ -388,6 +422,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					jstyle='invisible'
 					disabled={p.disableTransactionResort}
 					ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
+					tabIndex={isPendingDeletion ? -1 : undefined}
 				>
 					<ReorderIcon />
 				</JButton>
@@ -397,7 +432,9 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				onClick={() => p.updateFoldState(p.transaction.id)}
 				title={p.folded ? 'Click to reveal items' : 'Click to hide items'}
 			>
-				<FoldArrow />
+				<JButton jstyle='invisible' tabIndex={isPendingDeletion ? -1 : undefined}>
+					<FoldArrow />
+				</JButton>
 			</div>
 		</div>,
 		<div
@@ -410,6 +447,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				value={liveVals.date.val}
 				data-transaction_id={p.transaction.id}
 				data-key='date'
+				ref={dateSelectRef}
+				tabIndex={isPendingDeletion ? -1 : undefined}
 				{...eventHandlers}
 			/>
 		</div>,
@@ -423,6 +462,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				value={liveVals.name.val}
 				data-transaction_id={p.transaction.id}
 				data-key='name'
+				tabIndex={isPendingDeletion ? -1 : undefined}
 				{...eventHandlers}
 			/>
 		</div>,
@@ -445,12 +485,22 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		s.category,
 		s.account,
 	]
+
+	let columnCount = 0
+	const genGridStyle = () => {
+		columnCount++
+		return {
+			gridRow: `${p.gridRow} / ${p.gridRow + 1}`,
+			gridColumn: `${columnCount} / ${columnCount + 1}`,
+		} as React.CSSProperties
+	}
 	const columns = firstRow.map((rowItem, rowItemIndex) => {
 		return (
 			<div
 				className={`${s.column} ${uniqueColumnClassNames[rowItemIndex]} ${
 					p.folded && !p.playAnimation ? s.folded : ''
 				}`}
+				style={genGridStyle()}
 				ref={addToColumnNodesRef}
 			>
 				{rowItem} {itemRows.map((itemRow) => itemRow[rowItemIndex])}
@@ -465,6 +515,41 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			ref={forwardedRef}
 		>
 			{columns}
+
+			<div className={`${s.delete_overlay} ${isPendingDeletion ? s.visible : ''}`}>
+				<div
+					className={s.blur}
+					style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
+				/>
+				<div
+					className={s.color_overlay}
+					style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
+				/>
+				<div
+					className={s.text}
+					style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
+				>
+					"{p.transaction.name}" will be deleted when you save changes.
+				</div>
+				<div
+					className={s.button_container}
+					style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
+				>
+					<JButton
+						jstyle='invisible'
+						onClick={() => {
+							p.pendingChanges.removeDeletion('transaction', p.transaction.id)
+							if (dateSelectRef.current !== null) {
+								dateSelectRef.current.focus()
+							}
+						}}
+						ref={undoDeleteRef}
+						tabIndex={isPendingDeletion ? undefined : -1}
+					>
+						Undo Delete
+					</JButton>
+				</div>
+			</div>
 		</div>
 	)
 })

@@ -256,7 +256,7 @@ export function TransactionManager() {
 						</JButton>
 					</div>
 				),
-				defaultWidth: 75,
+				defaultWidth: 100,
 				noResize: true,
 			},
 			{
@@ -326,6 +326,7 @@ export function TransactionManager() {
 						dropdownOptions={dropdownOptions}
 						refreshData={refreshData}
 						gridRow={gridRow}
+						key={`${groupedItem.date}-${groupedItemIndex}`}
 					/>
 				)
 				gridRow++
@@ -350,6 +351,7 @@ export function TransactionManager() {
 							<SingleRow
 								{...props}
 								ref={setTransactionRowRef(transaction.id)}
+								key={`${groupedItemIndex}-${transaction.id}-${transactionIndex}`}
 							/>
 						)
 					} else {
@@ -381,6 +383,7 @@ export function TransactionManager() {
 							<MultiRow
 								{...props}
 								ref={setTransactionRowRef(transaction.id)}
+								key={`${groupedItemIndex}-${transaction.id}-${transactionIndex}`}
 							/>
 						)
 					}

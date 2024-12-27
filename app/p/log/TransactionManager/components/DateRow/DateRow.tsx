@@ -45,8 +45,9 @@ export function DateRow({ date, dropdownOptions, refreshData, gridRow }: DateRow
 	}
 
 	return (
-		<div className={s.main} style={{ gridRow: `${gridRow} / ${gridRow + 1}` }}>
-			<div className={s.content}>
+		<div className={s.main}>
+			<div className={s.empty} style={{ gridRow: `${gridRow} / ${gridRow + 1}` }} />
+			<div className={s.content} style={{ gridRow: `${gridRow} / ${gridRow + 1}` }}>
 				<div className={s.date_container}>
 					<div className={s.weekday}>{day.long}</div>
 					<div className={s.month}>{month.short}</div>
