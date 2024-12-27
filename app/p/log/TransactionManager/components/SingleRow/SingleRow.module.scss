@@ -27,16 +27,32 @@
 			border-radius: 0 var(--border-radius) var(--border-radius) 0;
 		}
 
-		&.row_controller {
+		&.row_controller,
+		&.more_controls_container {
 			min-height: 35px;
 			display: flex;
 			align-items: center;
 			justify-content: flex-end;
 			user-select: none;
 			width: 100%;
-			padding: 0 10px;
 			background-color: transparent;
+		}
+		&.more_controls_container {
+			width: fit-content;
+			margin-left: calc(var(--padding-val) * 2);
+			button {
+				padding: 0 calc(var(--padding-val) * 4);
+				width: fit-content;
+				overflow: visible;
+				svg {
+					height: 15px;
+					overflow: visible;
+				}
+			}
+		}
 
+		&.row_controller {
+			padding: 0 10px;
 			.reorder_grabber,
 			.delete_container {
 				display: flex;
@@ -148,7 +164,7 @@
 			width: 100%;
 		}
 	}
-	.cell_container.row_controller {
+	.cell_container {
 		opacity: 100%;
 		transition: opacity var(--delete-overlay-transition-time) ease;
 		&.hidden {

@@ -11,6 +11,7 @@ import {
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
+import { default as OptionsIcon } from '@/public/options-vertical.svg'
 import { FormTransaction } from '../../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
@@ -381,6 +382,16 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					{...eventHandlers}
 				/>
 			</div>,
+			<div
+				className={`${s.cell_container} ${s.more_controls_container} ${
+					isPendingDeletion ? s.hidden : ''
+				}`}
+				key={`${p.transaction.id}-${item.id}-8`}
+			>
+				<JButton jstyle='invisible'>
+					<OptionsIcon />
+				</JButton>
+			</div>,
 		]
 	})
 
@@ -475,6 +486,15 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-6`}>
 			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
 		</div>,
+		<div
+			className={`${s.cell_container} ${s.more_controls_container} ${
+				isPendingDeletion ? s.hidden : ''
+			}`}
+		>
+			<JButton jstyle='invisible'>
+				<OptionsIcon />
+			</JButton>
+		</div>,
 	]
 
 	const uniqueColumnClassNames = [
@@ -484,6 +504,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		s.amount,
 		s.category,
 		s.account,
+		s.more_controls,
 	]
 
 	let columnCount = 0

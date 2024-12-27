@@ -3,6 +3,7 @@ import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
+import { default as OptionsIcon } from '@/public/options-vertical.svg'
 import s from './SingleRow.module.scss'
 import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } from 'react'
 import { FormTransaction } from '../../TransactionManager'
@@ -274,6 +275,16 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : undefined}
 				/>
+			</div>
+			<div
+				className={`${s.cell_container} ${s.more_controls_container} ${
+					isPendingDeletion ? s.hidden : ''
+				}`}
+				style={genGridStyle()}
+			>
+				<JButton jstyle='invisible'>
+					<OptionsIcon />
+				</JButton>
 			</div>
 			<div className={`${s.delete_overlay} ${isPendingDeletion ? s.visible : ''}`}>
 				<div

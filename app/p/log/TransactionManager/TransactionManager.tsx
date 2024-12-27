@@ -309,6 +309,15 @@ export function TransactionManager() {
 				minWidth: 110,
 				maxWidth: 200,
 			},
+			{
+				content: (
+					<div className={`${s.header_container} ${s.more_controls}`}>
+						<div />
+					</div>
+				),
+				defaultWidth: 33,
+				noResize: true,
+			},
 		]
 	}, [historyController.undoDisabled, historyController.redoDisabled])
 
