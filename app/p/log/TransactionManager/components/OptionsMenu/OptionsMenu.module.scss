@@ -23,6 +23,7 @@
 		border-radius: 3px;
 		display: flex;
 		flex-direction: column;
+		justify-content: space-between;
 		outline: 0px solid var(--font-color);
 		overflow: hidden;
 		&:focus-within {
@@ -99,7 +100,6 @@
 		}
 		&.transitioning {
 			z-index: 4;
-			outline: 2px solid var(--font-color);
 		}
 		&:not(.revealed, .transitioning) {
 			background-color: transparent;

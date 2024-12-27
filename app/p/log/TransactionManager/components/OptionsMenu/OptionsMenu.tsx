@@ -8,24 +8,26 @@ import { useFocusLoop } from '@/utils/focusLoop/useFocusLoop'
 export type Option = {
 	text: string
 	icon?: any
-	onClick: () => any
+	onClick: (e: React.MouseEvent<HTMLButtonElement>) => any
 	className?: string
 }
 
 interface OptionsMenuProps extends HTMLAttributes<HTMLDivElement> {
 	test_transaction_id: string
 	width: number
+	height: number
 	options: Option[]
 }
 export function OptionsMenu({
 	width,
+	height,
 	test_transaction_id,
 	options,
 	className,
+	tabIndex,
 	...rest
 }: OptionsMenuProps) {
 	const [optionsIsOpen, setOptionsIsOpen] = useState(false)
-	const [openedHeight, setOpenedHeight] = useState(0)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const togglerRef = useRef<HTMLButtonElement>(null)
 	const optionsRef = useRef<HTMLButtonElement[]>([])
@@ -47,7 +49,7 @@ export function OptionsMenu({
 		if (optionsIsOpen) {
 			optionsRef.current[0].focus()
 
-			containerRef.current!.style.height = openedHeight + 'px'
+			containerRef.current!.style.height = height + 'px'
 			containerRef.current!.style.width = width + 'px'
 
 			// close moreControlsRef when opened and user clicks outside
@@ -74,25 +76,15 @@ export function OptionsMenu({
 		})
 	}, [optionsIsOpen])
 
-	useEffect(() => {
-		// calc opened height
-		let height = 33.5
-
-		optionsRef.current.forEach((node, index) => {
-			height += node.offsetHeight
-		})
-
-		setOpenedHeight(height)
-	}, [options.length])
-
 	const optionsDisplay = options.map((option, index) => {
 		return (
 			<JButton
 				jstyle='invisible'
 				className={`${s.option} ${option.className ? option.className : ''}`}
-				onClick={() => {
+				onClick={(e) => {
 					setOptionsIsOpen(false)
-					option.onClick()
+					togglerRef.current?.focus()
+					option.onClick(e)
 				}}
 				key={index}
 				ref={addToOptionsRef(index)}
@@ -115,6 +107,7 @@ export function OptionsMenu({
 					</div>
 					<JButton
 						jstyle='invisible'
+						tabIndex={tabIndex}
 						ref={togglerRef}
 						onClick={() => setOptionsIsOpen((prev) => !prev)}
 					>

@@ -3,6 +3,7 @@ import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
+import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import s from './SingleRow.module.scss'
 import {
 	ChangeEventHandler,
@@ -292,26 +293,27 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			>
 				<OptionsMenu
 					width={150}
-					test_transaction_id={p.transaction.id}
+					height={140}
+					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
+					tabIndex={isPendingDeletion ? -1 : undefined}
 					options={[
 						{
 							text: 'Delete',
 							icon: <DeleteIcon />,
-							onClick: () => console.log('deleted!'),
+							onClick: () => {
+								p.pendingChanges.addDeletion('transaction', p.transaction.id)
+								if (undoDeleteRef.current !== null) {
+									undoDeleteRef.current.focus()
+								}
+							},
 							className: s.delete,
 						},
 						{
-							text: 'Delete',
-							icon: <DeleteIcon />,
-							onClick: () => console.log('deleted!'),
-							className: s.delete,
-						},
-						{
-							text: 'Delete',
-							icon: <DeleteIcon />,
-							onClick: () => console.log('deleted!'),
-							className: s.delete,
+							text: 'Add Item',
+							icon: <InsertRowIcon />,
+							onClick: () => console.log('adding item'),
+							className: s.add_item,
 						},
 					]}
 				/>
