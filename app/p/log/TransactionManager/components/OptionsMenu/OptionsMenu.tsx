@@ -43,37 +43,41 @@ export function OptionsMenu({
 		lastRefIndex: optionsRef.current.length - 1,
 	})
 
-	const TRANSITION_TIME_S = 0.5 // also defined in OptionsMenu.module.scss, update there as well
+	const TRANSITION_TIME_S = 0.3 // also defined in OptionsMenu.module.scss, update there as well
 
 	useEffect(() => {
-		if (optionsIsOpen) {
-			optionsRef.current[0].focus()
+		if (containerRef.current) {
+			if (optionsIsOpen) {
+				optionsRef.current[0].focus()
 
-			containerRef.current!.style.height = height + 'px'
-			containerRef.current!.style.width = width + 'px'
+				containerRef.current.style.height = height + 'px'
+				containerRef.current.style.width = width + 'px'
 
-			// close moreControlsRef when opened and user clicks outside
-			const handleWindowClick = (e: MouseEvent) => {
-				const target = e.target as Node | null
-				if (
-					containerRef.current &&
-					target &&
-					!containerRef.current.contains(target)
-				) {
-					setOptionsIsOpen(false)
-					window.removeEventListener('mousedown', handleWindowClick)
+				// close moreControlsRef when opened and user clicks outside
+				const handleWindowClick = (e: MouseEvent) => {
+					const target = e.target as Node | null
+					if (
+						containerRef.current &&
+						target &&
+						!containerRef.current.contains(target)
+					) {
+						setOptionsIsOpen(false)
+						window.removeEventListener('mousedown', handleWindowClick)
+					}
 				}
+				window.addEventListener('mousedown', handleWindowClick)
+			} else {
+				containerRef.current.style.height = ''
+				containerRef.current.style.width = ''
 			}
-			window.addEventListener('mousedown', handleWindowClick)
-		} else {
-			containerRef.current!.style.height = ''
-			containerRef.current!.style.width = ''
-		}
 
-		containerRef.current!.classList.add(s.transitioning)
-		delay(TRANSITION_TIME_S * 1000).then(() => {
-			containerRef.current!.classList.remove(s.transitioning)
-		})
+			containerRef.current.classList.add(s.transitioning)
+			delay(TRANSITION_TIME_S * 1000).then(() => {
+				if (containerRef.current) {
+					containerRef.current.classList.remove(s.transitioning)
+				}
+			})
+		}
 	}, [optionsIsOpen])
 
 	const optionsDisplay = options.map((option, index) => {

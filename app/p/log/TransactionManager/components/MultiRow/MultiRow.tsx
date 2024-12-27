@@ -1,27 +1,20 @@
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import {
-	useMemo,
-	useRef,
-	forwardRef,
-	useEffect,
-	useCallback,
-	ChangeEventHandler,
-	FocusEventHandler,
-} from 'react'
+import { useMemo, useRef, forwardRef, useEffect, useCallback } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
-import { default as OptionsIcon } from '@/public/options-vertical.svg'
 import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import { FormTransaction } from '../../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { genLiveVals, LiveVals } from './genLiveVals'
+import { genLiveVals } from './func/genLiveVals'
 import { PendingChanges } from '../../hooks/usePendingChanges'
 import { SortOrder, FoldStateUpdater, HistoryController } from '../../hooks'
 import { foldRenderer } from './func/foldRenderer'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
+import { genEventHandlers } from './func/genEventHandlers'
+import { genUniqueLists } from './func/genUniqueLists'
 
 export interface MultiRowProps {
 	transaction: FormTransaction
@@ -73,37 +66,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		[p.transaction, p.pendingChanges.curChanges]
 	)
 
-	const uniqueCategories = (() => {
-		const arr: string[] = []
-		Object.values(liveVals.items).forEach((item) => {
-			if (item.category_id.val !== null) {
-				const categoryName = p.dropdownOptions.category.find(
-					(cat) => cat.value === item.category_id.val
-				)!.name
-				if (
-					arr.findIndex((item) => item === categoryName) === -1 &&
-					categoryName !== ''
-				) {
-					arr.push(categoryName)
-				}
-			}
-		})
-		return arr
-	})()
-	const uniqueAccounts = (() => {
-		const arr: string[] = []
-		Object.values(liveVals.items).forEach((item) => {
-			if (item.account_id.val !== null) {
-				const accountName = p.dropdownOptions.account.find(
-					(act) => act.value === item.account_id.val
-				)!.name
-				if (arr.findIndex((item) => item === accountName) === -1) {
-					arr.push(accountName)
-				}
-			}
-		})
-		return arr
-	})()
+	const uniqueLists = genUniqueLists(p, liveVals)
 
 	const undoDeleteRef = useRef<HTMLButtonElement>(null)
 	const dateSelectRef = useRef<HTMLInputElement>(null)
@@ -130,140 +93,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		return render.cancel
 	}, [p.folded, p.playAnimation])
 
-	const eventHandlers = useMemo(() => {
-		return {
-			onChange: ((e) => {
-				const key = e.target.dataset.key as
-					| keyof LiveVals
-					| keyof LiveVals['items'][number]
-				const item_id = e.target.dataset.item_id
-				const newVal = e.target.value
-
-				p.historyController.clearRedo()
-
-				// update pendingChanges
-				if (item_id === undefined) {
-					if (key === 'date' || key === 'name') {
-						const origVal = p.transaction[key]
-						if (origVal !== newVal) {
-							p.pendingChanges.updateChange(
-								'transactions',
-								p.transaction.id,
-								key,
-								newVal
-							)
-						} else {
-							p.pendingChanges.updateChange(
-								'transactions',
-								p.transaction.id,
-								key
-							)
-						}
-					} else {
-					}
-				} else {
-					if (
-						key === 'name' ||
-						key === 'amount' ||
-						key === 'category_id' ||
-						key === 'account_id'
-					) {
-						const origVal = p.transaction.items.find(
-							(item) => item.id === item_id
-						)![key]
-						if (origVal !== newVal) {
-							p.pendingChanges.updateChange('items', item_id, key, newVal)
-						} else {
-							p.pendingChanges.updateChange('items', item_id, key)
-						}
-					} else {
-					}
-				}
-
-				// update history
-				const oldVal = e.target.dataset.value_on_focus
-				if (oldVal !== undefined && newVal !== oldVal) {
-					if (key === 'date') {
-						p.historyController.upsert({
-							type: 'transaction_value_change',
-							transaction_id: p.transaction.id,
-							key,
-							oldVal,
-							newVal,
-						})
-					} else if (key === 'name' && item_id === undefined) {
-						p.historyController.upsert({
-							type: 'transaction_value_change',
-							transaction_id: p.transaction.id,
-							key,
-							oldVal,
-							newVal,
-						})
-					} else if (
-						(key === 'name' ||
-							key === 'amount' ||
-							key === 'category_id' ||
-							key === 'account_id') &&
-						item_id !== undefined
-					) {
-						p.historyController.upsert({
-							type: 'item_value_change',
-							transaction_id: p.transaction.id,
-							item_id: item_id,
-							key,
-							oldVal,
-							newVal,
-						})
-					}
-				}
-			}) as ChangeEventHandler<HTMLInputElement | HTMLSelectElement>,
-			onBlur: ((e) => {
-				const key = e.target.dataset.key as
-					| keyof LiveVals
-					| keyof LiveVals['items'][number]
-				const item_id = e.target.dataset.item_id
-				const newVal = e.target.value
-				const oldVal = e.target.dataset.value_on_focus
-				if (oldVal !== undefined && newVal !== oldVal) {
-					if (key === 'date') {
-						p.historyController.upsert({
-							type: 'transaction_value_change',
-							transaction_id: p.transaction.id,
-							key,
-							oldVal,
-							newVal,
-						})
-					} else if (key === 'name' && item_id === undefined) {
-						p.historyController.upsert({
-							type: 'transaction_value_change',
-							transaction_id: p.transaction.id,
-							key,
-							oldVal,
-							newVal,
-						})
-					} else if (
-						(key === 'name' ||
-							key === 'amount' ||
-							key === 'category_id' ||
-							key === 'account_id') &&
-						item_id !== undefined
-					) {
-						p.historyController.upsert({
-							type: 'item_value_change',
-							transaction_id: p.transaction.id,
-							item_id: item_id,
-							key,
-							oldVal,
-							newVal,
-						})
-					}
-				}
-			}) as FocusEventHandler<HTMLInputElement | HTMLSelectElement>,
-			onFocus: ((e) => {
-				e.target.dataset.value_on_focus = e.target.value
-			}) as FocusEventHandler<HTMLInputElement | HTMLSelectElement>,
-		}
-	}, [p.transaction])
+	const eventHandlers = genEventHandlers(p)
 
 	let sum = 0
 	const itemRows = p.transaction.items.map((item, itemIndex) => {
@@ -509,10 +339,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			<JNumberAccounting value={sum} disabled minimalStyle />
 		</div>,
 		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-5`}>
-			<JInput value={uniqueCategories.join(', ')} disabled minimalStyle />
+			<JInput value={uniqueLists.categories} disabled minimalStyle />
 		</div>,
 		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-6`}>
-			<JInput value={uniqueAccounts.join(', ')} disabled minimalStyle />
+			<JInput value={uniqueLists.accounts} disabled minimalStyle />
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row} ${s.more_controls_container} ${

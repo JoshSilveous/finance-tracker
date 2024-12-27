@@ -1,5 +1,5 @@
 .main {
-	--transition-time: 0.5s; // also defined in OptionsMenu.tsx, update there as well
+	--transition-time: 0.3s; // also defined in OptionsMenu.tsx, update there as well
 	--popout-padding: 7.5px;
 	--toggle-width: 26px;
 	--toggle-height: 26px;
@@ -81,8 +81,6 @@
 					display: flex;
 					align-items: center;
 					justify-content: center;
-				}
-				.text_container {
 				}
 			}
 		}
