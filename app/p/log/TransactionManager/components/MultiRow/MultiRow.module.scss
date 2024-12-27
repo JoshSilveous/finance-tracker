@@ -43,7 +43,6 @@
 		&.control,
 		&.more_controls {
 			padding: var(--padding-val) 0;
-			overflow: hidden;
 			.cell_container {
 				min-height: 36px;
 				display: flex;
@@ -58,24 +57,25 @@
 				}
 
 				&.more_controls_container {
-					width: 100%;
+					min-height: 36px;
 					display: flex;
-					height: 100%;
 					align-items: center;
 					justify-content: flex-end;
 					user-select: none;
 					width: 100%;
 					background-color: transparent;
-					width: fit-content;
+					width: 100%;
 					margin-left: var(--padding-val);
-					padding: 0 calc(var(--padding-val) / 2);
-					button {
-						padding: 0 calc(var(--padding-val) * 2);
-						width: fit-content;
-						overflow: visible;
-						svg {
-							height: 15px;
-							overflow: visible;
+					justify-content: flex-start;
+					padding: var(--padding-val) calc(var(--padding-val) / 2);
+
+					.more_controls {
+						.delete,
+						.add_item {
+							svg {
+								height: 20px;
+								width: 20px;
+							}
 						}
 					}
 				}
@@ -198,7 +198,7 @@
 		}
 
 		/* FOLDING / UNFOLDING EFFECT STYLES */
-		overflow-y: hidden;
+		// overflow-y: hidden; moving this to foldRenderer.ts, since having this on 24/7 prevents the options menu from overlapping the content
 		--fold-animation-time: 0.5s; // set in createFoldToggleHandler.ts as well
 		&.folded {
 			.cell_container:not(.first_row) {
@@ -232,14 +232,14 @@
 			margin-bottom: inherit;
 		}
 		.blur {
-			grid-column: 2 / -1;
+			grid-column: 2 / -2;
 			z-index: 1;
 			border-radius: var(--border-radius);
 			transition: backdrop-filter var(--delete-overlay-transition-time) ease;
 			backdrop-filter: blur(2px);
 		}
 		.color_overlay {
-			grid-column: 2 / -1;
+			grid-column: 2 / -2;
 			z-index: 1;
 			border-radius: var(--border-radius);
 			transition: opacity var(--delete-overlay-transition-time) ease;

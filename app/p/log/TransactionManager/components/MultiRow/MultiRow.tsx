@@ -12,6 +12,7 @@ import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
 import { default as OptionsIcon } from '@/public/options-vertical.svg'
+import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import { FormTransaction } from '../../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
@@ -20,6 +21,7 @@ import { genLiveVals, LiveVals } from './genLiveVals'
 import { PendingChanges } from '../../hooks/usePendingChanges'
 import { SortOrder, FoldStateUpdater, HistoryController } from '../../hooks'
 import { foldRenderer } from './func/foldRenderer'
+import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 
 export interface MultiRowProps {
 	transaction: FormTransaction
@@ -65,26 +67,35 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	)
 	itemRowsRef.current = [] // wipe refs every re-render
 
-	const uniqueCategories = useMemo(() => {
+	// re-calculates the displayed value (from default transaction or pendingChange)
+	const liveVals = useMemo(
+		() => genLiveVals(p.transaction, p.pendingChanges.curChanges),
+		[p.transaction, p.pendingChanges.curChanges]
+	)
+
+	const uniqueCategories = (() => {
 		const arr: string[] = []
-		p.transaction.items.forEach((item) => {
-			if (item.category_id !== null) {
+		Object.values(liveVals.items).forEach((item) => {
+			if (item.category_id.val !== null) {
 				const categoryName = p.dropdownOptions.category.find(
-					(cat) => cat.value === item.category_id
+					(cat) => cat.value === item.category_id.val
 				)!.name
-				if (arr.findIndex((item) => item === categoryName) === -1) {
+				if (
+					arr.findIndex((item) => item === categoryName) === -1 &&
+					categoryName !== ''
+				) {
 					arr.push(categoryName)
 				}
 			}
 		})
 		return arr
-	}, [p.dropdownOptions.category, p.transaction])
-	const uniqueAccounts = useMemo(() => {
+	})()
+	const uniqueAccounts = (() => {
 		const arr: string[] = []
-		p.transaction.items.forEach((item) => {
-			if (item.account_id !== null) {
+		Object.values(liveVals.items).forEach((item) => {
+			if (item.account_id.val !== null) {
 				const accountName = p.dropdownOptions.account.find(
-					(act) => act.value === item.account_id
+					(act) => act.value === item.account_id.val
 				)!.name
 				if (arr.findIndex((item) => item === accountName) === -1) {
 					arr.push(accountName)
@@ -92,7 +103,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			}
 		})
 		return arr
-	}, [p.dropdownOptions.account, p.transaction])
+	})()
 
 	const undoDeleteRef = useRef<HTMLButtonElement>(null)
 	const dateSelectRef = useRef<HTMLInputElement>(null)
@@ -118,12 +129,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		// runs when this component unmounts to prevent animation bugs (e.x. when a multi-row is reordered)
 		return render.cancel
 	}, [p.folded, p.playAnimation])
-
-	// re-calculates the displayed value (from default transaction or pendingChange)
-	const liveVals = useMemo(
-		() => genLiveVals(p.transaction, p.pendingChanges.curChanges),
-		[p.transaction, p.pendingChanges.curChanges]
-	)
 
 	const eventHandlers = useMemo(() => {
 		return {
@@ -388,9 +393,32 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				}`}
 				key={`${p.transaction.id}-${item.id}-8`}
 			>
-				<JButton jstyle='invisible'>
-					<OptionsIcon />
-				</JButton>
+				<OptionsMenu
+					width={150}
+					height={140}
+					test_transaction_id={p.transaction.name}
+					className={s.more_controls}
+					tabIndex={isPendingDeletion ? -1 : undefined}
+					options={[
+						{
+							text: 'Delete',
+							icon: <DeleteIcon />,
+							onClick: () => {
+								p.pendingChanges.addDeletion('transaction', p.transaction.id)
+								if (undoDeleteRef.current !== null) {
+									undoDeleteRef.current.focus()
+								}
+							},
+							className: s.delete,
+						},
+						{
+							text: 'Add Item',
+							icon: <InsertRowIcon />,
+							onClick: () => console.log('adding item'),
+							className: s.add_item,
+						},
+					]}
+				/>
 			</div>,
 		]
 	})
@@ -490,11 +518,36 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			className={`${s.cell_container} ${s.first_row} ${s.more_controls_container} ${
 				isPendingDeletion ? s.hidden : ''
 			}`}
-			key={`${p.transaction.id}-7`}
 		>
-			<JButton jstyle='invisible'>
-				<OptionsIcon />
-			</JButton>
+			<OptionsMenu
+				width={150}
+				height={140}
+				test_transaction_id={p.transaction.name}
+				className={s.more_controls}
+				tabIndex={isPendingDeletion ? -1 : undefined}
+				options={[
+					{
+						text: 'Delete',
+						icon: <DeleteIcon />,
+						onClick: () => {
+							p.pendingChanges.addDeletion('transaction', p.transaction.id)
+							if (undoDeleteRef.current !== null) {
+								undoDeleteRef.current.focus()
+							}
+							if (!p.folded) {
+								p.updateFoldState(p.transaction.id, true)
+							}
+						},
+						className: s.delete,
+					},
+					{
+						text: 'Add Item',
+						icon: <InsertRowIcon />,
+						onClick: () => console.log('adding item'),
+						className: s.add_item,
+					},
+				]}
+			/>
 		</div>,
 	]
 

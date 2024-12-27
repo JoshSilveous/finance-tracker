@@ -3,6 +3,7 @@
 	--popout-padding: 7.5px;
 	--toggle-width: 26px;
 	--toggle-height: 26px;
+	--padding-val: 2.5px;
 
 	display: flex;
 	align-items: center;
@@ -85,8 +86,11 @@
 				}
 			}
 		}
-		&.revealed {
+		&.transitioning {
 			z-index: 4;
+		}
+		&.revealed {
+			z-index: 5;
 			top: 0;
 			right: 0;
 			background-color: var(--bg-color-lighter-1);
@@ -97,9 +101,6 @@
 					outline: 2px solid var(--font-color);
 				}
 			}
-		}
-		&.transitioning {
-			z-index: 4;
 		}
 		&:not(.revealed, .transitioning) {
 			background-color: transparent;
