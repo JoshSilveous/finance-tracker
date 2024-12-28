@@ -18,7 +18,7 @@ import { FormTransaction } from '../../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../../hooks/useHistory'
 import { PendingChanges } from '../../hooks/usePendingChanges'
-import { SortOrder } from '../../hooks'
+import { SortOrder, TabIndexer } from '../../hooks'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 
 export interface SingleRowProps {
@@ -31,6 +31,7 @@ export interface SingleRowProps {
 	historyController: HistoryController
 	sortOrder: SortOrder.Controller
 	gridRow: number
+	tabIndexer: TabIndexer
 }
 export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwardedRef) => {
 	const item = p.transaction.items[0]
@@ -176,7 +177,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 								undoDeleteRef.current.focus()
 							}
 						}}
-						tabIndex={isPendingDeletion ? -1 : undefined}
+						tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 					>
 						<DeleteIcon />
 					</JButton>
@@ -193,7 +194,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						jstyle='invisible'
 						disabled={p.disableTransactionResort}
 						ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
-						tabIndex={isPendingDeletion ? -1 : undefined}
+						tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 					>
 						<ReorderIcon />
 					</JButton>
@@ -210,7 +211,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-transaction_id={p.transaction.id}
 					data-key='date'
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : undefined}
+					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 					ref={dateSelectRef}
 				/>
 			</div>
@@ -225,7 +226,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-transaction_id={p.transaction.id}
 					data-key='name'
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : undefined}
+					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 				/>
 			</div>
 			<div
@@ -242,7 +243,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					maxDigLeftOfDecimal={8}
 					maxDigRightOfDecimal={2}
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : undefined}
+					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 				/>
 			</div>
 			<div
@@ -262,7 +263,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-item_id={p.transaction.items[0].id}
 					data-key='category_id'
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : undefined}
+					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 				/>
 			</div>
 			<div
@@ -282,7 +283,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-item_id={p.transaction.items[0].id}
 					data-key='account_id'
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : undefined}
+					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 				/>
 			</div>
 			<div
@@ -296,7 +297,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					height={140}
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
-					tabIndex={isPendingDeletion ? -1 : undefined}
+					tabIndex={p.tabIndexer()}
 					options={[
 						{
 							text: 'Delete',
@@ -352,7 +353,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							}
 						}}
 						ref={undoDeleteRef}
-						tabIndex={isPendingDeletion ? undefined : -1}
+						tabIndex={isPendingDeletion ? p.tabIndexer() : -1}
 					>
 						Undo Delete
 					</JButton>

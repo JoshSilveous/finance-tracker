@@ -30,6 +30,7 @@ import {
 	useFoldState,
 	usePendingChanges,
 	useSortOrder,
+	useTabIndexer,
 } from './hooks'
 import { NewTransactionForm } from './components/DateRow/NewTransactionForm/NewTransactionForm'
 
@@ -72,6 +73,8 @@ export function TransactionManager() {
 			removeIsolatedKeyListeners([undoListener, redoListener])
 		}
 	}, [])
+
+	const tabIndexer = useTabIndexer(0)
 
 	const foldState = useFoldState()
 	const sortOrder = useSortOrder({
@@ -336,6 +339,7 @@ export function TransactionManager() {
 						refreshData={refreshData}
 						gridRow={gridRow}
 						key={`${groupedItem.date}-${groupedItemIndex}`}
+						tabIndexer={tabIndexer}
 					/>
 				)
 				gridRow++
@@ -355,6 +359,7 @@ export function TransactionManager() {
 							historyController,
 							sortOrder,
 							gridRow,
+							tabIndexer,
 						}
 						cells.push(
 							<SingleRow
@@ -386,6 +391,7 @@ export function TransactionManager() {
 							historyController,
 							sortOrder,
 							gridRow,
+							tabIndexer,
 						}
 
 						cells.push(

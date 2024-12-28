@@ -6,8 +6,11 @@ import { RefObject, useEffect } from 'react'
  * @param firstRefIndex Required if `firstRef` points to an array of nodes instead of a single node
  * @param lastRef  The `ref` that points to the last node in the loop, or an array of nodes
  * @param lastRefIndex Required if `lastRef` points to an array of nodes instead of a single node
+ *
+ *
+ * @returns a cleanup function that should be ran when firstRef or lastRef changes.
  */
-export function useFocusLoop({
+export function createFocusLoop({
 	firstRef,
 	firstRefIndex,
 	lastRef,
@@ -35,35 +38,37 @@ export function useFocusLoop({
 		? lastRef.current[lastRefIndex!]
 		: lastRef.current
 
-	useEffect(() => {
-		if (firstNode && lastNode) {
-			firstNode.addEventListener('keydown', onFirstRefKeydown)
-			lastNode.addEventListener('keydown', onLastRefKeyboard)
-		}
+	if (firstNode && lastNode) {
+		firstNode.addEventListener('keydown', onFirstRefKeydown)
+		lastNode.addEventListener('keydown', onLastRefKeydown)
+		console.log('focus loop created:', firstNode, lastNode)
+	}
 
-		function onFirstRefKeydown(e: KeyboardEvent) {
-			if (e.key === 'Tab' && e.shiftKey) {
-				e.preventDefault()
-				if (lastNode) {
-					lastNode.focus()
-				}
+	function onFirstRefKeydown(e: KeyboardEvent) {
+		if (e.key === 'Tab' && e.shiftKey) {
+			e.preventDefault()
+			if (lastNode) {
+				lastNode.focus()
 			}
 		}
+	}
 
-		function onLastRefKeyboard(e: KeyboardEvent) {
-			if (e.key === 'Tab' && !e.shiftKey) {
-				e.preventDefault()
-				if (firstNode) {
-					firstNode.focus()
-				}
+	function onLastRefKeydown(e: KeyboardEvent) {
+		if (e.key === 'Tab' && !e.shiftKey) {
+			e.preventDefault()
+			if (firstNode) {
+				firstNode.focus()
 			}
 		}
+	}
 
-		return () => {
+	return {
+		cleanup: () => {
 			if (firstNode && lastNode) {
 				firstNode.removeEventListener('keydown', onFirstRefKeydown)
-				lastNode.removeEventListener('keydown', onLastRefKeyboard)
+				lastNode.removeEventListener('keydown', onLastRefKeydown)
+				console.log('focus loop cleaned up:', firstNode, lastNode)
 			}
-		}
-	}, [firstNode, lastNode])
+		},
+	}
 }

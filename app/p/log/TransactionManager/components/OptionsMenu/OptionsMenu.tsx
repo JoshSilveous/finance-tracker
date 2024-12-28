@@ -3,7 +3,7 @@ import s from './OptionsMenu.module.scss'
 import { JButton } from '@/components/JForm'
 import { default as OptionsIcon } from '@/public/options-vertical.svg'
 import { delay } from '@/utils'
-import { useFocusLoop } from '@/utils/focusLoop/useFocusLoop'
+import { createFocusLoop } from '@/utils/focusLoop/createFocusLoop'
 
 export type Option = {
 	text: string
@@ -37,11 +37,16 @@ export function OptionsMenu({
 		}
 	}
 
-	useFocusLoop({
-		firstRef: togglerRef,
-		lastRef: optionsRef,
-		lastRefIndex: optionsRef.current.length - 1,
-	})
+	useEffect(() => {
+		if (optionsIsOpen) {
+			const focusLoop = createFocusLoop({
+				firstRef: togglerRef,
+				lastRef: optionsRef,
+				lastRefIndex: optionsRef.current.length - 1,
+			})
+			return focusLoop.cleanup
+		}
+	}, [optionsIsOpen, togglerRef, optionsRef])
 
 	const TRANSITION_TIME_S = 0.3 // also defined in OptionsMenu.module.scss, update there as well
 
@@ -80,6 +85,8 @@ export function OptionsMenu({
 		}
 	}, [optionsIsOpen])
 
+	const toggleButtonIndex = optionsIsOpen ? 100000 : tabIndex ? tabIndex : undefined
+
 	const optionsDisplay = options.map((option, index) => {
 		return (
 			<JButton
@@ -91,6 +98,7 @@ export function OptionsMenu({
 					option.onClick(e)
 				}}
 				key={index}
+				tabIndex={toggleButtonIndex ? toggleButtonIndex + index + 1 : undefined}
 				ref={addToOptionsRef(index)}
 			>
 				<div className={s.icon_container}>{option.icon ? option.icon : ''}</div>
@@ -111,7 +119,7 @@ export function OptionsMenu({
 					</div>
 					<JButton
 						jstyle='invisible'
-						tabIndex={tabIndex}
+						tabIndex={toggleButtonIndex}
 						ref={togglerRef}
 						onClick={() => setOptionsIsOpen((prev) => !prev)}
 					>

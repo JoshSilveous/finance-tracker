@@ -5,14 +5,22 @@ import { JButton } from '@/components/JForm'
 import { createPopup } from '@/utils'
 import { NewTransactionForm } from './NewTransactionForm/NewTransactionForm'
 import { DropdownOptions } from '../../TransactionManager'
+import { TabIndexer } from '../../hooks'
 
 interface DateRowProps {
 	date: string
 	dropdownOptions: DropdownOptions
 	refreshData: () => void
 	gridRow: number
+	tabIndexer: TabIndexer
 }
-export function DateRow({ date, dropdownOptions, refreshData, gridRow }: DateRowProps) {
+export function DateRow({
+	date,
+	dropdownOptions,
+	refreshData,
+	gridRow,
+	tabIndexer,
+}: DateRowProps) {
 	const { day, year, month } = formatDate(date)
 
 	const handleNewTransactionClick = () => {
@@ -56,7 +64,11 @@ export function DateRow({ date, dropdownOptions, refreshData, gridRow }: DateRow
 					<div className={s.year}>{year}</div>
 				</div>
 				<div className={s.new_transaction_container}>
-					<JButton jstyle='secondary' onClick={handleNewTransactionClick}>
+					<JButton
+						jstyle='secondary'
+						onClick={handleNewTransactionClick}
+						tabIndex={tabIndexer()}
+					>
 						Create New Transaction
 					</JButton>
 				</div>

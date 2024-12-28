@@ -8,7 +8,7 @@ import { MultiItemGrid } from './MultiItemGrid'
 import { delay, isStandardError, promptError, setKeyListenerContext } from '@/utils'
 import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
-import { useFocusLoop } from '@/utils/focusLoop/useFocusLoop'
+import { createFocusLoop } from '@/utils/focusLoop/createFocusLoop'
 
 export interface TransactionFormData {
 	name: string
@@ -49,7 +49,10 @@ export function NewTransactionForm({
 	const [submitting, setSubmitting] = useState(false)
 	const [creationFinished, setCreationFinished] = useState(false)
 
-	useFocusLoop({ firstRef: firstFocusRef, lastRef: lastFocusRef })
+	useEffect(() => {
+		const loop = createFocusLoop({ firstRef: firstFocusRef, lastRef: lastFocusRef })
+		return loop.cleanup
+	}, [firstFocusRef, lastFocusRef])
 
 	useEffect(() => {
 		firstFocusRef.current!.focus()
