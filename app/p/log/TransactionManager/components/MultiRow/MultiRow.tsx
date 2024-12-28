@@ -107,13 +107,25 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			).findIndex((it) => it === item.id) !==
 			itemIndex + 1
 
+		const isPendingCreation = p.pendingChanges.isCreation(item.id)
+
 		return [
 			<div
-				className={`${s.cell_container} ${isPendingDeletion ? s.hidden : ''}`}
+				className={`${s.cell_container} ${s.row_controls_container} ${
+					isPendingDeletion ? s.pending_deletion : ''
+				}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-1`}
 				ref={addToItemRowsRef(item.id)}
 			>
+				{isPendingCreation && (
+					<div
+						className={s.pending_creation_indicator}
+						title="This item has been newly added, and hasn't been saved yet."
+					>
+						<div className={s.new_text}>NEW</div>
+					</div>
+				)}
 				<div
 					className={`${s.reorder_grabber} ${itemSortPosChanged ? s.changed : ''}`}
 					title='Grab and drag to reposition this item'
@@ -132,7 +144,9 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				</div>
 			</div>,
 			<div
-				className={s.cell_container}
+				className={`${s.cell_container} ${
+					isPendingDeletion ? s.pending_deletion : ''
+				}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-2`}
 				ref={addToItemRowsRef(item.id)}
@@ -219,12 +233,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>,
 			<div
 				className={`${s.cell_container} ${s.more_controls_container} ${
-					isPendingDeletion ? s.hidden : ''
+					isPendingDeletion ? s.pending_deletion : ''
 				}`}
 				key={`${p.transaction.id}-${item.id}-8`}
 			>
 				<OptionsMenu
-					width={150}
+					width={180}
 					height={140}
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
@@ -242,10 +256,16 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							className: s.delete,
 						},
 						{
-							text: 'Add Item',
+							text: 'Add Item Below',
 							icon: <InsertRowIcon />,
-							onClick: () => console.log('adding item'),
-							className: s.add_item,
+							onClick: () =>
+								p.pendingChanges.addCreation('item', {
+									rel: 'below',
+									item_id: item.id,
+									date: p.transaction.date,
+									transaction_id: p.transaction.id,
+								}),
+							className: s.add_item_below,
 						},
 					]}
 				/>
@@ -256,7 +276,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	const firstRow = [
 		<div
 			className={`${s.cell_container} ${s.first_row} ${
-				isPendingDeletion ? s.hidden : ''
+				isPendingDeletion ? s.pending_deletion : ''
 			}`}
 			key={`${p.transaction.id}-1`}
 		>
@@ -346,7 +366,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row} ${s.more_controls_container} ${
-				isPendingDeletion ? s.hidden : ''
+				isPendingDeletion ? s.pending_deletion : ''
 			}`}
 		>
 			<OptionsMenu
@@ -399,12 +419,15 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			gridColumn: `${columnCount} / ${columnCount + 1}`,
 		} as React.CSSProperties
 	}
+
+	const isPendingCreation = p.pendingChanges.isCreation(p.transaction.id)
+
 	const columns = firstRow.map((rowItem, rowItemIndex) => {
 		return (
 			<div
 				className={`${s.column} ${uniqueColumnClassNames[rowItemIndex]} ${
 					p.folded && !p.playAnimation ? s.folded : ''
-				}`}
+				} ${isPendingCreation ? s.pending_creation : ''}`}
 				style={genGridStyle()}
 				ref={addToColumnNodesRef}
 			>

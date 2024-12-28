@@ -74,7 +74,6 @@ export function TransactionManager() {
 	}, [])
 
 	const foldState = useFoldState()
-	const pendingChanges = usePendingChanges()
 	const sortOrder = useSortOrder({
 		transactionRowsRef,
 		getFoldState: foldState.get,
@@ -97,6 +96,7 @@ export function TransactionManager() {
 			})
 		},
 	})
+	const pendingChanges = usePendingChanges(sortOrder)
 	const historyController = useHistory({
 		transactionDataRef,
 		setCurSortOrder: sortOrder.setCurrent,
@@ -211,7 +211,7 @@ export function TransactionManager() {
 
 	const sortedData = useMemo(() => {
 		if (transactionData !== null) {
-			return sortTransactions(sortOrder.cur, transactionData)
+			return sortTransactions(sortOrder.cur, transactionData, pendingChanges)
 		}
 		return null
 	}, [transactionData, sortOrder.cur])

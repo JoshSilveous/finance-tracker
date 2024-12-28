@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { FormTransaction } from '../TransactionManager'
+import { SortOrder } from './useSortOrder'
 
-export function usePendingChanges() {
+export function usePendingChanges(sortOrder: SortOrder.Controller) {
 	const [pendingChanges, setPendingChanges] = useState<PendingChanges.State>({
 		transactions: {},
 		items: {},
@@ -10,6 +11,11 @@ export function usePendingChanges() {
 		transactions: string[]
 		items: string[]
 	}>({ transactions: [], items: [] })
+
+	const [pendingCreations, setPendingCreations] = useState<{
+		transactions: null
+		items: FormTransaction['items']
+	}>({ transactions: null, items: [] })
 
 	const updateChange: PendingChanges.Updater = useCallback(
 		<T extends keyof PendingChanges.State>(
@@ -75,6 +81,72 @@ export function usePendingChanges() {
 		})
 	}
 
+	const addCreation = (
+		type: 'item' | 'transaction',
+		position: {
+			rel: 'above' | 'below'
+			item_id: string
+			date: string
+			transaction_id: string
+		},
+		item?: ItemWithoutID
+	) => {
+		if (type === 'item') {
+			const temporary_item_id = 'PENDING_CREATION||' + crypto.randomUUID()
+
+			const newItem = item
+				? { ...item, id: temporary_item_id }
+				: {
+						order_position: 0,
+						name: '',
+						amount: '',
+						account_id: null,
+						category_id: null,
+						id: temporary_item_id,
+				  }
+
+			setPendingCreations((prev) => {
+				const clone = structuredClone(prev)
+				clone.items.push(newItem)
+				return clone
+			})
+
+			sortOrder.setCurrent((prev) => {
+				const clone = structuredClone(prev)
+				const thisDate = clone[position.date]
+				const thisIndex = thisDate.findIndex((sortItem) =>
+					Array.isArray(sortItem)
+						? sortItem[0] === position.transaction_id
+						: sortItem === position.transaction_id
+				)
+				const sortItem = thisDate[thisIndex]
+				if (Array.isArray(sortItem)) {
+					// add item to multi-row
+					let insertIndex = sortItem.findIndex((id) => id === position.item_id)
+					if (insertIndex === -1) {
+						throw new Error(`couldnt find index $${position.item_id}`)
+					}
+					if (position.rel === 'below') {
+						insertIndex++
+					}
+					sortItem.splice(insertIndex, 0, temporary_item_id)
+				} else {
+					// add item to transaction non-multi-row
+					thisDate[thisIndex] = [
+						position.transaction_id,
+						position.item_id,
+						temporary_item_id,
+					]
+				}
+				return clone
+			})
+		}
+	}
+
+	const isCreation = (id: string) => {
+		return id.split('||')[0] === 'PENDING_CREATION'
+	}
+
 	const clearAll = useCallback(() => {
 		setPendingChanges({
 			transactions: {},
@@ -88,7 +160,10 @@ export function usePendingChanges() {
 		clearAll,
 		curDeletions: pendingDeletions,
 		addDeletion,
+		isCreation,
 		removeDeletion,
+		curCreations: pendingCreations,
+		addCreation,
 	} as PendingChanges.Controller
 }
 
@@ -175,6 +250,21 @@ export namespace PendingChanges {
 		 */
 		updateChange: Updater
 		clearAll: Clearer
+		isCreation: (id: string) => boolean
+		addCreation: (
+			type: 'item' | 'transaction',
+			position: {
+				rel: 'above' | 'below'
+				item_id: string
+				date: string
+				transaction_id: string
+			},
+			item?: ItemWithoutID
+		) => void
+		curCreations: {
+			transactions: null
+			items: FormTransaction['items']
+		}
 		curDeletions: {
 			transactions: string[]
 			items: string[]
@@ -188,3 +278,4 @@ export namespace PendingChanges {
 	 */
 	export type Clearer = () => void
 }
+type ItemWithoutID = Omit<FormTransaction['items'][number], 'id'>

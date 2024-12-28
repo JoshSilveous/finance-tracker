@@ -1,9 +1,11 @@
+import { PendingChanges } from '../hooks'
 import { SortOrder } from '../hooks/useSortOrder'
 import { GroupedTransaction, FormTransaction } from '../TransactionManager'
 
 export function sortTransactions(
 	sortOrder: SortOrder.State,
-	transactionData: FormTransaction[]
+	transactionData: FormTransaction[],
+	pendingChanges: PendingChanges.Controller
 ) {
 	return Object.entries(sortOrder).map((entry) => {
 		return {
@@ -17,9 +19,17 @@ export function sortTransactions(
 
 					sortItem.forEach((itemID, index) => {
 						if (index === 0) return
-						newItems.push(
-							thisTransaction.items.find((item) => item.id === itemID)!
-						)
+						if (pendingChanges.isCreation(itemID)) {
+							newItems.push(
+								pendingChanges.curCreations.items.find(
+									(item) => item.id === itemID
+								)!
+							)
+						} else {
+							newItems.push(
+								thisTransaction.items.find((item) => item.id === itemID)!
+							)
+						}
 					})
 					return { ...thisTransaction, items: newItems }
 				} else {
