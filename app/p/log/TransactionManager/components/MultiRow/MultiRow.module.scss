@@ -170,7 +170,15 @@
 			box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
 		}
 		&.control .cell_container.popped_out {
+			background-color: transparent;
+			padding-top: calc(var(--padding-val) * 2);
+			padding-right: calc(var(--padding-val) * 2.5);
+			filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
 			box-shadow: none;
+		}
+		&.more_controls .cell_container.popped_out {
+			box-shadow: none;
+			padding-top: calc(var(--padding-val) * 2);
 			filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
 		}
 		&.date .cell_container.popped_out {
@@ -182,11 +190,6 @@
 			padding-right: var(--padding-val);
 			border-top-right-radius: var(--border-radius);
 			border-bottom-right-radius: var(--border-radius);
-		}
-		&.control .cell_container.popped_out {
-			background-color: transparent;
-			padding-top: calc(var(--padding-val) * 3);
-			padding-right: calc(var(--padding-val) * 2.5);
 		}
 		&.date .cell_container.popped_out {
 			width: calc(100% + calc(var(--padding-val) * 3));
@@ -305,8 +308,12 @@
 				opacity: 0%;
 				pointer-events: none;
 			}
+			*:not(.pending_deletion_button) {
+				user-select: none;
+			}
 
 			.pending_deletion_text {
+				color: var(--font-color);
 				position: absolute;
 				width: 400px;
 				z-index: 1;

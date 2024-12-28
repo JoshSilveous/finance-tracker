@@ -32,7 +32,7 @@ export interface MultiRowProps {
 	gridRow: number
 }
 
-export type ItemRowRefs = { item_id: string; cells: HTMLDivElement[] }[]
+export type ItemRowsRef = { item_id: string; cells: HTMLDivElement[] }[]
 
 export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedRef) => {
 	const columnNodesRef = useRef<(HTMLDivElement | null)[]>([])
@@ -42,7 +42,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		}
 	}, [])
 
-	const itemRowsRef = useRef<ItemRowRefs>([])
+	const itemRowsRef = useRef<ItemRowsRef>([])
 	const addToItemRowsRef = useCallback(
 		(item_id: string) => (node: HTMLDivElement) => {
 			if (node !== null) {
@@ -266,6 +266,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					transactionPendingDeletion ? s.transaction_pending_deletion : ''
 				}`}
 				key={`${p.transaction.id}-${item.id}-8`}
+				ref={addToItemRowsRef(item.id)}
 			>
 				<OptionsMenu
 					width={180}

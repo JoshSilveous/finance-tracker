@@ -1,11 +1,11 @@
 import { delay } from '@/utils'
 import multiRowStyles from '../../components/MultiRow/MultiRow.module.scss'
-import { ItemRowRefs } from '../../components'
+import { ItemRowsRef } from '../../components'
 import { FormTransaction } from '../../TransactionManager'
 
 export function itemReorderMouseEffect(
 	item: FormTransaction['items'][number],
-	itemRows: ItemRowRefs,
+	itemRows: ItemRowsRef,
 	itemIndex: number,
 	transaction: FormTransaction,
 	e: MouseEvent,
@@ -27,10 +27,15 @@ export function itemReorderMouseEffect(
 		grabberContainerNode.offsetLeft -
 		2
 	const offsetY =
-		grabberNode.offsetTop +
+		grabberNode.parentElement!.offsetTop +
 		grabberNode.offsetHeight / 2 -
 		grabberContainerNode.offsetTop +
-		8
+		13
+
+	grabberNode.offsetLeft +
+		grabberNode.offsetWidth / 2 -
+		grabberContainerNode.offsetLeft -
+		2
 
 	let leftOffset = 0
 	thisRow.forEach((node, index) => {

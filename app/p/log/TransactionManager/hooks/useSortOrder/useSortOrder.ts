@@ -9,7 +9,7 @@ import {
 	useState,
 } from 'react'
 import { FormTransaction, TransactionRowsRef } from '../../TransactionManager'
-import { ItemRowRefs } from '../../components'
+import { ItemRowsRef } from '../../components'
 import { itemReorderMouseEffect } from './handleItemReorder'
 import { FoldStateGetter, FoldStateUpdater } from '../useFoldState'
 import { transactionReorderMouseEffect } from './handleTransactionReorder'
@@ -250,7 +250,7 @@ export function useSortOrder({
 		(
 				transaction: FormTransaction,
 				item: FormTransaction['items'][number],
-				itemRowsRef: MutableRefObject<ItemRowRefs>
+				itemRowsRef: MutableRefObject<ItemRowsRef>
 			) =>
 			(e: MouseEvent) => {
 				const transactionIndex = curSortOrderRef.current![
@@ -290,7 +290,7 @@ export function useSortOrder({
 		(
 				transaction: FormTransaction,
 				item: FormTransaction['items'][number],
-				itemRowsRef: MutableRefObject<ItemRowRefs>
+				itemRowsRef: MutableRefObject<ItemRowsRef>
 			) =>
 			(node: HTMLElement | null) => {
 				if (node !== null) {
@@ -434,7 +434,7 @@ export namespace SortOrder {
 		addToItemReorderRefs: (
 			transaction: FormTransaction,
 			item: FormTransaction['items'][number],
-			itemRowsRef: MutableRefObject<ItemRowRefs>
+			itemRowsRef: MutableRefObject<ItemRowsRef>
 		) => ItemReorderRefAdder
 	}
 
