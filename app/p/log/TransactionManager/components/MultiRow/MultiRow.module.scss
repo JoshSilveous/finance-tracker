@@ -225,7 +225,7 @@
 	}
 
 	/* DELETE OVERLAY STYLES */
-	--delete-overlay-transition-time: 0.2s;
+	--delete-overlay-transition-time: 0.5s;
 	.delete_overlay {
 		display: contents;
 		margin-top: var(--gap-row-height);
@@ -284,10 +284,40 @@
 	}
 	.cell_container {
 		opacity: 100%;
-		transition: opacity var(--delete-overlay-transition-time) ease;
-		&.pending_deletion {
+		transition: opacity var(--delete-overlay-transition-time) ease,
+			filter var(--delete-overlay-transition-time) ease;
+		button {
+			transition: opacity 0.2s ease;
+		}
+		&.transaction_pending_deletion {
 			opacity: 0%;
 			pointer-events: none;
+		}
+		&.item_pending_deletion {
+			position: relative !important;
+			&:not(.row_controls_container, .more_controls_container) {
+				filter: blur(3px);
+				opacity: 50%;
+				pointer-events: none;
+			}
+			&.row_controls_container button:not(.undo_delete_button),
+			&.more_controls_container button:not(.undo_delete_button) {
+				opacity: 0%;
+				pointer-events: none;
+			}
+
+			.pending_deletion_text {
+				position: absolute;
+				width: 400px;
+				z-index: 1;
+				left: calc(100% + var(--padding-val) * 4);
+			}
+			.pending_deletion_button {
+				position: absolute;
+				width: 200px;
+				z-index: 1;
+				right: calc(100% + var(--padding-val) * 4);
+			}
 		}
 	}
 }
