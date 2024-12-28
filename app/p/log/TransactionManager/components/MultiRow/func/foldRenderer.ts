@@ -43,7 +43,7 @@ export function foldRenderer(columnNodes: HTMLDivElement[]) {
 			parseInt(getComputedStyle(columnNodes[1]).paddingBottom)
 
 		columnNodes.forEach(async (col) => {
-			col.style.overflow = 'hidden'
+			col.style.overflowY = 'clip'
 			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
 			const colStyle = getComputedStyle(col)
 			const startingHeight = colStyle.height
@@ -60,7 +60,7 @@ export function foldRenderer(columnNodes: HTMLDivElement[]) {
 			col.style.height = ''
 			col.style.transition = ''
 			col.classList.add(s.folded)
-			col.style.overflow = ''
+			col.style.overflowY = ''
 		})
 	}
 
@@ -96,7 +96,7 @@ export function foldRenderer(columnNodes: HTMLDivElement[]) {
 
 		// apply new height animation
 		columnNodes.forEach(async (col) => {
-			col.style.overflow = 'hidden'
+			col.style.overflowY = 'clip'
 			col.style.transition = `height ${foldAnimationTime / 1000}s ease`
 			col.style.height = firstRowHeight + 'px'
 			await delay(10)
@@ -110,7 +110,7 @@ export function foldRenderer(columnNodes: HTMLDivElement[]) {
 			}
 			col.style.height = ''
 			col.style.transition = ''
-			col.style.overflow = ''
+			col.style.overflowY = ''
 		})
 	}
 

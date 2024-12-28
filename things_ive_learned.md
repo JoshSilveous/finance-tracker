@@ -19,3 +19,7 @@ this is just a loose list i'm keeping. eventually i'll make a beautiful linkedin
 -   for gods sake use Prettier and ESLint
 
 -   React DevTools are worth learning (helped me figure out why a hugely complex component was re-rendering twice)
+
+-   story
+    I was trying to figure out how to allow overflow-x while hiding overflow-y on the fold toggle component. Took an hour, but i figured out that overflow-clip works as i'd expect.
+    I figured this out by slowing down the animation a ton and using devtools to try a bunch of different overflow-y values until i got there. big brain moment.
