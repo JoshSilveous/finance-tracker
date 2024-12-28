@@ -122,7 +122,7 @@ export function usePendingChanges(sortOrder: SortOrder.Controller) {
 				const sortItem = thisDate[thisIndex]
 				if (Array.isArray(sortItem)) {
 					// add item to multi-row
-					let insertIndex = sortItem.findIndex((id) => id === position.item_id)
+					let insertIndex = sortItem.indexOf(position.item_id)
 					if (insertIndex === -1) {
 						throw new Error(`couldnt find index $${position.item_id}`)
 					}
@@ -137,6 +137,51 @@ export function usePendingChanges(sortOrder: SortOrder.Controller) {
 						position.item_id,
 						temporary_item_id,
 					]
+				}
+				return clone
+			})
+		}
+	}
+	const removeCreation = (
+		type: 'item' | 'transaction',
+		id: string,
+		transaction_id: string,
+		date: string
+	) => {
+		if (type === 'item') {
+			setPendingChanges((prev) => {
+				const clone = structuredClone(prev)
+				if (clone.items[id]) {
+					delete clone.items[id]
+				}
+				return clone
+			})
+			setPendingCreations((prev) => {
+				const clone = structuredClone(prev)
+				const index = clone.items.findIndex((item) => item.id === id)
+				clone.items.splice(index, 1)
+				return clone
+			})
+			sortOrder.setCurrent((prev) => {
+				const clone = structuredClone(prev)
+				const thisDate = clone[date]
+				const thisIndex = thisDate.findIndex((sortItem) =>
+					Array.isArray(sortItem)
+						? sortItem[0] === transaction_id
+						: sortItem === transaction_id
+				)
+				const sortItem = thisDate[thisIndex]
+				if (Array.isArray(sortItem)) {
+					// remove item from multi-row
+					let itemIndex = sortItem.indexOf(id)
+					if (itemIndex === -1) {
+						throw new Error(`couldnt find index $${id}`)
+					}
+					sortItem.splice(itemIndex, 1)
+
+					if (sortItem.length === 2) {
+						thisDate[thisIndex] = transaction_id
+					}
 				}
 				return clone
 			})
@@ -164,6 +209,7 @@ export function usePendingChanges(sortOrder: SortOrder.Controller) {
 		removeDeletion,
 		curCreations: pendingCreations,
 		addCreation,
+		removeCreation,
 	} as PendingChanges.Controller
 }
 
@@ -249,6 +295,12 @@ export namespace PendingChanges {
 		 * ```
 		 */
 		updateChange: Updater
+		removeCreation: (
+			type: 'item' | 'transaction',
+			id: string,
+			transaction_id: string,
+			date: string
+		) => void
 		clearAll: Clearer
 		isCreation: (id: string) => boolean
 		addCreation: (

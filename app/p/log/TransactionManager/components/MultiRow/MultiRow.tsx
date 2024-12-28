@@ -99,15 +99,22 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	const itemRows = p.transaction.items.map((item, itemIndex) => {
 		sum += Number(liveVals.items[item.id].amount.val)
 
-		const itemSortPosChanged =
-			(
-				p.defSortOrder[p.transaction.date].find(
-					(it) => it[0] === p.transaction.id
-				) as string[]
-			).findIndex((it) => it === item.id) !==
-			itemIndex + 1
-
 		const isPendingCreation = p.pendingChanges.isCreation(item.id)
+
+		const itemSortPosChanged = (() => {
+			if (isPendingCreation) {
+				return true
+			}
+
+			const defSort = p.defSortOrder[p.transaction.date].find((it) =>
+				Array.isArray(it) ? it[0] === p.transaction.id : it === p.transaction.id
+			)!
+			if (Array.isArray(defSort)) {
+				return defSort.findIndex((it) => it === item.id) !== itemIndex + 1
+			} else {
+				return true
+			}
+		})()
 
 		return [
 			<div
@@ -248,15 +255,27 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							text: 'Delete',
 							icon: <DeleteIcon />,
 							onClick: () => {
-								p.pendingChanges.addDeletion('transaction', p.transaction.id)
-								if (undoDeleteRef.current !== null) {
-									undoDeleteRef.current.focus()
+								if (isPendingCreation) {
+									p.pendingChanges.removeCreation(
+										'item',
+										item.id,
+										p.transaction.id,
+										p.transaction.date
+									)
+								} else {
+									p.pendingChanges.addDeletion(
+										'transaction',
+										p.transaction.id
+									)
+									if (undoDeleteRef.current !== null) {
+										undoDeleteRef.current.focus()
+									}
 								}
 							},
 							className: s.delete,
 						},
 						{
-							text: 'Add Item Below',
+							text: 'Add Item',
 							icon: <InsertRowIcon />,
 							onClick: () =>
 								p.pendingChanges.addCreation('item', {
@@ -265,7 +284,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 									date: p.transaction.date,
 									transaction_id: p.transaction.id,
 								}),
-							className: s.add_item_below,
+							className: s.add_item,
 						},
 					]}
 				/>
@@ -393,7 +412,13 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					{
 						text: 'Add Item',
 						icon: <InsertRowIcon />,
-						onClick: () => console.log('adding item'),
+						onClick: () =>
+							p.pendingChanges.addCreation('item', {
+								rel: 'above',
+								item_id: p.transaction.items[0].id,
+								date: p.transaction.date,
+								transaction_id: p.transaction.id,
+							}),
 						className: s.add_item,
 					},
 				]}

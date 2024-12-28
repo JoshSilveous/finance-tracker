@@ -312,7 +312,13 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						{
 							text: 'Add Item',
 							icon: <InsertRowIcon />,
-							onClick: () => console.log('adding item'),
+							onClick: () =>
+								p.pendingChanges.addCreation('item', {
+									rel: 'below',
+									item_id: item.id,
+									date: p.transaction.date,
+									transaction_id: p.transaction.id,
+								}),
 							className: s.add_item,
 						},
 					]}
