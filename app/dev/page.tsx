@@ -9,9 +9,6 @@ export default function Dev() {
 	const testRef = useRef<HTMLInputElement | null>(null)
 	const [val, setVal] = useState('0')
 
-	useEffect(() => {
-		console.log('currentRef:', testRef.current)
-	}, [testRef.current, val])
 	return (
 		<div className={s.main}>
 			<JNumberAccounting

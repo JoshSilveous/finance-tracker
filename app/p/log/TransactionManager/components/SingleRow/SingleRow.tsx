@@ -168,20 +168,6 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					isPendingDeletion ? s.hidden : ''
 				}`}
 			>
-				<div className={s.delete_container}>
-					<JButton
-						jstyle='invisible'
-						onClick={() => {
-							p.pendingChanges.addDeletion('transaction', p.transaction.id)
-							if (undoDeleteRef.current !== null) {
-								undoDeleteRef.current.focus()
-							}
-						}}
-						tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
-					>
-						<DeleteIcon />
-					</JButton>
-				</div>
 				<div
 					className={`${s.reorder_grabber} ${p.sortPosChanged ? s.changed : ''}`}
 					title={
@@ -297,7 +283,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					height={140}
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
-					tabIndex={p.tabIndexer()}
+					tabIndex={isPendingDeletion ? undefined : p.tabIndexer()}
 					options={[
 						{
 							text: 'Delete',

@@ -94,7 +94,6 @@
 					}
 				}
 				.reorder_grabber,
-				.delete_container,
 				.fold_toggle {
 					display: flex;
 					align-items: center;
@@ -131,14 +130,6 @@
 						cursor: grab;
 						&:active:not(:disabled) {
 							cursor: grabbing;
-						}
-					}
-				}
-				.delete_container {
-					button {
-						cursor: pointer;
-						&:hover:not(:disabled) {
-							color: var(--font-color-error);
 						}
 					}
 				}

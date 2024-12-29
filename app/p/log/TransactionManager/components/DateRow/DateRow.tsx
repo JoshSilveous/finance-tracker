@@ -30,7 +30,6 @@ export function DateRow({
 		}
 
 		const afterPopupClosed = () => {
-			console.log('popup closed, refreshRequired: ', refreshRequired)
 			if (refreshRequired) {
 				refreshData()
 			}

@@ -15,6 +15,7 @@ import { foldRenderer } from './func/foldRenderer'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 import { genEventHandlers } from './func/genEventHandlers'
 import { genUniqueLists } from './func/genUniqueLists'
+import { delay } from '@/utils'
 
 export interface MultiRowProps {
 	transaction: FormTransaction
@@ -33,7 +34,11 @@ export interface MultiRowProps {
 	tabIndexer: TabIndexer
 }
 
-export type ItemRowsRef = { item_id: string; cells: HTMLDivElement[] }[]
+export type ItemRowsRef = {
+	item_id: string
+	cells: HTMLDivElement[]
+	undoDeleteDiv?: HTMLDivElement
+}[]
 
 export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedRef) => {
 	const columnNodesRef = useRef<(HTMLDivElement | null)[]>([])
@@ -45,13 +50,19 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 	const itemRowsRef = useRef<ItemRowsRef>([])
 	const addToItemRowsRef = useCallback(
-		(item_id: string) => (node: HTMLDivElement) => {
+		(item_id: string, isUndoDeleteDiv?: boolean) => (node: HTMLDivElement) => {
 			if (node !== null) {
 				const itemRowRefIndex = itemRowsRef.current.findIndex(
 					(ref) => ref.item_id === item_id
 				)
+				if (isUndoDeleteDiv) {
+					itemRowsRef.current[itemRowRefIndex].undoDeleteDiv = node
+				}
 				if (itemRowRefIndex === -1) {
-					itemRowsRef.current.push({ item_id, cells: [node] })
+					itemRowsRef.current.push({
+						item_id,
+						cells: [node],
+					})
 				} else {
 					itemRowsRef.current[itemRowRefIndex].cells.push(node)
 				}
@@ -103,7 +114,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		})
 		return sum
 	})()
-	console.log('rendering firstRow for', p.transaction.name)
 
 	const firstRow = [
 		<div
@@ -112,23 +122,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			}`}
 			key={`${p.transaction.id}-1`}
 		>
-			<div className={s.delete_container}>
-				<JButton
-					jstyle='invisible'
-					onClick={() => {
-						p.pendingChanges.addDeletion('transaction', p.transaction.id)
-						if (undoDeleteRef.current !== null) {
-							undoDeleteRef.current.focus()
-						}
-						if (!p.folded) {
-							p.updateFoldState(p.transaction.id, true)
-						}
-					}}
-					tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
-				>
-					<DeleteIcon />
-				</JButton>
-			</div>
 			<div
 				className={`${s.reorder_grabber} ${
 					p.transactionSortPosChanged ? s.changed : ''
@@ -209,7 +202,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				height={140}
 				test_transaction_id={p.transaction.name}
 				className={s.more_controls}
-				tabIndex={p.tabIndexer()}
+				tabIndex={transactionPendingDeletion ? undefined : p.tabIndexer()}
 				options={[
 					{
 						text: 'Delete',
@@ -248,7 +241,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		)
 		const itemPendingCreation = p.pendingChanges.isCreation(item.id)
 
-		console.log('rendering an itemRow for', p.transaction.name, ' - ', item.name)
 		const itemSortPosChanged = (() => {
 			if (itemPendingCreation) {
 				return true
@@ -262,6 +254,39 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				return true
 			}
 		})()
+
+		const handleDelete = () => {
+			if (itemPendingCreation) {
+				p.pendingChanges.removeCreation(
+					'item',
+					item.id,
+					p.transaction.id,
+					p.transaction.date
+				)
+			} else {
+				p.pendingChanges.addDeletion('item', item.id)
+				if (document.activeElement) {
+					;(document.activeElement as HTMLElement).blur()
+				}
+
+				delay(10).then(() => {
+					const thisItemRef = itemRowsRef.current!.find(
+						(it) => it.item_id === item.id
+					)!
+					if (thisItemRef.undoDeleteDiv) {
+						;(thisItemRef.undoDeleteDiv.children[0] as HTMLButtonElement).focus()
+					}
+				})
+			}
+		}
+
+		const handleAddItem = () =>
+			p.pendingChanges.addCreation('item', {
+				rel: 'below',
+				item_id: item.id,
+				date: p.transaction.date,
+				transaction_id: p.transaction.id,
+			})
 
 		return [
 			<div
@@ -426,49 +451,29 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					height={140}
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
-					tabIndex={p.tabIndexer()}
+					tabIndex={itemPendingDeletion ? undefined : p.tabIndexer()}
 					options={[
 						{
 							text: 'Delete',
 							icon: <DeleteIcon />,
-							onClick: () => {
-								if (itemPendingCreation) {
-									p.pendingChanges.removeCreation(
-										'item',
-										item.id,
-										p.transaction.id,
-										p.transaction.date
-									)
-								} else {
-									p.pendingChanges.addDeletion('item', item.id)
-									if (document.activeElement) {
-										;(document.activeElement as HTMLElement).blur()
-									}
-									// if (undoDeleteRef.current !== null) {
-									// 	undoDeleteRef.current.focus()
-									// }
-								}
-							},
+							onClick: handleDelete,
 							className: s.delete,
 						},
 						{
 							text: 'Add Item',
 							icon: <InsertRowIcon />,
-							onClick: () =>
-								p.pendingChanges.addCreation('item', {
-									rel: 'below',
-									item_id: item.id,
-									date: p.transaction.date,
-									transaction_id: p.transaction.id,
-								}),
+							onClick: handleAddItem,
 							className: s.add_item,
 						},
 					]}
 				/>
 
-				{/* this text had to be injected somewhere into this array, this is the easiest way without messing up the layout */}
+				{/* this had to be injected somewhere into this array, this is the easiest way without messing up the layout */}
 				{itemPendingDeletion && (
-					<div className={s.pending_deletion_button}>
+					<div
+						className={s.pending_deletion_button}
+						ref={addToItemRowsRef(item.id, true)}
+					>
 						<JButton
 							jstyle='invisible'
 							onClick={() => {
@@ -476,7 +481,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							}}
 							ref={undoDeleteRef}
 							className={s.undo_delete_button}
-							tabIndex={transactionPendingDeletion ? p.tabIndexer() : -1}
+							tabIndex={itemPendingDeletion ? p.tabIndexer() : -1}
 						>
 							Undo Delete
 						</JButton>

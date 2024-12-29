@@ -99,11 +99,24 @@ export function TransactionManager() {
 			})
 		},
 	})
-	const pendingChanges = usePendingChanges(sortOrder)
+	const pendingChanges = usePendingChanges({
+		sortOrder,
+		afterItemDeletion: (id) =>
+			historyController.add({ type: 'item_deletion', item_id: id }),
+		afterTransactionDeletion: (id) =>
+			historyController.add({ type: 'transaction_deletion', transaction_id: id }),
+		afterItemDeletionReversed: (id) =>
+			historyController.add({ type: 'item_deletion_reversed', item_id: id }),
+		afterTransactionDeletionReversed: (id) =>
+			historyController.add({
+				type: 'transaction_deletion_reversed',
+				transaction_id: id,
+			}),
+	})
 	const historyController = useHistory({
 		transactionDataRef,
-		setCurSortOrder: sortOrder.setCurrent,
-		updatePendingChanges: pendingChanges.updateChange,
+		sortOrder,
+		pendingChanges,
 	})
 
 	useEffect(() => {
@@ -161,7 +174,6 @@ export function TransactionManager() {
 	}
 
 	const handleSaveChanges = async () => {
-		console.log('handleSave called')
 		setIsSaving(true)
 		try {
 			await saveChanges(pendingChanges, sortOrder, transactionDataRef)

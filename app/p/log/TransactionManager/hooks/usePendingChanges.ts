@@ -2,7 +2,20 @@ import { useCallback, useEffect, useState } from 'react'
 import { FormTransaction } from '../TransactionManager'
 import { SortOrder } from './useSortOrder'
 
-export function usePendingChanges(sortOrder: SortOrder.Controller) {
+export interface UsePendingChangesProps {
+	sortOrder: SortOrder.Controller
+	afterItemDeletion: (id: string) => void
+	afterTransactionDeletion: (id: string) => void
+	afterItemDeletionReversed: (id: string) => void
+	afterTransactionDeletionReversed: (id: string) => void
+}
+export function usePendingChanges({
+	sortOrder,
+	afterItemDeletion,
+	afterTransactionDeletion,
+	afterItemDeletionReversed,
+	afterTransactionDeletionReversed,
+}: UsePendingChangesProps) {
 	const [pendingChanges, setPendingChanges] = useState<PendingChanges.State>({
 		transactions: {},
 		items: {},
@@ -49,36 +62,48 @@ export function usePendingChanges(sortOrder: SortOrder.Controller) {
 		[]
 	)
 
-	const addDeletion = (type: 'item' | 'transaction', id: string) => {
+	const addDeletion = (
+		type: 'item' | 'transaction',
+		id: string,
+		dontAddToHistory?: boolean
+	) => {
 		setPendingDeletions((prev) => {
 			const clone = structuredClone(prev)
-			if (type === 'item') {
-				clone.items.push(id)
-			} else {
-				clone.transactions.push(id)
-			}
+			type === 'item' ? clone.items.push(id) : clone.transactions.push(id)
 			return clone
 		})
+		if (!dontAddToHistory) {
+			type === 'item' ? afterItemDeletion(id) : afterTransactionDeletion(id)
+		}
 	}
 
-	const removeDeletion = (type: 'item' | 'transaction', id: string) => {
+	const removeDeletion = (
+		type: 'item' | 'transaction',
+		id: string,
+		dontAddToHistory?: boolean
+	) => {
 		setPendingDeletions((prev) => {
 			const clone = structuredClone(prev)
 			if (type === 'item') {
 				const index = clone.items.findIndex((item_id) => item_id === id)
-				if (index !== -1) {
-					clone.items.splice(index, 1)
-				}
+				// if (index !== -1) {
+				clone.items.splice(index, 1)
+				// }
 			} else {
 				const index = clone.transactions.findIndex(
 					(transaction_id) => transaction_id === id
 				)
-				if (index !== -1) {
-					clone.transactions.splice(index, 1)
-				}
+				// if (index !== -1) {
+				clone.transactions.splice(index, 1)
+				// }
 			}
 			return clone
 		})
+		if (!dontAddToHistory) {
+			type === 'item'
+				? afterItemDeletionReversed(id)
+				: afterTransactionDeletionReversed(id)
+		}
 	}
 
 	const addCreation = (
@@ -321,8 +346,16 @@ export namespace PendingChanges {
 			transactions: string[]
 			items: string[]
 		}
-		addDeletion: (type: 'item' | 'transaction', id: string) => void
-		removeDeletion: (type: 'item' | 'transaction', id: string) => void
+		addDeletion: (
+			type: 'item' | 'transaction',
+			id: string,
+			dontAddToHistory?: boolean
+		) => void
+		removeDeletion: (
+			type: 'item' | 'transaction',
+			id: string,
+			dontAddToHistory?: boolean
+		) => void
 	}
 
 	/**

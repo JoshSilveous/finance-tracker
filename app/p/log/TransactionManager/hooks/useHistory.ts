@@ -14,14 +14,14 @@ import { SortOrder } from './'
 
 export interface UseHistoryProps {
 	transactionDataRef: MutableRefObject<FormTransaction[] | null>
-	setCurSortOrder: Dispatch<SetStateAction<SortOrder.State>>
-	updatePendingChanges: PendingChanges.Updater
+	sortOrder: SortOrder.Controller
+	pendingChanges: PendingChanges.Controller
 }
 
 export function useHistory({
 	transactionDataRef,
-	setCurSortOrder,
-	updatePendingChanges,
+	sortOrder,
+	pendingChanges,
 }: UseHistoryProps) {
 	// const [historyStack, setHistoryStack] = useState<HistoryState>({
 	// 	undoStack: [],
@@ -35,88 +35,128 @@ export function useHistory({
 
 	const undo = useCallback(() => {
 		if (historyStackRef.current.undoStack.length !== 0) {
-			const item = historyStackRef.current.undoStack.at(-1)
-			if (item !== undefined) {
-				switch (item.type) {
+			const historyItem = historyStackRef.current.undoStack.at(-1)
+			if (historyItem !== undefined) {
+				switch (historyItem.type) {
 					case 'transaction_position_change': {
-						setCurSortOrder((prev) => {
+						sortOrder.setCurrent((prev) => {
 							const clone = structuredClone(prev)
-							moveItemInArray(clone[item.date], item.newIndex, item.oldIndex)
+							moveItemInArray(
+								clone[historyItem.date],
+								historyItem.newIndex,
+								historyItem.oldIndex
+							)
 							return clone
 						})
 						break
 					}
 					case 'item_position_change': {
-						setCurSortOrder((prev) => {
+						sortOrder.setCurrent((prev) => {
 							const clone = structuredClone(prev)
-							const thisSortIndex = clone[item.date].findIndex((sortItem) => {
-								return (
-									Array.isArray(sortItem) &&
-									sortItem[0] === item.transaction_id
-								)
-							})
-							const thisSortArray = clone[item.date][thisSortIndex] as string[]
+							const thisSortIndex = clone[historyItem.date].findIndex(
+								(sortItem) => {
+									return (
+										Array.isArray(sortItem) &&
+										sortItem[0] === historyItem.transaction_id
+									)
+								}
+							)
+							const thisSortArray = clone[historyItem.date][
+								thisSortIndex
+							] as string[]
 
 							moveItemInArray(
 								thisSortArray,
-								item.newIndex + 1,
-								item.oldIndex + 1
+								historyItem.newIndex + 1,
+								historyItem.oldIndex + 1
 							)
 							return clone
 						})
 						break
 					}
 					case 'transaction_value_change': {
-						const query = `[data-transaction_id="${item.transaction_id}"][data-key="${item.key}"]:not([data-item_id])`
+						const query = `[data-transaction_id="${historyItem.transaction_id}"][data-key="${historyItem.key}"]:not([data-item_id])`
 						const node = document.querySelector(query) as HTMLInputElement
 
 						let defaultValue = transactionDataRef.current!.find(
-							(transaction) => transaction.id === item.transaction_id
-						)![item.key]
+							(transaction) => transaction.id === historyItem.transaction_id
+						)![historyItem.key]
 
-						if (defaultValue !== item.oldVal) {
-							updatePendingChanges(
+						if (defaultValue !== historyItem.oldVal) {
+							pendingChanges.updateChange(
 								'transactions',
-								item.transaction_id,
-								item.key,
-								item.oldVal
+								historyItem.transaction_id,
+								historyItem.key,
+								historyItem.oldVal
 							)
 						} else {
-							updatePendingChanges(
+							pendingChanges.updateChange(
 								'transactions',
-								item.transaction_id,
-								item.key
+								historyItem.transaction_id,
+								historyItem.key
 							)
 						}
-						node.value = item.oldVal
+						node.value = historyItem.oldVal
 						node.focus()
 
 						break
 					}
 					case 'item_value_change': {
-						const query = `[data-transaction_id="${item.transaction_id}"][data-key="${item.key}"][data-item_id="${item.item_id}"]`
+						const query = `[data-transaction_id="${historyItem.transaction_id}"][data-key="${historyItem.key}"][data-item_id="${historyItem.item_id}"]`
 						const node = document.querySelector(query) as HTMLInputElement
 
 						let defaultValue = transactionDataRef
 							.current!.find(
-								(transaction) => transaction.id === item.transaction_id
+								(transaction) =>
+									transaction.id === historyItem.transaction_id
 							)!
-							.items.find((it) => it.id === item.item_id)![item.key]
+							.items.find((it) => it.id === historyItem.item_id)![
+							historyItem.key
+						]
 
-						if (defaultValue !== item.oldVal) {
-							updatePendingChanges(
+						if (defaultValue !== historyItem.oldVal) {
+							pendingChanges.updateChange(
 								'items',
-								item.item_id,
-								item.key,
-								item.oldVal
+								historyItem.item_id,
+								historyItem.key,
+								historyItem.oldVal
 							)
 						} else {
-							updatePendingChanges('items', item.item_id, item.key)
+							pendingChanges.updateChange(
+								'items',
+								historyItem.item_id,
+								historyItem.key
+							)
 						}
 
-						node.value = item.oldVal
+						node.value = historyItem.oldVal
 						node.focus()
 
+						break
+					}
+					case 'item_deletion': {
+						pendingChanges.removeDeletion('item', historyItem.item_id, true)
+						break
+					}
+					case 'transaction_deletion': {
+						// figuring out undo/redo for deletions
+						pendingChanges.removeDeletion(
+							'transaction',
+							historyItem.transaction_id,
+							true
+						)
+						break
+					}
+					case 'item_deletion_reversed': {
+						pendingChanges.addDeletion('item', historyItem.item_id, true)
+						break
+					}
+					case 'transaction_deletion_reversed': {
+						pendingChanges.addDeletion(
+							'transaction',
+							historyItem.transaction_id,
+							true
+						)
 						break
 					}
 				}
@@ -133,91 +173,126 @@ export function useHistory({
 	}, [])
 	const redo = useCallback(() => {
 		if (historyStackRef.current.redoStack.length !== 0) {
-			const item = historyStackRef.current.redoStack[0]
-			if (item !== undefined) {
-				switch (item.type) {
+			const historyItem = historyStackRef.current.redoStack[0]
+			if (historyItem !== undefined) {
+				switch (historyItem.type) {
 					case 'transaction_position_change': {
-						setCurSortOrder((prev) => {
+						sortOrder.setCurrent((prev) => {
 							const clone = structuredClone(prev)
-							moveItemInArray(clone[item.date], item.oldIndex, item.newIndex)
+							moveItemInArray(
+								clone[historyItem.date],
+								historyItem.oldIndex,
+								historyItem.newIndex
+							)
 							return clone
 						})
 						break
 					}
 					case 'item_position_change': {
-						setCurSortOrder((prev) => {
+						sortOrder.setCurrent((prev) => {
 							const clone = structuredClone(prev)
-							const thisSortIndex = clone[item.date].findIndex((sortItem) => {
-								return (
-									Array.isArray(sortItem) &&
-									sortItem[0] === item.transaction_id
-								)
-							})
-							const thisSortArray = clone[item.date][thisSortIndex] as string[]
+							const thisSortIndex = clone[historyItem.date].findIndex(
+								(sortItem) => {
+									return (
+										Array.isArray(sortItem) &&
+										sortItem[0] === historyItem.transaction_id
+									)
+								}
+							)
+							const thisSortArray = clone[historyItem.date][
+								thisSortIndex
+							] as string[]
 							moveItemInArray(
 								thisSortArray,
-								item.oldIndex + 1,
-								item.newIndex + 1
+								historyItem.oldIndex + 1,
+								historyItem.newIndex + 1
 							)
 							return clone
 						})
 						break
 					}
 					case 'transaction_value_change': {
-						const query = `[data-transaction_id="${item.transaction_id}"][data-key="${item.key}"]:not([data-item_id])`
+						const query = `[data-transaction_id="${historyItem.transaction_id}"][data-key="${historyItem.key}"]:not([data-item_id])`
 						const node = document.querySelector(query) as HTMLInputElement
 
 						// update pendingChanges
 						let defaultValue: string | null = null
 						if (transactionDataRef.current! !== null) {
 							defaultValue = transactionDataRef.current!.find(
-								(transaction) => transaction.id === item.transaction_id
-							)![item.key]
+								(transaction) =>
+									transaction.id === historyItem.transaction_id
+							)![historyItem.key]
 						}
 
-						if (defaultValue !== item.newVal) {
-							updatePendingChanges(
+						if (defaultValue !== historyItem.newVal) {
+							pendingChanges.updateChange(
 								'transactions',
-								item.transaction_id,
-								item.key,
-								item.newVal
+								historyItem.transaction_id,
+								historyItem.key,
+								historyItem.newVal
 							)
 						} else {
-							updatePendingChanges(
+							pendingChanges.updateChange(
 								'transactions',
-								item.transaction_id,
-								item.key
+								historyItem.transaction_id,
+								historyItem.key
 							)
 						}
-						node.value = item.newVal
+						node.value = historyItem.newVal
 						node.focus()
 
 						break
 					}
 					case 'item_value_change': {
-						const query = `[data-transaction_id="${item.transaction_id}"][data-key="${item.key}"][data-item_id="${item.item_id}"]`
+						const query = `[data-transaction_id="${historyItem.transaction_id}"][data-key="${historyItem.key}"][data-item_id="${historyItem.item_id}"]`
 						const node = document.querySelector(query) as HTMLInputElement
 
 						let defaultValue = transactionDataRef
 							.current!.find(
-								(transaction) => transaction.id === item.transaction_id
+								(transaction) =>
+									transaction.id === historyItem.transaction_id
 							)!
-							.items.find((it) => it.id === item.item_id)![item.key]
+							.items.find((it) => it.id === historyItem.item_id)![
+							historyItem.key
+						]
 
-						if (defaultValue !== item.newVal) {
-							updatePendingChanges(
+						if (defaultValue !== historyItem.newVal) {
+							pendingChanges.updateChange(
 								'items',
-								item.item_id,
-								item.key,
-								item.newVal
+								historyItem.item_id,
+								historyItem.key,
+								historyItem.newVal
 							)
 						} else {
-							updatePendingChanges('items', item.item_id, item.key)
+							pendingChanges.updateChange(
+								'items',
+								historyItem.item_id,
+								historyItem.key
+							)
 						}
 
-						node.value = item.newVal
+						node.value = historyItem.newVal
 						node.focus()
 
+						break
+					}
+					case 'item_deletion': {
+						pendingChanges.addDeletion('item', historyItem.item_id)
+						break
+					}
+					case 'transaction_deletion': {
+						pendingChanges.addDeletion('transaction', historyItem.transaction_id)
+						break
+					}
+					case 'item_deletion_reversed': {
+						pendingChanges.removeDeletion('item', historyItem.item_id)
+						break
+					}
+					case 'transaction_deletion_reversed': {
+						pendingChanges.removeDeletion(
+							'transaction',
+							historyItem.transaction_id
+						)
 						break
 					}
 				}
@@ -234,81 +309,35 @@ export function useHistory({
 	}, [])
 
 	const add = useCallback((item: HistoryItem) => {
-		// setHistoryStack((prev) => {
-		// 	const clone = structuredClone(prev)
-		// 	clone.undoStack.push(item)
-		// 	return clone
-		// })
 		historyStackRef.current.undoStack.push(item)
 	}, [])
 
 	const clearUndo = useCallback(() => {
 		if (historyStackRef.current.undoStack.length > 0) {
-			// setHistoryStack((prev) => {
-			// 	const clone = structuredClone(prev)
-			// 	clone.undoStack = []
-			// 	return clone
-			// })
 			historyStackRef.current.undoStack = []
 		}
 	}, [])
 
 	const clear = useCallback(() => {
-		// setHistoryStack({ undoStack: [], redoStack: [] })
-
 		historyStackRef.current.undoStack = []
 		historyStackRef.current.redoStack = []
 	}, [])
 
 	const clearRedo = useCallback(() => {
 		if (historyStackRef.current.redoStack.length > 0) {
-			// setHistoryStack((prev) => {
-			// 	const clone = structuredClone(prev)
-			// 	clone.redoStack = []
-			// 	return clone
-			// })
 			historyStackRef.current.redoStack = []
 		}
 	}, [])
 
 	const upsert = useCallback((item: HistoryItem) => {
-		// setHistoryStack((prev) => {
-		// 	const clone = structuredClone(prev)
-		// 	const recentItem = clone.undoStack.at(-1)
-
-		// 	if (
-		// 		recentItem !== undefined &&
-		// 		item.type !== 'item_position_change' &&
-		// 		item.type !== 'transaction_position_change' &&
-		// 		recentItem.type !== 'item_position_change' &&
-		// 		recentItem.type !== 'transaction_position_change'
-		// 	) {
-		// 		let recentItemCopy = structuredClone(recentItem) as any
-		// 		let thisItemCopy = structuredClone(item) as any
-
-		// 		delete recentItemCopy.oldVal
-		// 		delete recentItemCopy.newVal
-		// 		delete thisItemCopy.oldVal
-		// 		delete thisItemCopy.newVal
-
-		// 		if (areDeeplyEqual(recentItemCopy, thisItemCopy)) {
-		// 			recentItem.newVal = item.newVal
-		// 			return clone
-		// 		}
-		// 	}
-		// 	clone.undoStack.push(item)
-		// 	clone.redoStack = []
-		// 	return clone
-		// })
-
 		const recentItem = historyStackRef.current.undoStack.at(-1)
 
 		if (
 			recentItem !== undefined &&
-			item.type !== 'item_position_change' &&
-			item.type !== 'transaction_position_change' &&
-			recentItem.type !== 'item_position_change' &&
-			recentItem.type !== 'transaction_position_change'
+			(item.type === 'item_value_change' ||
+				item.type === 'transaction_value_change') &&
+			(recentItem.type === 'item_value_change' ||
+				recentItem.type === 'transaction_value_change')
 		) {
 			let recentItemCopy = structuredClone(recentItem) as any
 			let thisItemCopy = structuredClone(item) as any
@@ -323,6 +352,7 @@ export function useHistory({
 				return
 			}
 		}
+		console.log('change successfully upserted')
 		historyStackRef.current.undoStack.push(item)
 		historyStackRef.current.redoStack = []
 	}, [])
@@ -371,6 +401,22 @@ export type HistoryItem =
 			key: 'name' | 'amount' | 'category_id' | 'account_id'
 			oldVal: string
 			newVal: string
+	  }
+	| {
+			type: 'item_deletion'
+			item_id: string
+	  }
+	| {
+			type: 'transaction_deletion'
+			transaction_id: string
+	  }
+	| {
+			type: 'item_deletion_reversed'
+			item_id: string
+	  }
+	| {
+			type: 'transaction_deletion_reversed'
+			transaction_id: string
 	  }
 
 export type HistoryState = { undoStack: HistoryItem[]; redoStack: HistoryItem[] }

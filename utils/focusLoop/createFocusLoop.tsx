@@ -41,7 +41,6 @@ export function createFocusLoop({
 	if (firstNode && lastNode) {
 		firstNode.addEventListener('keydown', onFirstRefKeydown)
 		lastNode.addEventListener('keydown', onLastRefKeydown)
-		console.log('focus loop created:', firstNode, lastNode)
 	}
 
 	function onFirstRefKeydown(e: KeyboardEvent) {
@@ -67,7 +66,6 @@ export function createFocusLoop({
 			if (firstNode && lastNode) {
 				firstNode.removeEventListener('keydown', onFirstRefKeydown)
 				lastNode.removeEventListener('keydown', onLastRefKeydown)
-				console.log('focus loop cleaned up:', firstNode, lastNode)
 			}
 		},
 	}
