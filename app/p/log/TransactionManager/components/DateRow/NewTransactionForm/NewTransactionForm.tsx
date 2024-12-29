@@ -42,17 +42,20 @@ export function NewTransactionForm({
 		date: defaultDate,
 		items: [{ name: '', amount: '', category_id: '', account_id: '' }],
 	})
-	const firstFocusRef = useRef<HTMLInputElement | null>(null)
-	const lastFocusRef = useRef<HTMLButtonElement | null>(null)
+	const firstFocusRef = useRef<HTMLElement | null>(null)
+	const lastFocusRef = useRef<HTMLElement | null>(null)
 	const [isMultiItems, setIsMultiItems] = useState(false)
 	const [missingItems, setMissingItems] = useState<string[]>([])
 	const [submitting, setSubmitting] = useState(false)
 	const [creationFinished, setCreationFinished] = useState(false)
 
 	useEffect(() => {
+		if (!creationFinished) {
+			firstFocusRef.current!.focus()
+		}
 		const loop = createFocusLoop({ firstRef: firstFocusRef, lastRef: lastFocusRef })
 		return loop.cleanup
-	}, [firstFocusRef, lastFocusRef])
+	}, [creationFinished])
 
 	useEffect(() => {
 		firstFocusRef.current!.focus()
@@ -203,7 +206,9 @@ export function NewTransactionForm({
 									id='transaction-name'
 									onChange={handleChange}
 									value={formData.name}
-									ref={firstFocusRef}
+									ref={(node) => {
+										firstFocusRef.current = node as HTMLElement
+									}}
 								/>
 							</div>
 							<div className={s.date_container}>
@@ -269,7 +274,9 @@ export function NewTransactionForm({
 							jstyle={missingItems.length !== 0 ? 'secondary' : 'primary'}
 							onClick={handleSubmit}
 							loading={submitting}
-							ref={lastFocusRef}
+							ref={(node) => {
+								lastFocusRef.current = node as HTMLElement
+							}}
 						>
 							Create
 						</JButton>
@@ -279,13 +286,21 @@ export function NewTransactionForm({
 				<>
 					<h3>Transaction successfully created.</h3>
 					<div className={s.button_container}>
-						<JButton jstyle='secondary' onClick={forceClosePopup}>
+						<JButton
+							jstyle='secondary'
+							onClick={forceClosePopup}
+							ref={(node) => {
+								firstFocusRef.current = node as HTMLElement
+							}}
+						>
 							Exit
 						</JButton>
 						<JButton
 							jstyle='primary'
 							onClick={handleCreateAnother}
-							ref={lastFocusRef}
+							ref={(node) => {
+								lastFocusRef.current = node as HTMLElement
+							}}
 						>
 							Create Another
 						</JButton>
