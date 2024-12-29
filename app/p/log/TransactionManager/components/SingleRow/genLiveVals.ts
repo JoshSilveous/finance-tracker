@@ -14,7 +14,7 @@ export type LiveVals = {
  */
 export function genLiveVals(
 	transaction: FormTransaction,
-	pendingChanges: PendingChanges.State
+	pendingChanges: PendingChanges.Controller['changes']['cur']
 ) {
 	const transaction_id = transaction.id
 	const item = transaction.items[0]

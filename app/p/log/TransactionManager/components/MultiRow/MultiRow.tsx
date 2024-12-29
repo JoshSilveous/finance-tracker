@@ -74,15 +74,15 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 	// re-calculates the displayed value (from default transaction or pendingChange)
 	const liveVals = useMemo(
-		() => genLiveVals(p.transaction, p.pendingChanges.curChanges),
-		[p.transaction, p.pendingChanges.curChanges]
+		() => genLiveVals(p.transaction, p.pendingChanges.changes.cur),
+		[p.transaction, p.pendingChanges.changes.cur]
 	)
 
 	const uniqueLists = genUniqueLists(p, liveVals)
 
 	const undoDeleteRef = useRef<HTMLButtonElement>(null)
 	const dateSelectRef = useRef<HTMLInputElement>(null)
-	const transactionPendingDeletion = p.pendingChanges.curDeletions.transactions.some(
+	const transactionPendingDeletion = p.pendingChanges.deletions.cur.transactions.some(
 		(id) => id === p.transaction.id
 	)
 
@@ -208,7 +208,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						text: 'Delete',
 						icon: <DeleteIcon />,
 						onClick: () => {
-							p.pendingChanges.addDeletion('transaction', p.transaction.id)
+							p.pendingChanges.deletions.add('transaction', p.transaction.id)
 							if (undoDeleteRef.current !== null) {
 								undoDeleteRef.current.focus()
 							}
@@ -222,7 +222,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						text: 'Add Item',
 						icon: <InsertRowIcon />,
 						onClick: () =>
-							p.pendingChanges.addCreation('item', {
+							p.pendingChanges.creations.add('item', {
 								rel: 'above',
 								item_id: p.transaction.items[0].id,
 								date: p.transaction.date,
@@ -236,10 +236,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	]
 
 	const itemRows = p.transaction.items.map((item, itemIndex) => {
-		const itemPendingDeletion = p.pendingChanges.curDeletions.items.some(
+		const itemPendingDeletion = p.pendingChanges.deletions.cur.items.some(
 			(id) => id === item.id
 		)
-		const itemPendingCreation = p.pendingChanges.isCreation(item.id)
+		const itemPendingCreation = p.pendingChanges.creations.check(item.id)
 
 		const itemSortPosChanged = (() => {
 			if (itemPendingCreation) {
@@ -257,14 +257,14 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 		const handleDelete = () => {
 			if (itemPendingCreation) {
-				p.pendingChanges.removeCreation(
+				p.pendingChanges.creations.remove(
 					'item',
 					item.id,
 					p.transaction.id,
 					p.transaction.date
 				)
 			} else {
-				p.pendingChanges.addDeletion('item', item.id)
+				p.pendingChanges.deletions.add('item', item.id)
 				if (document.activeElement) {
 					;(document.activeElement as HTMLElement).blur()
 				}
@@ -281,7 +281,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		}
 
 		const handleAddItem = () =>
-			p.pendingChanges.addCreation('item', {
+			p.pendingChanges.creations.add('item', {
 				rel: 'below',
 				item_id: item.id,
 				date: p.transaction.date,
@@ -477,7 +477,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						<JButton
 							jstyle='invisible'
 							onClick={() => {
-								p.pendingChanges.removeDeletion('item', item.id)
+								p.pendingChanges.deletions.add('item', item.id)
 							}}
 							ref={undoDeleteRef}
 							className={s.undo_delete_button}
@@ -510,7 +510,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		} as React.CSSProperties
 	}
 
-	const isPendingCreation = p.pendingChanges.isCreation(p.transaction.id)
+	const isPendingCreation = p.pendingChanges.creations.check(p.transaction.id)
 
 	const columns = firstRow.map((rowItem, rowItemIndex) => {
 		return (
@@ -560,7 +560,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					<JButton
 						jstyle='invisible'
 						onClick={() => {
-							p.pendingChanges.removeDeletion('transaction', p.transaction.id)
+							p.pendingChanges.deletions.remove(
+								'transaction',
+								p.transaction.id
+							)
 							if (dateSelectRef.current !== null) {
 								dateSelectRef.current.focus()
 							}

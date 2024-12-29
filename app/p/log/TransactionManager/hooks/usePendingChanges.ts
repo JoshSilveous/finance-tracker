@@ -16,37 +16,38 @@ export function usePendingChanges({
 	afterItemDeletionReversed,
 	afterTransactionDeletionReversed,
 }: UsePendingChangesProps) {
-	const [pendingChanges, setPendingChanges] = useState<PendingChanges.State>({
+	const [pendingChanges, setPendingChanges] = useState<
+		PendingChanges.Controller['changes']['cur']
+	>({
 		transactions: {},
 		items: {},
 	})
-	const [pendingDeletions, setPendingDeletions] = useState<{
-		transactions: string[]
-		items: string[]
-	}>({ transactions: [], items: [] })
+	const [pendingDeletions, setPendingDeletions] = useState<
+		PendingChanges.Controller['deletions']['cur']
+	>({ transactions: [], items: [] })
 
-	const [pendingCreations, setPendingCreations] = useState<{
-		transactions: null
-		items: FormTransaction['items']
-	}>({ transactions: null, items: [] })
+	const [pendingCreations, setPendingCreations] = useState<
+		PendingChanges.Controller['creations']['cur']
+	>({ transactions: null, items: [] })
 
-	const updateChange: PendingChanges.Updater = useCallback(
-		<T extends keyof PendingChanges.State>(
+	const updateChange: PendingChanges.Controller['changes']['set'] = useCallback(
+		<T extends keyof PendingChanges.Controller['changes']['cur']>(
 			type: T,
 			id: string,
-			key: keyof PendingChanges.State[T][number],
+			key: keyof PendingChanges.Controller['changes']['cur'][T][number],
 			value?: string
 		) => {
 			setPendingChanges((prev) => {
 				const clone = structuredClone(prev)
 				const target = clone[type] as Record<
 					string,
-					Partial<PendingChanges.State[T][number]>
+					Partial<PendingChanges.Controller['changes']['cur'][T][number]>
 				>
 
 				if (value !== undefined) {
 					target[id] ||= {}
-					target[id][key] = value as PendingChanges.State[T][number][typeof key]
+					target[id][key] =
+						value as PendingChanges.Controller['changes']['cur'][T][number][typeof key]
 				} else if (target[id] !== undefined) {
 					delete target[id][key]
 					if (Object.keys(target[id]).length === 0) {
@@ -62,10 +63,10 @@ export function usePendingChanges({
 		[]
 	)
 
-	const addDeletion = (
-		type: 'item' | 'transaction',
-		id: string,
-		dontAddToHistory?: boolean
+	const addDeletion: PendingChanges.Controller['deletions']['add'] = (
+		type,
+		id,
+		dontAddToHistory
 	) => {
 		setPendingDeletions((prev) => {
 			const clone = structuredClone(prev)
@@ -77,10 +78,10 @@ export function usePendingChanges({
 		}
 	}
 
-	const removeDeletion = (
-		type: 'item' | 'transaction',
-		id: string,
-		dontAddToHistory?: boolean
+	const removeDeletion: PendingChanges.Controller['deletions']['remove'] = (
+		type,
+		id,
+		dontAddToHistory
 	) => {
 		setPendingDeletions((prev) => {
 			const clone = structuredClone(prev)
@@ -106,15 +107,10 @@ export function usePendingChanges({
 		}
 	}
 
-	const addCreation = (
-		type: 'item' | 'transaction',
-		position: {
-			rel: 'above' | 'below'
-			item_id: string
-			date: string
-			transaction_id: string
-		},
-		item?: ItemWithoutID
+	const addCreation: PendingChanges.Controller['creations']['add'] = (
+		type,
+		position,
+		item
 	) => {
 		if (type === 'item') {
 			const temporary_item_id = 'PENDING_CREATION||' + crypto.randomUUID()
@@ -167,11 +163,11 @@ export function usePendingChanges({
 			})
 		}
 	}
-	const removeCreation = (
-		type: 'item' | 'transaction',
-		id: string,
-		transaction_id: string,
-		date: string
+	const removeCreation: PendingChanges.Controller['creations']['remove'] = (
+		type,
+		id,
+		transaction_id,
+		date
 	) => {
 		if (type === 'item') {
 			setPendingChanges((prev) => {
@@ -213,154 +209,139 @@ export function usePendingChanges({
 		}
 	}
 
-	const isCreation = (id: string) => {
+	const isCreation: PendingChanges.Controller['creations']['check'] = (id) => {
 		return id.split('||')[0] === 'PENDING_CREATION'
 	}
 
-	const clearAll = useCallback(() => {
+	const clearAll: PendingChanges.Controller['clear'] = useCallback(() => {
 		setPendingChanges({
 			transactions: {},
 			items: {},
 		})
+		setPendingCreations({ transactions: null, items: [] })
+		setPendingDeletions({ transactions: [], items: [] })
 	}, [])
 
 	return {
-		curChanges: pendingChanges,
-		updateChange,
-		clearAll,
-		curDeletions: pendingDeletions,
-		addDeletion,
-		isCreation,
-		removeDeletion,
-		curCreations: pendingCreations,
-		addCreation,
-		removeCreation,
+		changes: {
+			cur: pendingChanges,
+			set: updateChange,
+		},
+		deletions: {
+			cur: pendingDeletions,
+			add: addDeletion,
+			remove: removeDeletion,
+		},
+		creations: {
+			cur: pendingCreations,
+			add: addCreation,
+			remove: removeCreation,
+			check: isCreation,
+		},
+		clear: clearAll,
 	} as PendingChanges.Controller
 }
 
 export namespace PendingChanges {
-	/**
-	 * An object that stores any pending changes the user made to the Transaction data. Keys for the `transactions` and `items` properties are added/removed dynamically using a {@link Updater `PendingChangeUpdater`}.
-	 *
-	 * @example
-	 * ```ts
-	 * pendingChanges = {
-	 *     transactions: {
-	 *         "transaction_1": {
-	 *             "name": "New Name",
-	 *             "date": "2024-12-03"
-	 *         }
-	 *     },
-	 *     items: {}
-	 * }
-	 * ```
-	 */
-	export type State = {
-		transactions: {
-			[id: string]: Partial<Omit<FormTransaction, 'id' | 'items' | 'order_position'>>
-		}
-		items: {
-			[id: string]: Partial<
-				Omit<FormTransaction['items'][number], 'id' | 'order_position'>
-			>
-		}
-	}
+	export type ItemWithoutID = Omit<FormTransaction['items'][number], 'id'>
+	export type ItemWithoutIDAndPosition = Omit<
+		FormTransaction['items'][number],
+		'id' | 'order_position'
+	>
 
-	/**
-	 * Simplifies updating the `pendingChanges` array. Automatically adds/removes changes to keep pendingChanges minimized to relevant information.
-	 *
-	 * @param type `'transactions' | 'items'`
-	 * @param id The `item` or `transaction` id.
-	 * @param key The key of the item or transaction you're modifying.
-	 * @param value optional, leaving undefined will delete the value from `pendingChanges`
-	 *
-	 * @example
-	 * ```ts
-	 * updatePendingChanges('transactions', transaction.id, 'name', 'Burger') // creates/updates "name" for specified transaction as needed
-	 * updatePendingChanges('items', item.id, 'name') // removes "name" for specified item (implying the user has undone their change)
-	 * ```
-	 */
-	export type Updater = <T extends keyof State>(
-		type: T,
-		id: string,
-		key: keyof State[T][number],
-		value?: string
-	) => void
+	export type TransactionWithoutIDAndPosition = Omit<
+		FormTransaction,
+		'id' | 'items' | 'order_position'
+	>
 
 	export type Controller = {
-		/**
-		 * An object that stores any pending changes the user made to the Transaction data. Keys for the `transactions` and `items` properties are added/removed dynamically using a {@link Updater `PendingChangeUpdater`}.
-		 *
-		 * @example
-		 * ```ts
-		 * pendingChanges = {
-		 *     transactions: {
-		 *         "transaction_1": {
-		 *             "name": "New Name",
-		 *             "date": "2024-12-03"
-		 *         }
-		 *     },
-		 *     items: {}
-		 * }
-		 * ```
-		 */
-		curChanges: State
-		/**
-		 * Simplifies updating the `pendingChanges` array. Automatically adds/removes changes to keep pendingChanges minimized to relevant information.
-		 *
-		 * @param type `'transactions' | 'items'`
-		 * @param id The `item` or `transaction` id.
-		 * @param key The key of the item or transaction you're modifying.
-		 * @param value optional, leaving undefined will delete the value from `pendingChanges`
-		 *
-		 * @example
-		 * ```ts
-		 * updatePendingChanges('transactions', transaction.id, 'name', 'Burger') // creates/updates "name" for specified transaction as needed
-		 * updatePendingChanges('items', item.id, 'name') // removes "name" for specified item (implying the user has undone their change)
-		 * ```
-		 */
-		updateChange: Updater
-		removeCreation: (
-			type: 'item' | 'transaction',
-			id: string,
-			transaction_id: string,
-			date: string
-		) => void
-		clearAll: Clearer
-		isCreation: (id: string) => boolean
-		addCreation: (
-			type: 'item' | 'transaction',
-			position: {
-				rel: 'above' | 'below'
-				item_id: string
-				date: string
-				transaction_id: string
-			},
-			item?: ItemWithoutID
-		) => void
-		curCreations: {
-			transactions: null
-			items: FormTransaction['items']
-		}
-		curDeletions: {
-			transactions: string[]
-			items: string[]
-		}
-		addDeletion: (
-			type: 'item' | 'transaction',
-			id: string,
-			dontAddToHistory?: boolean
-		) => void
-		removeDeletion: (
-			type: 'item' | 'transaction',
-			id: string,
-			dontAddToHistory?: boolean
-		) => void
-	}
+		changes: {
+			/**
+			 * An object that stores any pending changes the user made to the Transaction data. Keys for the `transactions` and `items` properties are added/removed dynamically using a {@link Controller["changes"]["set"] `PendingChangeUpdater`}.
+			 *
+			 * @example
+			 * ```ts
+			 * pendingChanges = {
+			 *     transactions: {
+			 *         "transaction_1": {
+			 *             "name": "New Name",
+			 *             "date": "2024-12-03"
+			 *         }
+			 *     },
+			 *     items: {}
+			 * }
+			 * ```
+			 */
+			cur: {
+				transactions: {
+					[id: string]: Partial<TransactionWithoutIDAndPosition>
+				}
+				items: {
+					[id: string]: Partial<ItemWithoutIDAndPosition>
+				}
+			}
 
-	/**
-	 * Clears the pendingChange state
-	 */
-	export type Clearer = () => void
+			/**
+			 * Simplifies updating the `pendingChanges` array. Automatically adds/removes changes to keep pendingChanges minimized to relevant information.
+			 *
+			 * @param type `'transactions' | 'items'`
+			 * @param id The `item` or `transaction` id.
+			 * @param key The key of the item or transaction you're modifying.
+			 * @param value optional, leaving undefined will delete the value from `pendingChanges`
+			 *
+			 * @example
+			 * ```ts
+			 * updatePendingChanges('transactions', transaction.id, 'name', 'Burger') // creates/updates "name" for specified transaction as needed
+			 * updatePendingChanges('items', item.id, 'name') // removes "name" for specified item (implying the user has undone their change)
+			 * ```
+			 */
+			set: <T extends keyof Controller['changes']['cur']>(
+				type: T,
+				id: string,
+				key: keyof Controller['changes']['cur'][T][number],
+				value?: string
+			) => void
+		}
+		deletions: {
+			cur: {
+				transactions: string[]
+				items: string[]
+			}
+			add: (
+				type: 'item' | 'transaction',
+				id: string,
+				dontAddToHistory?: boolean
+			) => void
+			remove: (
+				type: 'item' | 'transaction',
+				id: string,
+				dontAddToHistory?: boolean
+			) => void
+		}
+		creations: {
+			cur: {
+				transactions: null
+				items: FormTransaction['items']
+			}
+			add: (
+				type: 'item' | 'transaction',
+				position: {
+					rel: 'above' | 'below'
+					item_id: string
+					date: string
+					transaction_id: string
+				},
+				item?: ItemWithoutID
+			) => void
+			remove: (
+				type: 'item' | 'transaction',
+				id: string,
+				transaction_id: string,
+				date: string
+			) => void
+
+			check: (id: string) => boolean
+		}
+		clear: () => void
+	}
 }
-type ItemWithoutID = Omit<FormTransaction['items'][number], 'id'>

@@ -39,8 +39,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 	const dateSelectRef = useRef<HTMLInputElement>(null)
 
 	const liveVals = useMemo(
-		() => genLiveVals(p.transaction, p.pendingChanges.curChanges),
-		[p.transaction, p.pendingChanges.curChanges]
+		() => genLiveVals(p.transaction, p.pendingChanges.changes.cur),
+		[p.transaction, p.pendingChanges.changes.cur]
 	)
 	const eventHandlers = useMemo(() => {
 		return {
@@ -55,14 +55,14 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				if (key === 'date' || key === 'name') {
 					const origVal = p.transaction[key]
 					if (origVal !== newVal) {
-						p.pendingChanges.updateChange(
+						p.pendingChanges.changes.set(
 							'transactions',
 							p.transaction.id,
 							key,
 							newVal
 						)
 					} else {
-						p.pendingChanges.updateChange('transactions', p.transaction.id, key)
+						p.pendingChanges.changes.set('transactions', p.transaction.id, key)
 					}
 				} else if (
 					key === 'amount' ||
@@ -73,9 +73,9 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						key
 					]
 					if (origVal !== newVal) {
-						p.pendingChanges.updateChange('items', item_id, key, newVal)
+						p.pendingChanges.changes.set('items', item_id, key, newVal)
 					} else {
-						p.pendingChanges.updateChange('items', item_id, key)
+						p.pendingChanges.changes.set('items', item_id, key)
 					}
 				}
 
@@ -143,7 +143,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 		}
 	}, [p.transaction])
 
-	const isPendingDeletion = p.pendingChanges.curDeletions.transactions.some(
+	const isPendingDeletion = p.pendingChanges.deletions.cur.transactions.some(
 		(id) => id === p.transaction.id
 	)
 
@@ -289,7 +289,10 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							text: 'Delete',
 							icon: <DeleteIcon />,
 							onClick: () => {
-								p.pendingChanges.addDeletion('transaction', p.transaction.id)
+								p.pendingChanges.deletions.add(
+									'transaction',
+									p.transaction.id
+								)
 								if (undoDeleteRef.current !== null) {
 									undoDeleteRef.current.focus()
 								}
@@ -300,7 +303,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							text: 'Add Item',
 							icon: <InsertRowIcon />,
 							onClick: () =>
-								p.pendingChanges.addCreation('item', {
+								p.pendingChanges.creations.add('item', {
 									rel: 'below',
 									item_id: item.id,
 									date: p.transaction.date,
@@ -333,7 +336,10 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					<JButton
 						jstyle='invisible'
 						onClick={() => {
-							p.pendingChanges.removeDeletion('transaction', p.transaction.id)
+							p.pendingChanges.deletions.remove(
+								'transaction',
+								p.transaction.id
+							)
 							if (dateSelectRef.current !== null) {
 								dateSelectRef.current.focus()
 							}

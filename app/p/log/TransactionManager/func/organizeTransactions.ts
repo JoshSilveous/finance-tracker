@@ -19,9 +19,9 @@ export function sortTransactions(
 
 					sortItem.forEach((itemID, index) => {
 						if (index === 0) return
-						if (pendingChanges.isCreation(itemID)) {
+						if (pendingChanges.creations.check(itemID)) {
 							newItems.push(
-								pendingChanges.curCreations.items.find(
+								pendingChanges.creations.cur.items.find(
 									(item) => item.id === itemID
 								)!
 							)

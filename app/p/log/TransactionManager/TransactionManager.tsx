@@ -136,7 +136,7 @@ export function TransactionManager() {
 	}, [mainContainerRef, loaded])
 
 	const refreshData = () => {
-		pendingChanges.clearAll()
+		pendingChanges.clear()
 		historyController.clear()
 		fetchAndLoadData(
 			setLoaded,
@@ -169,7 +169,7 @@ export function TransactionManager() {
 	}
 
 	const handleDiscardChanges = () => {
-		pendingChanges.clearAll()
+		pendingChanges.clear()
 		historyController.clear()
 	}
 
@@ -232,17 +232,22 @@ export function TransactionManager() {
 	}, [transactionData, sortOrder.cur])
 
 	const isChanged = useMemo(() => {
-		if (Object.keys(pendingChanges.curChanges.transactions).length !== 0) {
+		if (Object.keys(pendingChanges.changes.cur.transactions).length !== 0) {
 			return true
 		}
-		if (Object.keys(pendingChanges.curChanges.items).length !== 0) {
+		if (Object.keys(pendingChanges.changes.cur.items).length !== 0) {
 			return true
 		}
 		if (!areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
 			return true
 		}
 		return false
-	}, [pendingChanges.curChanges, sortOrder.cur, sortOrder.def])
+	}, [
+		pendingChanges.changes.cur,
+		sortOrder.cur,
+		sortOrder.def,
+		pendingChanges.creations.cur,
+	])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		const undoTitle = 'Undo most recent change.\nShortcut: CTRL + Z'
