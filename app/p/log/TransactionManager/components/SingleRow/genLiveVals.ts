@@ -1,4 +1,4 @@
-import { PendingChanges } from '../../hooks/usePendingChanges'
+import { PendingChangeController } from '../../hooks/usePendingChanges'
 import { FormTransaction } from '../../TransactionManager'
 
 export type LiveVals = {
@@ -14,7 +14,7 @@ export type LiveVals = {
  */
 export function genLiveVals(
 	transaction: FormTransaction,
-	pendingChanges: PendingChanges.Controller['changes']['cur']
+	pendingChanges: PendingChangeController['changes']['cur']
 ) {
 	const transaction_id = transaction.id
 	const item = transaction.items[0]

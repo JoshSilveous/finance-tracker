@@ -9,7 +9,7 @@ import s from './MultiRow.module.scss'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 import { genLiveVals } from './func/genLiveVals'
-import { PendingChanges } from '../../hooks/usePendingChanges'
+import { PendingChangeController } from '../../hooks/usePendingChanges'
 import { SortOrder, FoldStateUpdater, HistoryController, TabIndexer } from '../../hooks'
 import { foldRenderer } from './func/foldRenderer'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
@@ -20,7 +20,7 @@ import { delay } from '@/utils'
 export interface MultiRowProps {
 	transaction: FormTransaction
 	transactionIndex: number
-	pendingChanges: PendingChanges.Controller
+	pendingChanges: PendingChangeController
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	folded: boolean
 	playAnimation: boolean
@@ -477,7 +477,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						<JButton
 							jstyle='invisible'
 							onClick={() => {
-								p.pendingChanges.deletions.add('item', item.id)
+								p.pendingChanges.deletions.remove('item', item.id)
 							}}
 							ref={undoDeleteRef}
 							className={s.undo_delete_button}

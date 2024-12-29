@@ -17,13 +17,13 @@ import {
 import { FormTransaction } from '../../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../../hooks/useHistory'
-import { PendingChanges } from '../../hooks/usePendingChanges'
+import { PendingChangeController } from '../../hooks/usePendingChanges'
 import { SortOrder, TabIndexer } from '../../hooks'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 
 export interface SingleRowProps {
 	transaction: FormTransaction
-	pendingChanges: PendingChanges.Controller
+	pendingChanges: PendingChangeController
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	// onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	sortPosChanged: boolean

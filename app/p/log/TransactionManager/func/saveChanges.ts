@@ -9,7 +9,7 @@ import { MutableRefObject } from 'react'
 import { FormTransaction } from '../TransactionManager'
 
 export async function saveChanges(
-	pendingChanges: PendingChanges.Controller,
+	pendingChanges: PendingChanges.PendingChangeController,
 	sortOrder: SortOrder.Controller,
 	transactionData: MutableRefObject<FormTransaction[] | null>
 ) {

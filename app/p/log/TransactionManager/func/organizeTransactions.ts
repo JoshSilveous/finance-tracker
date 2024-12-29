@@ -5,7 +5,7 @@ import { GroupedTransaction, FormTransaction } from '../TransactionManager'
 export function sortTransactions(
 	sortOrder: SortOrder.State,
 	transactionData: FormTransaction[],
-	pendingChanges: PendingChanges.Controller
+	pendingChanges: PendingChanges.PendingChangeController
 ) {
 	return Object.entries(sortOrder).map((entry) => {
 		return {

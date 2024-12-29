@@ -9,13 +9,13 @@ import {
 } from 'react'
 import { FormTransaction } from '../TransactionManager'
 import { areDeeplyEqual, moveItemInArray } from '@/utils'
-import { PendingChanges } from './usePendingChanges'
+import { PendingChangeController } from './usePendingChanges'
 import { SortOrder } from './'
 
 export interface UseHistoryProps {
 	transactionDataRef: MutableRefObject<FormTransaction[] | null>
 	sortOrder: SortOrder.Controller
-	pendingChanges: PendingChanges.Controller
+	pendingChanges: PendingChangeController
 }
 
 export function useHistory({
@@ -23,14 +23,6 @@ export function useHistory({
 	sortOrder,
 	pendingChanges,
 }: UseHistoryProps) {
-	// const [historyStack, setHistoryStack] = useState<HistoryState>({
-	// 	undoStack: [],
-	// 	redoStack: [],
-	// })
-	// const historyStackRef = useRef<HistoryState>(historyStack)
-	// useEffect(() => {
-	// 	historyStackRef.current = historyStack
-	// }, [historyStack])
 	const historyStackRef = useRef<HistoryState>({ undoStack: [], redoStack: [] })
 
 	const undo = useCallback(() => {
@@ -83,14 +75,14 @@ export function useHistory({
 						)![historyItem.key]
 
 						if (defaultValue !== historyItem.oldVal) {
-							pendingChanges.updateChange(
+							pendingChanges.changes.set(
 								'transactions',
 								historyItem.transaction_id,
 								historyItem.key,
 								historyItem.oldVal
 							)
 						} else {
-							pendingChanges.updateChange(
+							pendingChanges.changes.set(
 								'transactions',
 								historyItem.transaction_id,
 								historyItem.key
@@ -115,14 +107,14 @@ export function useHistory({
 						]
 
 						if (defaultValue !== historyItem.oldVal) {
-							pendingChanges.updateChange(
+							pendingChanges.changes.set(
 								'items',
 								historyItem.item_id,
 								historyItem.key,
 								historyItem.oldVal
 							)
 						} else {
-							pendingChanges.updateChange(
+							pendingChanges.changes.set(
 								'items',
 								historyItem.item_id,
 								historyItem.key
@@ -135,12 +127,12 @@ export function useHistory({
 						break
 					}
 					case 'item_deletion': {
-						pendingChanges.removeDeletion('item', historyItem.item_id, true)
+						pendingChanges.deletions.remove('item', historyItem.item_id, true)
 						break
 					}
 					case 'transaction_deletion': {
 						// figuring out undo/redo for deletions
-						pendingChanges.removeDeletion(
+						pendingChanges.deletions.remove(
 							'transaction',
 							historyItem.transaction_id,
 							true
@@ -148,11 +140,11 @@ export function useHistory({
 						break
 					}
 					case 'item_deletion_reversed': {
-						pendingChanges.addDeletion('item', historyItem.item_id, true)
+						pendingChanges.deletions.add('item', historyItem.item_id, true)
 						break
 					}
 					case 'transaction_deletion_reversed': {
-						pendingChanges.addDeletion(
+						pendingChanges.deletions.add(
 							'transaction',
 							historyItem.transaction_id,
 							true
@@ -225,14 +217,14 @@ export function useHistory({
 						}
 
 						if (defaultValue !== historyItem.newVal) {
-							pendingChanges.updateChange(
+							pendingChanges.changes.set(
 								'transactions',
 								historyItem.transaction_id,
 								historyItem.key,
 								historyItem.newVal
 							)
 						} else {
-							pendingChanges.updateChange(
+							pendingChanges.changes.set(
 								'transactions',
 								historyItem.transaction_id,
 								historyItem.key
@@ -257,14 +249,14 @@ export function useHistory({
 						]
 
 						if (defaultValue !== historyItem.newVal) {
-							pendingChanges.updateChange(
+							pendingChanges.changes.set(
 								'items',
 								historyItem.item_id,
 								historyItem.key,
 								historyItem.newVal
 							)
 						} else {
-							pendingChanges.updateChange(
+							pendingChanges.changes.set(
 								'items',
 								historyItem.item_id,
 								historyItem.key
@@ -277,19 +269,22 @@ export function useHistory({
 						break
 					}
 					case 'item_deletion': {
-						pendingChanges.addDeletion('item', historyItem.item_id)
+						pendingChanges.deletions.add('item', historyItem.item_id)
 						break
 					}
 					case 'transaction_deletion': {
-						pendingChanges.addDeletion('transaction', historyItem.transaction_id)
+						pendingChanges.deletions.add(
+							'transaction',
+							historyItem.transaction_id
+						)
 						break
 					}
 					case 'item_deletion_reversed': {
-						pendingChanges.removeDeletion('item', historyItem.item_id)
+						pendingChanges.deletions.remove('item', historyItem.item_id)
 						break
 					}
 					case 'transaction_deletion_reversed': {
-						pendingChanges.removeDeletion(
+						pendingChanges.deletions.remove(
 							'transaction',
 							historyItem.transaction_id
 						)
@@ -308,28 +303,28 @@ export function useHistory({
 		}
 	}, [])
 
-	const add = useCallback((item: HistoryItem) => {
+	const add = (item: HistoryItem) => {
 		historyStackRef.current.undoStack.push(item)
-	}, [])
+	}
 
-	const clearUndo = useCallback(() => {
+	const clearUndo = () => {
 		if (historyStackRef.current.undoStack.length > 0) {
 			historyStackRef.current.undoStack = []
 		}
-	}, [])
+	}
 
-	const clear = useCallback(() => {
+	const clear = () => {
 		historyStackRef.current.undoStack = []
 		historyStackRef.current.redoStack = []
-	}, [])
+	}
 
-	const clearRedo = useCallback(() => {
+	const clearRedo = () => {
 		if (historyStackRef.current.redoStack.length > 0) {
 			historyStackRef.current.redoStack = []
 		}
-	}, [])
+	}
 
-	const upsert = useCallback((item: HistoryItem) => {
+	const upsert = (item: HistoryItem) => {
 		const recentItem = historyStackRef.current.undoStack.at(-1)
 
 		if (
@@ -352,13 +347,12 @@ export function useHistory({
 				return
 			}
 		}
-		console.log('change successfully upserted')
 		historyStackRef.current.undoStack.push(item)
 		historyStackRef.current.redoStack = []
-	}, [])
+	}
 
-	const undoDisabled = () => historyStackRef.current.undoStack.length === 0
-	const redoDisabled = () => historyStackRef.current.redoStack.length === 0
+	const undoDisabled = historyStackRef.current.undoStack.length === 0
+	const redoDisabled = historyStackRef.current.redoStack.length === 0
 
 	return {
 		undo,
@@ -454,11 +448,11 @@ export type HistoryController = {
 	 */
 	clear: () => void
 	/**
-	 * returns `true` if the `undo` array is empty, otherwise `false`
+	 * `true` if the `undo` array is empty, otherwise `false`
 	 */
-	undoDisabled: () => boolean
+	undoDisabled: boolean
 	/**
-	 * returns `true` if the `redo` array is empty, otherwise `false`
+	 * `true` if the `redo` array is empty, otherwise `false`
 	 */
-	redoDisabled: () => boolean
+	redoDisabled: boolean
 }

@@ -232,22 +232,14 @@ export function TransactionManager() {
 	}, [transactionData, sortOrder.cur])
 
 	const isChanged = useMemo(() => {
-		if (Object.keys(pendingChanges.changes.cur.transactions).length !== 0) {
-			return true
-		}
-		if (Object.keys(pendingChanges.changes.cur.items).length !== 0) {
+		if (pendingChanges.isChanges) {
 			return true
 		}
 		if (!areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
 			return true
 		}
 		return false
-	}, [
-		pendingChanges.changes.cur,
-		sortOrder.cur,
-		sortOrder.def,
-		pendingChanges.creations.cur,
-	])
+	}, [pendingChanges.isChanges, sortOrder.cur, sortOrder.def])
 
 	const headers: JGridTypes.Header[] = useMemo(() => {
 		const undoTitle = 'Undo most recent change.\nShortcut: CTRL + Z'
@@ -260,7 +252,7 @@ export function TransactionManager() {
 							jstyle='invisible'
 							className={s.undo}
 							onClick={historyController.undo}
-							disabled={historyController.undoDisabled()}
+							disabled={historyController.undoDisabled}
 							title={undoTitle}
 						>
 							<UndoRedoIcon />
@@ -269,7 +261,7 @@ export function TransactionManager() {
 							jstyle='invisible'
 							className={s.redo}
 							onClick={historyController.redo}
-							disabled={historyController.redoDisabled()}
+							disabled={historyController.redoDisabled}
 							title={redoTitle}
 						>
 							<UndoRedoIcon />
