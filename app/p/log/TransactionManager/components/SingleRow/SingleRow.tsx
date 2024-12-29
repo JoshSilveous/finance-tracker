@@ -280,7 +280,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			>
 				<OptionsMenu
 					width={150}
-					height={140}
+					height={110}
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
 					tabIndex={isPendingDeletion ? undefined : p.tabIndexer()}

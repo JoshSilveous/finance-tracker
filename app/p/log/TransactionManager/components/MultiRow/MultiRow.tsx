@@ -199,7 +199,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		>
 			<OptionsMenu
 				width={150}
-				height={140}
+				height={110}
 				test_transaction_id={p.transaction.name}
 				className={s.more_controls}
 				tabIndex={transactionPendingDeletion ? undefined : p.tabIndexer()}
@@ -448,7 +448,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			>
 				<OptionsMenu
 					width={180}
-					height={140}
+					height={110}
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
 					tabIndex={itemPendingDeletion ? undefined : p.tabIndexer()}
