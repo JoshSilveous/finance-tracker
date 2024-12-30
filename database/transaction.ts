@@ -215,3 +215,31 @@ export async function insertItems(items: InsertItemEntry[]) {
 
 	return data
 }
+
+export async function deleteItems(ids: string[]) {
+	if (!ids.length) {
+		throw new Error('No item IDs provided for deletion.')
+	}
+
+	const { error } = await supabase.from('transaction_items').delete().in('id', ids)
+
+	if (error) {
+		throw new Error(error.message)
+	}
+
+	return
+}
+
+export async function deleteTransactions(ids: string[]) {
+	if (!ids.length) {
+		throw new Error('No transaction IDs provided for deletion.')
+	}
+
+	const { error } = await supabase.from('transactions').delete().in('id', ids)
+
+	if (error) {
+		throw new Error(error.message)
+	}
+
+	return
+}

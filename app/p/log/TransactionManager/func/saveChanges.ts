@@ -1,4 +1,6 @@
 import {
+	deleteItems,
+	deleteTransactions,
 	FetchedTransaction,
 	insertItems,
 	UpsertItemEntry,
@@ -8,6 +10,7 @@ import {
 import { PendingChangeController, SortOrder } from '../hooks'
 import { MutableRefObject } from 'react'
 import { FormTransaction } from '../TransactionManager'
+import { delay } from '@/utils'
 
 export async function saveChanges(
 	pendingChanges: PendingChangeController,
@@ -20,7 +23,54 @@ export async function saveChanges(
 		def: structuredClone(sortOrder.def),
 	}
 
-	// 1. determine item order_position changes
+	// 1. isolate items to be deleted
+	const itemDeletePromise = (() => {
+		if (pendingChanges.deletions.cur.items.length === 0) {
+			return null
+		}
+		pendingChanges.deletions.cur.items.forEach((item_id) => {
+			// remove from changes
+			delete changesCopy.items[item_id]
+
+			// remove for current sortOrder
+			Object.entries(sortOrder.cur).forEach(([date, sortItems]) => {
+				sortItems.forEach((sortItem) => {
+					if (Array.isArray(sortItem) && sortItem.includes(item_id)) {
+						sortItem.splice(sortItem.indexOf(item_id), 1)
+					}
+				})
+			})
+		})
+
+		return deleteItems(pendingChanges.deletions.cur.items)
+	})()
+
+	// 2. isolate transactions to be deleted
+	const transactionDeletePromise = (() => {
+		if (pendingChanges.deletions.cur.transactions.length === 0) {
+			return null
+		}
+		pendingChanges.deletions.cur.transactions.forEach((transaction_id) => {
+			// remove from changes
+			delete changesCopy.transactions[transaction_id]
+
+			// remove for current sortOrder
+			Object.entries(sortOrder.cur).forEach(([date, sortItems]) => {
+				sortItems.forEach((sortItem, index) => {
+					if (
+						(Array.isArray(sortItem) && sortItem[0] === transaction_id) ||
+						sortItem === transaction_id
+					) {
+						sortItems.splice(index, 1)
+					}
+				})
+			})
+		})
+
+		return deleteTransactions(pendingChanges.deletions.cur.transactions)
+	})()
+
+	// 3. determine item order_position changes
 	const itemPositionUpdates: { id: string; order_position: number }[] = (() => {
 		const itemPositionUpdates: { id: string; order_position: number }[] = []
 
@@ -56,9 +106,8 @@ export async function saveChanges(
 
 		return itemPositionUpdates
 	})()
-	console.log('itemPositionUpdates', itemPositionUpdates)
 
-	// 2. insert new items with new order position
+	// 4. insert new items with new order position
 	const insertItemsPromise = (() => {
 		if (pendingChanges.creations.cur.items.length === 0) {
 			return null
@@ -98,7 +147,7 @@ export async function saveChanges(
 		return insertItems(newItems.map((entry) => entry.item))
 	})()
 
-	// 3. package up items for upsertion
+	// 5. package up items for upsertion
 	const packagedItems: UpsertItemEntry[] = (() => {
 		const packagedItems: UpsertItemEntry[] = []
 
@@ -166,7 +215,7 @@ export async function saveChanges(
 		return packagedItems
 	})()
 
-	// 4. determine transaction order_position changes
+	// 6. determine transaction order_position changes
 	const transactionPositionUpdates: { id: string; order_position: number }[] = (() => {
 		const transactionPositionUpdates: { id: string; order_position: number }[] = []
 
@@ -190,10 +239,9 @@ export async function saveChanges(
 		return transactionPositionUpdates
 	})()
 
-	// 5. package up transactions for upsertion
+	// 7. package up transactions for upsertion
 	const packagedTransactions: UpsertTransactionEntry[] = (() => {
 		const packagedTransactions: UpsertTransactionEntry[] = []
-
 		// add transactions with value changes
 		Object.entries(changesCopy.transactions).forEach(([id, changes]) => {
 			const original = transactionData.current!.find(
@@ -211,12 +259,12 @@ export async function saveChanges(
 			if (newOrderPositionUpdateIndex !== -1) {
 				transactionPositionUpdates.splice(newOrderPositionUpdateIndex, 1)
 			}
-			return {
+			packagedTransactions.push({
 				id,
 				order_position,
 				date: changes.date !== undefined ? changes.date : original.date,
 				name: changes.name !== undefined ? changes.name : original.name,
-			}
+			})
 		})
 
 		// add remaining transactions with only order_position changes
@@ -233,15 +281,25 @@ export async function saveChanges(
 		return packagedTransactions
 	})()
 
-	// 6. run promises
-	const upsertPromise = upsertTransactionsAndItems(packagedTransactions, packagedItems)
+	console.log('packagedTransactions, packagedItems', packagedTransactions, packagedItems)
 
-	if (insertItemsPromise === null) {
-		await upsertPromise
-		return
-	} else {
-		Promise.all([insertItemsPromise, upsertPromise]).then(() => {
-			return
-		})
-	}
+	// 8. prepare upsert promise
+	const upsertPromise = (() => {
+		if (packagedTransactions.length === 0 && packagedItems.length === 0) {
+			return null
+		} else {
+			return upsertTransactionsAndItems(packagedTransactions, packagedItems)
+		}
+	})()
+
+	// 9. run promises
+	const promises = [
+		itemDeletePromise,
+		transactionDeletePromise,
+		insertItemsPromise,
+		upsertPromise,
+	].filter((promise) => promise !== null)
+
+	await Promise.all(promises)
+	return
 }

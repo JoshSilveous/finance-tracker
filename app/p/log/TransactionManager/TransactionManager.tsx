@@ -135,11 +135,10 @@ export function TransactionManager() {
 		}
 	}, [mainContainerRef, loaded])
 
-	const refreshData = () => {
+	const refreshData = async () => {
 		pendingChanges.clear()
 		historyController.clear()
-		fetchAndLoadData(
-			setLoaded,
+		await fetchAndLoadData(
 			setTransactionData,
 			foldState.set,
 			setCategoryData,
@@ -147,9 +146,14 @@ export function TransactionManager() {
 			sortOrder.setDefault,
 			sortOrder.setCurrent
 		)
+		return
 	}
 	useEffect(() => {
-		refreshData()
+		;(async () => {
+			setLoaded(false)
+			await refreshData()
+			setLoaded(true)
+		})()
 	}, [])
 
 	useEffect(() => {
@@ -177,8 +181,8 @@ export function TransactionManager() {
 		setIsSaving(true)
 		try {
 			await saveChanges(pendingChanges, sortOrder, transactionDataRef)
+			await refreshData()
 			setIsSaving(false)
-			refreshData()
 		} catch (e) {
 			if (isStandardError(e)) {
 				promptError(
