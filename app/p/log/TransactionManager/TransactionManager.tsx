@@ -346,6 +346,24 @@ export function TransactionManager() {
 
 			let gridRow = 2
 			sortedData.forEach((groupedItem, groupedItemIndex) => {
+				if (groupedItemIndex === 0) {
+					const today = new Date()
+					today.setHours(0, 0, 0, 0)
+					const inputDate = new Date(`${groupedItem.date}T00:00:00`)
+					if (inputDate < today) {
+						cells.push(
+							<DateRow
+								date={today.toISOString().split('T')[0]}
+								dropdownOptions={dropdownOptions}
+								refreshData={refreshData}
+								gridRow={gridRow}
+								key={`${groupedItem.date}-${groupedItemIndex}`}
+								tabIndexer={tabIndexer}
+							/>
+						)
+						gridRow++
+					}
+				}
 				cells.push(
 					<DateRow
 						date={groupedItem.date}
