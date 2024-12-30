@@ -1,17 +1,35 @@
+## Unsolved
+
+-   Switch preferred column widths to localStorage instead of DB
+-   Add key listeners for saving
+-   Disable grid while saving
+-   Switch "create new transaction" button to add row to grid
+-   Show "Today" and "Yesterday" on dates
+-   Make TransactionManager card resizable, where the grid always takes up 100%.
+-   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
+    This will require some sortOrder magic and querying when saving.
+-   Make pop-out scrollbar not appear when not needed: https://i.imgur.com/sAXGkIZ.gif
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+## Solved
+
 -   TransactionManager
-
-    -   NEXT: move transaction reorder logic to sortOrder
-
+-   fix this bug https://imgur.com/NO91QLm
     -   Add control to delete rows
     -   Add control to delete transaction items
     -   Set up history system
-
-    -   fix this bug https://imgur.com/NO91QLm
-    -   fix this https://i.imgur.com/sAXGkIZ.gif
-
--   Switch preferred column widths to localStorage instead of DB
-
--   TransactionManager
+    -   NEXT: move transaction reorder logic to sortOrder
     -   Set up PendingChange system
     -   remove datasets
     -   STRESS TEST RESORTING (esp when scrollheight overflows)
