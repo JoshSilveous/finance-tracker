@@ -101,7 +101,7 @@ export function MultiItemGrid({
 		[]
 	)
 	const cells: JGridTypes.Row[] = formData.items.map((item, index) => (
-		<div className={s.item_row} ref={addToItemRowsRef(index)}>
+		<div className={s.item_row} ref={addToItemRowsRef(index)} key={index}>
 			<div className={`${s.control_container} ${index === 0 ? s.first_row : ''}`}>
 				<div className={s.reorder_grabber}>
 					<button
