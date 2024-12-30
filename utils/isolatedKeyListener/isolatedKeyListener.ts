@@ -5,7 +5,8 @@ export type IsolatedKeyListener = {
 	ctrlKey?: boolean
 	shiftKey?: boolean
 	altKey?: boolean
-	run: () => void
+	run: (e: KeyboardEvent) => void
+	preventDefault?: boolean
 }
 
 let curContext = ''
@@ -51,6 +52,7 @@ export function removeIsolatedKeyListeners(
  * e.x. use this when a popup is activated to prevent the default key listeners from running.
  */
 export function setKeyListenerContext(context: string) {
+	console.log('context set to', context)
 	curContext = context
 }
 
@@ -71,8 +73,10 @@ function listenerDistributor(e: KeyboardEvent) {
 		if (listener.altKey !== undefined && e.altKey !== listener.altKey) {
 			return
 		}
-		e.preventDefault()
-		listener.run()
+		if (listener.preventDefault) {
+			e.preventDefault()
+		}
+		listener.run(e)
 	})
 }
 
