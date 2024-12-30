@@ -6,9 +6,17 @@ import { default as DeleteIcon } from '@/public/delete.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import s from './NewTransactionForm.module.scss'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
-import { Dispatch, SetStateAction, useCallback, useMemo, useRef } from 'react'
+import {
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react'
 import { handleReorder } from './handleReorder'
-import { removeFromArray } from '@/utils'
+import { delay, removeFromArray } from '@/utils'
 
 interface MultiItemGridProps {
 	formData: TransactionFormData
@@ -23,14 +31,31 @@ export function MultiItemGrid({
 	setFormData,
 }: MultiItemGridProps) {
 	const itemRowsRef = useRef<HTMLDivElement[]>([])
-	const addToItemRowsRef = useCallback(
-		(itemIndex: number) => (node: HTMLDivElement) => {
-			if (node !== null) {
-				itemRowsRef.current[itemIndex] = node
-			}
-		},
-		[]
-	)
+	const addToItemRowsRef = (itemIndex: number) => (node: HTMLDivElement) => {
+		if (node !== null) {
+			itemRowsRef.current[itemIndex] = node
+		}
+	}
+
+	const addNewItem = useCallback(() => {
+		setFormData((prev) => {
+			const clone = structuredClone(prev)
+			clone.items.push({ name: '', amount: '', category_id: '', account_id: '' })
+			return clone
+		})
+		setNewItemAdded(true)
+	}, [])
+	const [newItemAdded, setNewItemAdded] = useState(false)
+	useEffect(() => {
+		// focus on new row when added
+		if (newItemAdded) {
+			const newRowNameInputNode = document.querySelector(
+				`[data-newest-row-identifier="true"]`
+			) as HTMLInputElement
+			newRowNameInputNode.focus()
+			setNewItemAdded(false)
+		}
+	}, [newItemAdded])
 
 	const headers: JGridTypes.Header[] = useMemo(
 		() => [
@@ -83,13 +108,6 @@ export function MultiItemGrid({
 		[]
 	)
 
-	const addNewItem = useCallback(() => {
-		setFormData((prev) => {
-			const clone = structuredClone(prev)
-			clone.items.push({ name: '', amount: '', category_id: '', account_id: '' })
-			return clone
-		})
-	}, [])
 	const deleteItem = useCallback(
 		(index: number) => () => {
 			setFormData((prev) => {
@@ -100,6 +118,7 @@ export function MultiItemGrid({
 		},
 		[]
 	)
+
 	const cells: JGridTypes.Row[] = formData.items.map((item, index) => (
 		<div className={s.item_row} ref={addToItemRowsRef(index)} key={index}>
 			<div className={`${s.control_container} ${index === 0 ? s.first_row : ''}`}>
@@ -136,6 +155,9 @@ export function MultiItemGrid({
 			<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
 				<JInput
 					id={`item-name-${index}`}
+					data-newest-row-identifier={
+						index === formData.items.length - 1 ? 'true' : undefined
+					}
 					value={item.name}
 					onChange={handleChange}
 				/>
