@@ -56,8 +56,6 @@ export function DateRow({
 	const isToday = date === getDateString()
 	const isYesterday = date === getDateString(-1)
 
-	console.log('date', date, isToday, isYesterday)
-
 	const dateDisplay = (
 		<div className={s.date_container}>
 			{day.long}, {month.short}

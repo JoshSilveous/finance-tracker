@@ -44,6 +44,8 @@ export function useSortOrder({
 		curSortOrderRef.current = curSortOrder
 	}, [curSortOrder])
 
+	const changesAreDisabled = useRef<boolean>(false)
+
 	/* TRANSACTION REORDERING LOGIC */
 
 	// used to re-gain focus on the reorder node after re-renders
@@ -60,61 +62,68 @@ export function useSortOrder({
 	>([])
 	const handleTransactionReorderKeydown = useCallback(
 		(transaction: FormTransaction) => (e: KeyboardEvent) => {
-			const transactionIndex = curSortOrderRef.current![transaction.date].findIndex(
-				(sortItem) =>
+			if (!changesAreDisabled.current) {
+				const transactionIndex = curSortOrderRef.current![
+					transaction.date
+				].findIndex((sortItem) =>
 					Array.isArray(sortItem)
 						? sortItem[0] === transaction.id
 						: sortItem === transaction.id
-			)
+				)
 
-			if (e.key === 'ArrowUp' && transactionIndex !== 0) {
-				e.preventDefault()
-				updateTransactionSortOrder(
-					transaction.date,
-					transactionIndex,
-					transactionIndex - 1
-				)
-				transactionToFocusOnRef.current = transaction.id
-			} else if (
-				e.key === 'ArrowDown' &&
-				transactionIndex !== curSortOrderRef.current![transaction.date].length - 1
-			) {
-				e.preventDefault()
-				updateTransactionSortOrder(
-					transaction.date,
-					transactionIndex,
-					transactionIndex + 1
-				)
-				transactionToFocusOnRef.current = transaction.id
+				if (e.key === 'ArrowUp' && transactionIndex !== 0) {
+					e.preventDefault()
+					updateTransactionSortOrder(
+						transaction.date,
+						transactionIndex,
+						transactionIndex - 1
+					)
+					transactionToFocusOnRef.current = transaction.id
+				} else if (
+					e.key === 'ArrowDown' &&
+					transactionIndex !==
+						curSortOrderRef.current![transaction.date].length - 1
+				) {
+					e.preventDefault()
+					updateTransactionSortOrder(
+						transaction.date,
+						transactionIndex,
+						transactionIndex + 1
+					)
+					transactionToFocusOnRef.current = transaction.id
+				}
 			}
 		},
 		[]
 	)
 	const handleTransactionReorderMousedown = useCallback(
 		(transaction: FormTransaction) => (e: MouseEvent) => {
-			const transactionIndex = curSortOrderRef.current![transaction.date].findIndex(
-				(sortItem) =>
+			if (!changesAreDisabled.current) {
+				const transactionIndex = curSortOrderRef.current![
+					transaction.date
+				].findIndex((sortItem) =>
 					Array.isArray(sortItem)
 						? sortItem[0] === transaction.id
 						: sortItem === transaction.id
-			)
+				)
 
-			const folded = getFoldState(transaction.id)
+				const folded = getFoldState(transaction.id)
 
-			return transactionReorderMouseEffect(
-				transaction,
-				transactionIndex,
-				curSortOrderRef.current![transaction.date],
-				transactionRowsRef,
-				folded,
-				updateFoldState,
-				e,
-				(oldIndex, newIndex) => {
-					updateTransactionSortOrder(transaction.date, oldIndex, newIndex)
-					// setTransactionToFocusOn(transaction.id)
-					transactionToFocusOnRef.current = transaction.id
-				}
-			)
+				return transactionReorderMouseEffect(
+					transaction,
+					transactionIndex,
+					curSortOrderRef.current![transaction.date],
+					transactionRowsRef,
+					folded,
+					updateFoldState,
+					e,
+					(oldIndex, newIndex) => {
+						updateTransactionSortOrder(transaction.date, oldIndex, newIndex)
+						// setTransactionToFocusOn(transaction.id)
+						transactionToFocusOnRef.current = transaction.id
+					}
+				)
+			}
 		},
 		[]
 	)
@@ -168,9 +177,7 @@ export function useSortOrder({
 		[]
 	)
 	/* END TRANSACTION REORDERING LOGIC */
-	//
-	//
-	//
+
 	/* ITEM REORDERING LOGIC */
 
 	// used to re-gain focus on the reorder node after re-renders
@@ -193,54 +200,56 @@ export function useSortOrder({
 	const handleItemReorderKeydown = useCallback(
 		(transaction: FormTransaction, item: FormTransaction['items'][number]) =>
 			(e: KeyboardEvent) => {
-				if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-					const transactionIndex = curSortOrderRef.current![
-						transaction.date
-					].findIndex(
-						(sortItem) =>
-							Array.isArray(sortItem) && sortItem[0] === transaction.id
-					)
-
-					const itemIndex =
-						(
-							curSortOrderRef.current![transaction.date][
-								transactionIndex
-							] as string[]
-						).findIndex((sortItem) => sortItem === item.id) - 1
-
-					if (e.key === 'ArrowUp' && itemIndex !== 0) {
-						e.preventDefault()
-						updateItemSortOrder(
-							transaction,
-							transactionIndex,
-							itemIndex,
-							itemIndex - 1
+				if (!changesAreDisabled.current) {
+					if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+						const transactionIndex = curSortOrderRef.current![
+							transaction.date
+						].findIndex(
+							(sortItem) =>
+								Array.isArray(sortItem) && sortItem[0] === transaction.id
 						)
-						setItemToFocusOn({
-							transaction_id: transaction.id,
-							item_id: item.id,
-						})
-					} else if (
-						e.key === 'ArrowDown' &&
-						itemIndex !==
+
+						const itemIndex =
 							(
 								curSortOrderRef.current![transaction.date][
 									transactionIndex
 								] as string[]
-							).length -
-								2
-					) {
-						e.preventDefault()
-						updateItemSortOrder(
-							transaction,
-							transactionIndex,
-							itemIndex,
-							itemIndex + 1
-						)
-						setItemToFocusOn({
-							transaction_id: transaction.id,
-							item_id: item.id,
-						})
+							).findIndex((sortItem) => sortItem === item.id) - 1
+
+						if (e.key === 'ArrowUp' && itemIndex !== 0) {
+							e.preventDefault()
+							updateItemSortOrder(
+								transaction,
+								transactionIndex,
+								itemIndex,
+								itemIndex - 1
+							)
+							setItemToFocusOn({
+								transaction_id: transaction.id,
+								item_id: item.id,
+							})
+						} else if (
+							e.key === 'ArrowDown' &&
+							itemIndex !==
+								(
+									curSortOrderRef.current![transaction.date][
+										transactionIndex
+									] as string[]
+								).length -
+									2
+						) {
+							e.preventDefault()
+							updateItemSortOrder(
+								transaction,
+								transactionIndex,
+								itemIndex,
+								itemIndex + 1
+							)
+							setItemToFocusOn({
+								transaction_id: transaction.id,
+								item_id: item.id,
+							})
+						}
 					}
 				}
 			},
@@ -253,35 +262,40 @@ export function useSortOrder({
 				itemRowsRef: MutableRefObject<ItemRowsRef>
 			) =>
 			(e: MouseEvent) => {
-				const transactionIndex = curSortOrderRef.current![
-					transaction.date
-				].findIndex(
-					(sortItem) => Array.isArray(sortItem) && sortItem[0] === transaction.id
-				)
+				if (!changesAreDisabled.current) {
+					const transactionIndex = curSortOrderRef.current![
+						transaction.date
+					].findIndex(
+						(sortItem) =>
+							Array.isArray(sortItem) && sortItem[0] === transaction.id
+					)
 
-				const itemIndex = (
-					curSortOrderRef.current![transaction.date][transactionIndex] as string[]
-				).findIndex((sortItem) => sortItem === item.id)
+					const itemIndex = (
+						curSortOrderRef.current![transaction.date][
+							transactionIndex
+						] as string[]
+					).findIndex((sortItem) => sortItem === item.id)
 
-				return itemReorderMouseEffect(
-					item,
-					itemRowsRef,
-					itemIndex - 1,
-					transaction,
-					e,
-					(oldIndex, newIndex) => {
-						updateItemSortOrder(
-							transaction,
-							transactionIndex,
-							oldIndex,
-							newIndex
-						)
-						setItemToFocusOn({
-							transaction_id: transaction.id,
-							item_id: item.id,
-						})
-					}
-				)
+					return itemReorderMouseEffect(
+						item,
+						itemRowsRef,
+						itemIndex - 1,
+						transaction,
+						e,
+						(oldIndex, newIndex) => {
+							updateItemSortOrder(
+								transaction,
+								transactionIndex,
+								oldIndex,
+								newIndex
+							)
+							setItemToFocusOn({
+								transaction_id: transaction.id,
+								item_id: item.id,
+							})
+						}
+					)
+				}
 			},
 		[]
 	)
@@ -359,6 +373,12 @@ export function useSortOrder({
 		def: defSortOrder,
 		addToTransactionReorderRefs,
 		addToItemReorderRefs,
+		disableChanges: () => {
+			changesAreDisabled.current = true
+		},
+		enableChanges: () => {
+			changesAreDisabled.current = false
+		},
 	} as SortOrder.Controller
 }
 
@@ -436,6 +456,8 @@ export namespace SortOrder {
 			item: FormTransaction['items'][number],
 			itemRowsRef: MutableRefObject<ItemRowsRef>
 		) => ItemReorderRefAdder
+		disableChanges: () => void
+		enableChanges: () => void
 	}
 
 	/**

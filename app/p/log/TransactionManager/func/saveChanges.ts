@@ -286,8 +286,6 @@ export async function saveChanges(
 		return packagedTransactions
 	})()
 
-	console.log('packagedTransactions, packagedItems', packagedTransactions, packagedItems)
-
 	// 8. prepare upsert promise
 	const upsertPromise = (() => {
 		if (packagedTransactions.length === 0 && packagedItems.length === 0) {

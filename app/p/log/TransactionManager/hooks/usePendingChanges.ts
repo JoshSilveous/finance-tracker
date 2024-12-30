@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { FormTransaction } from '../TransactionManager'
 import { SortOrder } from './useSortOrder'
 
@@ -30,6 +30,8 @@ export function usePendingChanges({
 		PendingChangeController['creations']['cur']
 	>({ transactions: null, items: [] })
 
+	const changesAreDisabled = useRef<boolean>(false)
+
 	const updateChange: PendingChangeController['changes']['set'] = useCallback(
 		<T extends keyof PendingChangeController['changes']['cur']>(
 			type: T,
@@ -37,28 +39,30 @@ export function usePendingChanges({
 			key: keyof PendingChangeController['changes']['cur'][T][number],
 			value?: string
 		) => {
-			setPendingChanges((prev) => {
-				const clone = structuredClone(prev)
-				const target = clone[type] as Record<
-					string,
-					Partial<PendingChangeController['changes']['cur'][T][number]>
-				>
+			if (!changesAreDisabled.current) {
+				setPendingChanges((prev) => {
+					const clone = structuredClone(prev)
+					const target = clone[type] as Record<
+						string,
+						Partial<PendingChangeController['changes']['cur'][T][number]>
+					>
 
-				if (value !== undefined) {
-					target[id] ||= {}
-					target[id][key] =
-						value as PendingChangeController['changes']['cur'][T][number][typeof key]
-				} else if (target[id] !== undefined) {
-					delete target[id][key]
-					if (Object.keys(target[id]).length === 0) {
+					if (value !== undefined) {
+						target[id] ||= {}
+						target[id][key] =
+							value as PendingChangeController['changes']['cur'][T][number][typeof key]
+					} else if (target[id] !== undefined) {
+						delete target[id][key]
+						if (Object.keys(target[id]).length === 0) {
+							delete target[id]
+						}
+					} else {
 						delete target[id]
 					}
-				} else {
-					delete target[id]
-				}
 
-				return clone
-			})
+					return clone
+				})
+			}
 		},
 		[]
 	)
@@ -68,13 +72,15 @@ export function usePendingChanges({
 		id,
 		dontAddToHistory
 	) => {
-		setPendingDeletions((prev) => {
-			const clone = structuredClone(prev)
-			type === 'item' ? clone.items.push(id) : clone.transactions.push(id)
-			return clone
-		})
-		if (!dontAddToHistory) {
-			type === 'item' ? afterItemDeletion(id) : afterTransactionDeletion(id)
+		if (!changesAreDisabled.current) {
+			setPendingDeletions((prev) => {
+				const clone = structuredClone(prev)
+				type === 'item' ? clone.items.push(id) : clone.transactions.push(id)
+				return clone
+			})
+			if (!dontAddToHistory) {
+				type === 'item' ? afterItemDeletion(id) : afterTransactionDeletion(id)
+			}
 		}
 	}
 
@@ -83,27 +89,29 @@ export function usePendingChanges({
 		id,
 		dontAddToHistory
 	) => {
-		setPendingDeletions((prev) => {
-			const clone = structuredClone(prev)
-			if (type === 'item') {
-				const index = clone.items.findIndex((item_id) => item_id === id)
-				// if (index !== -1) {
-				clone.items.splice(index, 1)
-				// }
-			} else {
-				const index = clone.transactions.findIndex(
-					(transaction_id) => transaction_id === id
-				)
-				// if (index !== -1) {
-				clone.transactions.splice(index, 1)
-				// }
+		if (!changesAreDisabled.current) {
+			setPendingDeletions((prev) => {
+				const clone = structuredClone(prev)
+				if (type === 'item') {
+					const index = clone.items.findIndex((item_id) => item_id === id)
+					// if (index !== -1) {
+					clone.items.splice(index, 1)
+					// }
+				} else {
+					const index = clone.transactions.findIndex(
+						(transaction_id) => transaction_id === id
+					)
+					// if (index !== -1) {
+					clone.transactions.splice(index, 1)
+					// }
+				}
+				return clone
+			})
+			if (!dontAddToHistory) {
+				type === 'item'
+					? afterItemDeletionReversed(id)
+					: afterTransactionDeletionReversed(id)
 			}
-			return clone
-		})
-		if (!dontAddToHistory) {
-			type === 'item'
-				? afterItemDeletionReversed(id)
-				: afterTransactionDeletionReversed(id)
 		}
 	}
 
@@ -112,56 +120,62 @@ export function usePendingChanges({
 		position,
 		item
 	) => {
-		if (type === 'item') {
-			const temporary_item_id = 'PENDING_CREATION||' + crypto.randomUUID()
+		if (!changesAreDisabled.current) {
+			if (type === 'item') {
+				const temporary_item_id = 'PENDING_CREATION||' + crypto.randomUUID()
 
-			const newItem = item
-				? { ...item, id: temporary_item_id, transaction_id: position.transaction_id }
-				: {
-						order_position: 0,
-						name: '',
-						amount: '',
-						account_id: null,
-						category_id: null,
-						id: temporary_item_id,
-						transaction_id: position.transaction_id,
-				  }
+				const newItem = item
+					? {
+							...item,
+							id: temporary_item_id,
+							transaction_id: position.transaction_id,
+					  }
+					: {
+							order_position: 0,
+							name: '',
+							amount: '',
+							account_id: null,
+							category_id: null,
+							id: temporary_item_id,
+							transaction_id: position.transaction_id,
+					  }
 
-			setPendingCreations((prev) => {
-				const clone = structuredClone(prev)
-				clone.items.push(newItem)
-				return clone
-			})
+				setPendingCreations((prev) => {
+					const clone = structuredClone(prev)
+					clone.items.push(newItem)
+					return clone
+				})
 
-			sortOrder.setCurrent((prev) => {
-				const clone = structuredClone(prev)
-				const thisDate = clone[position.date]
-				const thisIndex = thisDate.findIndex((sortItem) =>
-					Array.isArray(sortItem)
-						? sortItem[0] === position.transaction_id
-						: sortItem === position.transaction_id
-				)
-				const sortItem = thisDate[thisIndex]
-				if (Array.isArray(sortItem)) {
-					// add item to multi-row
-					let insertIndex = sortItem.indexOf(position.item_id)
-					if (insertIndex === -1) {
-						throw new Error(`couldnt find index $${position.item_id}`)
+				sortOrder.setCurrent((prev) => {
+					const clone = structuredClone(prev)
+					const thisDate = clone[position.date]
+					const thisIndex = thisDate.findIndex((sortItem) =>
+						Array.isArray(sortItem)
+							? sortItem[0] === position.transaction_id
+							: sortItem === position.transaction_id
+					)
+					const sortItem = thisDate[thisIndex]
+					if (Array.isArray(sortItem)) {
+						// add item to multi-row
+						let insertIndex = sortItem.indexOf(position.item_id)
+						if (insertIndex === -1) {
+							throw new Error(`couldnt find index $${position.item_id}`)
+						}
+						if (position.rel === 'below') {
+							insertIndex++
+						}
+						sortItem.splice(insertIndex, 0, temporary_item_id)
+					} else {
+						// add item to transaction non-multi-row
+						thisDate[thisIndex] = [
+							position.transaction_id,
+							position.item_id,
+							temporary_item_id,
+						]
 					}
-					if (position.rel === 'below') {
-						insertIndex++
-					}
-					sortItem.splice(insertIndex, 0, temporary_item_id)
-				} else {
-					// add item to transaction non-multi-row
-					thisDate[thisIndex] = [
-						position.transaction_id,
-						position.item_id,
-						temporary_item_id,
-					]
-				}
-				return clone
-			})
+					return clone
+				})
+			}
 		}
 	}
 	const removeCreation: PendingChangeController['creations']['remove'] = (
@@ -170,43 +184,45 @@ export function usePendingChanges({
 		transaction_id,
 		date
 	) => {
-		if (type === 'item') {
-			setPendingChanges((prev) => {
-				const clone = structuredClone(prev)
-				if (clone.items[id]) {
-					delete clone.items[id]
-				}
-				return clone
-			})
-			setPendingCreations((prev) => {
-				const clone = structuredClone(prev)
-				const index = clone.items.findIndex((item) => item.id === id)
-				clone.items.splice(index, 1)
-				return clone
-			})
-			sortOrder.setCurrent((prev) => {
-				const clone = structuredClone(prev)
-				const thisDate = clone[date]
-				const thisIndex = thisDate.findIndex((sortItem) =>
-					Array.isArray(sortItem)
-						? sortItem[0] === transaction_id
-						: sortItem === transaction_id
-				)
-				const sortItem = thisDate[thisIndex]
-				if (Array.isArray(sortItem)) {
-					// remove item from multi-row
-					let itemIndex = sortItem.indexOf(id)
-					if (itemIndex === -1) {
-						throw new Error(`couldnt find index $${id}`)
+		if (!changesAreDisabled.current) {
+			if (type === 'item') {
+				setPendingChanges((prev) => {
+					const clone = structuredClone(prev)
+					if (clone.items[id]) {
+						delete clone.items[id]
 					}
-					sortItem.splice(itemIndex, 1)
+					return clone
+				})
+				setPendingCreations((prev) => {
+					const clone = structuredClone(prev)
+					const index = clone.items.findIndex((item) => item.id === id)
+					clone.items.splice(index, 1)
+					return clone
+				})
+				sortOrder.setCurrent((prev) => {
+					const clone = structuredClone(prev)
+					const thisDate = clone[date]
+					const thisIndex = thisDate.findIndex((sortItem) =>
+						Array.isArray(sortItem)
+							? sortItem[0] === transaction_id
+							: sortItem === transaction_id
+					)
+					const sortItem = thisDate[thisIndex]
+					if (Array.isArray(sortItem)) {
+						// remove item from multi-row
+						let itemIndex = sortItem.indexOf(id)
+						if (itemIndex === -1) {
+							throw new Error(`couldnt find index $${id}`)
+						}
+						sortItem.splice(itemIndex, 1)
 
-					if (sortItem.length === 2) {
-						thisDate[thisIndex] = transaction_id
+						if (sortItem.length === 2) {
+							thisDate[thisIndex] = transaction_id
+						}
 					}
-				}
-				return clone
-			})
+					return clone
+				})
+			}
 		}
 	}
 
@@ -255,6 +271,12 @@ export function usePendingChanges({
 		},
 		clear: clearAll,
 		isChanges: isChanges,
+		disableChanges: () => {
+			changesAreDisabled.current = true
+		},
+		enableChanges: () => {
+			changesAreDisabled.current = false
+		},
 	} as PendingChangeController
 }
 
@@ -354,4 +376,6 @@ export type PendingChangeController = {
 	}
 	clear: () => void
 	isChanges: boolean
+	disableChanges: () => void
+	enableChanges: () => void
 }

@@ -30,7 +30,7 @@ export interface TransactionFormData {
 }
 
 interface NewTransactionFormProps {
-	defaultDate: string
+	defaultDate?: string
 	dropdownOptions: DropdownOptions
 	forceClosePopup: () => void
 	setRefreshRequired?: () => void
@@ -45,6 +45,9 @@ export function NewTransactionForm({
 	forceClosePopup,
 	setRefreshRequired,
 }: NewTransactionFormProps) {
+	if (defaultDate === undefined) {
+		defaultDate = new Date().toISOString().split('T')[0]
+	}
 	const [formData, setFormData] = useState<TransactionFormData>({
 		name: '',
 		date: defaultDate,

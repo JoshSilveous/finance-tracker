@@ -104,7 +104,6 @@ export function itemReorderMouseEffect(
 				node.classList.add(multiRowStyles.margin_bottom_double)
 			})
 		} else {
-			console.log('edge case')
 			otherRows[rowIndex].forEach((node) =>
 				node.classList.add(multiRowStyles.margin_bottom)
 			)

@@ -34,6 +34,7 @@ export function TransactionManager() {
 	const transactionDataRef = useRef<FormTransaction[] | null>([])
 	const prevFoldStateRef = useRef<FoldState>({})
 	const transactionRowsRef = useRef<TransactionRowsRef>({})
+	const saveChangesButtonRef = useRef<HTMLButtonElement>(null)
 
 	const [loaded, setLoaded] = useState<boolean>(false)
 	const [transactionData, setTransactionData] = useState<FormTransaction[] | null>(null)
@@ -103,9 +104,14 @@ export function TransactionManager() {
 				ctrlKey: true,
 				shiftKey: false,
 				run: () => {
-					if (isChanged) {
-						handleSaveChanges
-					}
+					const saveButton = saveChangesButtonRef.current! as HTMLButtonElement
+
+					const clickEvent = new Event('click', {
+						bubbles: true,
+						cancelable: true,
+					})
+
+					saveButton.dispatchEvent(clickEvent)
 				},
 				preventDefault: true,
 			},
@@ -164,6 +170,33 @@ export function TransactionManager() {
 		pendingChanges,
 	})
 
+	const handleCreateTransaction = () => {
+		let refreshRequired = false
+		const setRefreshRequired = () => {
+			refreshRequired = true
+		}
+
+		const afterPopupClosed = () => {
+			if (refreshRequired) {
+				refreshData()
+			}
+		}
+
+		const popup = createPopup(
+			<NewTransactionForm
+				dropdownOptions={dropdownOptions}
+				forceClosePopup={() => {
+					popup.close()
+					afterPopupClosed()
+				}}
+				setRefreshRequired={setRefreshRequired}
+			/>,
+			'normal',
+			afterPopupClosed
+		)
+		popup.trigger()
+	}
+
 	useEffect(() => {
 		transactionDataRef.current = transactionData
 	}, [transactionData])
@@ -217,27 +250,39 @@ export function TransactionManager() {
 		transactionRowsRef.current[transaction_id] = node
 	}
 
+	const isChangedRef = useRef<boolean>(false)
+	isChangedRef.current =
+		pendingChanges.isChanges || !areDeeplyEqual(sortOrder.cur, sortOrder.def)
+
 	const handleDiscardChanges = () => {
 		pendingChanges.clear()
 		historyController.clear()
 	}
 
 	const handleSaveChanges = async () => {
-		setIsSaving(true)
-		try {
-			await saveChanges(pendingChanges, sortOrder, transactionDataRef)
-			await refreshData()
-			setIsSaving(false)
-		} catch (e) {
-			if (isStandardError(e)) {
-				promptError(
-					'Errors occured while saving your data',
-					e.message,
-					'Try refreshing your browser'
-				)
-				console.error(e)
+		if (isChangedRef.current) {
+			setIsSaving(true)
+			pendingChanges.disableChanges()
+			sortOrder.disableChanges()
+			try {
+				await saveChanges(pendingChanges, sortOrder, transactionDataRef)
+				await refreshData()
+				setIsSaving(false)
+				pendingChanges.enableChanges()
+				sortOrder.enableChanges()
+			} catch (e) {
+				if (isStandardError(e)) {
+					promptError(
+						'Errors occured while saving your data',
+						e.message,
+						'Try refreshing your browser'
+					)
+					console.error(e)
+				}
+				setIsSaving(false)
+				pendingChanges.enableChanges()
+				sortOrder.enableChanges()
 			}
-			setIsSaving(false)
 		}
 	}
 
@@ -280,16 +325,6 @@ export function TransactionManager() {
 		}
 		return null
 	}, [transactionData, sortOrder.cur])
-
-	const isChanged = useMemo(() => {
-		if (pendingChanges.isChanges) {
-			return true
-		}
-		if (!areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
-			return true
-		}
-		return false
-	}, [pendingChanges.isChanges, sortOrder.cur, sortOrder.def])
 
 	const headers: JGridTypes.Header[] = genHeaders(historyController)
 
@@ -448,8 +483,21 @@ export function TransactionManager() {
 					<div className={s.grid_container}>{grid}</div>
 					<div className={s.control_container}>
 						<JButton
+							jstyle='secondary'
+							disabled={isChangedRef.current}
+							className={s.new_transaction_button}
+							onClick={handleCreateTransaction}
+							title={
+								isChangedRef.current
+									? 'Disabled while there are changes to be saved'
+									: 'Opens form to create a new transaction'
+							}
+						>
+							Create New Transaction
+						</JButton>
+						<JButton
 							jstyle='primary'
-							disabled={!isChanged}
+							disabled={!isChangedRef.current}
 							className={s.discard_button}
 							onClick={handleDiscardChanges}
 						>
@@ -457,10 +505,11 @@ export function TransactionManager() {
 						</JButton>
 						<JButton
 							jstyle='primary'
-							disabled={!isChanged}
+							disabled={!isChangedRef.current}
 							className={s.save_button}
 							loading={isSaving}
 							onClick={handleSaveChanges}
+							ref={saveChangesButtonRef}
 						>
 							Save Changes
 						</JButton>

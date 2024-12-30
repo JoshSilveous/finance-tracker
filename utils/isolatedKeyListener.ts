@@ -52,7 +52,6 @@ export function removeIsolatedKeyListeners(
  * e.x. use this when a popup is activated to prevent the default key listeners from running.
  */
 export function setKeyListenerContext(context: string) {
-	console.log('context set to', context)
 	curContext = context
 }
 
