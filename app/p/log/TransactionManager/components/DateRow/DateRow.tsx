@@ -78,7 +78,7 @@ export function DateRow({
 						jstyle='secondary'
 						onClick={handleNewTransactionClick}
 						tabIndex={tabIndexer()}
-						data-grid_nav_col='account'
+						data-grid_nav_col='TM_account'
 						data-grid_nav_index={gridNavIndex}
 					>
 						Create New Transaction

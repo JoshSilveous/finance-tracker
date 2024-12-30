@@ -1,7 +1,11 @@
 import { useRef, useState } from 'react'
 
-export function useGridNav(navCols: string[]) {
+interface GridNavOptions {
+	loopAtEnd?: boolean
+}
+export function useGridNav(navCols: string[], options?: GridNavOptions) {
 	const endIndexRef = useRef<number | null>(null)
+	const loopAtEnd = options !== undefined ? options.loopAtEnd : false
 
 	const getCurNodeProperties = () => {
 		const curElem = document.activeElement as HTMLElement
@@ -43,18 +47,21 @@ export function useGridNav(navCols: string[]) {
 			const nextNode = getNode(curNode.col, i)
 			if (nextNode !== null) {
 				nextNode.focus()
-				return
+				return true
 			}
 		}
 
-		// if next node not found, start from the top
-		for (let i = endIndexRef.current!; i >= 0; i--) {
-			const nextNode = getNode(curNode.col, i)
-			if (nextNode !== null) {
-				nextNode.focus()
-				return
+		if (loopAtEnd) {
+			// if next node not found, start from the top
+			for (let i = endIndexRef.current!; i >= 0; i--) {
+				const nextNode = getNode(curNode.col, i)
+				if (nextNode !== null) {
+					nextNode.focus()
+					return true
+				}
 			}
 		}
+		return false
 	}
 	const moveDown = () => {
 		const curNode = getCurNodeProperties()
@@ -67,18 +74,21 @@ export function useGridNav(navCols: string[]) {
 			const nextNode = getNode(curNode.col, i)
 			if (nextNode !== null) {
 				nextNode.focus()
-				return
+				return true
 			}
 		}
 
-		// if next node not found, start from the top
-		for (let i = 0; i < endIndexRef.current!; i++) {
-			const nextNode = getNode(curNode.col, i)
-			if (nextNode !== null) {
-				nextNode.focus()
-				return
+		if (loopAtEnd) {
+			// if next node not found, start from the top
+			for (let i = 0; i < endIndexRef.current!; i++) {
+				const nextNode = getNode(curNode.col, i)
+				if (nextNode !== null) {
+					nextNode.focus()
+					return true
+				}
 			}
 		}
+		return false
 	}
 	// not needed, browser tab navigation is fine and I'm not going to use arrow keys
 	// const moveLeft = () => {}

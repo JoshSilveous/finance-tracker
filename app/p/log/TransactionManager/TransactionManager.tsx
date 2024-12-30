@@ -47,68 +47,69 @@ export function TransactionManager() {
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
 	const [isSaving, setIsSaving] = useState(false)
 
-	const gridNav = useGridNav([
-		'left_controls',
-		'date',
-		'name',
-		'amount',
-		'category',
-		'account',
-		'right_controls',
-	])
+	const gridNav = useGridNav(
+		[
+			'TM_left_controls',
+			'TM_date',
+			'TM_name',
+			'TM_amount',
+			'TM_category',
+			'TM_account',
+			'TM_right_controls',
+		],
+		{ loopAtEnd: true }
+	)
 
-	const makeActiveContext = useCallback(() => {
-		setKeyListenerContext('TransactionManager')
-	}, [])
+	const makeActiveContext = () => setKeyListenerContext('TransactionManager')
 	useEffect(() => {
 		// set up key listeners
-		const undoListener: IsolatedKeyListener = {
-			context: 'TransactionManager',
-			char: 'Z',
-			ctrlKey: true,
-			shiftKey: false,
-			run: historyController.undo,
-		}
 
-		const redoListener: IsolatedKeyListener = {
-			context: 'TransactionManager',
-			char: 'Z',
-			ctrlKey: true,
-			shiftKey: true,
-			run: historyController.redo,
-		}
+		const listeners: IsolatedKeyListener[] = [
+			{
+				context: 'TransactionManager',
+				char: 'Z',
+				ctrlKey: true,
+				shiftKey: false,
+				run: historyController.undo,
+				preventDefault: true,
+			},
+			{
+				context: 'TransactionManager',
+				char: 'Z',
+				ctrlKey: true,
+				shiftKey: true,
+				run: historyController.redo,
+				preventDefault: true,
+			},
+			{
+				context: 'TransactionManager',
+				char: 'ENTER',
+				ctrlKey: false,
+				shiftKey: false,
+				run: (e) => {
+					if (gridNav.moveDown()) {
+						e.preventDefault()
+					}
+				},
+			},
+			{
+				context: 'TransactionManager',
+				char: 'ENTER',
+				ctrlKey: false,
+				shiftKey: true,
+				run: (e) => {
+					if (gridNav.moveUp()) {
+						e.preventDefault()
+					}
+				},
+			},
+		]
 
-		const moveDownListener: IsolatedKeyListener = {
-			context: 'TransactionManager',
-			char: 'ENTER',
-			ctrlKey: false,
-			shiftKey: false,
-			run: gridNav.moveDown,
-		}
-
-		const moveUpListener: IsolatedKeyListener = {
-			context: 'TransactionManager',
-			char: 'ENTER',
-			ctrlKey: false,
-			shiftKey: true,
-			run: gridNav.moveUp,
-		}
-
-		addIsolatedKeyListeners([
-			undoListener,
-			redoListener,
-			moveDownListener,
-			moveUpListener,
-		])
+		addIsolatedKeyListeners(listeners)
 		makeActiveContext()
 
 		return () => {
-			removeIsolatedKeyListeners([
-				undoListener,
-				redoListener,
-				moveDownListener,
-				moveUpListener,
-			])
+			removeIsolatedKeyListeners(listeners)
 		}
 	}, [])
 

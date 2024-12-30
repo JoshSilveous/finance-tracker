@@ -16,7 +16,14 @@ import {
 	useState,
 } from 'react'
 import { handleReorder } from './handleReorder'
-import { delay, removeFromArray } from '@/utils'
+import {
+	addIsolatedKeyListeners,
+	delay,
+	IsolatedKeyListener,
+	removeFromArray,
+	removeIsolatedKeyListeners,
+} from '@/utils'
+import { useGridNav } from '../../../hooks'
 
 interface MultiItemGridProps {
 	formData: TransactionFormData
@@ -36,6 +43,44 @@ export function MultiItemGrid({
 			itemRowsRef.current[itemIndex] = node
 		}
 	}
+
+	const gridNav = useGridNav(
+		['MIG_controls', 'MIG_name', 'MIG_amount', 'MIG_category', 'MIG_account'],
+		{
+			loopAtEnd: true,
+		}
+	)
+	useEffect(() => {
+		const listeners: IsolatedKeyListener[] = [
+			{
+				context: 'NewTransactionForm',
+				char: 'ENTER',
+				ctrlKey: false,
+				shiftKey: false,
+				run: (e) => {
+					if (gridNav.moveDown()) {
+						e.preventDefault()
+					}
+				},
+			},
+			{
+				context: 'NewTransactionForm',
+				char: 'ENTER',
+				ctrlKey: false,
+				shiftKey: true,
+				run: (e) => {
+					if (gridNav.moveUp()) {
+						e.preventDefault()
+					}
+				},
+			},
+		]
+		addIsolatedKeyListeners(listeners)
+
+		return () => {
+			removeIsolatedKeyListeners(listeners)
+		}
+	})
 
 	const addNewItem = useCallback(() => {
 		setFormData((prev) => {
@@ -119,81 +164,105 @@ export function MultiItemGrid({
 		[]
 	)
 
-	const cells: JGridTypes.Row[] = formData.items.map((item, index) => (
-		<div className={s.item_row} ref={addToItemRowsRef(index)} key={index}>
-			<div className={`${s.control_container} ${index === 0 ? s.first_row : ''}`}>
-				<div className={s.reorder_grabber}>
-					<button
-						type='button'
-						onMouseDown={handleReorder(
-							formData,
-							setFormData,
-							itemRowsRef.current,
-							index
-						)}
-						disabled={formData.items.length === 1}
-						title='Grab and drag to reposition this item'
-					>
-						<ReorderIcon />
-					</button>
+	let gridNavIndex = 0
+	const cells: JGridTypes.Row[] = formData.items.map((item, index) => {
+		const cell = (
+			<div className={s.item_row} ref={addToItemRowsRef(index)} key={index}>
+				<div className={`${s.control_container} ${index === 0 ? s.first_row : ''}`}>
+					<div className={s.reorder_grabber}>
+						<button
+							type='button'
+							onMouseDown={handleReorder(
+								formData,
+								setFormData,
+								itemRowsRef.current,
+								index
+							)}
+							disabled={formData.items.length === 1}
+							title='Grab and drag to reposition this item'
+							data-grid_nav_col='MIG_controls'
+							data-grid_nav_index={gridNavIndex}
+						>
+							<ReorderIcon />
+						</button>
+					</div>
+					<div className={s.delete_container}>
+						<button
+							type='button'
+							disabled={formData.items.length === 1}
+							title={
+								formData.items.length !== 1
+									? 'Save or discard changes before deleting'
+									: ''
+							}
+							onClick={deleteItem(index)}
+							data-grid_nav_col='MIG_controls'
+							data-grid_nav_index={gridNavIndex}
+						>
+							<DeleteIcon />
+						</button>
+					</div>
 				</div>
-				<div className={s.delete_container}>
-					<button
-						type='button'
-						disabled={formData.items.length === 1}
-						title={
-							formData.items.length !== 1
-								? 'Save or discard changes before deleting'
-								: ''
+				<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
+					<JInput
+						id={`item-name-${index}`}
+						data-newest-row-identifier={
+							index === formData.items.length - 1 ? 'true' : undefined
 						}
-						onClick={deleteItem(index)}
-					>
-						<DeleteIcon />
-					</button>
+						value={item.name}
+						onChange={handleChange}
+						data-grid_nav_col='MIG_name'
+						data-grid_nav_index={gridNavIndex}
+					/>
+				</div>
+				<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
+					<JNumberAccounting
+						id={`item-amount-${index}`}
+						value={item.amount}
+						onChange={handleChange}
+						data-grid_nav_col='MIG_amount'
+						data-grid_nav_index={gridNavIndex}
+					/>
+				</div>
+				<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
+					<JDropdown
+						id={`item-category_id-${index}`}
+						options={dropdownOptions.category}
+						value={item.category_id}
+						onChange={handleChange}
+						data-grid_nav_col='MIG_category'
+						data-grid_nav_index={gridNavIndex}
+					/>
+				</div>
+				<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
+					<JDropdown
+						id={`item-account_id-${index}`}
+						options={dropdownOptions.account}
+						value={item.account_id}
+						onChange={handleChange}
+						data-grid_nav_col='MIG_account'
+						data-grid_nav_index={gridNavIndex}
+					/>
 				</div>
 			</div>
-			<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
-				<JInput
-					id={`item-name-${index}`}
-					data-newest-row-identifier={
-						index === formData.items.length - 1 ? 'true' : undefined
-					}
-					value={item.name}
-					onChange={handleChange}
-				/>
-			</div>
-			<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
-				<JNumberAccounting
-					id={`item-amount-${index}`}
-					value={item.amount}
-					onChange={handleChange}
-				/>
-			</div>
-			<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
-				<JDropdown
-					id={`item-category_id-${index}`}
-					options={dropdownOptions.category}
-					value={item.category_id}
-					onChange={handleChange}
-				/>
-			</div>
-			<div className={`${s.cell} ${index === 0 ? s.first_row : ''}`}>
-				<JDropdown
-					id={`item-account_id-${index}`}
-					options={dropdownOptions.account}
-					value={item.account_id}
-					onChange={handleChange}
-				/>
-			</div>
-		</div>
-	))
+		)
+		gridNavIndex++
+		return cell
+	})
 	cells.push(
 		<div className={s.add_new_row}>
-			<JButton jstyle='secondary' onClick={addNewItem}>
+			<JButton
+				jstyle='secondary'
+				onClick={addNewItem}
+				data-grid_nav_col='MIG_name'
+				data-grid_nav_index={gridNavIndex}
+			>
 				Add new Item
 			</JButton>
 		</div>
 	)
+	gridNavIndex++
+	gridNav.setEndIndex(gridNavIndex)
 
 	const gridConfig: JGridTypes.Props = {
 		headers,

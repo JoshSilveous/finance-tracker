@@ -174,7 +174,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						disabled={p.disableTransactionResort}
 						ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
 						tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
-						data-grid_nav_col='left_controls'
+						data-grid_nav_col='TM_left_controls'
 						data-grid_nav_index={p.gridNavIndex}
 					>
 						<ReorderIcon />
@@ -194,7 +194,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 					ref={dateSelectRef}
-					data-grid_nav_col='date'
+					data-grid_nav_col='TM_date'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
@@ -210,7 +210,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-key='name'
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
-					data-grid_nav_col='name'
+					data-grid_nav_col='TM_name'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
@@ -229,7 +229,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					maxDigRightOfDecimal={2}
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
-					data-grid_nav_col='amount'
+					data-grid_nav_col='TM_amount'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
@@ -251,7 +251,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-key='category_id'
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
-					data-grid_nav_col='category'
+					data-grid_nav_col='TM_category'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
@@ -273,7 +273,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-key='account_id'
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
-					data-grid_nav_col='account'
+					data-grid_nav_col='TM_account'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
@@ -289,7 +289,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
 					tabIndex={isPendingDeletion ? undefined : p.tabIndexer()}
-					data-grid_nav_col='right_controls'
+					data-grid_nav_col='TM_right_controls'
 					data-grid_nav_index={p.gridNavIndex}
 					options={[
 						{
