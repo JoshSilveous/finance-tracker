@@ -1,16 +1,105 @@
-'use client'
-import s from './tile.module.scss'
+import React, { useRef, useEffect, ReactNode } from 'react'
+import s from './Tile.module.scss'
+import { default as ResizeHandle } from '@/public/resize_handle.svg'
 
-interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ResizableWrapperProps {
+	children: ReactNode
 	resizable?: boolean
+	onResize?: (width: number, height: number) => void
+	minWidth?: number
+	minHeight?: number
+	maxWidth?: number
+	maxHeight?: number
 }
-export function Tile({ className, resizable, ...rest }: TileProps) {
+
+export function Tile({
+	children,
+	resizable,
+	onResize,
+	minWidth = 100,
+	minHeight = 100,
+	maxWidth,
+	maxHeight,
+}: ResizableWrapperProps) {
+	const wrapperRef = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		if (resizable) {
+			const wrapper = wrapperRef.current
+			if (!wrapper) return
+
+			const observer = new ResizeObserver((entries) => {
+				if (entries.length === 0) return
+				const { width, height } = entries[0].contentRect
+
+				if (onResize) {
+					onResize(width, height)
+				}
+			})
+
+			observer.observe(wrapper)
+
+			return () => {
+				observer.disconnect()
+			}
+		}
+	}, [onResize, resizable])
+
+	const onResizeGrabberMouseDown = (event: React.MouseEvent) => {
+		event.preventDefault()
+		const startX = event.clientX
+		const startY = event.clientY
+		const startWidth = wrapperRef.current?.offsetWidth || 0
+		const startHeight = wrapperRef.current?.offsetHeight || 0
+
+		const handleMouseMove = (moveEvent: MouseEvent) => {
+			if (!wrapperRef.current) return
+
+			const newWidth = Math.min(
+				Math.max(startWidth + (moveEvent.clientX - startX), minWidth),
+				maxWidth !== undefined ? maxWidth : Infinity
+			)
+			const newHeight = Math.min(
+				Math.max(startHeight + (moveEvent.clientY - startY), minHeight),
+				maxHeight !== undefined ? maxHeight : Infinity
+			)
+
+			wrapperRef.current.style.width = `${newWidth}px`
+			wrapperRef.current.style.height = `${newHeight}px`
+
+			if (onResize) {
+				onResize(newWidth, newHeight)
+			}
+		}
+
+		const handleMouseUp = () => {
+			document.removeEventListener('mousemove', handleMouseMove)
+			document.removeEventListener('mouseup', handleMouseUp)
+		}
+
+		document.addEventListener('mousemove', handleMouseMove)
+		document.addEventListener('mouseup', handleMouseUp)
+	}
+
 	return (
 		<div
-			className={`${s.container} ${resizable ? s.resizable : ''} ${
-				className ? className : ''
-			}`}
-			{...rest}
-		/>
+			ref={wrapperRef}
+			className={`${s.container} ${resizable ? s.resizable : ''}`}
+			style={{
+				minWidth: `${minWidth}px`,
+				minHeight: `${minHeight}px`,
+				maxWidth: `${maxWidth}px`,
+				maxHeight: `${maxHeight}px`,
+			}}
+		>
+			{children}
+			{resizable && (
+				<div className={s.resize_grabber} onMouseDown={onResizeGrabberMouseDown}>
+					<ResizeHandle />
+				</div>
+			)}
+		</div>
 	)
 }
+
+export default Tile

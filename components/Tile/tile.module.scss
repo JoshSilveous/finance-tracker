@@ -1,9 +1,27 @@
 .container {
+	position: relative;
+	display: inline-block;
+	resize: none;
+	overflow: hidden;
+
 	background-color: var(--bg-color-lighter-1);
 	width: fit-content;
 	border-radius: 20px;
 	border: 2px solid var(--bg-color-lighter-2);
-	&.resizable {
-		// resize: vertical;
+
+	.resize_grabber {
+		--size: 20px;
+
+		position: absolute;
+		bottom: 3px;
+		right: 3px;
+		height: var(--size);
+		width: var(--size);
+		cursor: se-resize;
+		svg {
+			color: var(--bg-color-lighter-3);
+			height: var(--size);
+			width: var(--size);
+		}
 	}
 }
