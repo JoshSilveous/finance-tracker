@@ -31,7 +31,9 @@ export const JDropdown = forwardRef<HTMLSelectElement, JDropdownTypes.Props>(
 		})
 		if (rest.value === undefined) {
 			optionsDisplay.unshift(
-				<option value=''>{placeholder ? placeholder : ''}</option>
+				<option value='' key={-1}>
+					{placeholder ? placeholder : ''}
+				</option>
 			)
 		}
 		return (

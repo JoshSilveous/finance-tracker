@@ -182,10 +182,11 @@ export function TransactionManager() {
 		} catch (e) {
 			if (isStandardError(e)) {
 				promptError(
-					'Error occured while saving your data',
+					'Errors occured while saving your data',
 					e.message,
 					'Try refreshing your browser'
 				)
+				console.error(e)
 			}
 			setIsSaving(false)
 		}

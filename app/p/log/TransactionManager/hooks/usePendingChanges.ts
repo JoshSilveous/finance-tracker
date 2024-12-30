@@ -116,7 +116,7 @@ export function usePendingChanges({
 			const temporary_item_id = 'PENDING_CREATION||' + crypto.randomUUID()
 
 			const newItem = item
-				? { ...item, id: temporary_item_id }
+				? { ...item, id: temporary_item_id, transaction_id: position.transaction_id }
 				: {
 						order_position: 0,
 						name: '',
@@ -124,6 +124,7 @@ export function usePendingChanges({
 						account_id: null,
 						category_id: null,
 						id: temporary_item_id,
+						transaction_id: position.transaction_id,
 				  }
 
 			setPendingCreations((prev) => {
@@ -331,7 +332,7 @@ export type PendingChangeController = {
 	creations: {
 		cur: {
 			transactions: null
-			items: FormTransaction['items']
+			items: { id: string; transaction_id: string }[]
 		}
 		add: (
 			type: 'item' | 'transaction',

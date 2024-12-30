@@ -520,6 +520,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				} ${isPendingCreation ? s.pending_creation : ''}`}
 				style={genGridStyle()}
 				ref={addToColumnNodesRef}
+				key={rowItemIndex}
 			>
 				{rowItem} {itemRows.map((itemRow) => itemRow[rowItemIndex])}
 			</div>

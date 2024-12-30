@@ -152,6 +152,7 @@ export async function upsertTransactionsAndItems(
 	const itemUpdatesWithUserID = items.map((item) => {
 		return {
 			...item,
+			amount: Number(item.amount),
 			user_id: user_id,
 		}
 	})
@@ -184,4 +185,33 @@ export async function upsertTransactionsAndItems(
 			console.error(e)
 			throw new Error(e.message)
 		})
+}
+
+export interface InsertItemEntry {
+	name: string | null
+	amount: string
+	category_id: string | null
+	account_id: string | null
+	transaction_id: string
+}
+export async function insertItems(items: InsertItemEntry[]) {
+	const user_id = await getUserID()
+
+	const itemUpdatesWithUserID = items.map((item) => {
+		return {
+			...item,
+			amount: Number(item.amount),
+			user_id: user_id,
+		}
+	})
+
+	const { data, error } = await supabase
+		.from('transaction_items')
+		.insert(itemUpdatesWithUserID)
+		.select('id')
+	if (error) {
+		throw new Error(error.message)
+	}
+
+	return data
 }

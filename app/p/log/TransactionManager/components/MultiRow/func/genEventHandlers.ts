@@ -18,14 +18,14 @@ export function genEventHandlers(p: MultiRowProps) {
 				if (key === 'date' || key === 'name') {
 					const origVal = p.transaction[key]
 					if (origVal !== newVal) {
-						p.pendingChanges.updateChange(
+						p.pendingChanges.changes.set(
 							'transactions',
 							p.transaction.id,
 							key,
 							newVal
 						)
 					} else {
-						p.pendingChanges.updateChange('transactions', p.transaction.id, key)
+						p.pendingChanges.changes.set('transactions', p.transaction.id, key)
 					}
 				} else {
 				}
@@ -40,9 +40,9 @@ export function genEventHandlers(p: MultiRowProps) {
 						key
 					]
 					if (origVal !== newVal) {
-						p.pendingChanges.updateChange('items', item_id, key, newVal)
+						p.pendingChanges.changes.set('items', item_id, key, newVal)
 					} else {
-						p.pendingChanges.updateChange('items', item_id, key)
+						p.pendingChanges.changes.set('items', item_id, key)
 					}
 				} else {
 				}
