@@ -2,8 +2,7 @@ import { HTMLAttributes, useEffect, useRef, useState } from 'react'
 import s from './OptionsMenu.module.scss'
 import { JButton } from '@/components/JForm'
 import { default as OptionsIcon } from '@/public/options-vertical.svg'
-import { delay } from '@/utils'
-import { createFocusLoop } from '@/utils/focusLoop/createFocusLoop'
+import { delay, createFocusLoop } from '@/utils'
 
 export type Option = {
 	text: string

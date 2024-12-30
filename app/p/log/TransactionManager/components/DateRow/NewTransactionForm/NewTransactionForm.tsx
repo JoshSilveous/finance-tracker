@@ -5,10 +5,15 @@ import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
 import { DropdownOptions } from '../../../TransactionManager'
 import { MultiItemGrid } from './MultiItemGrid'
-import { delay, isStandardError, promptError, setKeyListenerContext } from '@/utils'
+import {
+	delay,
+	isStandardError,
+	promptError,
+	setKeyListenerContext,
+	createFocusLoop,
+} from '@/utils'
 import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
-import { createFocusLoop } from '@/utils/focusLoop/createFocusLoop'
 
 export interface TransactionFormData {
 	name: string

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/database/supabase/client'
 import Link from 'next/link'
 
 export default async function Home() {

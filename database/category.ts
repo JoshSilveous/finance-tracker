@@ -1,5 +1,5 @@
 'use client'
-import { createClient, getUserID } from '@/utils/supabase/client'
+import { createClient, getUserID } from '@/database/supabase/client'
 const supabase = createClient()
 
 export interface FetchedCategory {

@@ -5,6 +5,10 @@
 		"/database",
 		"/app/p/log/TransactionManager/components",
 		"/app/p/log/TransactionManager/func",
-		"/app/p/log/TransactionManager/hooks"
+		"/app/p/log/TransactionManager/hooks",
+		"/utils",
+		"/utils/errors",
+		"/utils/useBgLoad",
+		"/utils/createPopup"
 	]
 }
