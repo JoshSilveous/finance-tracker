@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from 'react'
 import s from './DateRow.module.scss'
 import { formatDate } from '@/utils/formatDate'
 import { JButton } from '@/components/JForm'
@@ -14,6 +13,7 @@ interface DateRowProps {
 	refreshData: () => void
 	gridRow: number
 	tabIndexer: TabIndexer
+	gridNavIndex: number
 }
 export function DateRow({
 	date,
@@ -21,6 +21,7 @@ export function DateRow({
 	refreshData,
 	gridRow,
 	tabIndexer,
+	gridNavIndex,
 }: DateRowProps) {
 	const { day, year, month } = formatDate(date)
 
@@ -77,6 +78,8 @@ export function DateRow({
 						jstyle='secondary'
 						onClick={handleNewTransactionClick}
 						tabIndex={tabIndexer()}
+						data-grid_nav_col='account'
+						data-grid_nav_index={gridNavIndex}
 					>
 						Create New Transaction
 					</JButton>

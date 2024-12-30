@@ -5,15 +5,7 @@ import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
 import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import s from './SingleRow.module.scss'
-import {
-	ChangeEventHandler,
-	FocusEventHandler,
-	forwardRef,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react'
+import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } from 'react'
 import { FormTransaction } from '../../TransactionManager'
 import { genLiveVals, LiveVals } from './genLiveVals'
 import { HistoryController } from '../../hooks/useHistory'
@@ -32,6 +24,7 @@ export interface SingleRowProps {
 	sortOrder: SortOrder.Controller
 	gridRow: number
 	tabIndexer: TabIndexer
+	gridNavIndex: number
 }
 export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwardedRef) => {
 	const item = p.transaction.items[0]
@@ -181,6 +174,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						disabled={p.disableTransactionResort}
 						ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
 						tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+						data-grid_nav_col='left_controls'
+						data-grid_nav_index={p.gridNavIndex}
 					>
 						<ReorderIcon />
 					</JButton>
@@ -199,6 +194,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
 					ref={dateSelectRef}
+					data-grid_nav_col='date'
+					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
 			<div
@@ -213,6 +210,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-key='name'
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					data-grid_nav_col='name'
+					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
 			<div
@@ -230,6 +229,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					maxDigRightOfDecimal={2}
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					data-grid_nav_col='amount'
+					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
 			<div
@@ -250,6 +251,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-key='category_id'
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					data-grid_nav_col='category'
+					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
 			<div
@@ -270,6 +273,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-key='account_id'
 					{...eventHandlers}
 					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					data-grid_nav_col='account'
+					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
 			<div
@@ -284,6 +289,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
 					tabIndex={isPendingDeletion ? undefined : p.tabIndexer()}
+					data-grid_nav_col='right_controls'
+					data-grid_nav_index={p.gridNavIndex}
 					options={[
 						{
 							text: 'Delete',

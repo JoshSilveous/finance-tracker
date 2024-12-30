@@ -23,6 +23,7 @@
 
 ## Solved
 
+-   Allow enter/arrow navigation in grid
 -   Show "Today" and "Yesterday" on dates
 -   fix this bug https://imgur.com/NO91QLm
 -   TransactionManager - Add control to delete rows

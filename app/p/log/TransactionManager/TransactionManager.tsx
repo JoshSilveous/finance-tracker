@@ -31,6 +31,7 @@ import {
 	usePendingChanges,
 	useSortOrder,
 	useTabIndexer,
+	useGridNav,
 } from './hooks'
 import { NewTransactionForm } from './components/DateRow/NewTransactionForm/NewTransactionForm'
 
@@ -45,6 +46,16 @@ export function TransactionManager() {
 	const [categoryData, setCategoryData] = useState<FetchedCategory[] | null>(null)
 	const [accountData, setAccountData] = useState<FetchedAccount[] | null>(null)
 	const [isSaving, setIsSaving] = useState(false)
+
+	const gridNav = useGridNav([
+		'left_controls',
+		'date',
+		'name',
+		'amount',
+		'category',
+		'account',
+		'right_controls',
+	])
 
 	const makeActiveContext = useCallback(() => {
 		setKeyListenerContext('TransactionManager')
@@ -66,11 +77,38 @@ export function TransactionManager() {
 			shiftKey: true,
 			run: historyController.redo,
 		}
-		addIsolatedKeyListeners([undoListener, redoListener])
+
+		const moveDownListener: IsolatedKeyListener = {
+			context: 'TransactionManager',
+			char: 'ENTER',
+			ctrlKey: false,
+			shiftKey: false,
+			run: gridNav.moveDown,
+		}
+
+		const moveUpListener: IsolatedKeyListener = {
+			context: 'TransactionManager',
+			char: 'ENTER',
+			ctrlKey: false,
+			shiftKey: true,
+			run: gridNav.moveUp,
+		}
+
+		addIsolatedKeyListeners([
+			undoListener,
+			redoListener,
+			moveDownListener,
+			moveUpListener,
+		])
 		makeActiveContext()
 
 		return () => {
-			removeIsolatedKeyListeners([undoListener, redoListener])
+			removeIsolatedKeyListeners([
+				undoListener,
+				redoListener,
+				moveDownListener,
+				moveUpListener,
+			])
 		}
 	}, [])
 
@@ -345,6 +383,7 @@ export function TransactionManager() {
 			const cells: JGridTypes.Props['cells'] = []
 
 			let gridRow = 2
+			let gridNavIndex = 0
 			sortedData.forEach((groupedItem, groupedItemIndex) => {
 				if (groupedItemIndex === 0) {
 					const today = new Date()
@@ -359,9 +398,11 @@ export function TransactionManager() {
 								gridRow={gridRow}
 								key={`${groupedItem.date}-${groupedItemIndex}`}
 								tabIndexer={tabIndexer}
+								gridNavIndex={gridNavIndex}
 							/>
 						)
 						gridRow++
+						gridNavIndex++
 					}
 				}
 				cells.push(
@@ -372,9 +413,11 @@ export function TransactionManager() {
 						gridRow={gridRow}
 						key={`${groupedItem.date}-${groupedItemIndex}`}
 						tabIndexer={tabIndexer}
+						gridNavIndex={gridNavIndex}
 					/>
 				)
 				gridRow++
+				gridNavIndex++
 
 				groupedItem.transactions.forEach((transaction, transactionIndex) => {
 					if (transaction.items.length === 1) {
@@ -392,6 +435,7 @@ export function TransactionManager() {
 							sortOrder,
 							gridRow,
 							tabIndexer,
+							gridNavIndex,
 						}
 						cells.push(
 							<SingleRow
@@ -400,6 +444,7 @@ export function TransactionManager() {
 								key={`${groupedItemIndex}-${transaction.id}-${transactionIndex}`}
 							/>
 						)
+						gridNavIndex++
 					} else {
 						const sortPosChanged =
 							sortOrder.def[transaction.date].findIndex(
@@ -424,6 +469,7 @@ export function TransactionManager() {
 							sortOrder,
 							gridRow,
 							tabIndexer,
+							gridNavIndex,
 						}
 
 						cells.push(
@@ -433,10 +479,12 @@ export function TransactionManager() {
 								key={`${groupedItemIndex}-${transaction.id}-${transactionIndex}`}
 							/>
 						)
+						gridNavIndex += transaction.items.length + 1
 					}
 					gridRow++
 				})
 			})
+			gridNav.setEndIndex(gridNavIndex)
 			const gridConfig: JGridTypes.Props = {
 				headers: headers,
 				cells: cells,

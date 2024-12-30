@@ -32,6 +32,7 @@ export interface MultiRowProps {
 	sortOrder: SortOrder.Controller
 	gridRow: number
 	tabIndexer: TabIndexer
+	gridNavIndex: number
 }
 
 export type ItemRowsRef = {
@@ -137,6 +138,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					disabled={p.disableTransactionResort}
 					ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
 					tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
+					data-grid_nav_col='left_controls'
+					data-grid_nav_index={p.gridNavIndex}
 				>
 					<ReorderIcon />
 				</JButton>
@@ -149,6 +152,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				<JButton
 					jstyle='invisible'
 					tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
+					data-grid_nav_col='left_controls'
+					data-grid_nav_index={p.gridNavIndex}
 				>
 					<FoldArrow />
 				</JButton>
@@ -167,6 +172,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				ref={dateSelectRef}
 				tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
 				{...eventHandlers}
+				data-grid_nav_col='date'
+				data-grid_nav_index={p.gridNavIndex}
 			/>
 		</div>,
 		<div
@@ -181,6 +188,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				data-key='name'
 				tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
 				{...eventHandlers}
+				data-grid_nav_col='name'
+				data-grid_nav_index={p.gridNavIndex}
 			/>
 		</div>,
 		<div className={`${s.cell_container} ${s.first_row}`} key={`${p.transaction.id}-4`}>
@@ -203,6 +212,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				test_transaction_id={p.transaction.name}
 				className={s.more_controls}
 				tabIndex={transactionPendingDeletion ? undefined : p.tabIndexer()}
+				data-grid_nav_col='right_controls'
+				data-grid_nav_index={p.gridNavIndex}
 				options={[
 					{
 						text: 'Delete',
@@ -321,6 +332,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 								? -1
 								: p.tabIndexer()
 						}
+						data-grid_nav_col='left_controls'
+						data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
 					>
 						<ReorderIcon />
 					</JButton>
@@ -362,6 +375,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: p.tabIndexer()
 					}
 					{...eventHandlers}
+					data-grid_nav_col='name'
+					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
 				/>
 			</div>,
 			<div
@@ -383,6 +398,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: p.tabIndexer()
 					}
 					{...eventHandlers}
+					data-grid_nav_col='amount'
+					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
 				/>
 			</div>,
 			<div
@@ -409,6 +426,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: p.tabIndexer()
 					}
 					{...eventHandlers}
+					data-grid_nav_col='category'
+					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
 				/>
 			</div>,
 			<div
@@ -435,6 +454,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: p.tabIndexer()
 					}
 					{...eventHandlers}
+					data-grid_nav_col='account'
+					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
 				/>
 			</div>,
 			<div
@@ -452,6 +473,8 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					test_transaction_id={p.transaction.name}
 					className={s.more_controls}
 					tabIndex={itemPendingDeletion ? undefined : p.tabIndexer()}
+					data-grid_nav_col='right_controls'
+					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
 					options={[
 						{
 							text: 'Delete',

@@ -1,4 +1,5 @@
 export * from './useFoldState'
+export * from './useGridNav'
 export * from './useHistory'
 export * from './usePendingChanges'
 export * from './useSortOrder'

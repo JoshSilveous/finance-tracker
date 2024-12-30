@@ -12,7 +12,7 @@ export type Option = {
 	className?: string
 }
 
-interface OptionsMenuProps extends HTMLAttributes<HTMLDivElement> {
+interface OptionsMenuProps extends HTMLAttributes<HTMLButtonElement> {
 	test_transaction_id: string
 	width: number
 	height: number
@@ -108,7 +108,7 @@ export function OptionsMenu({
 	})
 
 	return (
-		<div className={`${s.main} ${className ? className : ''}`} {...rest}>
+		<div className={`${s.main} ${className ? className : ''}`}>
 			<div
 				className={`${s.popout} ${optionsIsOpen ? s.revealed : ''}`}
 				ref={containerRef}
@@ -119,6 +119,7 @@ export function OptionsMenu({
 					</div>
 					<JButton
 						jstyle='invisible'
+						{...rest}
 						tabIndex={toggleButtonIndex}
 						ref={togglerRef}
 						onClick={() => setOptionsIsOpen((prev) => !prev)}
