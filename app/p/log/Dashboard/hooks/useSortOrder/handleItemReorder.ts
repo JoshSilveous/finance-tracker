@@ -1,8 +1,8 @@
 import { delay } from '@/utils'
-import multiRowStyles from '../../components/MultiRow/MultiRow.module.scss'
-import { ItemRowsRef } from '../../components'
-import { FormTransaction } from '../../TransactionManager'
+import multiRowStyles from '../../../TransactionManager/components/MultiRow/MultiRow.module.scss'
 import { MutableRefObject } from 'react'
+import { ItemRowsRef } from '../../../TransactionManager/components'
+import { FormTransaction } from '../../../TransactionManager/TransactionManager'
 
 export function itemReorderMouseEffect(
 	item: FormTransaction['items'][number],

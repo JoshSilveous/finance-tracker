@@ -18,6 +18,9 @@ export function Dashboard() {
 			sortOrder.genDefaultSortOrder(newData.transactions)
 		},
 	})
+	useEffect(() => {
+		data.reload()
+	}, [])
 	const transactionManagerRowsRef = useRef<TransactionManagerRowsRef>({})
 	const setTransactionManagerRowRef =
 		(transaction_id: string) => (node: HTMLInputElement) => {

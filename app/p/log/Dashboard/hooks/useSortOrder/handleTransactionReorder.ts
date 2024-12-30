@@ -1,7 +1,10 @@
-import s from '../../TransactionManager.module.scss'
+import s from '../../../TransactionManager/TransactionManager.module.scss'
 import { delay } from '@/utils'
 import { MutableRefObject } from 'react'
-import { FormTransaction, TransactionRowsRef } from '../../TransactionManager'
+import {
+	FormTransaction,
+	TransactionRowsRef,
+} from '../../../TransactionManager/TransactionManager'
 import { FoldStateUpdater } from '../useFoldState'
 import { SortOrder } from './useSortOrder'
 
