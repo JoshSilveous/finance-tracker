@@ -1,12 +1,13 @@
 ## Unsolved
 
 -   Switch preferred column widths to localStorage instead of DB
--   Add key listeners for saving
 -   Disable grid while saving
 -   Switch "create new transaction" button to add row to grid
 -   Make TransactionManager card resizable, where the grid always takes up 100%.
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
+
     This will require some sortOrder magic and querying when saving.
+
 -   Make pop-out scrollbar not appear when not needed: https://i.imgur.com/sAXGkIZ.gif
 
 #
@@ -24,6 +25,7 @@
 ## Solved
 
 -   Allow enter/arrow navigation in grid
+-   Add key listeners for saving
 -   Show "Today" and "Yesterday" on dates
 -   fix this bug https://imgur.com/NO91QLm
 -   TransactionManager - Add control to delete rows

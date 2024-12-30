@@ -11,6 +11,9 @@ import {
 	promptError,
 	setKeyListenerContext,
 	createFocusLoop,
+	IsolatedKeyListener,
+	addIsolatedKeyListeners,
+	removeIsolatedKeyListeners,
 } from '@/utils'
 import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
@@ -63,8 +66,35 @@ export function NewTransactionForm({
 	}, [creationFinished])
 
 	useEffect(() => {
-		firstFocusRef.current!.focus()
 		setKeyListenerContext('NewTransactionForm')
+		firstFocusRef.current!.focus()
+
+		const listeners: IsolatedKeyListener[] = [
+			{
+				context: 'NewTransactionForm',
+				char: 'S',
+				ctrlKey: true,
+				shiftKey: false,
+				run: () => {
+					if (!creationFinished) {
+						const saveButton = lastFocusRef.current! as HTMLButtonElement
+
+						const clickEvent = new Event('click', {
+							bubbles: true,
+							cancelable: true,
+						})
+
+						saveButton.dispatchEvent(clickEvent)
+					}
+				},
+				preventDefault: true,
+			},
+		]
+		addIsolatedKeyListeners(listeners)
+
+		return () => {
+			removeIsolatedKeyListeners(listeners)
+		}
 	}, [])
 
 	// check if form is ready to submit
@@ -134,56 +164,58 @@ export function NewTransactionForm({
 			}
 		}, [])
 
-	const handleSubmit: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
-		if (missingItems.length !== 0) {
-			const node = e.currentTarget
+	const handleSubmit = async () => {
+		if (!submitting && !creationFinished) {
+			if (missingItems.length !== 0) {
+				const createButtonNode = lastFocusRef.current!
 
-			node.classList.add(s.error_shake, s.error)
-			missingItems.forEach((id) => {
-				const key = id.split('-')[1] as Key
-				if (key === 'amount') {
-					const actInput = document.getElementById(id) as HTMLInputElement
-					const actFormatted = actInput.parentElement!
-						.childNodes[2] as HTMLDivElement
-					actInput.classList.add(s.error_shake, s.error)
-					actFormatted.classList.add(s.error_shake, s.error)
-				} else {
-					document.getElementById(id)!.classList.add(s.error_shake, s.error)
-				}
-			})
-
-			delay(300).then(() => {
+				createButtonNode.classList.add(s.error_shake, s.error)
 				missingItems.forEach((id) => {
 					const key = id.split('-')[1] as Key
 					if (key === 'amount') {
 						const actInput = document.getElementById(id) as HTMLInputElement
 						const actFormatted = actInput.parentElement!
 							.childNodes[2] as HTMLDivElement
-						actInput.classList.remove(s.error_shake)
-						actFormatted.classList.remove(s.error_shake)
+						actInput.classList.add(s.error_shake, s.error)
+						actFormatted.classList.add(s.error_shake, s.error)
 					} else {
-						document.getElementById(id)!.classList.remove(s.error_shake)
+						document.getElementById(id)!.classList.add(s.error_shake, s.error)
 					}
 				})
-				node.classList.remove(s.error_shake, s.error)
-			})
-		} else {
-			setSubmitting(true)
-			try {
-				await insertTransactionAndItems(formData)
-				setSubmitting(false)
-				if (setRefreshRequired) {
-					setRefreshRequired()
-				}
-				setCreationFinished(true)
-			} catch (e) {
-				if (isStandardError(e)) {
-					promptError(
-						'Error occurred while creating your transaction.',
-						e.message,
-						'Check your internet connection, and try refreshing the page.'
-					)
-					console.error(e)
+
+				delay(300).then(() => {
+					missingItems.forEach((id) => {
+						const key = id.split('-')[1] as Key
+						if (key === 'amount') {
+							const actInput = document.getElementById(id) as HTMLInputElement
+							const actFormatted = actInput.parentElement!
+								.childNodes[2] as HTMLDivElement
+							actInput.classList.remove(s.error_shake)
+							actFormatted.classList.remove(s.error_shake)
+						} else {
+							document.getElementById(id)!.classList.remove(s.error_shake)
+						}
+					})
+					createButtonNode.classList.remove(s.error_shake, s.error)
+				})
+			} else {
+				setSubmitting(true)
+				try {
+					await insertTransactionAndItems(formData)
+					setSubmitting(false)
+					if (setRefreshRequired) {
+						setRefreshRequired()
+					}
+					setCreationFinished(true)
+				} catch (e) {
+					if (isStandardError(e)) {
+						promptError(
+							'Error occurred while creating your transaction.',
+							e.message,
+							'Check your internet connection, and try refreshing the page.'
+						)
+						console.error(e)
+					}
 				}
 			}
 		}

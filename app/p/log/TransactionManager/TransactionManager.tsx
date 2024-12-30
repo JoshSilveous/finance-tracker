@@ -97,6 +97,18 @@ export function TransactionManager() {
 					}
 				},
 			},
+			{
+				context: 'TransactionManager',
+				char: 'S',
+				ctrlKey: true,
+				shiftKey: false,
+				run: () => {
+					if (isChanged) {
+						handleSaveChanges
+					}
+				},
+				preventDefault: true,
+			},
 		]
 
 		addIsolatedKeyListeners(listeners)
