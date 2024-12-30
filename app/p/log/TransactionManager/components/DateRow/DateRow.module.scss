@@ -11,27 +11,15 @@
 			font-size: 20px;
 			display: flex;
 
-			.weekday {
-				&::after {
-					content: ',\00a0';
-				}
-			}
-			.month {
-				&::after {
-					content: '\00a0';
-				}
-			}
-			.day {
+			.day_num {
 				font-weight: 500;
 			}
 			.suffix {
-				vertical-align: text-top; /* Positions the text as superscript */
+				vertical-align: text-top;
 				font-size: 0.75em;
-				&::after {
-					content: '\00a0';
-				}
 			}
-			.year {
+			.relative::before {
+				content: '\00a0';
 			}
 		}
 	}

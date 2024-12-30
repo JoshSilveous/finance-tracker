@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import s from './DateRow.module.scss'
 import { formatDate } from '@/utils/formatDate'
 import { JButton } from '@/components/JForm'
@@ -6,6 +6,7 @@ import { createPopup } from '@/utils'
 import { NewTransactionForm } from './NewTransactionForm/NewTransactionForm'
 import { DropdownOptions } from '../../TransactionManager'
 import { TabIndexer } from '../../hooks'
+import { getDateString } from '@/utils/getDateString'
 
 interface DateRowProps {
 	date: string
@@ -51,17 +52,26 @@ export function DateRow({
 		popup.trigger()
 	}
 
+	const isToday = date === getDateString()
+	const isYesterday = date === getDateString(-1)
+
+	console.log('date', date, isToday, isYesterday)
+
+	const dateDisplay = (
+		<div className={s.date_container}>
+			{day.long}, {month.short}
+			&nbsp;<span className={s.day_num}>{day.num}</span>
+			<span className={s.suffix}>{day.suffix}</span>&nbsp;{year}
+			{isToday && ' (Today)'}
+			{isYesterday && ' (Yesterday)'}
+		</div>
+	)
+
 	return (
 		<div className={s.main}>
 			<div className={s.empty} style={{ gridRow: `${gridRow} / ${gridRow + 1}` }} />
 			<div className={s.content} style={{ gridRow: `${gridRow} / ${gridRow + 1}` }}>
-				<div className={s.date_container}>
-					<div className={s.weekday}>{day.long}</div>
-					<div className={s.month}>{month.short}</div>
-					<div className={s.day}>{day.num}</div>
-					<div className={s.suffix}>{day.suffix}</div>
-					<div className={s.year}>{year}</div>
-				</div>
+				{dateDisplay}
 				<div className={s.new_transaction_container}>
 					<JButton
 						jstyle='secondary'

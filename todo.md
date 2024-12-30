@@ -4,7 +4,6 @@
 -   Add key listeners for saving
 -   Disable grid while saving
 -   Switch "create new transaction" button to add row to grid
--   Show "Today" and "Yesterday" on dates
 -   Make TransactionManager card resizable, where the grid always takes up 100%.
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
     This will require some sortOrder magic and querying when saving.
@@ -24,20 +23,20 @@
 
 ## Solved
 
--   TransactionManager
+-   Show "Today" and "Yesterday" on dates
 -   fix this bug https://imgur.com/NO91QLm
-    -   Add control to delete rows
-    -   Add control to delete transaction items
-    -   Set up history system
-    -   NEXT: move transaction reorder logic to sortOrder
-    -   Set up PendingChange system
-    -   remove datasets
-    -   STRESS TEST RESORTING (esp when scrollheight overflows)
-    -   Add control to fold/unfold multi-rows
-    -   Add control to resort multi-rows
-    -   Make margins when resorting fit row size exactly ( + use linear transitions for less wobbling)
-    -   Make Transaction resorting limited to the row
-    -   Add control to resort rows
+-   TransactionManager - Add control to delete rows
+-   TransactionManager - Add control to delete transaction items
+-   TransactionManager - Set up history system
+-   TransactionManager - NEXT: move transaction reorder logic to sortOrder
+-   TransactionManager - Set up PendingChange system
+-   TransactionManager - remove datasets
+-   TransactionManager - STRESS TEST RESORTING (esp when scrollheight overflows)
+-   TransactionManager - Add control to fold/unfold multi-rows
+-   TransactionManager - Add control to resort multi-rows
+-   TransactionManager - Make margins when resorting fit row size exactly ( + use linear transitions for less wobbling)
+-   TransactionManager - Make Transaction resorting limited to the row
+-   TransactionManager - Add control to resort rows
 -   Phase out namespace type system- accounts
 -   Create CategoryManager
 -   Add undo/redo buttons in AccountManager
