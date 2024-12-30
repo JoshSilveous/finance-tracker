@@ -136,8 +136,6 @@ export function TransactionManager() {
 	}, [mainContainerRef, loaded])
 
 	const refreshData = async () => {
-		pendingChanges.clear()
-		historyController.clear()
 		await fetchAndLoadData(
 			setTransactionData,
 			foldState.set,
@@ -146,6 +144,8 @@ export function TransactionManager() {
 			sortOrder.setDefault,
 			sortOrder.setCurrent
 		)
+		pendingChanges.clear()
+		historyController.clear()
 		return
 	}
 	useEffect(() => {

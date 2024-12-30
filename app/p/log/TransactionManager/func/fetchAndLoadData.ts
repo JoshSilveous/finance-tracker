@@ -26,6 +26,7 @@ export async function fetchAndLoadData(
 		])
 
 		const [transactions, categories, accounts] = res
+
 		// generate default sort order
 		const sortOrder: SortOrder.State = {}
 		transactions.forEach((transaction) => {
@@ -50,6 +51,11 @@ export async function fetchAndLoadData(
 					]
 				}
 			}
+		})
+
+		// flip transactions sort order (so new transactions appear at the top)
+		Object.entries(sortOrder).forEach(([date, sortItems]) => {
+			sortOrder[date] = sortItems.reverse()
 		})
 
 		// generate default fold state

@@ -113,7 +113,12 @@ export async function saveChanges(
 			return null
 		}
 		const newItems = pendingChanges.creations.cur.items.map((entry) => {
-			const newItemData = changesCopy.items[entry.id]
+			let newItemData = changesCopy.items[entry.id]
+
+			if (newItemData === undefined) {
+				// handles case where a user adds a new item, but doesn't fill out any info, and hits save
+				newItemData = {}
+			}
 
 			const posUpdateIndex = itemPositionUpdates.findIndex(
 				(update) => update.id === entry.id
@@ -230,7 +235,7 @@ export async function saveChanges(
 				if (defaultIndex !== currentIndex) {
 					transactionPositionUpdates.push({
 						id: transaction_id,
-						order_position: currentIndex,
+						order_position: sortItems.length - currentIndex, // sort order is reversed for transactions so newest appears at top
 					})
 				}
 			})
