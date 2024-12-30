@@ -1,5 +1,6 @@
 export * from './addCommas'
 export * from './areDeeplyEqual'
+export * from './calculatePercentages'
 export * from './createFocusLoop'
 export * from './createPopup'
 export * from './delay'

@@ -4,35 +4,6 @@
 	gap: 50px;
 	align-items: center;
 	justify-content: center;
-	width: 200px;
+	width: 100vw;
 	height: 100vh;
-	.container {
-		display: flex;
-		flex-direction: column;
-		gap: 50px;
-		align-items: center;
-		justify-content: center;
-		border: 2px solid red;
-		padding: 40px;
-	}
-	.test {
-		background-color: white;
-		color: red;
-		height: 200px;
-		width: 200px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: relative;
-
-		.text::after {
-			content: url('/checkmark.svg');
-			color: red;
-			z-index: 1000;
-			height: 200px;
-			width: 200px;
-			position: absolute;
-			display: inline-block;
-		}
-	}
 }

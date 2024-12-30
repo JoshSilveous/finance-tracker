@@ -5,24 +5,71 @@ import s from './page.module.scss'
 import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { Tile } from '@/components/Tile/Tile'
+import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 
 export default function Dev() {
 	const testRef = useRef<HTMLInputElement | null>(null)
 	const [val, setVal] = useState('0')
 
-	let text = ''
-	for (let i = 0; i < 1000; i++) {
-		text += 'Example Content '
+	const columnCount = 7
+	const rowCount = 20
+	const cells: JGridTypes.Cell[][] = []
+	const headers: JGridTypes.Props['headers'] = [
+		{
+			content: <div>Col {1}</div>,
+			defaultWidth: 100,
+			noResize: true,
+		},
+		{
+			content: <div>Col {2}</div>,
+			defaultWidth: 100,
+			minWidth: 50,
+		},
+		{
+			content: <div>Col {3}</div>,
+			defaultWidth: 100,
+			noResize: true,
+		},
+		{
+			content: <div>Col {4}</div>,
+			defaultWidth: 100,
+			noResize: true,
+		},
+		{
+			content: <div>Col {5}</div>,
+			defaultWidth: 100,
+			noResize: true,
+		},
+		{
+			content: <div>Col {6}</div>,
+			defaultWidth: 100,
+			minWidth: 50,
+		},
+		{
+			content: <div>Col {7}</div>,
+			defaultWidth: 100,
+			noResize: true,
+		},
+	]
+	for (let i = 0; i < rowCount; i++) {
+		cells.push([])
+		for (let j = 0; j < columnCount; j++) {
+			cells[i].push(<div>content!</div>)
+		}
+	}
+
+	console.log(cells, headers)
+
+	const gridConfig: JGridTypes.Props = {
+		cells: cells,
+		headers: headers,
+		useFullWidth: true,
 	}
 
 	return (
 		<div className={s.main}>
-			<Tile
-				onResize={(width, height) => {
-					console.log(width, height)
-				}}
-			>
-				<div className={s.content}>{text}</div>
+			<Tile className={s.grid_container} resizable>
+				<JGrid {...gridConfig} />
 			</Tile>
 		</div>
 	)
