@@ -224,7 +224,6 @@ export function usePendingChanges({
 	}, [])
 
 	const isChanges = (() => {
-		console.log('calced isChanges', pendingDeletions.transactions.length)
 		if (
 			Object.keys(pendingChanges.transactions).length !== 0 ||
 			Object.keys(pendingChanges.items).length !== 0 ||

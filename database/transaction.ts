@@ -193,6 +193,7 @@ export interface InsertItemEntry {
 	category_id: string | null
 	account_id: string | null
 	transaction_id: string
+	order_position: number
 }
 export async function insertItems(items: InsertItemEntry[]) {
 	const user_id = await getUserID()
@@ -208,7 +209,6 @@ export async function insertItems(items: InsertItemEntry[]) {
 	const { data, error } = await supabase
 		.from('transaction_items')
 		.insert(itemUpdatesWithUserID)
-		.select('id')
 	if (error) {
 		throw new Error(error.message)
 	}
