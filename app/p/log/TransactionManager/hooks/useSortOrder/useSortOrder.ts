@@ -265,7 +265,7 @@ export function useSortOrder({
 
 				return itemReorderMouseEffect(
 					item,
-					itemRowsRef.current,
+					itemRowsRef,
 					itemIndex - 1,
 					transaction,
 					e,

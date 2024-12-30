@@ -2,10 +2,11 @@ import { delay } from '@/utils'
 import multiRowStyles from '../../components/MultiRow/MultiRow.module.scss'
 import { ItemRowsRef } from '../../components'
 import { FormTransaction } from '../../TransactionManager'
+import { MutableRefObject } from 'react'
 
 export function itemReorderMouseEffect(
 	item: FormTransaction['items'][number],
-	itemRows: ItemRowsRef,
+	itemRowsRef: MutableRefObject<ItemRowsRef>,
 	itemIndex: number,
 	transaction: FormTransaction,
 	e: MouseEvent,
@@ -14,12 +15,12 @@ export function itemReorderMouseEffect(
 	const grabberNode = (e.currentTarget as HTMLButtonElement)
 		.parentElement as HTMLDivElement
 	const grabberContainerNode = grabberNode.parentElement as HTMLDivElement
-	const allRows = itemRows.map((ref) => ref.cells)
-	const thisRow = itemRows.find((ref) => ref.item_id === item.id)!.cells
+	const allRows = itemRowsRef.current.map((ref) => ref.cells)
+	const thisRow = itemRowsRef.current.find((ref) => ref.item_id === item.id)!.cells
 	const otherRows = allRows.filter((_, index) => index !== itemIndex)!
 
-	const gridElem = itemRows[0].cells[0]?.parentNode?.parentNode?.parentNode?.parentNode
-		?.parentNode as HTMLDivElement
+	const gridElem = itemRowsRef.current[0].cells[0]?.parentNode?.parentNode?.parentNode
+		?.parentNode?.parentNode as HTMLDivElement
 
 	const offsetX =
 		grabberNode.offsetLeft +
@@ -98,11 +99,12 @@ export function itemReorderMouseEffect(
 			})
 		}
 		// if hovering over last row
-		else if (rowIndex === transaction.items.length - 2) {
+		else if (rowIndex === otherRows.length - 1) {
 			otherRows.at(-1)!.forEach((node) => {
 				node.classList.add(multiRowStyles.margin_bottom_double)
 			})
 		} else {
+			console.log('edge case')
 			otherRows[rowIndex].forEach((node) =>
 				node.classList.add(multiRowStyles.margin_bottom)
 			)
