@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Data } from '../../Dashboard/hooks/useData/useData'
 
 export function useFoldState() {
 	const [foldState, setFoldState] = useState<FoldState>({})
@@ -6,6 +7,16 @@ export function useFoldState() {
 	useEffect(() => {
 		foldStateRef.current = foldState
 	}, [foldState])
+
+	const genDefaultFoldState = (transactions: Data.StateTransaction[]) => {
+		const foldState: FoldState = {}
+		transactions.forEach((transaction) => {
+			if (transaction.items.length > 1) {
+				foldState[transaction.id] = false
+			}
+		})
+		setFoldState(foldState)
+	}
 
 	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {
 		setFoldState((prev) => {
@@ -26,6 +37,7 @@ export function useFoldState() {
 		set: setFoldState,
 		update: updateFoldState,
 		get: getFoldState,
+		genDefault: genDefaultFoldState,
 	}
 }
 

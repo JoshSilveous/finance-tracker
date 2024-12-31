@@ -13,6 +13,7 @@ import { ItemRowsRef } from '../../components'
 import { itemReorderMouseEffect } from './handleItemReorder'
 import { FoldStateGetter, FoldStateUpdater } from '../useFoldState'
 import { transactionReorderMouseEffect } from './handleTransactionReorder'
+import { Data } from '../../../Dashboard/hooks/useData/useData'
 
 export interface UseSortOrderProps {
 	getFoldState: FoldStateGetter
@@ -45,6 +46,41 @@ export function useSortOrder({
 	}, [curSortOrder])
 
 	const changesAreDisabled = useRef<boolean>(false)
+
+	const genDefaultSortOrder = (transactions: Data.StateTransaction[]) => {
+		// generate default sort order
+		const sortOrder: SortOrder.State = {}
+		transactions.forEach((transaction) => {
+			if (sortOrder[transaction.date.val] === undefined) {
+				if (transaction.items.length > 1) {
+					sortOrder[transaction.date.val] = [
+						[transaction.id, ...transaction.items.map((item) => item.id)],
+					]
+				} else {
+					sortOrder[transaction.date.val] = [transaction.id]
+				}
+			} else {
+				if (transaction.items.length > 1) {
+					sortOrder[transaction.date.val] = [
+						...sortOrder[transaction.date.val],
+						[transaction.id, ...transaction.items.map((item) => item.id)],
+					]
+				} else {
+					sortOrder[transaction.date.val] = [
+						...sortOrder[transaction.date.val],
+						transaction.id,
+					]
+				}
+			}
+		})
+
+		// flip transactions sort order (so new transactions appear at the top)
+		Object.entries(sortOrder).forEach(([date, sortItems]) => {
+			sortOrder[date] = sortItems.reverse()
+		})
+		setDefSortOrder(sortOrder)
+		setCurSortOrder(sortOrder)
+	}
 
 	/* TRANSACTION REORDERING LOGIC */
 
@@ -379,6 +415,7 @@ export function useSortOrder({
 		enableChanges: () => {
 			changesAreDisabled.current = false
 		},
+		genDefaultSortOrder,
 	} as SortOrder.Controller
 }
 
@@ -458,6 +495,7 @@ export namespace SortOrder {
 		) => ItemReorderRefAdder
 		disableChanges: () => void
 		enableChanges: () => void
+		genDefaultSortOrder: (transactions: Data.StateTransaction[]) => void
 	}
 
 	/**
