@@ -92,10 +92,10 @@ export function Tile({
 				className ? className : ''
 			}`}
 			style={{
-				minWidth: `${minWidth}px`,
-				minHeight: `${minHeight}px`,
-				maxWidth: `${maxWidth}px`,
-				maxHeight: `${maxHeight}px`,
+				minWidth: minWidth !== undefined ? `${minWidth}px` : undefined,
+				minHeight: minHeight !== undefined ? `${minHeight}px` : undefined,
+				maxWidth: maxWidth !== undefined ? `${maxWidth}px` : undefined,
+				maxHeight: maxHeight !== undefined ? `${maxHeight}px` : undefined,
 			}}
 			{...rest}
 		>

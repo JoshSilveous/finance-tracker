@@ -5,6 +5,10 @@
 	justify-content: flex-start;
 	border-radius: inherit;
 
+	* {
+		min-width: 0;
+	}
+
 	.grid {
 		display: grid;
 		grid-auto-rows: auto;
@@ -25,6 +29,7 @@
 				align-items: flex-start;
 				white-space: nowrap;
 				text-overflow: ellipsis;
+				overflow: hidden;
 				width: 100%;
 				height: auto;
 

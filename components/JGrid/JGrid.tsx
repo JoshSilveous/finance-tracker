@@ -323,7 +323,7 @@ export function JGrid(p: JGridTypes.Props) {
 			return itemRow
 		}
 	})
-
+	let sumtest = 0
 	const gridTemplateColumns = (() => {
 		if (p.useFullWidth) {
 			return columnWidths
@@ -336,7 +336,9 @@ export function JGrid(p: JGridTypes.Props) {
 							(sum, w, i) => (noResizeArr[i] ? sum : sum + w),
 							0
 						)
-						return `${(width / totalResizablePercentage) * 1}fr`
+						console.log('calcing', width, totalResizablePercentage)
+						sumtest += width / totalResizablePercentage
+						return `${width / totalResizablePercentage}fr`
 					}
 				})
 				.join(' ')
@@ -344,6 +346,7 @@ export function JGrid(p: JGridTypes.Props) {
 			return columnWidths.map((val) => `${val}px`).join(' ')
 		}
 	})()
+	console.log('after sumtest:', sumtest)
 	return (
 		<div
 			className={`${s.container} ${p.className ? p.className : ''}`}

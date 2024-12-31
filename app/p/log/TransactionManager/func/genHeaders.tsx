@@ -7,7 +7,7 @@ import { JGridTypes } from '@/components/JGrid/JGrid'
 export function genHeaders(historyController: HistoryController) {
 	const undoTitle = 'Undo most recent change.\nShortcut: CTRL + Z'
 	const redoTitle = 'Redo most recent change.\nShortcut: CTRL + ALT + Z'
-	return [
+	const headers: JGridTypes.Header[] = [
 		{
 			content: (
 				<div className={`${s.header_container} ${s.control}`}>
@@ -93,5 +93,6 @@ export function genHeaders(historyController: HistoryController) {
 			defaultWidth: 50,
 			noResize: true,
 		},
-	] as JGridTypes.Header[]
+	]
+	return headers
 }

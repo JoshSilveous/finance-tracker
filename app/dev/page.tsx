@@ -6,6 +6,7 @@ import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { Tile } from '@/components/Tile/Tile'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
+import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 
 export default function Dev() {
 	const testRef = useRef<HTMLInputElement | null>(null)
@@ -18,43 +19,40 @@ export default function Dev() {
 		{
 			content: <div>Col {1}</div>,
 			defaultWidth: 100,
-			noResize: true,
 		},
 		{
 			content: <div>Col {2}</div>,
 			defaultWidth: 100,
-			minWidth: 50,
 		},
 		{
 			content: <div>Col {3}</div>,
 			defaultWidth: 100,
-			noResize: true,
 		},
 		{
 			content: <div>Col {4}</div>,
 			defaultWidth: 100,
-			noResize: true,
 		},
 		{
 			content: <div>Col {5}</div>,
 			defaultWidth: 100,
-			noResize: true,
 		},
 		{
 			content: <div>Col {6}</div>,
 			defaultWidth: 100,
-			minWidth: 50,
 		},
 		{
 			content: <div>Col {7}</div>,
 			defaultWidth: 100,
-			noResize: true,
 		},
 	]
 	for (let i = 0; i < rowCount; i++) {
 		cells.push([])
 		for (let j = 0; j < columnCount; j++) {
-			cells[i].push(<div>content!</div>)
+			cells[i].push(
+				<div>
+					<JDatePicker />
+				</div>
+			)
 		}
 	}
 

@@ -443,6 +443,7 @@ export function TransactionManager() {
 				noBorders: true,
 				maxTableWidth: 1000,
 				stickyHeaders: true,
+				useFullWidth: true,
 			}
 			grid = <JGrid className={s.grid} {...gridConfig} />
 		}
