@@ -2,8 +2,11 @@
 import { Tile } from '@/components/Tile/Tile'
 import s from './Dashboard.module.scss'
 import { TransactionManager } from '../TransactionManager/TransactionManager'
+import { useState } from 'react'
 
 export function Dashboard() {
+	const [data, setData] = useState()
+
 	return (
 		<div className={s.main}>
 			<Tile

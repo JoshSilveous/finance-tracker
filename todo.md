@@ -1,8 +1,9 @@
 ## Unsolved
 
+-   \*\* Get transaction data (db and changed) into dashboard component for other items
+
 -   Switch preferred column widths to localStorage instead of DB
 -   Switch "create new transaction" button to add row to grid
--   Make TransactionManager card resizable, where the grid always takes up 100%.
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
     This will require some sortOrder magic and querying when saving.
 
@@ -22,6 +23,7 @@
 
 ## Solved
 
+-   Make TransactionManager card resizable, where the grid always takes up 100%.
 -   Disable grid while saving
 -   Allow enter/arrow navigation in grid
 -   Add key listeners for saving
