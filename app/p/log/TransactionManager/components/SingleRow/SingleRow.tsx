@@ -7,17 +7,15 @@ import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import s from './SingleRow.module.scss'
 import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } from 'react'
 import { FormTransaction } from '../../TransactionManager'
-import { genLiveVals, LiveVals } from './genLiveVals'
-import { HistoryController } from '../../hooks/useHistory'
 import { PendingChangeController } from '../../hooks/usePendingChanges'
-import { SortOrder, TabIndexer } from '../../hooks'
+import { TabIndexer } from '../../hooks'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
+import { Data, HistoryController, SortOrder } from '../../../Dashboard/hooks'
 
 export interface SingleRowProps {
-	transaction: FormTransaction
-	pendingChanges: PendingChangeController
+	transaction: Data.StateTransaction
+	data: Data.Controller
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
-	// onResortMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void
 	sortPosChanged: boolean
 	disableTransactionResort: boolean
 	historyController: HistoryController
@@ -31,14 +29,15 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 	const undoDeleteRef = useRef<HTMLButtonElement>(null)
 	const dateSelectRef = useRef<HTMLInputElement>(null)
 
-	const liveVals = useMemo(
-		() => genLiveVals(p.transaction, p.pendingChanges.changes.cur),
-		[p.transaction, p.pendingChanges.changes.cur]
-	)
 	const eventHandlers = useMemo(() => {
 		return {
 			onChange: ((e) => {
-				const key = e.target.dataset.key as keyof LiveVals
+				const key = e.target.dataset.key as
+					| 'date'
+					| 'name'
+					| 'amount'
+					| 'category_id'
+					| 'account_id'
 				const item_id = item.id
 				const newVal = e.target.value
 
@@ -46,30 +45,13 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 
 				// update pendingChanges
 				if (key === 'date' || key === 'name') {
-					const origVal = p.transaction[key]
-					if (origVal !== newVal) {
-						p.pendingChanges.changes.set(
-							'transactions',
-							p.transaction.id,
-							key,
-							newVal
-						)
-					} else {
-						p.pendingChanges.changes.set('transactions', p.transaction.id, key)
-					}
+					p.data.update('transaction', p.transaction.id, key, newVal)
 				} else if (
 					key === 'amount' ||
 					key === 'category_id' ||
 					key === 'account_id'
 				) {
-					const origVal = p.transaction.items.find((item) => item.id === item_id)![
-						key
-					]
-					if (origVal !== newVal) {
-						p.pendingChanges.changes.set('items', item_id, key, newVal)
-					} else {
-						p.pendingChanges.changes.set('items', item_id, key)
-					}
+					p.data.update('item', p.transaction.id, item_id, key, newVal)
 				}
 
 				// update history
@@ -100,7 +82,12 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				}
 			}) as ChangeEventHandler<HTMLInputElement | HTMLSelectElement>,
 			onBlur: ((e) => {
-				const key = e.target.dataset.key as keyof LiveVals
+				const key = e.target.dataset.key as
+					| 'date'
+					| 'name'
+					| 'amount'
+					| 'category_id'
+					| 'account_id'
 				const item_id = item.id
 				const newVal = e.target.value
 				const oldVal = e.target.dataset.value_on_focus
@@ -136,10 +123,6 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 		}
 	}, [p.transaction])
 
-	const isPendingDeletion = p.pendingChanges.deletions.cur.transactions.some(
-		(id) => id === p.transaction.id
-	)
-
 	let columnCount = 0
 	const genGridStyle = () => {
 		columnCount++
@@ -158,7 +141,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div
 				style={genGridStyle()}
 				className={`${s.cell_container} ${s.row_controller} ${
-					isPendingDeletion ? s.hidden : ''
+					p.transaction.pendingDeletion ? s.hidden : ''
 				}`}
 			>
 				<div
@@ -173,7 +156,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						jstyle='invisible'
 						disabled={p.disableTransactionResort}
 						ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
-						tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+						tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 						data-grid_nav_col='TM_left_controls'
 						data-grid_nav_index={p.gridNavIndex}
 					>
@@ -184,15 +167,15 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div
 				style={genGridStyle()}
 				className={`${s.cell_container} ${s.first_col} ${
-					liveVals.date.changed ? s.changed : ''
+					p.transaction.date.changed ? s.changed : ''
 				}`}
 			>
 				<JDatePicker
-					value={liveVals.date.val}
+					value={p.transaction.date.val}
 					data-transaction_id={p.transaction.id}
 					data-key='date'
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					ref={dateSelectRef}
 					data-grid_nav_col='TM_date'
 					data-grid_nav_index={p.gridNavIndex}
@@ -201,15 +184,15 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div
 				style={genGridStyle()}
 				className={`${s.cell_container} ${s.mid_col} ${
-					liveVals.name.changed ? s.changed : ''
+					p.transaction.name.changed ? s.changed : ''
 				}`}
 			>
 				<JInput
-					value={liveVals.name.val}
+					value={p.transaction.name.val}
 					data-transaction_id={p.transaction.id}
 					data-key='name'
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_name'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
@@ -217,18 +200,18 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div
 				style={genGridStyle()}
 				className={`${s.cell_container} ${s.mid_col} ${
-					liveVals.amount.changed ? s.changed : ''
+					item.amount.changed ? s.changed : ''
 				}`}
 			>
 				<JNumberAccounting
-					value={liveVals.amount.val}
+					value={item.amount.val}
 					data-transaction_id={p.transaction.id}
 					data-item_id={p.transaction.items[0].id}
 					data-key='amount'
 					maxDigLeftOfDecimal={8}
 					maxDigRightOfDecimal={2}
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_amount'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
@@ -236,21 +219,17 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div
 				style={genGridStyle()}
 				className={`${s.cell_container} ${s.mid_col} ${
-					liveVals.category_id.changed ? s.changed : ''
+					item.category_id.changed ? s.changed : ''
 				}`}
 			>
 				<JDropdown
 					options={p.dropdownOptions.category}
-					value={
-						liveVals.category_id.val !== null
-							? liveVals.category_id.val
-							: undefined
-					}
+					value={item.category_id.val !== null ? item.category_id.val : undefined}
 					data-transaction_id={p.transaction.id}
 					data-item_id={p.transaction.items[0].id}
 					data-key='category_id'
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_category'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
@@ -258,37 +237,33 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			<div
 				style={genGridStyle()}
 				className={`${s.cell_container} ${s.last_col} ${
-					liveVals.account_id.changed ? s.changed : ''
+					item.account_id.changed ? s.changed : ''
 				}`}
 			>
 				<JDropdown
 					options={p.dropdownOptions.account}
-					value={
-						liveVals.account_id.val !== null
-							? liveVals.account_id.val
-							: undefined
-					}
+					value={item.account_id.val !== null ? item.account_id.val : undefined}
 					data-transaction_id={p.transaction.id}
 					data-item_id={p.transaction.items[0].id}
 					data-key='account_id'
 					{...eventHandlers}
-					tabIndex={isPendingDeletion ? -1 : p.tabIndexer()}
+					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_account'
 					data-grid_nav_index={p.gridNavIndex}
 				/>
 			</div>
 			<div
 				className={`${s.cell_container} ${s.more_controls_container} ${
-					isPendingDeletion ? s.hidden : ''
+					p.transaction.pendingDeletion ? s.hidden : ''
 				}`}
 				style={genGridStyle()}
 			>
 				<OptionsMenu
 					width={150}
 					height={110}
-					test_transaction_id={p.transaction.name}
+					test_transaction_id={p.transaction.name.val}
 					className={s.more_controls}
-					tabIndex={isPendingDeletion ? undefined : p.tabIndexer()}
+					tabIndex={p.transaction.pendingDeletion ? undefined : p.tabIndexer()}
 					data-grid_nav_col='TM_right_controls'
 					data-grid_nav_index={p.gridNavIndex}
 					options={[
@@ -296,10 +271,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							text: 'Delete',
 							icon: <DeleteIcon />,
 							onClick: () => {
-								p.pendingChanges.deletions.add(
-									'transaction',
-									p.transaction.id
-								)
+								p.data.stageDelete('transaction', p.transaction.id)
 								if (undoDeleteRef.current !== null) {
 									undoDeleteRef.current.focus()
 								}
@@ -310,18 +282,20 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							text: 'Add Item',
 							icon: <InsertRowIcon />,
 							onClick: () =>
-								p.pendingChanges.creations.add('item', {
+								p.data.stageCreate('item', p.transaction.id, {
 									rel: 'below',
 									item_id: item.id,
-									date: p.transaction.date,
-									transaction_id: p.transaction.id,
 								}),
 							className: s.add_item,
 						},
 					]}
 				/>
 			</div>
-			<div className={`${s.delete_overlay} ${isPendingDeletion ? s.visible : ''}`}>
+			<div
+				className={`${s.delete_overlay} ${
+					p.transaction.pendingDeletion ? s.visible : ''
+				}`}
+			>
 				<div
 					className={s.blur}
 					style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
@@ -334,7 +308,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					className={s.text}
 					style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
 				>
-					"{p.transaction.name}" will be deleted when you save changes.
+					"{p.transaction.name.val}" will be deleted when you save changes.
 				</div>
 				<div
 					className={s.button_container}
@@ -343,16 +317,13 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					<JButton
 						jstyle='invisible'
 						onClick={() => {
-							p.pendingChanges.deletions.remove(
-								'transaction',
-								p.transaction.id
-							)
+							p.data.unstageDelete('transaction', p.transaction.id)
 							if (dateSelectRef.current !== null) {
 								dateSelectRef.current.focus()
 							}
 						}}
 						ref={undoDeleteRef}
-						tabIndex={isPendingDeletion ? p.tabIndexer() : -1}
+						tabIndex={p.transaction.pendingDeletion ? p.tabIndexer() : -1}
 					>
 						Undo Delete
 					</JButton>

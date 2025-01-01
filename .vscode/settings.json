@@ -9,6 +9,7 @@
 		"/utils",
 		"/utils/errors",
 		"/utils/useBgLoad",
-		"/utils/createPopup"
+		"/utils/createPopup",
+		"/app/p/log/Dashboard/hooks"
 	]
 }

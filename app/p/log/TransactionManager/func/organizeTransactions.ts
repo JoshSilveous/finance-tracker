@@ -1,41 +1,35 @@
-import { PendingChanges } from '../hooks'
+import { Data } from '../../Dashboard/hooks'
 import { SortOrder } from '../hooks/useSortOrder'
-import { GroupedTransaction, FormTransaction } from '../TransactionManager'
 
 export function sortTransactions(
 	sortOrder: SortOrder.State,
-	transactionData: FormTransaction[],
-	pendingChanges: PendingChanges.PendingChangeController
+	transactions: Data.StateTransaction[]
 ) {
 	return Object.entries(sortOrder).map((entry) => {
 		return {
 			date: entry[0],
-			transactions: entry[1].map((sortItem) => {
-				if (Array.isArray(sortItem)) {
-					const newItems: FormTransaction['items'] = []
-					const thisTransaction = transactionData.find(
-						(item) => item.id === sortItem[0]
+			transactions: entry[1].map((sortID) => {
+				if (Array.isArray(sortID)) {
+					const sortedItems: Data.StateTransaction['items'] = []
+					const thisTransaction = transactions.find(
+						(item) => item.id === sortID[0]
 					)!
 
-					sortItem.forEach((itemID, index) => {
+					sortID.forEach((itemID, index) => {
 						if (index === 0) return
-						if (pendingChanges.creations.check(itemID)) {
-							newItems.push(
-								pendingChanges.creations.cur.items.find(
-									(item) => item.id === itemID
-								)!
-							)
-						} else {
-							newItems.push(
-								thisTransaction.items.find((item) => item.id === itemID)!
-							)
-						}
+						sortedItems.push(
+							thisTransaction.items.find((it) => it.id === itemID)!
+						)
 					})
-					return { ...thisTransaction, items: newItems }
+					return { ...thisTransaction, items: sortedItems }
 				} else {
-					return transactionData.find((item) => item.id === sortItem)!
+					return transactions.find((trn) => trn.id === sortID)!
 				}
 			}),
 		}
 	}) as GroupedTransaction[]
 }
+/**
+ * Transaction(s), grouped by date
+ */
+export type GroupedTransaction = { date: string; transactions: Data.StateTransaction[] }

@@ -8,25 +8,24 @@ import { FormTransaction } from '../../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { genLiveVals } from './func/genLiveVals'
 import { PendingChangeController } from '../../hooks/usePendingChanges'
-import { SortOrder, FoldStateUpdater, HistoryController, TabIndexer } from '../../hooks'
+import { FoldStateUpdater, TabIndexer } from '../../hooks'
 import { foldRenderer } from './func/foldRenderer'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 import { genEventHandlers } from './func/genEventHandlers'
 import { genUniqueLists } from './func/genUniqueLists'
 import { delay } from '@/utils'
+import { Data, HistoryController, SortOrder } from '../../../Dashboard/hooks'
 
 export interface MultiRowProps {
-	transaction: FormTransaction
+	transaction: Data.StateTransaction
+	data: Data.Controller
 	transactionIndex: number
-	pendingChanges: PendingChangeController
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	folded: boolean
 	playAnimation: boolean
 	updateFoldState: FoldStateUpdater
 	transactionSortPosChanged: boolean
-	defSortOrder: SortOrder.State
 	disableTransactionResort: boolean
 	historyController: HistoryController
 	sortOrder: SortOrder.Controller
@@ -73,19 +72,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	)
 	itemRowsRef.current = [] // wipe refs every re-render
 
-	// re-calculates the displayed value (from default transaction or pendingChange)
-	const liveVals = useMemo(
-		() => genLiveVals(p.transaction, p.pendingChanges.changes.cur),
-		[p.transaction, p.pendingChanges.changes.cur]
-	)
-
-	const uniqueLists = genUniqueLists(p, liveVals)
+	const uniqueLists = genUniqueLists(p)
 
 	const undoDeleteRef = useRef<HTMLButtonElement>(null)
 	const dateSelectRef = useRef<HTMLInputElement>(null)
-	const transactionPendingDeletion = p.pendingChanges.deletions.cur.transactions.some(
-		(id) => id === p.transaction.id
-	)
 
 	// paint fold state / animation after dom renders
 	useEffect(() => {
@@ -111,7 +101,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	const sum = (() => {
 		let sum = 0
 		p.transaction.items.forEach((item) => {
-			sum += Number(liveVals.items[item.id].amount.val)
+			sum += Number(item.amount.val)
 		})
 		return sum
 	})()
@@ -119,7 +109,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	const firstRow = [
 		<div
 			className={`${s.cell_container} ${s.first_row} ${
-				transactionPendingDeletion ? s.transaction_pending_deletion : ''
+				p.transaction.pendingDeletion ? s.transaction_pending_deletion : ''
 			}`}
 			key={`${p.transaction.id}-1`}
 		>
@@ -137,7 +127,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					jstyle='invisible'
 					disabled={p.disableTransactionResort}
 					ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
-					tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
+					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_left_controls'
 					data-grid_nav_index={p.gridNavIndex}
 				>
@@ -151,7 +141,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			>
 				<JButton
 					jstyle='invisible'
-					tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
+					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_left_controls'
 					data-grid_nav_index={p.gridNavIndex}
 				>
@@ -161,16 +151,16 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row} ${
-				liveVals.date.changed ? s.changed : ''
+				p.transaction.date.changed ? s.changed : ''
 			}`}
 			key={`${p.transaction.id}-2`}
 		>
 			<JDatePicker
-				value={liveVals.date.val}
+				value={p.transaction.date.val}
 				data-transaction_id={p.transaction.id}
 				data-key='date'
 				ref={dateSelectRef}
-				tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
+				tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 				{...eventHandlers}
 				data-grid_nav_col='TM_date'
 				data-grid_nav_index={p.gridNavIndex}
@@ -178,15 +168,15 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row} ${
-				liveVals.name.changed ? s.changed : ''
+				p.transaction.name.changed ? s.changed : ''
 			}`}
 			key={`${p.transaction.id}-3`}
 		>
 			<JInput
-				value={liveVals.name.val}
+				value={p.transaction.name.val}
 				data-transaction_id={p.transaction.id}
 				data-key='name'
-				tabIndex={transactionPendingDeletion ? -1 : p.tabIndexer()}
+				tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 				{...eventHandlers}
 				data-grid_nav_col='TM_name'
 				data-grid_nav_index={p.gridNavIndex}
@@ -203,15 +193,15 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		</div>,
 		<div
 			className={`${s.cell_container} ${s.first_row} ${s.more_controls_container} ${
-				transactionPendingDeletion ? s.transaction_pending_deletion : ''
+				p.transaction.pendingDeletion ? s.transaction_pending_deletion : ''
 			}`}
 		>
 			<OptionsMenu
 				width={150}
 				height={110}
-				test_transaction_id={p.transaction.name}
+				test_transaction_id={p.transaction.name.val}
 				className={s.more_controls}
-				tabIndex={transactionPendingDeletion ? undefined : p.tabIndexer()}
+				tabIndex={p.transaction.pendingDeletion ? undefined : p.tabIndexer()}
 				data-grid_nav_col='TM_right_controls'
 				data-grid_nav_index={p.gridNavIndex}
 				options={[
@@ -219,7 +209,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						text: 'Delete',
 						icon: <DeleteIcon />,
 						onClick: () => {
-							p.pendingChanges.deletions.add('transaction', p.transaction.id)
+							p.data.stageDelete('transaction', p.transaction.id)
 							if (undoDeleteRef.current !== null) {
 								undoDeleteRef.current.focus()
 							}
@@ -233,12 +223,11 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						text: 'Add Item',
 						icon: <InsertRowIcon />,
 						onClick: () =>
-							p.pendingChanges.creations.add('item', {
+							p.data.stageCreate('item', p.transaction.id, {
 								rel: 'above',
 								item_id: p.transaction.items[0].id,
-								date: p.transaction.date,
-								transaction_id: p.transaction.id,
 							}),
+
 						className: s.add_item,
 					},
 				]}
@@ -247,16 +236,11 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	]
 
 	const itemRows = p.transaction.items.map((item, itemIndex) => {
-		const itemPendingDeletion = p.pendingChanges.deletions.cur.items.some(
-			(id) => id === item.id
-		)
-		const itemPendingCreation = p.pendingChanges.creations.check(item.id)
-
 		const itemSortPosChanged = (() => {
-			if (itemPendingCreation) {
+			if (item.pendingCreation) {
 				return true
 			}
-			const defSort = p.defSortOrder[p.transaction.date].find((it) =>
+			const defSort = p.sortOrder.def[p.transaction.date.val].find((it) =>
 				Array.isArray(it) ? it[0] === p.transaction.id : it === p.transaction.id
 			)!
 			if (Array.isArray(defSort)) {
@@ -267,48 +251,31 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		})()
 
 		const handleDelete = () => {
-			if (itemPendingCreation) {
-				p.pendingChanges.creations.remove(
-					'item',
-					item.id,
-					p.transaction.id,
-					p.transaction.date
-				)
-			} else {
-				p.pendingChanges.deletions.add('item', item.id)
-				if (document.activeElement) {
-					;(document.activeElement as HTMLElement).blur()
-				}
+			p.data.stageDelete('item', item.id, p.transaction.id)
 
-				delay(10).then(() => {
-					const thisItemRef = itemRowsRef.current!.find(
-						(it) => it.item_id === item.id
-					)!
-					if (thisItemRef.undoDeleteDiv) {
-						;(thisItemRef.undoDeleteDiv.children[0] as HTMLButtonElement).focus()
-					}
-				})
-			}
+			delay(10).then(() => {
+				const thisItemRef = itemRowsRef.current!.find(
+					(it) => it.item_id === item.id
+				)!
+				if (thisItemRef.undoDeleteDiv) {
+					;(thisItemRef.undoDeleteDiv.children[0] as HTMLButtonElement).focus()
+				}
+			})
 		}
 
 		const handleAddItem = () =>
-			p.pendingChanges.creations.add('item', {
-				rel: 'below',
-				item_id: item.id,
-				date: p.transaction.date,
-				transaction_id: p.transaction.id,
-			})
+			p.data.stageCreate('item', p.transaction.id, { rel: 'below', item_id: item.id })
 
 		return [
 			<div
 				className={`${s.cell_container} ${s.row_controls_container} ${
-					transactionPendingDeletion ? s.transaction_pending_deletion : ''
-				} ${itemPendingDeletion ? s.item_pending_deletion : ''}`}
+					p.transaction.pendingDeletion ? s.transaction_pending_deletion : ''
+				} ${item.pendingDeletion ? s.item_pending_deletion : ''}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-1`}
 				ref={addToItemRowsRef(item.id)}
 			>
-				{itemPendingCreation && (
+				{item.pendingCreation && (
 					<div
 						className={s.pending_creation_indicator}
 						title="This item has been newly added, and hasn't been saved yet."
@@ -328,7 +295,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							itemRowsRef
 						)}
 						tabIndex={
-							transactionPendingDeletion || itemPendingDeletion
+							p.transaction.pendingDeletion || item.pendingDeletion
 								? -1
 								: p.tabIndexer()
 						}
@@ -339,7 +306,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					</JButton>
 
 					{/* this text had to be injected somewhere into this array, this is the easiest way without messing up the layout */}
-					{itemPendingDeletion && (
+					{item.pendingDeletion && (
 						<div className={s.pending_deletion_text}>
 							This item will be deleted when you save changes.
 						</div>
@@ -348,29 +315,29 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>,
 			<div
 				className={`${s.cell_container} ${
-					transactionPendingDeletion ? s.transaction_pending_deletion : ''
-				} ${itemPendingDeletion ? s.item_pending_deletion : ''}`}
+					p.transaction.pendingDeletion ? s.transaction_pending_deletion : ''
+				} ${item.pendingDeletion ? s.item_pending_deletion : ''}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-2`}
 				ref={addToItemRowsRef(item.id)}
 			>
-				<JDatePicker value={liveVals.date.val} disabled minimalStyle />
+				<JDatePicker value={p.transaction.date.val} disabled minimalStyle />
 			</div>,
 			<div
-				className={`${s.cell_container} ${
-					liveVals.items[item.id].name.changed ? s.changed : ''
-				} ${itemPendingDeletion ? s.item_pending_deletion : ''}`}
+				className={`${s.cell_container} ${item.name.changed ? s.changed : ''} ${
+					item.pendingDeletion ? s.item_pending_deletion : ''
+				}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-3`}
 				ref={addToItemRowsRef(item.id)}
 			>
 				<JInput
-					value={liveVals.items[item.id].name.val}
+					value={item.name.val}
 					data-item_id={item.id}
 					data-transaction_id={p.transaction.id}
 					data-key='name'
 					tabIndex={
-						transactionPendingDeletion || itemPendingDeletion
+						p.transaction.pendingDeletion || item.pendingDeletion
 							? -1
 							: p.tabIndexer()
 					}
@@ -380,20 +347,20 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				/>
 			</div>,
 			<div
-				className={`${s.cell_container} ${
-					liveVals.items[item.id].amount.changed ? s.changed : ''
-				} ${itemPendingDeletion ? s.item_pending_deletion : ''}`}
+				className={`${s.cell_container} ${item.amount.changed ? s.changed : ''} ${
+					item.pendingDeletion ? s.item_pending_deletion : ''
+				}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-4`}
 				ref={addToItemRowsRef(item.id)}
 			>
 				<JNumberAccounting
-					value={liveVals.items[item.id].amount.val}
+					value={item.amount.val}
 					data-item_id={item.id}
 					data-transaction_id={p.transaction.id}
 					data-key='amount'
 					tabIndex={
-						transactionPendingDeletion || itemPendingDeletion
+						p.transaction.pendingDeletion || item.pendingDeletion
 							? -1
 							: p.tabIndexer()
 					}
@@ -404,24 +371,20 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>,
 			<div
 				className={`${s.cell_container} ${
-					liveVals.items[item.id].category_id.changed ? s.changed : ''
-				} ${itemPendingDeletion ? s.item_pending_deletion : ''}`}
+					item.category_id.changed ? s.changed : ''
+				} ${item.pendingDeletion ? s.item_pending_deletion : ''}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-5`}
 				ref={addToItemRowsRef(item.id)}
 			>
 				<JDropdown
 					options={p.dropdownOptions.category}
-					value={
-						liveVals.items[item.id].category_id.val !== null
-							? liveVals.items[item.id].category_id.val!
-							: 'none'
-					}
+					value={item.category_id.val !== null ? item.category_id.val! : 'none'}
 					data-item_id={item.id}
 					data-transaction_id={p.transaction.id}
 					data-key='category_id'
 					tabIndex={
-						transactionPendingDeletion || itemPendingDeletion
+						p.transaction.pendingDeletion || item.pendingDeletion
 							? -1
 							: p.tabIndexer()
 					}
@@ -432,24 +395,20 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>,
 			<div
 				className={`${s.cell_container} ${
-					itemPendingDeletion ? s.item_pending_deletion : ''
-				} ${liveVals.items[item.id].account_id.changed ? s.changed : ''}`}
+					item.pendingDeletion ? s.item_pending_deletion : ''
+				} ${item.account_id.changed ? s.changed : ''}`}
 				data-item_id={item.id}
 				key={`${p.transaction.id}-${item.id}-7`}
 				ref={addToItemRowsRef(item.id)}
 			>
 				<JDropdown
 					options={p.dropdownOptions.account}
-					value={
-						liveVals.items[item.id].account_id.val !== null
-							? liveVals.items[item.id].account_id.val!
-							: 'none'
-					}
+					value={item.account_id.val !== null ? item.account_id.val! : 'none'}
 					data-item_id={item.id}
 					data-transaction_id={p.transaction.id}
 					data-key='account_id'
 					tabIndex={
-						transactionPendingDeletion || itemPendingDeletion
+						p.transaction.pendingDeletion || item.pendingDeletion
 							? -1
 							: p.tabIndexer()
 					}
@@ -460,9 +419,9 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>,
 			<div
 				className={`${s.cell_container} ${
-					itemPendingDeletion ? s.item_pending_deletion : ''
+					item.pendingDeletion ? s.item_pending_deletion : ''
 				} ${s.more_controls_container} ${
-					transactionPendingDeletion ? s.transaction_pending_deletion : ''
+					p.transaction.pendingDeletion ? s.transaction_pending_deletion : ''
 				}`}
 				key={`${p.transaction.id}-${item.id}-8`}
 				ref={addToItemRowsRef(item.id)}
@@ -470,9 +429,9 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				<OptionsMenu
 					width={180}
 					height={110}
-					test_transaction_id={p.transaction.name}
+					test_transaction_id={p.transaction.name.val}
 					className={s.more_controls}
-					tabIndex={itemPendingDeletion ? undefined : p.tabIndexer()}
+					tabIndex={item.pendingDeletion ? undefined : p.tabIndexer()}
 					data-grid_nav_col='TM_right_controls'
 					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
 					options={[
@@ -492,7 +451,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				/>
 
 				{/* this had to be injected somewhere into this array, this is the easiest way without messing up the layout */}
-				{itemPendingDeletion && (
+				{item.pendingDeletion && (
 					<div
 						className={s.pending_deletion_button}
 						ref={addToItemRowsRef(item.id, true)}
@@ -500,11 +459,11 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						<JButton
 							jstyle='invisible'
 							onClick={() => {
-								p.pendingChanges.deletions.remove('item', item.id)
+								p.data.unstageDelete('item', item.id, p.transaction.id)
 							}}
 							ref={undoDeleteRef}
 							className={s.undo_delete_button}
-							tabIndex={itemPendingDeletion ? p.tabIndexer() : -1}
+							tabIndex={item.pendingDeletion ? p.tabIndexer() : -1}
 						>
 							Undo Delete
 						</JButton>
@@ -533,14 +492,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		} as React.CSSProperties
 	}
 
-	const isPendingCreation = p.pendingChanges.creations.check(p.transaction.id)
-
 	const columns = firstRow.map((rowItem, rowItemIndex) => {
 		return (
 			<div
 				className={`${s.column} ${uniqueColumnClassNames[rowItemIndex]} ${
 					p.folded && !p.playAnimation ? s.folded : ''
-				} ${isPendingCreation ? s.pending_creation : ''}`}
+				} ${p.transaction.pendingCreation ? s.pending_creation : ''}`}
 				style={genGridStyle()}
 				ref={addToColumnNodesRef}
 				key={rowItemIndex}
@@ -560,7 +517,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 
 			<div
 				className={`${s.delete_overlay} ${
-					transactionPendingDeletion ? s.visible : ''
+					p.transaction.pendingDeletion ? s.visible : ''
 				}`}
 			>
 				<div
@@ -584,16 +541,13 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					<JButton
 						jstyle='invisible'
 						onClick={() => {
-							p.pendingChanges.deletions.remove(
-								'transaction',
-								p.transaction.id
-							)
+							p.data.unstageDelete('transaction', p.transaction.id)
 							if (dateSelectRef.current !== null) {
 								dateSelectRef.current.focus()
 							}
 						}}
 						ref={undoDeleteRef}
-						tabIndex={transactionPendingDeletion ? p.tabIndexer() : -1}
+						tabIndex={p.transaction.pendingDeletion ? p.tabIndexer() : -1}
 					>
 						Undo Delete
 					</JButton>

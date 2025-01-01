@@ -130,36 +130,81 @@ export function useData(p?: UseDataOptions) {
 		}
 	}
 
+	const unstageDelete: Data.Delete = (type, ...args) => {
+		if (type === 'transaction') {
+			const [transaction_id] = args as Data.DeleteTransactionArgs
+			setData((prev) => {
+				const clone = structuredClone(prev)
+				const transactionIndex = clone.transactions.findIndex(
+					(transaction) => transaction.id === transaction_id
+				)
+				if (transactionIndex === -1) {
+					throw new Error(
+						`Transaction "${transaction_id}" cannot be found in data`
+					)
+				}
+				const transaction = data.transactions[transactionIndex]
+				transaction.pendingDeletion = false
+
+				return clone
+			})
+		} else if (type === 'item') {
+			const [item_id, transaction_id] = args as Data.DeleteItemArgs
+			setData((prev) => {
+				const clone = structuredClone(prev)
+				const transactionIndex = clone.transactions.findIndex(
+					(transaction) => transaction.id === transaction_id
+				)
+				if (transactionIndex === -1) {
+					throw new Error(
+						`Transaction "${transaction_id}" cannot be found in data`
+					)
+				}
+				const transaction = data.transactions[transactionIndex]
+				const itemIndex = transaction.items.findIndex((item) => item.id === item_id)
+				if (itemIndex === -1) {
+					throw new Error(`Item "${item_id}" cannot be found in data`)
+				}
+				const item = transaction.items[itemIndex]
+				item.pendingDeletion = false
+
+				return clone
+			})
+		}
+	}
+
 	const stageCreate: Data.Create = (type, ...args) => {
 		if (type === 'transaction') {
 			const [transaction] = args as Data.CreateTransactionArgs
 			if (transaction.items.length === 0) {
 				throw new Error('New transaction must have at least one item provided.')
 			}
-			setData((prev) => {
-				const clone = structuredClone(prev)
+			console.log('NEED TO MAKE')
+			// setData((prev) => {
+			// 	const clone = structuredClone(prev)
 
-				const newTransaction: Data.State['transactions'][number] = {
-					id: 'PENDING_CREATION||' + crypto.randomUUID(),
-					name: { val: transaction.name, changed: true },
-					date: { val: transaction.date, changed: true },
-					items: transaction.items.map((item) => ({
-						id: 'PENDING_CREATION||' + crypto.randomUUID(),
-						name: { val: item.name, changed: true },
-						amount: { val: item.amount, changed: true },
-						category_id: { val: item.category_id, changed: true },
-						account_id: { val: item.account_id, changed: true },
-						pendingCreation: true,
-						pendingDeletion: false,
-					})),
-					pendingCreation: true,
-					pendingDeletion: false,
-				}
-				clone.transactions.push(newTransaction)
-				return clone
-			})
+			// 	const newTransaction: Data.State['transactions'][number] = {
+			// 		id: 'PENDING_CREATION||' + crypto.randomUUID(),
+			// 		name: { val: transaction.name, changed: true },
+			// 		date: { val: transaction.date, changed: true },
+			// 		items: transaction.items.map((item) => ({
+			// 			id: 'PENDING_CREATION||' + crypto.randomUUID(),
+			// 			name: { val: item.name, changed: true },
+			// 			amount: { val: item.amount, changed: true },
+			// 			category_id: { val: item.category_id, changed: true },
+			// 			account_id: { val: item.account_id, changed: true },
+			// 			pendingCreation: true,
+			// 			pendingDeletion: false,
+			// 		})),
+			// 		pendingCreation: true,
+			// 		pendingDeletion: false,
+			// 	}
+			// 	clone.transactions.push(newTransaction)
+			// 	return clone
+			// })
 		} else if (type === 'item') {
-			const [transaction_id, item] = args as Data.CreateItemArgs
+			const [transaction_id, position, item] = args as Data.CreateItemArgs
+			console.log('NEED TO MAKE')
 			setData((prev) => {
 				const clone = structuredClone(prev)
 				return clone
@@ -219,14 +264,24 @@ export function useData(p?: UseDataOptions) {
 		}
 	}
 
+	const unstageCreate: Data.Create = (type, ...args) => {
+		console.log('MEED TO MAKE')
+	}
+
+	const clearChanges = () => {
+		console.log('NEED TO MAKE')
+	}
+
 	const controller: Data.Controller = {
 		cur: data,
 		update,
-		delete: stageDelete,
-		create: stageCreate,
+		stageDelete,
+		stageCreate,
 		isLoading,
 		isPendingSave,
 		reload,
+		unstageDelete,
+		clearChanges,
 	}
 
 	return controller
@@ -268,11 +323,13 @@ export namespace Data {
 	export type Controller = {
 		cur: Data.State
 		update: Data.Update
-		delete: Data.Delete
-		create: Data.Create
+		stageDelete: Data.Delete
+		stageCreate: Data.Create
 		isLoading: boolean
 		isPendingSave: boolean
 		reload: () => void
+		unstageDelete: Data.Delete
+		clearChanges: () => void
 	}
 
 	export type Update = <T extends 'transaction' | 'item'>(
@@ -310,7 +367,11 @@ export namespace Data {
 	]
 	export type CreateItemArgs = [
 		transaction_id: string,
-		item: {
+		position: {
+			rel: 'above' | 'below'
+			item_id: string
+		},
+		item?: {
 			name: string
 			amount: string
 			category_id: string

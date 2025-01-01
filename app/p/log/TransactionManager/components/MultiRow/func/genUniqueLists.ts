@@ -1,10 +1,10 @@
+import { Data } from '@/app/p/log/Dashboard/hooks'
 import { MultiRowProps } from '../MultiRow'
-import { LiveVals } from './genLiveVals'
 
-export function genUniqueLists(p: MultiRowProps, liveVals: LiveVals) {
+export function genUniqueLists(p: MultiRowProps) {
 	const uniqueCategories = (() => {
 		const arr: string[] = []
-		Object.values(liveVals.items).forEach((item) => {
+		Object.values(p.transaction.items).forEach((item) => {
 			if (item.category_id.val !== null) {
 				const categoryName = p.dropdownOptions.category.find(
 					(cat) => cat.value === item.category_id.val
@@ -21,7 +21,7 @@ export function genUniqueLists(p: MultiRowProps, liveVals: LiveVals) {
 	})()
 	const uniqueAccounts = (() => {
 		const arr: string[] = []
-		Object.values(liveVals.items).forEach((item) => {
+		Object.values(p.transaction.items).forEach((item) => {
 			if (item.account_id.val !== null) {
 				const accountName = p.dropdownOptions.account.find(
 					(act) => act.value === item.account_id.val
