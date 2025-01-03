@@ -1,15 +1,21 @@
-import React, { useRef, useEffect, ReactNode, HTMLAttributes } from 'react'
+import React, { useRef, useEffect, ReactNode, HTMLAttributes, useLayoutEffect } from 'react'
 import s from './Tile.module.scss'
 import { default as ResizeHandle } from '@/public/resize_handle.svg'
+import { default as RepositionHandle } from '@/public/reposition_handle.svg'
 
-interface ResizableWrapperProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onResize'> {
+interface TileProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onResize'> {
 	children: ReactNode
 	resizable?: boolean
 	onResize?: (width: number, height: number) => void
+	onReposition: (top: number, left: number) => void
 	minWidth?: number
 	minHeight?: number
 	maxWidth?: number
 	maxHeight?: number
+	defaultWidth: number
+	defaultHeight: number
+	defaultPosLeft: number
+	defaultPosTop: number
 }
 
 export function Tile({
@@ -19,92 +25,140 @@ export function Tile({
 	minWidth = 100,
 	minHeight = 100,
 	maxWidth,
+	defaultWidth,
+	defaultHeight,
+	onReposition,
 	maxHeight,
+	defaultPosLeft,
+	defaultPosTop,
 	className,
 	...rest
-}: ResizableWrapperProps) {
+}: TileProps) {
 	const wrapperRef = useRef<HTMLDivElement>(null)
+	const GRID_SPACING = 30 // also defined in @\app\p\log\Dashboard\Dashboard.module.scss
 
-	useEffect(() => {
+	useLayoutEffect(() => {
+		// load default width/height
+		wrapperRef.current!.style.width = defaultWidth + 'px'
+		wrapperRef.current!.style.height = defaultHeight + 'px'
+
+		// load default position
+		wrapperRef.current!.style.top = defaultPosTop + 'px'
+		wrapperRef.current!.style.left = defaultPosLeft + 'px'
+	})
+
+	const onResizeGrabberMouseDown = (e: React.MouseEvent) => {
 		if (resizable) {
-			const wrapper = wrapperRef.current
-			if (!wrapper) return
+			e.preventDefault()
+			const startX = e.clientX
+			const startY = e.clientY
+			const startWidth = wrapperRef.current!.offsetWidth
+			const startHeight = wrapperRef.current!.offsetHeight
+			document.body.style.userSelect = 'none'
+			document.body.style.cursor = 'se-resize'
 
-			const observer = new ResizeObserver((entries) => {
-				if (entries.length === 0) return
-				const { width, height } = entries[0].contentRect
+			const handleMouseMove = (e: MouseEvent) => {
+				const newWidth = roundToMultiple(
+					Math.min(
+						Math.max(startWidth + (e.clientX - startX), minWidth),
+						maxWidth !== undefined ? maxWidth : Infinity
+					),
+					GRID_SPACING
+				)
+				const newHeight = roundToMultiple(
+					Math.min(
+						Math.max(startHeight + (e.clientY - startY), minHeight),
+						maxHeight !== undefined ? maxHeight : Infinity
+					),
+					GRID_SPACING
+				)
 
+				wrapperRef.current!.style.width = `${newWidth}px`
+				wrapperRef.current!.style.height = `${newHeight}px`
+			}
+
+			const handleMouseUp = () => {
+				const width = parseInt(wrapperRef.current!.style.width)
+				const height = parseInt(wrapperRef.current!.style.height)
 				if (onResize) {
 					onResize(width, height)
 				}
-			})
 
-			observer.observe(wrapper)
-
-			return () => {
-				observer.disconnect()
+				document.removeEventListener('mousemove', handleMouseMove)
+				document.removeEventListener('mouseup', handleMouseUp)
+				document.body.style.userSelect = ''
+				document.body.style.cursor = ''
 			}
+
+			document.addEventListener('mousemove', handleMouseMove)
+			document.addEventListener('mouseup', handleMouseUp)
 		}
-	}, [onResize, resizable])
+	}
 
-	const onResizeGrabberMouseDown = resizable
-		? (event: React.MouseEvent) => {
-				event.preventDefault()
-				const startX = event.clientX
-				const startY = event.clientY
-				const startWidth = wrapperRef.current?.offsetWidth || 0
-				const startHeight = wrapperRef.current?.offsetHeight || 0
+	const onRepositionGrabberMouseDown = (e: React.MouseEvent) => {
+		const startX = e.clientX
+		const startY = e.clientY
+		const startTop = parseInt(wrapperRef.current!.style.top)
+		const startLeft = parseInt(wrapperRef.current!.style.left)
+		document.body.style.userSelect = 'none'
+		document.body.style.cursor = 'move'
 
-				const handleMouseMove = (moveEvent: MouseEvent) => {
-					if (!wrapperRef.current) return
+		const onMouseMove = (e: MouseEvent) => {
+			const diffX = roundToMultiple(
+				Math.max(e.clientX - startX + startLeft, 0),
+				GRID_SPACING
+			)
+			const diffY = roundToMultiple(
+				Math.max(e.clientY - startY + startTop, 0),
+				GRID_SPACING
+			)
 
-					const newWidth = Math.min(
-						Math.max(startWidth + (moveEvent.clientX - startX), minWidth),
-						maxWidth !== undefined ? maxWidth : Infinity
-					)
-					const newHeight = Math.min(
-						Math.max(startHeight + (moveEvent.clientY - startY), minHeight),
-						maxHeight !== undefined ? maxHeight : Infinity
-					)
+			wrapperRef.current!.style.top = diffY + 'px'
+			wrapperRef.current!.style.left = diffX + 'px'
+		}
+		const onMouseUp = () => {
+			const top = parseInt(wrapperRef.current!.style.top)
+			const left = parseInt(wrapperRef.current!.style.left)
 
-					wrapperRef.current.style.width = `${newWidth}px`
-					wrapperRef.current.style.height = `${newHeight}px`
+			onReposition(top, left)
 
-					if (onResize) {
-						onResize(newWidth, newHeight)
-					}
-				}
+			window.removeEventListener('mousemove', onMouseMove)
+			window.removeEventListener('mouseup', onMouseUp)
+			document.body.style.userSelect = ''
+			document.body.style.cursor = ''
+		}
 
-				const handleMouseUp = () => {
-					document.removeEventListener('mousemove', handleMouseMove)
-					document.removeEventListener('mouseup', handleMouseUp)
-				}
-
-				document.addEventListener('mousemove', handleMouseMove)
-				document.addEventListener('mouseup', handleMouseUp)
-		  }
-		: () => {}
+		window.addEventListener('mousemove', onMouseMove)
+		window.addEventListener('mouseup', onMouseUp)
+	}
+	const roundToMultiple = (num: number, multiple: number) =>
+		Math.round(num / multiple) * multiple
 
 	return (
 		<div
+			className={s.wrapper}
 			ref={wrapperRef}
-			className={`${s.container} ${resizable ? s.resizable : ''} ${
-				className ? className : ''
-			}`}
 			style={{
 				minWidth: minWidth !== undefined ? `${minWidth}px` : undefined,
 				minHeight: minHeight !== undefined ? `${minHeight}px` : undefined,
 				maxWidth: maxWidth !== undefined ? `${maxWidth}px` : undefined,
 				maxHeight: maxHeight !== undefined ? `${maxHeight}px` : undefined,
 			}}
-			{...rest}
 		>
-			{children}
-			{resizable && (
-				<div className={s.resize_grabber} onMouseDown={onResizeGrabberMouseDown}>
-					<ResizeHandle />
+			<div className={`${s.container} ${className ? className : ''}`} {...rest}>
+				{children}
+				{resizable && (
+					<div className={s.resize_grabber} onMouseDown={onResizeGrabberMouseDown}>
+						<ResizeHandle />
+					</div>
+				)}
+				<div
+					className={s.reposition_grabber}
+					onMouseDown={onRepositionGrabberMouseDown}
+				>
+					<RepositionHandle />
 				</div>
-			)}
+			</div>
 		</div>
 	)
 }

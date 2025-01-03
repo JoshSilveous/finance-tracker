@@ -9,7 +9,6 @@
 	--gap-row-height: 10px;
 
 	.control_container {
-		transition: padding-right 0.3s ease;
 		height: var(--control-row-height);
 		display: flex;
 		justify-content: flex-end;
@@ -30,33 +29,36 @@
 	/* SCROLLBAR EFFECTS */
 
 	--scrollbar-width: 17px; // this is a "default" value, which gets overridden once the component renders with the calculated scrollbar width (since this varies between browsers).
-	padding-right: calc(var(--main-padding) - var(--scrollbar-width));
-	transition: padding-right 0.3s ease;
 	.grid_container {
-		padding-right: 0;
-		// reserves space for the scrollbar even when it's not rendered
 		scrollbar-gutter: stable;
-
-		transition: padding-right 0.3s ease, scrollbar-color 0.3s ease;
 		overflow: hidden;
 		scrollbar-color: transparent transparent;
+		transition: scrollbar-color 0.3s ease;
 	}
-	&:hover {
-		padding-right: calc(var(--main-padding) / 2);
-		.grid_container {
-			overflow-y: auto;
-			padding-right: calc(var(--main-padding) / 2);
-			scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
-		}
-		.control_container {
-			padding-right: calc(
-				calc(var(--main-padding) * 1.5) -
-					(var(--main-padding) - var(--scrollbar-width))
-			);
-		}
+	&:hover .grid_container {
+		overflow-y: auto;
+		scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
 	}
+	padding-right: calc(var(--main-padding) - var(--scrollbar-width));
+	// .grid_container {
+	// 	padding-right: calc(var(--main-padding) / 2);
+	// 	// reserves space for the scrollbar even when it's not rendered
+	// 	scrollbar-gutter: stable;
 
-	/* END SCROLLBAR EFFECTS */
+	// 	transition: padding-right 0.3s ease, scrollbar-color 0.3s ease;
+	// 	overflow: hidden;
+	// 	scrollbar-color: transparent transparent;
+	// }
+	// &:hover {
+	// 	padding-right: calc(var(--main-padding) / 2);
+	// 	.grid_container {
+	// 		overflow-y: auto;
+	// 		padding-right: calc((var(--main-padding) / 2) - var(--scrollbar-width));
+	// 		scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
+	// 	}
+	// }
+
+	// /* END SCROLLBAR EFFECTS */
 
 	.loading_container {
 		padding: 10px 20px;
@@ -75,7 +77,7 @@
 				z-index: 10;
 				&.control {
 					height: 100%;
-					padding: 1.5px 2px;
+					padding: 1.5px 10px;
 					display: flex;
 					align-items: center;
 					justify-content: center;
@@ -90,6 +92,7 @@
 						padding: 0;
 						cursor: pointer;
 						transition: scale 0.1s ease, color 0.1s ease;
+						translate: 0 -3px;
 						svg {
 							height: 100%;
 							width: 100%;

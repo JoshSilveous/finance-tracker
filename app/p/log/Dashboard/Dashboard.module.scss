@@ -1,9 +1,24 @@
 .main {
+	--GRID-SPACING: 30px; // also defined in @\components\Tile\Tile.tsx
 	height: 100%;
-	.transaction_manager_container {
-		display: flex;
-		max-height: calc(100vh - 60px - 20px);
-		flex-direction: column;
-		overflow: auto;
+	width: 100%;
+	.tile_container {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		background-color: var(--bg-color); /* Light gray background */
+		background-image: linear-gradient(
+				to right,
+				var(--bg-color-lighter-1) 1px,
+				transparent 1px
+			),
+			linear-gradient(to bottom, var(--bg-color-lighter-1) 1px, transparent 1px);
+		background-size: var(--GRID-SPACING) var(--GRID-SPACING); /* Size of the grid cells */
+		.transaction_manager_container {
+			display: flex;
+			max-height: calc(100vh - 60px - 20px);
+			flex-direction: column;
+			overflow: auto;
+		}
 	}
 }

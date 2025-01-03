@@ -74,24 +74,93 @@ export function Dashboard() {
 		}
 	}, [])
 
+	const [tileData, setTileData] = useState([
+		{
+			type: 'transaction_manager',
+			position: {
+				top: 20,
+				left: 20,
+			},
+			size: {
+				width: 1000,
+				height: 400,
+			},
+			zIndex: 1,
+		},
+		{
+			type: 'transaction_manager',
+			position: {
+				top: 20,
+				left: 20,
+			},
+			size: {
+				width: 1000,
+				height: 400,
+			},
+			zIndex: 2,
+		},
+	])
+
+	const tiles = tileData.map((tile, index) => {
+		const onResize = (width: number, height: number) => {
+			console.log('resized!', { width, height })
+			setTileData((prev) => {
+				const clone = structuredClone(prev)
+				clone[index].size = { width, height }
+				return clone
+			})
+		}
+		const onReposition = (top: number, left: number) => {
+			console.log('repositioned!', { top, left })
+			setTileData((prev) => {
+				const clone = structuredClone(prev)
+				clone[index].position = { top, left }
+				return clone
+			})
+		}
+
+		const onMouseDown = () => {
+			setTileData((prev) => {
+				const clone = structuredClone(prev)
+				const curHighestZIndex = Math.max(...clone.map((tile) => tile.zIndex))
+				clone[index].zIndex = curHighestZIndex + 1
+				return clone
+			})
+		}
+
+		if (tile.type === 'transaction_manager') {
+			return (
+				<Tile
+					className={s.transaction_manager_container}
+					style={{ zIndex: tile.zIndex }}
+					onMouseDown={onMouseDown}
+					resizable
+					onResize={onResize}
+					onReposition={onReposition}
+					minWidth={740}
+					maxWidth={1200}
+					minHeight={350}
+					defaultWidth={tile.size.width}
+					defaultHeight={tile.size.height}
+					defaultPosLeft={tile.position.left}
+					defaultPosTop={tile.position.top}
+					key={index}
+				>
+					<TransactionManager
+						data={data}
+						foldState={foldState}
+						sortOrder={sortOrder}
+						historyController={historyController}
+						setTransactionManagerRowRef={setTransactionManagerRowRef}
+					/>
+				</Tile>
+			)
+		}
+	})
+
 	return (
 		<div className={s.main} ref={mainContainerRef}>
-			<button onClick={data.reload}>BUTTON</button>
-			<Tile
-				className={s.transaction_manager_container}
-				resizable
-				minWidth={740}
-				maxWidth={1200}
-				minHeight={350}
-			>
-				<TransactionManager
-					data={data}
-					foldState={foldState}
-					sortOrder={sortOrder}
-					historyController={historyController}
-					setTransactionManagerRowRef={setTransactionManagerRowRef}
-				/>
-			</Tile>
+			<div className={s.tile_container}>{tiles}</div>
 		</div>
 	)
 }

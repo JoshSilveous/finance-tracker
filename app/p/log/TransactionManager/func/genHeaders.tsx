@@ -31,7 +31,7 @@ export function genHeaders(historyController: HistoryController) {
 					</JButton>
 				</div>
 			),
-			defaultWidth: 100,
+			defaultWidth: 75,
 			noResize: true,
 		},
 		{
@@ -90,7 +90,7 @@ export function genHeaders(historyController: HistoryController) {
 					<div />
 				</div>
 			),
-			defaultWidth: 50,
+			defaultWidth: 41,
 			noResize: true,
 		},
 	]

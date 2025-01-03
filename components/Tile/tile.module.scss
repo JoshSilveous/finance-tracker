@@ -1,27 +1,50 @@
-.container {
-	position: relative;
-	display: inline-block;
-	resize: none;
-	overflow: hidden;
+.wrapper {
+	position: absolute;
+	overflow: visible;
+	transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
+	.container {
+		position: relative;
+		display: inline-block;
+		resize: none;
+		overflow: hidden;
+		box-sizing: border-box;
 
-	background-color: var(--bg-color-lighter-1);
-	width: fit-content;
-	border-radius: 20px;
-	border: 2px solid var(--bg-color-lighter-2);
+		background-color: var(--bg-color-lighter-1);
+		width: 100%;
+		height: 100%;
+		border-radius: 20px;
+		overflow: visible;
+		border: 2px solid var(--bg-color-lighter-2);
 
-	.resize_grabber {
-		--size: 20px;
+		.resize_grabber {
+			--size: 20px;
 
-		position: absolute;
-		bottom: 3px;
-		right: 3px;
-		height: var(--size);
-		width: var(--size);
-		cursor: se-resize;
-		svg {
-			color: var(--bg-color-lighter-3);
+			position: absolute;
+			bottom: 3px;
+			right: 3px;
 			height: var(--size);
 			width: var(--size);
+			cursor: se-resize;
+			svg {
+				color: var(--bg-color-lighter-3);
+				height: var(--size);
+				width: var(--size);
+			}
+		}
+		.reposition_grabber {
+			--size: 17px;
+
+			position: absolute;
+			top: 2px;
+			left: 2px;
+			height: var(--size);
+			width: var(--size);
+			cursor: move;
+			svg {
+				color: var(--bg-color-lighter-3);
+				height: var(--size);
+				width: var(--size);
+			}
 		}
 	}
 }
