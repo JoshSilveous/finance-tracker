@@ -18,6 +18,9 @@ export function Dashboard() {
 			sortOrder.genDefaultSortOrder(newData.transactions)
 		},
 	})
+	useEffect(() => {
+		data.reload()
+	}, [])
 
 	useEffect(() => {
 		data.reload()

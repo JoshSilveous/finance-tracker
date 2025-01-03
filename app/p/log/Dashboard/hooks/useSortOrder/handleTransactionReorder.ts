@@ -1,4 +1,5 @@
 import s from '../../../TransactionManager/TransactionManager.module.scss'
+import s from '../../../TransactionManager/TransactionManager.module.scss'
 import { delay } from '@/utils'
 import { MutableRefObject } from 'react'
 import { FoldStateUpdater } from '../useFoldState'

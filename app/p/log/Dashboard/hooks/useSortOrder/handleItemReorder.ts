@@ -1,5 +1,6 @@
 import { delay } from '@/utils'
 import multiRowStyles from '../../../TransactionManager/components/MultiRow/MultiRow.module.scss'
+import multiRowStyles from '../../../TransactionManager/components/MultiRow/MultiRow.module.scss'
 import { MutableRefObject } from 'react'
 import { ItemRowsRef } from '../../../TransactionManager/components'
 import { Data } from '../useData'
