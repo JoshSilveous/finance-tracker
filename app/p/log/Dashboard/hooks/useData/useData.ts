@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { fetchAccountData, fetchCategoryData, fetchTransactionData } from '@/database'
 
 export type UseDataOptions = {
@@ -15,6 +15,11 @@ export function useData(p?: UseDataOptions) {
 		categories: [],
 		accounts: [],
 	})
+	const origDataRef = useRef(origData)
+	useEffect(() => {
+		origDataRef.current = origData
+	}, [origData])
+
 	const [isLoading, setIsLoading] = useState(false)
 	const [isPendingSave, setIsPendingSave] = useState(false)
 
@@ -30,18 +35,19 @@ export function useData(p?: UseDataOptions) {
 					console.error(
 						`Transaction "${transaction_id}" cannot be found in data.`,
 						'\ndata.transactions:',
-						data.transactions
+						structuredClone(data.transactions)
 					)
 					throw new Error(
 						`Transaction "${transaction_id}" cannot be found in data`
 					)
 				}
-				const transaction = data.transactions[transactionIndex]
+				const transaction = clone.transactions[transactionIndex]
 				if (transaction.pendingCreation) {
 					transaction[key].val = value
 					transaction[key].changed = true
 				} else {
-					const origVal = origData.transactions[transactionIndex][key].val
+					const origVal =
+						origDataRef.current.transactions[transactionIndex][key].val
 					transaction[key].val = value
 					transaction[key].changed = value !== origVal
 				}
@@ -56,13 +62,23 @@ export function useData(p?: UseDataOptions) {
 					(transaction) => transaction.id === transaction_id
 				)
 				if (transactionIndex === -1) {
+					console.error(
+						`Transaction "${transaction_id}" cannot be found in data.`,
+						'\ndata.transactions:',
+						structuredClone(data.transactions)
+					)
 					throw new Error(
 						`Transaction "${transaction_id}" cannot be found in data`
 					)
 				}
-				const transaction = data.transactions[transactionIndex]
+				const transaction = clone.transactions[transactionIndex]
 				const itemIndex = transaction.items.findIndex((item) => item.id === item_id)
 				if (itemIndex === -1) {
+					console.error(
+						`Item "${item_id}" cannot be found in data.`,
+						'This transaction:',
+						structuredClone(transaction)
+					)
 					throw new Error(`Item "${item_id}" cannot be found in data`)
 				}
 				const item = transaction.items[itemIndex]
@@ -71,7 +87,9 @@ export function useData(p?: UseDataOptions) {
 					item[key].changed = true
 				} else {
 					const oldVal =
-						origData.transactions[transactionIndex].items[itemIndex][key].val
+						origDataRef.current.transactions[transactionIndex].items[itemIndex][
+							key
+						].val
 					item[key].val = value
 					item[key].changed = value === oldVal
 				}
@@ -90,11 +108,16 @@ export function useData(p?: UseDataOptions) {
 					(transaction) => transaction.id === transaction_id
 				)
 				if (transactionIndex === -1) {
+					console.error(
+						`Transaction "${transaction_id}" cannot be found in data.`,
+						'\ndata.transactions:',
+						structuredClone(data.transactions)
+					)
 					throw new Error(
 						`Transaction "${transaction_id}" cannot be found in data`
 					)
 				}
-				const transaction = data.transactions[transactionIndex]
+				const transaction = clone.transactions[transactionIndex]
 				if (transaction.pendingCreation) {
 					// remove item from array
 					clone.transactions.slice(transactionIndex, 1)
@@ -113,13 +136,23 @@ export function useData(p?: UseDataOptions) {
 					(transaction) => transaction.id === transaction_id
 				)
 				if (transactionIndex === -1) {
+					console.error(
+						`Transaction "${transaction_id}" cannot be found in data.`,
+						'\ndata.transactions:',
+						structuredClone(data.transactions)
+					)
 					throw new Error(
 						`Transaction "${transaction_id}" cannot be found in data`
 					)
 				}
-				const transaction = data.transactions[transactionIndex]
+				const transaction = clone.transactions[transactionIndex]
 				const itemIndex = transaction.items.findIndex((item) => item.id === item_id)
 				if (itemIndex === -1) {
+					console.error(
+						`Item "${item_id}" cannot be found in data.`,
+						'This transaction:',
+						structuredClone(transaction)
+					)
 					throw new Error(`Item "${item_id}" cannot be found in data`)
 				}
 				const item = transaction.items[itemIndex]
@@ -145,11 +178,16 @@ export function useData(p?: UseDataOptions) {
 					(transaction) => transaction.id === transaction_id
 				)
 				if (transactionIndex === -1) {
+					console.error(
+						`Transaction "${transaction_id}" cannot be found in data.`,
+						'\ndata.transactions:',
+						structuredClone(data.transactions)
+					)
 					throw new Error(
 						`Transaction "${transaction_id}" cannot be found in data`
 					)
 				}
-				const transaction = data.transactions[transactionIndex]
+				const transaction = clone.transactions[transactionIndex]
 				transaction.pendingDeletion = false
 
 				return clone
@@ -162,13 +200,23 @@ export function useData(p?: UseDataOptions) {
 					(transaction) => transaction.id === transaction_id
 				)
 				if (transactionIndex === -1) {
+					console.error(
+						`Transaction "${transaction_id}" cannot be found in data.`,
+						'\ndata.transactions:',
+						structuredClone(data.transactions)
+					)
 					throw new Error(
 						`Transaction "${transaction_id}" cannot be found in data`
 					)
 				}
-				const transaction = data.transactions[transactionIndex]
+				const transaction = clone.transactions[transactionIndex]
 				const itemIndex = transaction.items.findIndex((item) => item.id === item_id)
 				if (itemIndex === -1) {
+					console.error(
+						`Item "${item_id}" cannot be found in data.`,
+						'This transaction:',
+						structuredClone(transaction)
+					)
 					throw new Error(`Item "${item_id}" cannot be found in data`)
 				}
 				const item = transaction.items[itemIndex]
