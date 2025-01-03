@@ -8,6 +8,7 @@
     This will require some sortOrder magic and querying when saving.
 
 -   Make pop-out scrollbar not appear when not needed: https://i.imgur.com/sAXGkIZ.gif
+-   GridNav not working when a row is folded- add a check for disabled inputs
 
 #
 

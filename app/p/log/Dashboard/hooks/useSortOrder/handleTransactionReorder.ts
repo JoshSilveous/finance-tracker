@@ -1,12 +1,13 @@
-import s from '../../TransactionManager.module.scss'
+import s from '../../../TransactionManager/TransactionManager.module.scss'
 import { delay } from '@/utils'
 import { MutableRefObject } from 'react'
-import { FormTransaction, TransactionRowsRef } from '../../TransactionManager'
 import { FoldStateUpdater } from '../useFoldState'
 import { SortOrder } from './useSortOrder'
+import { TransactionRowsRef } from '../../../TransactionManager/TransactionManager'
+import { Data } from '../useData'
 
 export const transactionReorderMouseEffect = (
-	transaction: FormTransaction,
+	transaction: Data.StateTransaction,
 	transactionIndex: number,
 	sortOrder: SortOrder.State[number],
 	transactionRowsRef: MutableRefObject<TransactionRowsRef>,

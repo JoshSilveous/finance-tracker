@@ -316,7 +316,6 @@ export function useSortOrder({
 						item,
 						itemRowsRef,
 						itemIndex - 1,
-						transaction,
 						e,
 						(oldIndex, newIndex) => {
 							updateItemSortOrder(

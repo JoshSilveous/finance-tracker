@@ -1,33 +1,23 @@
 import { ChangeEventHandler, FocusEventHandler } from 'react'
-import { LiveVals } from './genLiveVals'
 import { MultiRowProps } from '../MultiRow'
 
 export function genEventHandlers(p: MultiRowProps) {
 	return {
 		onChange: ((e) => {
 			const key = e.target.dataset.key as
-				| keyof LiveVals
-				| keyof LiveVals['items'][number]
+				| 'date'
+				| 'name'
+				| 'amount'
+				| 'category_id'
+				| 'account_id'
 			const item_id = e.target.dataset.item_id
 			const newVal = e.target.value
 
 			p.historyController.clearRedo()
 
-			// update pendingChanges
 			if (item_id === undefined) {
 				if (key === 'date' || key === 'name') {
-					const origVal = p.transaction[key]
-					if (origVal !== newVal) {
-						p.pendingChanges.changes.set(
-							'transactions',
-							p.transaction.id,
-							key,
-							newVal
-						)
-					} else {
-						p.pendingChanges.changes.set('transactions', p.transaction.id, key)
-					}
-				} else {
+					p.data.update('transaction', p.transaction.id, key, newVal)
 				}
 			} else {
 				if (
@@ -36,15 +26,7 @@ export function genEventHandlers(p: MultiRowProps) {
 					key === 'category_id' ||
 					key === 'account_id'
 				) {
-					const origVal = p.transaction.items.find((item) => item.id === item_id)![
-						key
-					]
-					if (origVal !== newVal) {
-						p.pendingChanges.changes.set('items', item_id, key, newVal)
-					} else {
-						p.pendingChanges.changes.set('items', item_id, key)
-					}
-				} else {
+					p.data.update('item', p.transaction.id, item_id, key, newVal)
 				}
 			}
 
@@ -87,8 +69,11 @@ export function genEventHandlers(p: MultiRowProps) {
 		}) as ChangeEventHandler<HTMLInputElement | HTMLSelectElement>,
 		onBlur: ((e) => {
 			const key = e.target.dataset.key as
-				| keyof LiveVals
-				| keyof LiveVals['items'][number]
+				| 'date'
+				| 'name'
+				| 'amount'
+				| 'category_id'
+				| 'account_id'
 			const item_id = e.target.dataset.item_id
 			const newVal = e.target.value
 			const oldVal = e.target.dataset.value_on_focus

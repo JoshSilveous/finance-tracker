@@ -27,6 +27,11 @@ export function useData(p?: UseDataOptions) {
 					(transaction) => transaction.id === transaction_id
 				)
 				if (transactionIndex === -1) {
+					console.error(
+						`Transaction "${transaction_id}" cannot be found in data.`,
+						'\ndata.transactions:',
+						data.transactions
+					)
 					throw new Error(
 						`Transaction "${transaction_id}" cannot be found in data`
 					)
@@ -40,6 +45,7 @@ export function useData(p?: UseDataOptions) {
 					transaction[key].val = value
 					transaction[key].changed = value !== origVal
 				}
+
 				return clone
 			})
 		} else if (type === 'item') {
@@ -259,6 +265,7 @@ export function useData(p?: UseDataOptions) {
 		const newData = { transactions, categories, accounts }
 
 		setData(newData)
+		setOrigData(newData)
 		if (p && p.onReload) {
 			p.onReload(newData)
 		}

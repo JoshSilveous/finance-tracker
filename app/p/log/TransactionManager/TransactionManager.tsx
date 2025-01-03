@@ -1,29 +1,18 @@
 'use client'
-import {
-	forwardRef,
-	ReactNode,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react'
+import { ReactNode, useEffect, useMemo, useRef } from 'react'
 import s from './TransactionManager.module.scss'
 import {
 	areDeeplyEqual,
 	createPopup,
-	getScrollbarWidth,
 	addIsolatedKeyListeners,
 	IsolatedKeyListener,
 	removeIsolatedKeyListeners,
 	setKeyListenerContext,
-	promptError,
-	isStandardError,
 } from '@/utils'
-import { FetchedTransaction, FetchedAccount, FetchedCategory } from '@/database'
+import { FetchedTransaction } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { fetchAndLoadData, sortTransactions, saveChanges, genHeaders } from './func'
+import { sortTransactions, genHeaders } from './func'
 import { DateRow, MultiRowProps, MultiRow, SingleRow, SingleRowProps } from './components'
 import { JButton, JNumberAccounting } from '@/components/JForm'
 import { useTabIndexer, useGridNav } from './hooks'
@@ -52,7 +41,6 @@ export function TransactionManager({
 	setTransactionManagerRowRef,
 }: TransactionManagerProps) {
 	const mainContainerRef = useRef<HTMLDivElement>(null)
-	const transactionDataRef = useRef<FormTransaction[] | null>([])
 	const prevFoldStateRef = useRef<FoldState>({})
 	const saveChangesButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -400,9 +388,9 @@ export type TransactionRowsRef = {
  * }
  * ```
  */
-export interface FormTransaction extends Omit<FetchedTransaction, 'items'> {
-	items: (Omit<FetchedTransaction['items'][number], 'amount'> & { amount: string })[]
-}
+// export interface FormTransaction extends Omit<FetchedTransaction, 'items'> {
+// 	items: (Omit<FetchedTransaction['items'][number], 'amount'> & { amount: string })[]
+// }
 
 export type DropdownOptions = {
 	category: JDropdownTypes.Option[]
