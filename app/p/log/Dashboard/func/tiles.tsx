@@ -4,8 +4,7 @@ import { SimpleValues, TransactionManager } from '../tiles'
 import { Data, FoldStateController, SortOrder, HistoryController } from '../hooks'
 import s from '../Dashboard.module.scss'
 
-export interface TileData {
-	type: 'transaction_manager' | 'simple_values'
+interface TileDataBase {
 	position: {
 		top: number
 		left: number
@@ -16,6 +15,20 @@ export interface TileData {
 	}
 	zIndex: number
 }
+
+interface TransactionManagerTile extends TileDataBase {
+	type: 'transaction_manager'
+	options?: never
+}
+interface SimpleValuesTile extends TileDataBase {
+	type: 'simple_values'
+	options?: {
+		exclude: string[]
+		show: 'categories' | 'accounts'
+	}
+}
+
+export type TileData = TransactionManagerTile | SimpleValuesTile
 
 const tileSettings = {
 	transaction_manager: {
@@ -90,7 +103,13 @@ export function genDisplayTiles(
 						setTransactionManagerRowRef={setTransactionManagerRowRef}
 					/>
 				)}
-				{tile.type === 'simple_values' && <SimpleValues data={data} />}
+				{tile.type === 'simple_values' && (
+					<SimpleValues
+						data={data}
+						exclude={tile.options!.exclude}
+						show={tile.options!.show}
+					/>
+				)}
 			</Tile>
 		)
 	})

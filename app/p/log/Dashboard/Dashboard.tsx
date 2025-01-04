@@ -96,6 +96,10 @@ export function Dashboard() {
 				height: 600,
 			},
 			zIndex: 2,
+			options: {
+				exclude: [],
+				show: 'accounts',
+			},
 		},
 	])
 

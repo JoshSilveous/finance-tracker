@@ -280,8 +280,9 @@ export function useData(p?: UseDataOptions) {
 		if (isPendingSave) {
 			throw new Error('Cannot reload data while pending save.')
 		} else if (isLoading) {
-			throw new Error('Cannot reload data while  already loading.')
+			throw new Error('Cannot reload data while already loading.')
 		}
+		setIsLoading(true)
 		const [transactionsRaw, categoriesRaw, accountsRaw] = await Promise.all([
 			fetchTransactionData(),
 			fetchCategoryData(),
@@ -313,17 +314,20 @@ export function useData(p?: UseDataOptions) {
 		const categories: Data.StateCategory[] = categoriesRaw.map((category) => ({
 			id: category.id,
 			name: { val: category.name, changed: false },
+			amtBeforeCurrentTransactions: 0, // will change once page-by-page transaction loading is added
 		}))
 		const accounts: Data.StateAccount[] = accountsRaw.map((account) => ({
 			id: account.id,
 			name: { val: account.name, changed: false },
 			starting_amount: { val: account.starting_amount.toFixed(2), changed: false },
+			amtBeforeCurrentTransactions: 0, // will change once page-by-page transaction loading is added
 		}))
 
 		const newData = { transactions, categories, accounts }
 
 		setData(newData)
 		setOrigData(newData)
+		setIsLoading(false)
 		if (p && p.onReload) {
 			p.onReload(newData)
 		}
@@ -378,11 +382,13 @@ export namespace Data {
 	export type StateCategory = {
 		id: string
 		name: { val: string; changed: boolean }
+		amtBeforeCurrentTransactions: number
 	}
 	export type StateAccount = {
 		id: string
 		name: { val: string; changed: boolean }
 		starting_amount: { val: string; changed: boolean }
+		amtBeforeCurrentTransactions: number
 	}
 
 	export type Controller = {

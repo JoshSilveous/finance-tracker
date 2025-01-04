@@ -100,23 +100,6 @@ export function TransactionManager({
 					}
 				},
 			},
-			{
-				context: 'TransactionManager',
-				char: 'S',
-				ctrlKey: true,
-				shiftKey: false,
-				run: () => {
-					const saveButton = saveChangesButtonRef.current! as HTMLButtonElement
-
-					const clickEvent = new Event('click', {
-						bubbles: true,
-						cancelable: true,
-					})
-
-					saveButton.dispatchEvent(clickEvent)
-				},
-				preventDefault: true,
-			},
 		]
 
 		addIsolatedKeyListeners(listeners)
