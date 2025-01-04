@@ -6,8 +6,6 @@ import { default as DeleteIcon } from '@/public/delete.svg'
 import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import s from './SingleRow.module.scss'
 import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } from 'react'
-import { FormTransaction } from '../../TransactionManager'
-import { PendingChangeController } from '../../hooks/usePendingChanges'
 import { TabIndexer } from '../../hooks'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 import { Data, HistoryController, SortOrder } from '../../../Dashboard/hooks'
@@ -51,7 +49,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					key === 'category_id' ||
 					key === 'account_id'
 				) {
-					p.data.update('item', p.transaction.id, item_id, key, newVal)
+					p.data.update('item', item_id, p.transaction.id, key, newVal)
 				}
 
 				// update history

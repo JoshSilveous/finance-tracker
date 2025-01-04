@@ -220,7 +220,7 @@ export function TransactionManager({
 							dropdownOptions={dropdownOptions}
 							refreshData={data.reload}
 							gridRow={gridRow}
-							key={`${groupedItem.date}-${groupedItemIndex}`}
+							key={`${groupedItem.date}-TODAY`}
 							tabIndexer={tabIndexer}
 							gridNavIndex={gridNavIndex}
 						/>

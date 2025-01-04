@@ -26,7 +26,7 @@ export function genEventHandlers(p: MultiRowProps) {
 					key === 'category_id' ||
 					key === 'account_id'
 				) {
-					p.data.update('item', p.transaction.id, item_id, key, newVal)
+					p.data.update('item', item_id, p.transaction.id, key, newVal)
 				}
 			}
 

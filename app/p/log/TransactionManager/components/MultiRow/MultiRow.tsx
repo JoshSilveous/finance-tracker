@@ -4,18 +4,21 @@ import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
 import { default as InsertRowIcon } from '@/public/insert_row.svg'
-import { FormTransaction } from '../../TransactionManager'
 import s from './MultiRow.module.scss'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
-import { PendingChangeController } from '../../hooks/usePendingChanges'
-import { FoldStateUpdater, TabIndexer } from '../../hooks'
+import { TabIndexer } from '../../hooks'
 import { foldRenderer } from './func/foldRenderer'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 import { genEventHandlers } from './func/genEventHandlers'
 import { genUniqueLists } from './func/genUniqueLists'
 import { delay } from '@/utils'
-import { Data, HistoryController, SortOrder } from '../../../Dashboard/hooks'
+import {
+	Data,
+	FoldStateUpdater,
+	HistoryController,
+	SortOrder,
+} from '../../../Dashboard/hooks'
 
 export interface MultiRowProps {
 	transaction: Data.StateTransaction

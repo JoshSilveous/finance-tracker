@@ -91,7 +91,7 @@ export function useData(p?: UseDataOptions) {
 							key
 						].val
 					item[key].val = value
-					item[key].changed = value === oldVal
+					item[key].changed = value !== oldVal
 				}
 
 				return clone

@@ -42,10 +42,10 @@ export const transactionReorderMouseEffect = (
 
 	const grabberNode = e.currentTarget as HTMLButtonElement
 
-	const offsetX =
-		grabberNode.offsetWidth / 2 + grabberNode.offsetLeft - thisRow[0].offsetLeft
-	const offsetY =
-		grabberNode.offsetHeight / 2 + grabberNode.offsetTop + 8 - thisRow[0].offsetTop
+	const offsetX = grabberNode.offsetLeft + grabberNode.offsetWidth / 2 - 4
+	const offsetY = grabberNode.offsetHeight * 1.5 - 2
+
+	const topOffset = gridElem.getBoundingClientRect().top
 
 	const colStyle = getComputedStyle(thisRow[1])
 	const gapHeight = parseInt(colStyle.getPropertyValue('--gap-row-height'))
@@ -90,6 +90,17 @@ export const transactionReorderMouseEffect = (
 		}
 		leftOffset += node.clientWidth
 	})
+
+	const classlistPatch = setInterval(() => {
+		// needed because react starting double-rendering multi-row components that get folded. this is the easiest way to make sure this class gets applied
+		thisRow.forEach((node, nodeIndex) => {
+			node.classList.add(s.popped_out)
+			if (nodeIndex === 0 || nodeIndex === thisRow.length - 2) {
+				node.classList.add(s.drop_shadow)
+			}
+		})
+		console.log('RAN')
+	}, 10)
 
 	let firstRun = true
 	const marginSize = calculatedRowHeight + gapHeight
@@ -152,7 +163,9 @@ export const transactionReorderMouseEffect = (
 		}, 0)
 		return test
 	}
-	let closestBreakpointIndex = getClosestBreakpointIndex(e.clientY + gridElem.scrollTop)
+	let closestBreakpointIndex = getClosestBreakpointIndex(
+		e.clientY + gridElem.scrollTop - topOffset
+	)
 	putMarginGapOnRow(closestBreakpointIndex)
 
 	const SCROLL_MARGIN = 50 // margin from top/bottom of grid container to activate scrolling effect
@@ -216,29 +229,40 @@ export const transactionReorderMouseEffect = (
 
 	function handleReorderMouseMove(e: MouseEvent) {
 		let leftOffset = 0
-		thisRow.forEach((node) => {
+		thisRow.forEach((node, nodeIndex) => {
 			node.style.left = `${e.clientX - offsetX + leftOffset}px`
 			node.style.top = `${e.clientY - offsetY}px`
+			node.classList.add(s.popped_out)
+			if (nodeIndex === 0 || nodeIndex === thisRow.length - 2) {
+				node.classList.add(s.drop_shadow)
+			}
 			leftOffset += node.clientWidth
 		})
 		const prevClosestBreakpointIndex = closestBreakpointIndex
-		closestBreakpointIndex = getClosestBreakpointIndex(e.clientY + gridElem.scrollTop)
+		closestBreakpointIndex = getClosestBreakpointIndex(
+			e.clientY + gridElem.scrollTop - topOffset
+		)
 		if (firstRun || prevClosestBreakpointIndex !== closestBreakpointIndex) {
 			putMarginGapOnRow(closestBreakpointIndex)
 		}
 		firstRun = false
 
-		if (e.clientY < gridElem.offsetTop + SCROLL_MARGIN) {
+		if (e.clientY < gridElem.offsetTop + topOffset + SCROLL_MARGIN) {
 			scroll.startUp()
 		} else {
 			scroll.stopUp()
 		}
 
-		if (e.clientY > gridElem.offsetTop + gridElem.offsetHeight - SCROLL_MARGIN) {
+		if (
+			e.clientY >
+			gridElem.offsetTop + topOffset + gridElem.offsetHeight - SCROLL_MARGIN
+		) {
 			scroll.startDown()
 		} else {
 			scroll.stopDown()
 		}
+
+		clearInterval(classlistPatch)
 	}
 
 	function handleReorderMouseUp() {

@@ -78,26 +78,14 @@ export function Dashboard() {
 		{
 			type: 'transaction_manager',
 			position: {
-				top: 20,
-				left: 20,
+				top: 30,
+				left: 30,
 			},
 			size: {
-				width: 1000,
-				height: 400,
+				width: 990,
+				height: 690,
 			},
 			zIndex: 1,
-		},
-		{
-			type: 'transaction_manager',
-			position: {
-				top: 20,
-				left: 20,
-			},
-			size: {
-				width: 1000,
-				height: 400,
-			},
-			zIndex: 2,
 		},
 	])
 

@@ -26,16 +26,9 @@ export function itemReorderMouseEffect(
 		grabberNode.offsetWidth / 2 -
 		grabberContainerNode.offsetLeft -
 		2
-	const offsetY =
-		grabberNode.parentElement!.offsetTop +
-		grabberNode.offsetHeight / 2 -
-		grabberContainerNode.offsetTop +
-		13
+	const offsetY = grabberNode.offsetHeight / 2 + 13
 
-	grabberNode.offsetLeft +
-		grabberNode.offsetWidth / 2 -
-		grabberContainerNode.offsetLeft -
-		2
+	const topOffset = gridElem.getBoundingClientRect().top
 
 	let leftOffset = 0
 	thisRow.forEach((node, index) => {
@@ -60,6 +53,7 @@ export function itemReorderMouseEffect(
 
 	const breakpoints: number[] = (() => {
 		const arr = otherRows.map((row) => row[0].offsetTop)
+
 		arr.push(arr.at(-1)! + (allRows.at(-1)![0] as HTMLDivElement).offsetHeight)
 		return arr
 	})()
@@ -128,7 +122,9 @@ export function itemReorderMouseEffect(
 				: closestIndex
 		}, 0)
 	}
-	let closestBreakpointIndex = getClosestBreakpointIndex(e.clientY + gridElem.scrollTop)
+	let closestBreakpointIndex = getClosestBreakpointIndex(
+		e.clientY + gridElem.scrollTop - topOffset
+	)
 	putMarginGapOnRow(closestBreakpointIndex)
 
 	const SCROLL_MARGIN = 50 // margin from top/bottom of grid container to activate scrolling effect
@@ -192,6 +188,7 @@ export function itemReorderMouseEffect(
 
 	function handleReorderMouseMove(e: MouseEvent) {
 		let leftOffset = 0
+
 		thisRow.forEach((node) => {
 			node.style.left = `${e.clientX - offsetX + leftOffset}px`
 			node.style.top = `${e.clientY - offsetY}px`
@@ -199,19 +196,24 @@ export function itemReorderMouseEffect(
 		})
 
 		const prevClosestBreakpointIndex = closestBreakpointIndex
-		closestBreakpointIndex = getClosestBreakpointIndex(e.clientY + gridElem.scrollTop)
+		closestBreakpointIndex = getClosestBreakpointIndex(
+			e.clientY + gridElem.scrollTop - topOffset
+		)
 		if (firstRun || prevClosestBreakpointIndex !== closestBreakpointIndex) {
 			putMarginGapOnRow(closestBreakpointIndex)
 		}
 		firstRun = false
 
-		if (e.clientY < gridElem.offsetTop + SCROLL_MARGIN) {
+		if (e.clientY < gridElem.offsetTop + topOffset + SCROLL_MARGIN) {
 			scroll.startUp()
 		} else {
 			scroll.stopUp()
 		}
 
-		if (e.clientY > gridElem.offsetTop + gridElem.offsetHeight - SCROLL_MARGIN) {
+		if (
+			e.clientY >
+			gridElem.offsetTop + topOffset + gridElem.offsetHeight - SCROLL_MARGIN
+		) {
 			scroll.startDown()
 		} else {
 			scroll.stopDown()
