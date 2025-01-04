@@ -2,14 +2,16 @@
 	width: 100vw;
 	height: 100vh;
 	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	--NAVBAR-HEIGHT: 60px;
 
 	.navbar_container {
-		height: 60px;
+		min-height: var(--NAVBAR-HEIGHT);
 		width: 100%;
 		box-sizing: border-box;
 	}
 	.content_container {
-		height: 100%;
-		overflow-y: auto;
+		height: calc(100vh - var(--NAVBAR-HEIGHT));
 	}
 }

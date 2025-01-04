@@ -9,6 +9,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Data } from './hooks/useData/useData'
 import { useFoldState, useSortOrder, useHistory, useData } from './hooks'
 import { getScrollbarWidth } from '@/utils'
+import { JButton } from '@/components/JForm'
+import { genDisplayTiles, TileData } from './func/tiles'
 
 export function Dashboard() {
 	const data = useData({
@@ -61,20 +63,20 @@ export function Dashboard() {
 		data,
 		sortOrder,
 	})
-	const mainContainerRef = useRef<HTMLDivElement>(null)
+	const tileContainerRef = useRef<HTMLDivElement>(null)
 	useLayoutEffect(() => {
 		/**
 		 * Sets the `--scrollbar-width` css variable, used for smooth scrollbar animations across any browser
 		 */
-		if (mainContainerRef.current !== null) {
-			mainContainerRef.current.style.setProperty(
+		if (tileContainerRef.current !== null) {
+			tileContainerRef.current.style.setProperty(
 				'--scrollbar-width',
 				getScrollbarWidth() + 'px'
 			)
 		}
 	}, [])
 
-	const [tileData, setTileData] = useState([
+	const [tileData, setTileData] = useState<TileData[]>([
 		{
 			type: 'transaction_manager',
 			position: {
@@ -89,66 +91,53 @@ export function Dashboard() {
 		},
 	])
 
-	const tiles = tileData.map((tile, index) => {
-		const onResize = (width: number, height: number) => {
-			console.log('resized!', { width, height })
-			setTileData((prev) => {
-				const clone = structuredClone(prev)
-				clone[index].size = { width, height }
-				return clone
-			})
-		}
-		const onReposition = (top: number, left: number) => {
-			console.log('repositioned!', { top, left })
-			setTileData((prev) => {
-				const clone = structuredClone(prev)
-				clone[index].position = { top, left }
-				return clone
-			})
-		}
+	useLayoutEffect(() => {
+		// re-calculate size needed for dashboard component
 
-		const onMouseDown = () => {
-			setTileData((prev) => {
-				const clone = structuredClone(prev)
-				const curHighestZIndex = Math.max(...clone.map((tile) => tile.zIndex))
-				clone[index].zIndex = curHighestZIndex + 1
-				return clone
-			})
-		}
+		let maxWidth = 0
+		let maxHeight = 0
 
-		if (tile.type === 'transaction_manager') {
-			return (
-				<Tile
-					className={s.transaction_manager_container}
-					style={{ zIndex: tile.zIndex }}
-					onMouseDown={onMouseDown}
-					resizable
-					onResize={onResize}
-					onReposition={onReposition}
-					minWidth={740}
-					maxWidth={1200}
-					minHeight={350}
-					defaultWidth={tile.size.width}
-					defaultHeight={tile.size.height}
-					defaultPosLeft={tile.position.left}
-					defaultPosTop={tile.position.top}
-					key={index}
-				>
-					<TransactionManager
-						data={data}
-						foldState={foldState}
-						sortOrder={sortOrder}
-						historyController={historyController}
-						setTransactionManagerRowRef={setTransactionManagerRowRef}
-					/>
-				</Tile>
-			)
-		}
-	})
+		tileData.forEach((tile) => {
+			const { top, left } = tile.position
+			const { width, height } = tile.size
+
+			maxWidth = Math.max(maxWidth, left + width)
+			maxHeight = Math.max(maxHeight, top + height)
+		})
+
+		console.log(maxWidth, maxHeight)
+		tileContainerRef.current!.style.width = `calc(${maxWidth}px + (var(--GRID-SPACING) * 3))`
+		tileContainerRef.current!.style.height = `calc(${maxHeight}px + (var(--GRID-SPACING) * 3))`
+	}, [tileData])
+
+	const tiles = genDisplayTiles(
+		tileData,
+		setTileData,
+		data,
+		foldState,
+		sortOrder,
+		historyController,
+		setTransactionManagerRowRef
+	)
 
 	return (
-		<div className={s.main} ref={mainContainerRef}>
-			<div className={s.tile_container}>{tiles}</div>
+		<div className={s.main}>
+			<div className={s.tile_wrapper}>
+				<div className={s.tile_container} ref={tileContainerRef}>
+					{tiles}
+				</div>
+			</div>
+			<div className={s.bottom_container}>
+				<JButton jstyle='secondary' className={s.reset}>
+					Reset Tile Positions
+				</JButton>
+				<JButton jstyle='secondary' className={s.discard}>
+					Discard Changes
+				</JButton>
+				<JButton jstyle='primary' className={s.save}>
+					Save Changes
+				</JButton>
+			</div>
 		</div>
 	)
 }
