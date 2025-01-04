@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchAccountData, fetchCategoryData, fetchTransactionData } from '@/database'
+import { deepEqual } from 'assert'
+import { areDeeplyEqual } from '@/utils'
 
 export type UseDataOptions = {
 	onReload?: (newData: Data.State) => void
@@ -22,6 +24,14 @@ export function useData(p?: UseDataOptions) {
 
 	const [isLoading, setIsLoading] = useState(false)
 	const [isPendingSave, setIsPendingSave] = useState(false)
+
+	useEffect(() => {
+		if (isPendingSave && areDeeplyEqual(data, origData)) {
+			setIsPendingSave(false)
+		} else if (!isPendingSave && !areDeeplyEqual(data, origData)) {
+			setIsPendingSave(true)
+		}
+	}, [data])
 
 	const update: Data.Update = (type, ...args) => {
 		if (type === 'transaction') {

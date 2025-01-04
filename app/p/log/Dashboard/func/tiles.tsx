@@ -1,11 +1,11 @@
 import { SetStateAction } from 'react'
 import { Tile } from '@/components/Tile/Tile'
-import { TransactionManager } from '../tiles'
+import { SimpleValues, TransactionManager } from '../tiles'
 import { Data, FoldStateController, SortOrder, HistoryController } from '../hooks'
 import s from '../Dashboard.module.scss'
 
 export interface TileData {
-	type: 'transaction_manager'
+	type: 'transaction_manager' | 'simple_values'
 	position: {
 		top: number
 		left: number
@@ -22,6 +22,12 @@ const tileSettings = {
 		minWidth: 740,
 		minHeight: 350,
 		maxWidth: 1200,
+		maxHeight: undefined,
+	},
+	simple_values: {
+		minWidth: undefined,
+		minHeight: undefined,
+		maxWidth: undefined,
 		maxHeight: undefined,
 	},
 }
@@ -60,22 +66,22 @@ export function genDisplayTiles(
 			})
 		}
 
-		if (tile.type === 'transaction_manager') {
-			return (
-				<Tile
-					className={s.transaction_manager_container}
-					style={{ zIndex: tile.zIndex }}
-					onMouseDown={onMouseDown}
-					resizable
-					onResize={onResize}
-					onReposition={onReposition}
-					defaultWidth={tile.size.width}
-					defaultHeight={tile.size.height}
-					defaultPosLeft={tile.position.left}
-					defaultPosTop={tile.position.top}
-					{...tileSettings.transaction_manager}
-					key={index}
-				>
+		return (
+			<Tile
+				className={s.transaction_manager_container}
+				style={{ zIndex: tile.zIndex }}
+				onMouseDown={onMouseDown}
+				onResize={onResize}
+				onReposition={onReposition}
+				defaultWidth={tile.size.width}
+				defaultHeight={tile.size.height}
+				defaultPosLeft={tile.position.left}
+				defaultPosTop={tile.position.top}
+				{...tileSettings[tile.type]}
+				key={index}
+				resizable
+			>
+				{tile.type === 'transaction_manager' && (
 					<TransactionManager
 						data={data}
 						foldState={foldState}
@@ -83,8 +89,9 @@ export function genDisplayTiles(
 						historyController={historyController}
 						setTransactionManagerRowRef={setTransactionManagerRowRef}
 					/>
-				</Tile>
-			)
-		}
+				)}
+				{tile.type === 'simple_values' && <SimpleValues data={data} />}
+			</Tile>
+		)
 	})
 }

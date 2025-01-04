@@ -85,6 +85,18 @@ export function Dashboard() {
 			},
 			zIndex: 1,
 		},
+		{
+			type: 'simple_values',
+			position: {
+				top: 30,
+				left: 300,
+			},
+			size: {
+				width: 400,
+				height: 600,
+			},
+			zIndex: 2,
+		},
 	])
 
 	useLayoutEffect(() => {
@@ -127,10 +139,14 @@ export function Dashboard() {
 				<JButton jstyle='secondary' className={s.reset}>
 					Reset Tile Positions
 				</JButton>
-				<JButton jstyle='secondary' className={s.discard}>
+				<JButton
+					jstyle='secondary'
+					className={s.discard}
+					disabled={!data.isPendingSave}
+				>
 					Discard Changes
 				</JButton>
-				<JButton jstyle='primary' className={s.save}>
+				<JButton jstyle='primary' className={s.save} disabled={!data.isPendingSave}>
 					Save Changes
 				</JButton>
 			</div>
