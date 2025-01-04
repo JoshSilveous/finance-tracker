@@ -19,11 +19,11 @@ import { useTabIndexer, useGridNav } from './hooks'
 import { NewTransactionForm } from './components/DateRow/NewTransactionForm/NewTransactionForm'
 import {
 	Data,
-	FoldState,
+	SortOrder,
 	FoldStateController,
 	HistoryController,
-	SortOrder,
-} from '../Dashboard/hooks'
+	FoldState,
+} from '../../hooks'
 
 export interface TransactionManagerProps {
 	data: Data.Controller

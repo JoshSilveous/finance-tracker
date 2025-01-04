@@ -13,7 +13,7 @@ import { FoldStateGetter, FoldStateUpdater } from '../useFoldState'
 import { transactionReorderMouseEffect } from './handleTransactionReorder'
 import { Data } from '../../../Dashboard/hooks/useData/useData'
 import { TransactionManagerRowsRef } from '../../Dashboard'
-import { ItemRowsRef } from '../../../TransactionManager/components'
+import { ItemRowsRef } from '../../tiles/TransactionManager/components'
 
 export interface UseSortOrderProps {
 	getFoldState: FoldStateGetter

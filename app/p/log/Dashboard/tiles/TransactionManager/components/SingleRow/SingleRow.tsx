@@ -8,7 +8,7 @@ import s from './SingleRow.module.scss'
 import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } from 'react'
 import { TabIndexer } from '../../hooks'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
-import { Data, HistoryController, SortOrder } from '../../../Dashboard/hooks'
+import { Data, HistoryController, SortOrder } from '../../../../hooks'
 
 export interface SingleRowProps {
 	transaction: Data.StateTransaction

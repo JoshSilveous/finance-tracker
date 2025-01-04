@@ -1,6 +1,6 @@
 import { JButton } from '@/components/JForm'
 import { default as UndoRedoIcon } from '@/public/undo_redo.svg'
-import { HistoryController } from '../../Dashboard/hooks'
+import { HistoryController } from '../../../hooks'
 import s from '../TransactionManager.module.scss'
 import { JGridTypes } from '@/components/JGrid/JGrid'
 

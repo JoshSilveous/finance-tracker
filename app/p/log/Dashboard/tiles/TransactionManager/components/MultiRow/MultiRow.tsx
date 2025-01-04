@@ -13,12 +13,7 @@ import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 import { genEventHandlers } from './func/genEventHandlers'
 import { genUniqueLists } from './func/genUniqueLists'
 import { delay } from '@/utils'
-import {
-	Data,
-	FoldStateUpdater,
-	HistoryController,
-	SortOrder,
-} from '../../../Dashboard/hooks'
+import { Data, FoldStateUpdater, HistoryController, SortOrder } from '../../../../hooks'
 
 export interface MultiRowProps {
 	transaction: Data.StateTransaction

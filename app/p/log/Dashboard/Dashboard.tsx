@@ -1,10 +1,6 @@
 'use client'
 import { Tile } from '@/components/Tile/Tile'
 import s from './Dashboard.module.scss'
-import {
-	TransactionManager,
-	TransactionManagerProps,
-} from '../TransactionManager/TransactionManager'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Data } from './hooks/useData/useData'
 import { useFoldState, useSortOrder, useHistory, useData } from './hooks'

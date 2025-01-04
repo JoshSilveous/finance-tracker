@@ -1,4 +1,4 @@
-import { Data, SortOrder } from '../../Dashboard/hooks'
+import { SortOrder, Data } from '../../../hooks'
 
 export function sortTransactions(
 	sortOrder: SortOrder.State,

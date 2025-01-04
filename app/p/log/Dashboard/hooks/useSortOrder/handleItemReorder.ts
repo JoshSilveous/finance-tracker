@@ -1,8 +1,8 @@
 import { delay } from '@/utils'
-import multiRowStyles from '../../../TransactionManager/components/MultiRow/MultiRow.module.scss'
+import s from '../../tiles/TransactionManager/components/MultiRow/MultiRow.module.scss'
 import { MutableRefObject } from 'react'
-import { ItemRowsRef } from '../../../TransactionManager/components'
 import { Data } from '../useData'
+import { ItemRowsRef } from '../../tiles/TransactionManager/components'
 
 export function itemReorderMouseEffect(
 	item: Data.StateTransaction['items'][number],
@@ -47,7 +47,7 @@ export function itemReorderMouseEffect(
 		node.style.width = `${node.offsetWidth + widthOffset}px`
 		node.style.left = `${e.clientX - offsetX + leftOffset}px`
 		node.style.top = `${e.clientY - offsetY}px`
-		node.classList.add(multiRowStyles.popped_out)
+		node.classList.add(s.popped_out)
 		leftOffset += node.clientWidth
 	})
 
@@ -64,7 +64,7 @@ export function itemReorderMouseEffect(
 		if (rowIndex === 'none') {
 			allRows.forEach((rowNodes) => {
 				rowNodes.forEach((node) => {
-					node.classList.remove(multiRowStyles.transitions)
+					node.classList.remove(s.transitions)
 				})
 			})
 		}
@@ -72,10 +72,10 @@ export function itemReorderMouseEffect(
 		allRows.forEach((rowNodes) => {
 			rowNodes.forEach((node) => {
 				node.classList.remove(
-					multiRowStyles.margin_top,
-					multiRowStyles.margin_bottom,
-					multiRowStyles.margin_top_double,
-					multiRowStyles.margin_bottom_double
+					s.margin_top,
+					s.margin_bottom,
+					s.margin_top_double,
+					s.margin_bottom_double
 				)
 			})
 		})
@@ -88,28 +88,24 @@ export function itemReorderMouseEffect(
 		// if hovering over first row
 		if (rowIndex === -1) {
 			otherRows[0].forEach((node) => {
-				node.classList.add(multiRowStyles.margin_top_double)
+				node.classList.add(s.margin_top_double)
 			})
 		}
 		// if hovering over last row
 		else if (rowIndex === otherRows.length - 1) {
 			otherRows.at(-1)!.forEach((node) => {
-				node.classList.add(multiRowStyles.margin_bottom_double)
+				node.classList.add(s.margin_bottom_double)
 			})
 		} else {
-			otherRows[rowIndex].forEach((node) =>
-				node.classList.add(multiRowStyles.margin_bottom)
-			)
-			otherRows[rowIndex + 1].forEach((node) =>
-				node.classList.add(multiRowStyles.margin_top)
-			)
+			otherRows[rowIndex].forEach((node) => node.classList.add(s.margin_bottom))
+			otherRows[rowIndex + 1].forEach((node) => node.classList.add(s.margin_top))
 		}
 
 		if (firstRun) {
 			delay(10).then(() => {
 				allRows.forEach((row) => {
 					row.forEach((node) => {
-						node.classList.add(multiRowStyles.transitions)
+						node.classList.add(s.transitions)
 					})
 				})
 			})
@@ -226,7 +222,7 @@ export function itemReorderMouseEffect(
 			node.style.width = ''
 			node.style.top = ''
 			node.style.left = ''
-			node.classList.remove(multiRowStyles.popped_out)
+			node.classList.remove(s.popped_out)
 		})
 
 		scroll.stopUp()

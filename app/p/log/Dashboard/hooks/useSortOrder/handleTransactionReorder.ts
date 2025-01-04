@@ -1,10 +1,10 @@
-import s from '../../../TransactionManager/TransactionManager.module.scss'
+import s from '../../tiles/TransactionManager/TransactionManager.module.scss'
 import { delay } from '@/utils'
 import { MutableRefObject } from 'react'
 import { FoldStateUpdater } from '../useFoldState'
 import { SortOrder } from './useSortOrder'
-import { TransactionRowsRef } from '../../../TransactionManager/TransactionManager'
 import { Data } from '../useData'
+import { TransactionRowsRef } from '../../tiles/TransactionManager/TransactionManager'
 
 export const transactionReorderMouseEffect = (
 	transaction: Data.StateTransaction,

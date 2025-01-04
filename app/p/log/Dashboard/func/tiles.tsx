@@ -1,6 +1,6 @@
 import { SetStateAction } from 'react'
 import { Tile } from '@/components/Tile/Tile'
-import { TransactionManager } from '../../TransactionManager/TransactionManager'
+import { TransactionManager } from '../tiles'
 import { Data, FoldStateController, SortOrder, HistoryController } from '../hooks'
 import s from '../Dashboard.module.scss'
 
