@@ -9,6 +9,8 @@ import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './func/tiles'
 
 export function Dashboard() {
+	const GRID_SPACING = 30
+
 	const data = useData({
 		onReload: (newData) => {
 			// re-generate sort order & foldState
@@ -98,6 +100,26 @@ export function Dashboard() {
 			options: {
 				exclude: [],
 				show: 'accounts',
+				title: 'Accounts',
+				showTitle: true,
+			},
+		},
+		{
+			type: 'simple_values',
+			position: {
+				top: 30,
+				left: 300,
+			},
+			size: {
+				width: 400,
+				height: 600,
+			},
+			zIndex: 3,
+			options: {
+				exclude: [],
+				show: 'categories',
+				title: 'Categories',
+				showTitle: true,
 			},
 		},
 	])
@@ -121,6 +143,20 @@ export function Dashboard() {
 		tileContainerRef.current!.style.height = `calc(${maxHeight}px + (var(--GRID-SPACING) * 3))`
 	}, [tileData])
 
+	const resetTilePositions = () => {
+		setTileData((prev) => {
+			const clone = structuredClone(prev)
+			const tileCount = clone.length
+			clone.forEach((tile, index) => {
+				const left = (index + 1) * GRID_SPACING
+				const top = (tileCount - index) * GRID_SPACING
+				tile.position = { top, left }
+				tile.zIndex = index + 1
+			})
+			return clone
+		})
+	}
+
 	const tiles = genDisplayTiles(
 		tileData,
 		setTileData,
@@ -142,7 +178,7 @@ export function Dashboard() {
 				<JButton jstyle='secondary' className={s.new}>
 					Add New Tile
 				</JButton>
-				<JButton jstyle='secondary' className={s.reset}>
+				<JButton jstyle='secondary' className={s.reset} onClick={resetTilePositions}>
 					Reset Tile Positions
 				</JButton>
 				<JButton

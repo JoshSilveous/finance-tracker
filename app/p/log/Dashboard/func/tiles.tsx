@@ -25,6 +25,8 @@ interface SimpleValuesTile extends TileDataBase {
 	options?: {
 		exclude: string[]
 		show: 'categories' | 'accounts'
+		title: string
+		showTitle: boolean
 	}
 }
 
@@ -73,7 +75,6 @@ export function genDisplayTiles(
 				return clone
 			})
 		}
-
 		const onMouseDown = () => {
 			setTileData((prev) => {
 				const clone = structuredClone(prev)
@@ -112,6 +113,8 @@ export function genDisplayTiles(
 						data={data}
 						exclude={tile.options!.exclude}
 						show={tile.options!.show}
+						showTitle={tile.options!.showTitle}
+						title={tile.options!.title}
 					/>
 				)}
 			</Tile>

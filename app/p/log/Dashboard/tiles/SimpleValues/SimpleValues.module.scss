@@ -1,14 +1,25 @@
 .main {
 	padding: 20px;
 
-	.table_container {
-		display: flex;
-		flex-direction: column;
+	.title {
+		font-weight: 500;
+		font-size: 18px;
+		margin-bottom: 10px;
+	}
+	.table {
+		width: 100%;
+		border-collapse: collapse;
+		&,
+		td {
+			border: 1px solid var(--bg-color-lighter-3);
+		}
 
-		.table_item {
-			display: flex;
+		td {
+			padding: 3px 5px;
+		}
+
+		tr {
 			width: 100%;
-			justify-content: space-between;
 
 			.changed {
 				color: var(--font-color-changed);

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchAccountData, fetchCategoryData, fetchTransactionData } from '@/database'
-import { deepEqual } from 'assert'
 import { areDeeplyEqual } from '@/utils'
 
 export type UseDataOptions = {
@@ -12,23 +11,22 @@ export function useData(p?: UseDataOptions) {
 		categories: [],
 		accounts: [],
 	})
-	const [origData, setOrigData] = useState<Data.State>({
+	const origDataRef = useRef<Data.State>({
 		transactions: [],
 		categories: [],
 		accounts: [],
 	})
-	const origDataRef = useRef(origData)
 	useEffect(() => {
-		origDataRef.current = origData
-	}, [origData])
+		origDataRef.current = origDataRef.current
+	}, [origDataRef.current])
 
 	const [isLoading, setIsLoading] = useState(false)
 	const [isPendingSave, setIsPendingSave] = useState(false)
 
 	useEffect(() => {
-		if (isPendingSave && areDeeplyEqual(data, origData)) {
+		if (isPendingSave && areDeeplyEqual(data, origDataRef.current)) {
 			setIsPendingSave(false)
-		} else if (!isPendingSave && !areDeeplyEqual(data, origData)) {
+		} else if (!isPendingSave && !areDeeplyEqual(data, origDataRef.current)) {
 			setIsPendingSave(true)
 		}
 	}, [data])
@@ -326,7 +324,7 @@ export function useData(p?: UseDataOptions) {
 		const newData = { transactions, categories, accounts }
 
 		setData(newData)
-		setOrigData(newData)
+		origDataRef.current = structuredClone(newData)
 		setIsLoading(false)
 		if (p && p.onReload) {
 			p.onReload(newData)

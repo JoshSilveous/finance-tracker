@@ -1,4 +1,3 @@
-import { fetchCategoryTotals } from '@/database'
 import { Data } from '../../hooks'
 import s from './SimpleValues.module.scss'
 import { addCommas } from '@/utils'
@@ -6,8 +5,11 @@ export interface SimpleValuesProps {
 	data: Data.Controller
 	show: 'accounts' | 'categories'
 	exclude: string[]
+	title: string
+	showTitle: boolean
 }
-export function SimpleValues({ data, show, exclude }: SimpleValuesProps) {
+
+export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleValuesProps) {
 	const tableRows = (() => {
 		if (show === 'categories') {
 			const categories = [
@@ -35,14 +37,14 @@ export function SimpleValues({ data, show, exclude }: SimpleValuesProps) {
 				})()
 
 				return (
-					<div className={s.table_item}>
-						<div className={`${s.name} ${cat.name.changed ? s.changed : ''}`}>
+					<tr>
+						<td className={`${s.name} ${cat.name.changed ? s.changed : ''}`}>
 							{cat.name.val}
-						</div>
-						<div className={`${s.amount} ${totalChanged ? s.changed : ''}`}>
+						</td>
+						<td className={`${s.amount} ${totalChanged ? s.changed : ''}`}>
 							${addCommas(catTotal.toFixed(2))}
-						</div>
-					</div>
+						</td>
+					</tr>
 				)
 			})
 		} else if (show === 'accounts') {
@@ -76,21 +78,24 @@ export function SimpleValues({ data, show, exclude }: SimpleValuesProps) {
 				})()
 
 				return (
-					<div className={s.table_item}>
-						<div className={`${s.name} ${act.name.changed ? s.changed : ''}`}>
+					<tr>
+						<td className={`${s.name} ${act.name.changed ? s.changed : ''}`}>
 							{act.name.val}
-						</div>
-						<div className={`${s.amount} ${totalChanged ? s.changed : ''}`}>
+						</td>
+						<td className={`${s.amount} ${totalChanged ? s.changed : ''}`}>
 							${addCommas(actTotal.toFixed(2))}
-						</div>
-					</div>
+						</td>
+					</tr>
 				)
 			})
 		}
 	})()
 	return (
 		<div className={s.main}>
-			<div className={s.table_container}>{tableRows}</div>
+			{showTitle && <div className={s.title}>{title}</div>}
+			<table className={s.table}>
+				<tbody>{tableRows}</tbody>
+			</table>
 		</div>
 	)
 }
