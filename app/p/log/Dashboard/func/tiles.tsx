@@ -42,6 +42,10 @@ const tileSettings = {
 		minHeight: undefined,
 		maxWidth: undefined,
 		maxHeight: undefined,
+		showEditButton: true,
+		onEditButtonClick: () => {
+			console.log('edit button clicked!')
+		},
 	},
 }
 

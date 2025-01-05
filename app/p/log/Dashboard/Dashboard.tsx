@@ -17,12 +17,11 @@ export function Dashboard() {
 		},
 	})
 	useEffect(() => {
-		data.reload()
+		if (!data.isPendingSave) {
+			data.reload()
+		}
 	}, [])
 
-	useEffect(() => {
-		data.reload()
-	}, [])
 	const transactionManagerRowsRef = useRef<TransactionManagerRowsRef>({})
 	const setTransactionManagerRowRef =
 		(transaction_id: string) => (node: HTMLInputElement) => {
@@ -140,6 +139,9 @@ export function Dashboard() {
 				</div>
 			</div>
 			<div className={s.bottom_container}>
+				<JButton jstyle='secondary' className={s.new}>
+					Add New Tile
+				</JButton>
 				<JButton jstyle='secondary' className={s.reset}>
 					Reset Tile Positions
 				</JButton>

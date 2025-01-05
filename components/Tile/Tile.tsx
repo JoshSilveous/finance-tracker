@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, ReactNode, HTMLAttributes, useLayoutEffect } from 'react'
-import s from './Tile.module.scss'
+import s from './tile.module.scss'
 import { default as ResizeHandle } from '@/public/resize_handle.svg'
 import { default as RepositionHandle } from '@/public/reposition_handle.svg'
+import { default as EditIcon } from '@/public/edit_icon.svg'
 
 interface TileProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onResize'> {
 	children: ReactNode
@@ -16,6 +17,8 @@ interface TileProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onResize'> {
 	defaultHeight: number
 	defaultPosLeft: number
 	defaultPosTop: number
+	showEditButton?: boolean
+	onEditButtonClick?: () => void
 }
 
 export function Tile({
@@ -32,6 +35,8 @@ export function Tile({
 	defaultPosLeft,
 	defaultPosTop,
 	className,
+	showEditButton,
+	onEditButtonClick,
 	...rest
 }: TileProps) {
 	const wrapperRef = useRef<HTMLDivElement>(null)
@@ -158,6 +163,11 @@ export function Tile({
 				>
 					<RepositionHandle />
 				</div>
+				{showEditButton && (
+					<div className={s.edit_button} onMouseDown={onEditButtonClick}>
+						<EditIcon />
+					</div>
+				)}
 			</div>
 		</div>
 	)

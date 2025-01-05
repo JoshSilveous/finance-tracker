@@ -46,5 +46,20 @@
 				width: var(--size);
 			}
 		}
+		.edit_button {
+			--size: 17px;
+			position: absolute;
+			top: 3px;
+			right: 3px;
+			height: var(--size);
+			width: var(--size);
+			cursor: pointer;
+			svg {
+				color: var(--bg-color-lighter-3);
+				height: var(--size);
+				width: var(--size);
+				transform: scaleX(-100%);
+			}
+		}
 	}
 }
