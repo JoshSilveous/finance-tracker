@@ -1,9 +1,10 @@
 import { JGrid } from '@/components/JGrid'
 import { Data } from '../../hooks'
-import { TileDefaultSettings } from '../types'
+import { SimpleValuesTile, TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
-import { addCommas } from '@/utils'
+import { addCommas, createPopup } from '@/utils'
 import { JGridTypes } from '@/components/JGrid/JGrid'
+import { EditTilePopup } from './EditTilePopup'
 export interface SimpleValuesProps {
 	data: Data.Controller
 	show: 'accounts' | 'categories'
@@ -18,8 +19,16 @@ export const simpleValuesTileDefaults: TileDefaultSettings = {
 	maxWidth: undefined,
 	maxHeight: undefined,
 	showEditButton: true,
-	onEditButtonClick: (tile) => {
-		console.log('EDIT CLICKED:', tile)
+	onEditButtonClick: (tile, setTileData, data) => {
+		const popup = createPopup(
+			<EditTilePopup
+				tile={tile as SimpleValuesTile}
+				setTileData={setTileData}
+				data={data}
+				closePopup={() => popup.close()}
+			/>
+		)
+		popup.trigger()
 	},
 }
 
@@ -28,12 +37,18 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 		if (show === 'categories') {
 			const categories = [
 				...data.cur.categories.filter((cat) => !exclude.includes(cat.id)),
-				{ id: '', name: { val: 'No Category', changed: false } },
 			]
+			if (!exclude.includes('no_category')) {
+				categories.push({
+					id: '',
+					name: { val: 'No Category', changed: false },
+					amtBeforeCurrentTransactions: 0,
+				})
+			}
 			return categories.map((cat, index) => {
 				let totalChanged = false
 				const catTotal = (() => {
-					let total = 0
+					let total = cat.amtBeforeCurrentTransactions
 					data.cur.transactions.forEach((transaction) => {
 						transaction.items.forEach((item) => {
 							if (item.category_id.val === cat.id) {
@@ -87,13 +102,15 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 		} else {
 			const accounts: Data.StateAccount[] = [
 				...data.cur.accounts.filter((act) => !exclude.includes(act.id)),
-				{
+			]
+			if (!exclude.includes('no_account')) {
+				accounts.push({
 					id: '',
 					name: { val: 'No Account', changed: false },
 					starting_amount: { val: '0', changed: false },
 					amtBeforeCurrentTransactions: 0,
-				},
-			]
+				})
+			}
 			return accounts.map((act, index) => {
 				let totalChanged = false
 				const actTotal = (() => {

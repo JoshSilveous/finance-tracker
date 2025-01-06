@@ -21,7 +21,7 @@ export namespace JDropdownTypes {
 }
 
 export const JDropdown = forwardRef<HTMLSelectElement, JDropdownTypes.Props>(
-	({ options, placeholder, className, loading, ...rest }, ref) => {
+	({ options, placeholder, className, loading, multiple, ...rest }, ref) => {
 		const optionsDisplay = options.map((option, index) => {
 			return (
 				<option value={option.value} key={index}>
@@ -29,7 +29,7 @@ export const JDropdown = forwardRef<HTMLSelectElement, JDropdownTypes.Props>(
 				</option>
 			)
 		})
-		if (rest.value === undefined) {
+		if (rest.value === undefined && multiple !== true) {
 			optionsDisplay.unshift(
 				<option value='' key={-1}>
 					{placeholder ? placeholder : ''}
@@ -37,18 +37,24 @@ export const JDropdown = forwardRef<HTMLSelectElement, JDropdownTypes.Props>(
 			)
 		}
 		return (
-			<div className={`${s.main} ${className ? className : ''}`}>
+			<div
+				className={`${s.main} ${multiple ? s.multiple : ''} ${
+					className ? className : ''
+				}`}
+			>
 				{loading && (
 					<div className={s.loading}>
 						<LoadingAnim />
 					</div>
 				)}
-				<select ref={ref} {...rest}>
+				<select ref={ref} multiple={multiple} {...rest}>
 					{loading ? '' : optionsDisplay}
 				</select>
-				<div className={s.custom_arrow}>
-					<DropdownArrow />
-				</div>
+				{multiple !== true && (
+					<div className={s.custom_arrow}>
+						<DropdownArrow />
+					</div>
+				)}
 			</div>
 		)
 	}

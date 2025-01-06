@@ -1,4 +1,7 @@
+import { Data } from '../hooks'
+
 interface TileDataBase {
+	id: string
 	position: {
 		top: number
 		left: number
@@ -10,11 +13,11 @@ interface TileDataBase {
 	zIndex: number
 }
 
-interface TransactionManagerTile extends TileDataBase {
+export interface TransactionManagerTile extends TileDataBase {
 	type: 'transaction_manager'
 	options: null
 }
-interface SimpleValuesTile extends TileDataBase {
+export interface SimpleValuesTile extends TileDataBase {
 	type: 'simple_values'
 	options: {
 		exclude: string[]
@@ -30,7 +33,11 @@ export type TileDefaultSettings = {
 	maxWidth?: number
 	maxHeight?: number
 	showEditButton?: boolean
-	onEditButtonClick?: (tile: TileData) => void
+	onEditButtonClick?: (
+		tile: TileData,
+		setTileData: (value: SetStateAction<TileData[]>) => void,
+		data: Data.Controller
+	) => void
 }
 
 export type TileData = TransactionManagerTile | SimpleValuesTile

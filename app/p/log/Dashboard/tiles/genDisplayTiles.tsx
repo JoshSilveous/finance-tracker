@@ -61,7 +61,7 @@ export function genDisplayTiles(
 				{...tileDefaults}
 				onEditButtonClick={
 					tileDefaults.onEditButtonClick !== undefined
-						? () => tileDefaults.onEditButtonClick!(tile)
+						? () => tileDefaults.onEditButtonClick!(tile, setTileData, data)
 						: undefined
 				}
 				key={index}

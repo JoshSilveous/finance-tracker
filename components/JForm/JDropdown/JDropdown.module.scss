@@ -1,12 +1,17 @@
 .main {
 	position: relative;
 	width: 100%;
+	height: 36px;
+
+	&.multiple {
+		height: 100%;
+	}
 
 	select {
 		appearance: none;
 		width: 100%;
 		padding: 10px 30px 10px 10px;
-		height: 36px;
+		height: 100%;
 		font-size: 16px;
 		box-shadow: inset 0 0 0 1px var(--input-border-color);
 		color: inherit;
@@ -21,6 +26,15 @@
 		// remove default arrow
 		background: none;
 		background-color: var(--bg-color-lighter-1);
+		scrollbar-color: transparent transparent;
+		overflow: auto;
+
+		option:checked:active {
+			background-color: red;
+		}
+		&:hover {
+			scrollbar-color: var(--font-color) transparent;
+		}
 
 		&:focus:not(:disabled),
 		&:active:not(:disabled) {

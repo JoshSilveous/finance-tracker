@@ -72,6 +72,7 @@ export function Dashboard() {
 
 	const [tileData, setTileData] = useState<TileData[]>([
 		{
+			id: 'tasduih41',
 			type: 'transaction_manager',
 			position: {
 				top: 30,
@@ -85,6 +86,7 @@ export function Dashboard() {
 			options: null,
 		},
 		{
+			id: 'imj432io',
 			type: 'simple_values',
 			position: {
 				top: 300,
@@ -103,6 +105,7 @@ export function Dashboard() {
 			},
 		},
 		{
+			id: '3u4i2h5',
 			type: 'simple_values',
 			position: {
 				top: 30,

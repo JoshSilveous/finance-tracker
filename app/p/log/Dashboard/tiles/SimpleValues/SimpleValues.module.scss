@@ -9,9 +9,15 @@
 	.grid {
 		width: 100%;
 		.header {
+			background-color: var(--bg-color-lighter-2);
+			width: 100%;
+			height: 100%;
+			padding: 1px 3px;
 		}
 		.cell {
-			padding: 1px;
+			padding: 1px 3px;
+			border-bottom: 1px solid var(--bg-color-lighter-2);
+			width: 100%;
 			&.amount {
 				display: flex;
 				width: 100%;
