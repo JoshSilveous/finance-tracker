@@ -7,7 +7,7 @@ import { areDeeplyEqual, createPopup, delay, getScrollbarWidth } from '@/utils'
 import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
-import { fetchTileData } from '@/database'
+import { fetchTileData, upsertTiles } from '@/database'
 import { AddTilePopup } from './AddTilePopup/AddTilePopup'
 
 export function Dashboard() {
@@ -24,14 +24,17 @@ export function Dashboard() {
 	useEffect(() => {
 		// guard only needed for development
 		if (!data.isPendingSave) {
-			Promise.all([data.reload(), fetchTileData()]).then(([dataRes, tileDataRes]) => {
-				console.log(dataRes, tileDataRes)
-				setTileData(tileDataRes)
-				origTileDataRef.current = tileDataRes
+			refreshAllData().then(() => {
 				setIsLoading(false)
 			})
 		}
 	}, [])
+	const refreshAllData = async () => {
+		Promise.all([data.reload(), fetchTileData()]).then(([dataRes, tileDataRes]) => {
+			setTileData(tileDataRes)
+			origTileDataRef.current = tileDataRes
+		})
+	}
 
 	const transactionManagerRowsRef = useRef<TransactionManagerRowsRef>({})
 	const setTransactionManagerRowRef =
@@ -147,6 +150,47 @@ export function Dashboard() {
 		return false
 	})()
 
+	const handleSave = async () => {
+		// save tile changes
+		setIsLoading(true)
+		await upsertTiles(tileData)
+		await refreshAllData()
+		setIsLoading(false)
+	}
+
+	const handleDiscard = () => {
+		function discardChanges() {
+			data.clearChanges()
+			setTileData(origTileDataRef.current)
+		}
+		const popup = createPopup(
+			<div>
+				<h3>Discard Changes</h3>
+				<p>Are you sure?</p>
+				<div style={{ display: 'flex', gap: '10px' }}>
+					<JButton
+						jstyle='secondary'
+						onClick={() => {
+							popup.close()
+						}}
+					>
+						No
+					</JButton>
+					<JButton
+						jstyle='primary'
+						onClick={() => {
+							discardChanges()
+							popup.close()
+						}}
+					>
+						Yes
+					</JButton>
+				</div>
+			</div>
+		)
+		popup.trigger()
+	}
+
 	return (
 		<div className={`${s.main} ${isLoading ? s.loading : ''}`}>
 			<div className={s.loading_anim_container}>
@@ -168,6 +212,7 @@ export function Dashboard() {
 					jstyle='secondary'
 					className={s.discard}
 					disabled={!changesArePending}
+					onClick={handleDiscard}
 				>
 					Discard Changes
 				</JButton>
@@ -176,12 +221,7 @@ export function Dashboard() {
 					className={s.save}
 					disabled={!changesArePending}
 					loading={isLoading}
-					onClick={() => {
-						setIsLoading(true)
-						delay(4000).then(() => {
-							setIsLoading(false)
-						})
-					}}
+					onClick={handleSave}
 				>
 					Save Changes
 				</JButton>

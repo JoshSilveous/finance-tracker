@@ -100,7 +100,7 @@ export function NewSimpleValuesPopup({
 						height: simpleValuesTileDefaults.minHeight!,
 					},
 					id: `PENDING_CREATION||${crypto.randomUUID()}`,
-					zIndex: clone.length,
+					zIndex: clone.length + 1,
 					options: structuredClone(formData),
 				})
 			)

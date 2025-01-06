@@ -2,6 +2,7 @@
 
 ### Needed before beta
 
+-   Set up all needed data/save methods
 -   Set up SimpleValues options for:
     time period (past two weeks, since last item in category (e.x. income), this month)
 -   Switch preferred column widths to localStorage instead of DB

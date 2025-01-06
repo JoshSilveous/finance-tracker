@@ -34,15 +34,16 @@ export function genDisplayTiles(
 			})
 		}
 		const onMouseDown = () => {
-			if (tile.zIndex !== tileData.length)
+			if (tile.zIndex !== tileData.length) {
 				setTileData((prev) => {
 					const clone = structuredClone(prev)
 					clone.forEach((tile) => {
-						tile.zIndex--
+						tile.zIndex = tile.zIndex > 1 ? tile.zIndex - 1 : tile.zIndex
 					})
 					clone[index].zIndex = clone.length
 					return clone
 				})
+			}
 		}
 
 		const tileDefaults =
