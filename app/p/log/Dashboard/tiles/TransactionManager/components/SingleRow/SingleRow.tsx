@@ -280,10 +280,12 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							text: 'Add Item',
 							icon: <InsertRowIcon />,
 							onClick: () =>
-								p.data.stageCreate('item', p.transaction.id, {
-									rel: 'below',
-									item_id: item.id,
-								}),
+								p.data.stageCreate(
+									'item',
+									p.transaction.id,
+									1,
+									p.transaction.date.val
+								),
 							className: s.add_item,
 						},
 					]}

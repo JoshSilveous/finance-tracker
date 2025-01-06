@@ -309,6 +309,7 @@ export function TransactionManager({
 		}
 		grid = <JGrid className={s.grid} {...gridConfig} />
 	}
+	console.log('transactionManager:', data.cur.transactions)
 	return (
 		<div
 			className={s.main}

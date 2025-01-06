@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchAccountData, fetchCategoryData, fetchTransactionData } from '@/database'
 import { areDeeplyEqual } from '@/utils'
+import { SortOrder } from '../useSortOrder'
 
 export type UseDataOptions = {
 	onReload?: (newData: Data.State) => void
+	getSortOrderController: () => SortOrder.Controller
 }
 export function useData(p?: UseDataOptions) {
 	const [data, setData] = useState<Data.State>({
@@ -241,34 +243,97 @@ export function useData(p?: UseDataOptions) {
 			if (transaction.items.length === 0) {
 				throw new Error('New transaction must have at least one item provided.')
 			}
-			console.log('NEED TO MAKE')
-			// setData((prev) => {
-			// 	const clone = structuredClone(prev)
-
-			// 	const newTransaction: Data.State['transactions'][number] = {
-			// 		id: 'PENDING_CREATION||' + crypto.randomUUID(),
-			// 		name: { val: transaction.name, changed: true },
-			// 		date: { val: transaction.date, changed: true },
-			// 		items: transaction.items.map((item) => ({
-			// 			id: 'PENDING_CREATION||' + crypto.randomUUID(),
-			// 			name: { val: item.name, changed: true },
-			// 			amount: { val: item.amount, changed: true },
-			// 			category_id: { val: item.category_id, changed: true },
-			// 			account_id: { val: item.account_id, changed: true },
-			// 			pendingCreation: true,
-			// 			pendingDeletion: false,
-			// 		})),
-			// 		pendingCreation: true,
-			// 		pendingDeletion: false,
-			// 	}
-			// 	clone.transactions.push(newTransaction)
-			// 	return clone
-			// })
-		} else if (type === 'item') {
-			const [transaction_id, position, item] = args as Data.CreateItemArgs
-			console.log('NEED TO MAKE')
 			setData((prev) => {
 				const clone = structuredClone(prev)
+
+				const newTransaction: Data.StateTransaction = {
+					id: 'PENDING_CREATION||' + crypto.randomUUID(),
+					name: { val: transaction.name, changed: true },
+					date: { val: transaction.date, changed: true },
+					items: transaction.items.map((item) => ({
+						id: 'PENDING_CREATION||' + crypto.randomUUID(),
+						name: { val: item.name, changed: true },
+						amount: { val: item.amount, changed: true },
+						category_id: { val: item.category_id, changed: true },
+						account_id: { val: item.account_id, changed: true },
+						pendingCreation: true,
+						pendingDeletion: false,
+					})),
+					pendingCreation: true,
+					pendingDeletion: false,
+				}
+				clone.transactions.push(newTransaction)
+				return clone
+			})
+		} else if (type === 'item') {
+			const [transaction_id, itemInsertIndex, date, item] = args as Data.CreateItemArgs
+			const newItemID = 'PENDING_CREATION||' + crypto.randomUUID()
+
+			const transactionIndex = data.transactions.findIndex(
+				(transaction) => transaction.id === transaction_id
+			)
+			if (transactionIndex - 1 === undefined) {
+				console.error(
+					`Transaction "${transaction_id}" couldn't be found in current data state.`,
+					data.transactions
+				)
+				throw new Error(
+					`Transaction "${transaction_id}" couldn't be found in current data state.`
+				)
+			}
+
+			const firstItemID = data.transactions[transactionIndex].items[0].id
+
+			setData((prev) => {
+				const clone = structuredClone(prev)
+
+				const transaction = clone.transactions[transactionIndex]
+
+				const newItem =
+					item !== undefined
+						? {
+								id: newItemID,
+								name: { val: item.name, changed: true },
+								amount: { val: item.amount, changed: true },
+								category_id: { val: item.category_id, changed: true },
+								account_id: { val: item.account_id, changed: true },
+								pendingCreation: true,
+								pendingDeletion: false,
+						  }
+						: {
+								id: newItemID,
+								name: { val: '', changed: true },
+								amount: { val: '', changed: true },
+								category_id: { val: '', changed: true },
+								account_id: { val: '', changed: true },
+								pendingCreation: true,
+								pendingDeletion: false,
+						  }
+
+				transaction.items.push(newItem)
+
+				return clone
+			})
+			p!.getSortOrderController().setCurrent((prev) => {
+				const clone = structuredClone(prev)
+
+				const transactionIndex = clone[date].findIndex((sortItem) =>
+					Array.isArray(sortItem)
+						? sortItem[0] === transaction_id
+						: sortItem === transaction_id
+				)
+
+				if (Array.isArray(clone[date][transactionIndex])) {
+					clone[date][transactionIndex].splice(itemInsertIndex, 0, newItemID)
+				} else {
+					clone[date][transactionIndex] = [
+						clone[date][transactionIndex],
+						firstItemID,
+						newItemID,
+					]
+				}
+				console.log('prev', structuredClone(prev), 'clone', structuredClone(clone))
+
 				return clone
 			})
 		}
@@ -436,10 +501,8 @@ export namespace Data {
 	]
 	export type CreateItemArgs = [
 		transaction_id: string,
-		position: {
-			rel: 'above' | 'below'
-			item_id: string
-		},
+		itemInsertIndex: number,
+		date: string,
 		item?: {
 			name: string
 			amount: string

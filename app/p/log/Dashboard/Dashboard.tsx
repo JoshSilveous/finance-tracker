@@ -20,6 +20,7 @@ export function Dashboard() {
 			foldState.genDefault(newData.transactions)
 			sortOrder.genDefaultSortOrder(newData.transactions)
 		},
+		getSortOrderController: () => sortOrder,
 	})
 	useEffect(() => {
 		// guard only needed for development

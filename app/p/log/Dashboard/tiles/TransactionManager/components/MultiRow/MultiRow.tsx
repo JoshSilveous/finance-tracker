@@ -221,10 +221,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						text: 'Add Item',
 						icon: <InsertRowIcon />,
 						onClick: () =>
-							p.data.stageCreate('item', p.transaction.id, {
-								rel: 'above',
-								item_id: p.transaction.items[0].id,
-							}),
+							p.data.stageCreate(
+								'item',
+								p.transaction.id,
+								1,
+								p.transaction.date.val
+							),
 
 						className: s.add_item,
 					},
@@ -262,7 +264,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		}
 
 		const handleAddItem = () =>
-			p.data.stageCreate('item', p.transaction.id, { rel: 'below', item_id: item.id })
+			p.data.stageCreate(
+				'item',
+				p.transaction.id,
+				itemIndex + 2,
+				p.transaction.date.val
+			)
 
 		return [
 			<div

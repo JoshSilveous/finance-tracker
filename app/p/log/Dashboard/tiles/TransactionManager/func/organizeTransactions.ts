@@ -4,7 +4,7 @@ export function sortTransactions(
 	sortOrder: SortOrder.State,
 	transactions: Data.StateTransaction[]
 ) {
-	return Object.entries(sortOrder).map((entry) => {
+	const res = Object.entries(sortOrder).map((entry) => {
 		return {
 			date: entry[0],
 			transactions: entry[1].map((sortID) => {
@@ -27,6 +27,9 @@ export function sortTransactions(
 			}),
 		}
 	}) as GroupedTransaction[]
+	console.log('input:\n', transactions, sortOrder)
+	console.log('output:\n', res)
+	return res
 }
 /**
  * Transaction(s), grouped by date
