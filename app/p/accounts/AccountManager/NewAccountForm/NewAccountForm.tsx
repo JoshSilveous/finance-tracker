@@ -101,6 +101,7 @@ export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
 						onChange={handleInputChange}
 						onBlur={handleBlur}
 						placeholder='e.x. Discover Credit'
+						value={formData.name}
 					/>
 					<div className={s.error_container}>
 						{errors.name && <div>{errors.name}</div>}
@@ -115,7 +116,7 @@ export function NewAccountForm({ afterSubmit }: { afterSubmit: () => void }) {
 						required
 						onChange={handleInputChange}
 						onBlur={handleBlur}
-						defaultValue={0}
+						value={formData.starting_amount}
 					/>
 					<div className={s.error_container}>
 						{errors.starting_amount && <div>{errors.starting_amount}</div>}

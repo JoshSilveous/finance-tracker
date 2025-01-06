@@ -1,7 +1,9 @@
+import { JGrid } from '@/components/JGrid'
 import { Data } from '../../hooks'
 import { TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
 import { addCommas } from '@/utils'
+import { JGridTypes } from '@/components/JGrid/JGrid'
 export interface SimpleValuesProps {
 	data: Data.Controller
 	show: 'accounts' | 'categories'
@@ -11,21 +13,21 @@ export interface SimpleValuesProps {
 }
 
 export const simpleValuesTileDefaults: TileDefaultSettings = {
-	minWidth: undefined,
-	minHeight: undefined,
+	minWidth: 180,
+	minHeight: 180,
 	maxWidth: undefined,
 	maxHeight: undefined,
 	showEditButton: true,
-	onEditButtonClick: () => {
-		console.log('edit button clicked!')
+	onEditButtonClick: (tile) => {
+		console.log('EDIT CLICKED:', tile)
 	},
 }
 
 export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleValuesProps) {
-	const tableRows = (() => {
+	const cells: JGridTypes.Props['cells'] = (() => {
 		if (show === 'categories') {
 			const categories = [
-				...data.cur.categories,
+				...data.cur.categories.filter((cat) => !exclude.includes(cat.id)),
 				{ id: '', name: { val: 'No Category', changed: false } },
 			]
 			return categories.map((cat, index) => {
@@ -47,21 +49,44 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 					})
 					return total
 				})()
-
-				return (
-					<tr key={index}>
-						<td className={`${s.name} ${cat.name.changed ? s.changed : ''}`}>
-							{cat.name.val}
-						</td>
-						<td className={`${s.amount} ${totalChanged ? s.changed : ''}`}>
-							${addCommas(catTotal.toFixed(2))}
-						</td>
-					</tr>
-				)
+				return [
+					<div
+						className={`${s.cell} ${s.name} ${
+							cat.name.changed ? s.changed : ''
+						}`}
+						key={`${cat.id}-${index}-1`}
+					>
+						{cat.name.val}
+					</div>,
+					<div
+						className={`${s.cell} ${s.amount} ${totalChanged ? s.changed : ''} ${
+							catTotal < 0 ? s.negative : ''
+						}`}
+						key={`${cat.id}-${index}-2`}
+					>
+						{catTotal < 0 ? (
+							<>
+								<div className={s.symbol}>$</div>
+								<div className={s.left_parenthesis}>(</div>
+								<div className={s.number}>
+									{addCommas(Math.abs(catTotal).toFixed(2))}
+								</div>
+								<div className={s.right_parenthesis}>)</div>
+							</>
+						) : (
+							<>
+								<div className={s.symbol}>$</div>
+								<div className={s.number}>
+									{addCommas(catTotal.toFixed(2))}
+								</div>
+							</>
+						)}
+					</div>,
+				]
 			})
-		} else if (show === 'accounts') {
+		} else {
 			const accounts: Data.StateAccount[] = [
-				...data.cur.accounts,
+				...data.cur.accounts.filter((act) => !exclude.includes(act.id)),
 				{
 					id: '',
 					name: { val: 'No Account', changed: false },
@@ -89,25 +114,67 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 					return total
 				})()
 
-				return (
-					<tr key={index}>
-						<td className={`${s.name} ${act.name.changed ? s.changed : ''}`}>
-							{act.name.val}
-						</td>
-						<td className={`${s.amount} ${totalChanged ? s.changed : ''}`}>
-							${addCommas(actTotal.toFixed(2))}
-						</td>
-					</tr>
-				)
+				return [
+					<div
+						className={`${s.cell} ${s.name} ${
+							act.name.changed ? s.changed : ''
+						}`}
+						key={`${act.id}-${index}-1`}
+					>
+						{act.name.val}
+					</div>,
+					<div
+						className={`${s.cell} ${s.amount} ${totalChanged ? s.changed : ''} ${
+							actTotal < 0 ? s.negative : ''
+						}`}
+						key={`${act.id}-${index}-2`}
+					>
+						{actTotal < 0 ? (
+							<>
+								<div className={s.symbol}>$</div>
+								<div className={s.left_parenthesis}>(</div>
+								<div className={s.number}>
+									{addCommas(Math.abs(actTotal).toFixed(2))}
+								</div>
+								<div className={s.right_parenthesis}>)</div>
+							</>
+						) : (
+							<>
+								<div className={s.symbol}>$</div>
+								<div className={s.number}>
+									{addCommas(actTotal.toFixed(2))}
+								</div>
+							</>
+						)}
+					</div>,
+				]
 			})
 		}
 	})()
+
+	const headers: JGridTypes.Props['headers'] = [
+		{
+			defaultWidth: 50,
+			minWidth: 40,
+			content: <div className={s.header}>Name</div>,
+		},
+		{
+			defaultWidth: 50,
+			minWidth: 40,
+			content: <div className={s.header}>Amount</div>,
+		},
+	]
+
 	return (
 		<div className={s.main}>
 			{showTitle && <div className={s.title}>{title}</div>}
-			<table className={s.table}>
-				<tbody>{tableRows}</tbody>
-			</table>
+			<JGrid
+				className={s.grid}
+				headers={headers}
+				cells={cells}
+				useFullWidth
+				noBorders
+			/>
 		</div>
 	)
 }

@@ -8,6 +8,16 @@
 	--main-padding: 20px;
 	--gap-row-height: 10px;
 
+	.no_transactions_container {
+		max-width: 400px;
+		margin: auto;
+		text-align: center;
+		button {
+			margin: var(--main-padding) auto 0 auto;
+			max-width: 300px;
+		}
+	}
+
 	.control_container {
 		height: var(--control-row-height);
 		display: flex;

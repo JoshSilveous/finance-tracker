@@ -12,11 +12,11 @@ interface TileDataBase {
 
 interface TransactionManagerTile extends TileDataBase {
 	type: 'transaction_manager'
-	options?: never
+	options: null
 }
 interface SimpleValuesTile extends TileDataBase {
 	type: 'simple_values'
-	options?: {
+	options: {
 		exclude: string[]
 		show: 'categories' | 'accounts'
 		title: string
@@ -30,7 +30,7 @@ export type TileDefaultSettings = {
 	maxWidth?: number
 	maxHeight?: number
 	showEditButton?: boolean
-	onEditButtonClick?: () => void
+	onEditButtonClick?: (tile: TileData) => void
 }
 
 export type TileData = TransactionManagerTile | SimpleValuesTile

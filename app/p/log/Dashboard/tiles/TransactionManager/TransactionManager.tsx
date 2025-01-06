@@ -319,7 +319,7 @@ export function TransactionManager({
 			{data.isLoading ? (
 				<div className={s.loading_container}>Loading...</div>
 			) : sortedData!.length === 0 ? (
-				<div>
+				<div className={s.no_transactions_container}>
 					<div>
 						You do not have any transactions, click "Create new transaction"
 						below to get started!

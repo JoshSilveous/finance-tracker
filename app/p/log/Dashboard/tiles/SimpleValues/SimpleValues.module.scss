@@ -6,22 +6,39 @@
 		font-size: 18px;
 		margin-bottom: 10px;
 	}
-	.table {
+	.grid {
 		width: 100%;
-		border-collapse: collapse;
-		&,
-		td {
-			border: 1px solid var(--bg-color-lighter-3);
+		.header {
 		}
+		.cell {
+			padding: 1px;
+			&.amount {
+				display: flex;
+				width: 100%;
+				--RIGHT_OFFSET: 10px;
+				.symbol,
+				.left_parenthesis,
+				.right_parenthesis,
+				.number {
+					display: inline;
+				}
 
-		td {
-			padding: 3px 5px;
-		}
-
-		tr {
-			width: 100%;
-
-			.changed {
+				.left_parenthesis {
+					margin: 0 5px;
+				}
+				.right_parenthesis {
+					width: var(--RIGHT_OFFSET);
+					text-align: end;
+				}
+				.number {
+					margin-left: auto;
+					overflow: hidden;
+				}
+				&:not(.negative) .number {
+					margin-right: var(--RIGHT_OFFSET);
+				}
+			}
+			&.changed {
 				color: var(--font-color-changed);
 			}
 		}

@@ -1,14 +1,17 @@
 ## Unsolved
 
--   \*\* Get transaction data (db and changed) into dashboard component for other items
+### Needed before beta
 
+-   Set up SimpleValues options for:
+    time period (past two weeks, since last item in category (e.x. income), this month)
 -   Switch preferred column widths to localStorage instead of DB
+-   GridNav not working when a row is folded- add a check for disabled inputs
+
+### Can wait
+
 -   Switch "create new transaction" button to add row to grid
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
     This will require some sortOrder magic and querying when saving.
-
--   Make pop-out scrollbar not appear when not needed: https://i.imgur.com/sAXGkIZ.gif
--   GridNav not working when a row is folded- add a check for disabled inputs
 
 #
 
@@ -24,6 +27,8 @@
 
 ## Solved
 
+-   Make pop-out scrollbar not appear when not needed: https://i.imgur.com/sAXGkIZ.gif
+-   Get transaction data (db and changed) into dashboard component for other items
 -   Make TransactionManager card resizable, where the grid always takes up 100%.
 -   Disable grid while saving
 -   Allow enter/arrow navigation in grid

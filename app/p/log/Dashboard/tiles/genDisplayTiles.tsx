@@ -59,6 +59,11 @@ export function genDisplayTiles(
 				defaultPosLeft={tile.position.left}
 				defaultPosTop={tile.position.top}
 				{...tileDefaults}
+				onEditButtonClick={
+					tileDefaults.onEditButtonClick !== undefined
+						? () => tileDefaults.onEditButtonClick!(tile)
+						: undefined
+				}
 				key={index}
 				resizable
 			>

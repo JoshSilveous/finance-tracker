@@ -1,7 +1,8 @@
 import { MutableRefObject, SetStateAction } from 'react'
 import { fetchPreferredColumnWidths } from '.'
-import { createPreferencesEntry, isStandardError, promptError } from '@/utils'
+import { isStandardError, promptError } from '@/utils'
 import { fetchCategoryData, FetchedCategory } from '@/database'
+import { createPreferencesEntry } from '@/database/supabase/newUserPropagation'
 
 export async function fetchAndLoadData(
 	setIsLoading: (value: SetStateAction<boolean>) => void,

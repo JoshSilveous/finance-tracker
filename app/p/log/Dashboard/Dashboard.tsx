@@ -82,6 +82,7 @@ export function Dashboard() {
 				height: 690,
 			},
 			zIndex: 1,
+			options: null,
 		},
 		{
 			type: 'simple_values',
