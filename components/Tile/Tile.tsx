@@ -4,7 +4,7 @@ import { default as ResizeHandle } from '@/public/resize_handle.svg'
 import { default as RepositionHandle } from '@/public/reposition_handle.svg'
 import { default as EditIcon } from '@/public/edit_icon.svg'
 
-interface TileProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onResize'> {
+export interface TileProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onResize'> {
 	children: ReactNode
 	resizable?: boolean
 	onResize?: (width: number, height: number) => void

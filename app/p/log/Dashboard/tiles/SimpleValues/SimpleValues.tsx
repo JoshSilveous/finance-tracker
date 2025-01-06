@@ -1,4 +1,5 @@
 import { Data } from '../../hooks'
+import { TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
 import { addCommas } from '@/utils'
 export interface SimpleValuesProps {
@@ -9,6 +10,17 @@ export interface SimpleValuesProps {
 	showTitle: boolean
 }
 
+export const simpleValuesTileDefaults: TileDefaultSettings = {
+	minWidth: undefined,
+	minHeight: undefined,
+	maxWidth: undefined,
+	maxHeight: undefined,
+	showEditButton: true,
+	onEditButtonClick: () => {
+		console.log('edit button clicked!')
+	},
+}
+
 export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleValuesProps) {
 	const tableRows = (() => {
 		if (show === 'categories') {
@@ -16,7 +28,7 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 				...data.cur.categories,
 				{ id: '', name: { val: 'No Category', changed: false } },
 			]
-			return categories.map((cat) => {
+			return categories.map((cat, index) => {
 				let totalChanged = false
 				const catTotal = (() => {
 					let total = 0
@@ -37,7 +49,7 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 				})()
 
 				return (
-					<tr>
+					<tr key={index}>
 						<td className={`${s.name} ${cat.name.changed ? s.changed : ''}`}>
 							{cat.name.val}
 						</td>
@@ -57,7 +69,7 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 					amtBeforeCurrentTransactions: 0,
 				},
 			]
-			return accounts.map((act) => {
+			return accounts.map((act, index) => {
 				let totalChanged = false
 				const actTotal = (() => {
 					let total = Number(act.starting_amount.val)
@@ -78,7 +90,7 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 				})()
 
 				return (
-					<tr>
+					<tr key={index}>
 						<td className={`${s.name} ${act.name.changed ? s.changed : ''}`}>
 							{act.name.val}
 						</td>

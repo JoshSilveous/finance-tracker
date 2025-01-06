@@ -10,6 +10,7 @@
 		"/utils/errors",
 		"/utils/useBgLoad",
 		"/utils/createPopup",
-		"/app/p/log/Dashboard/hooks"
+		"/app/p/log/Dashboard/hooks",
+		"/app/p/log/Dashboard/tiles"
 	]
 }

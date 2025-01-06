@@ -1,12 +1,10 @@
 'use client'
-import { Tile } from '@/components/Tile/Tile'
 import s from './Dashboard.module.scss'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Data } from './hooks/useData/useData'
 import { useFoldState, useSortOrder, useHistory, useData } from './hooks'
 import { getScrollbarWidth } from '@/utils'
 import { JButton } from '@/components/JForm'
-import { genDisplayTiles, TileData } from './func/tiles'
+import { genDisplayTiles, TileData } from './tiles'
 
 export function Dashboard() {
 	const GRID_SPACING = 30
@@ -89,12 +87,12 @@ export function Dashboard() {
 		{
 			type: 'simple_values',
 			position: {
-				top: 30,
-				left: 300,
+				top: 300,
+				left: 1050,
 			},
 			size: {
-				width: 400,
-				height: 600,
+				width: 330,
+				height: 210,
 			},
 			zIndex: 2,
 			options: {
@@ -108,11 +106,11 @@ export function Dashboard() {
 			type: 'simple_values',
 			position: {
 				top: 30,
-				left: 300,
+				left: 1050,
 			},
 			size: {
-				width: 400,
-				height: 600,
+				width: 330,
+				height: 240,
 			},
 			zIndex: 3,
 			options: {

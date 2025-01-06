@@ -1,55 +1,13 @@
-import { SetStateAction } from 'react'
-import { Tile } from '@/components/Tile/Tile'
-import { SimpleValues, TransactionManager } from '../tiles'
-import { Data, FoldStateController, SortOrder, HistoryController } from '../hooks'
+import Tile from '@/components/Tile/Tile'
 import s from '../Dashboard.module.scss'
-
-interface TileDataBase {
-	position: {
-		top: number
-		left: number
-	}
-	size: {
-		width: number
-		height: number
-	}
-	zIndex: number
-}
-
-interface TransactionManagerTile extends TileDataBase {
-	type: 'transaction_manager'
-	options?: never
-}
-interface SimpleValuesTile extends TileDataBase {
-	type: 'simple_values'
-	options?: {
-		exclude: string[]
-		show: 'categories' | 'accounts'
-		title: string
-		showTitle: boolean
-	}
-}
-
-export type TileData = TransactionManagerTile | SimpleValuesTile
-
-const tileSettings = {
-	transaction_manager: {
-		minWidth: 740,
-		minHeight: 350,
-		maxWidth: 1200,
-		maxHeight: undefined,
-	},
-	simple_values: {
-		minWidth: undefined,
-		minHeight: undefined,
-		maxWidth: undefined,
-		maxHeight: undefined,
-		showEditButton: true,
-		onEditButtonClick: () => {
-			console.log('edit button clicked!')
-		},
-	},
-}
+import { SetStateAction } from 'react'
+import { Data, FoldStateController, SortOrder, HistoryController } from '../hooks'
+import { SimpleValues, simpleValuesTileDefaults } from './SimpleValues/SimpleValues'
+import {
+	TransactionManager,
+	transactionManagerTileDefaults,
+} from './TransactionManager/TransactionManager'
+import { TileData } from './types'
 
 export function genDisplayTiles(
 	tileData: TileData[],
@@ -84,6 +42,11 @@ export function genDisplayTiles(
 			})
 		}
 
+		const tileDefaults =
+			tile.type === 'simple_values'
+				? simpleValuesTileDefaults
+				: transactionManagerTileDefaults
+
 		return (
 			<Tile
 				className={s.transaction_manager_container}
@@ -95,7 +58,7 @@ export function genDisplayTiles(
 				defaultHeight={tile.size.height}
 				defaultPosLeft={tile.position.left}
 				defaultPosTop={tile.position.top}
-				{...tileSettings[tile.type]}
+				{...tileDefaults}
 				key={index}
 				resizable
 			>
@@ -106,6 +69,7 @@ export function genDisplayTiles(
 						sortOrder={sortOrder}
 						historyController={historyController}
 						setTransactionManagerRowRef={setTransactionManagerRowRef}
+						key={`tm-${index}`}
 					/>
 				)}
 				{tile.type === 'simple_values' && (
@@ -115,6 +79,7 @@ export function genDisplayTiles(
 						show={tile.options!.show}
 						showTitle={tile.options!.showTitle}
 						title={tile.options!.title}
+						key={`sv-${index}`}
 					/>
 				)}
 			</Tile>

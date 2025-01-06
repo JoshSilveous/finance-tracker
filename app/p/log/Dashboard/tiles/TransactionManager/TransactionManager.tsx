@@ -24,6 +24,14 @@ import {
 	HistoryController,
 	FoldState,
 } from '../../hooks'
+import { TileDefaultSettings } from '../types'
+
+export const transactionManagerTileDefaults: TileDefaultSettings = {
+	minWidth: 740,
+	minHeight: 350,
+	maxWidth: 1200,
+	maxHeight: undefined,
+}
 
 export interface TransactionManagerProps {
 	data: Data.Controller
