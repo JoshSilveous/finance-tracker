@@ -77,7 +77,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 		return loop.cleanup
 	}, [])
 
-	const handleApply = async () => {
+	const handleSave = async () => {
 		setTileData((prev) => {
 			const clone = structuredClone(prev)
 			const index = prev.findIndex((it) => it.id === tile.id)
@@ -199,8 +199,8 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 				<JButton jstyle='secondary' onClick={closePopup}>
 					Cancel
 				</JButton>
-				<JButton jstyle='primary' onClick={handleApply} ref={lastNodeRef}>
-					Apply
+				<JButton jstyle='primary' onClick={handleSave} ref={lastNodeRef}>
+					Save Changes
 				</JButton>
 			</div>
 		</div>

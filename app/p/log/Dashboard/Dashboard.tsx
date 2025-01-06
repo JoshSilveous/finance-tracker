@@ -2,12 +2,16 @@
 import s from './Dashboard.module.scss'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useFoldState, useSortOrder, useHistory, useData } from './hooks'
-import { getScrollbarWidth } from '@/utils'
+import { default as LoadingAnim } from '@/public/loading.svg'
+import { delay, getScrollbarWidth } from '@/utils'
 import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
+import { fetchTileData } from '@/database'
 
 export function Dashboard() {
+	const [isLoading, setIsLoading] = useState(true)
+	const [tileData, setTileData] = useState<TileData[]>([])
 	const data = useData({
 		onReload: (newData) => {
 			// re-generate sort order & foldState
@@ -16,8 +20,13 @@ export function Dashboard() {
 		},
 	})
 	useEffect(() => {
+		// guard only needed for development
 		if (!data.isPendingSave) {
-			data.reload()
+			Promise.all([data.reload(), fetchTileData()]).then(([dataRes, tileDataRes]) => {
+				console.log(dataRes, tileDataRes)
+				setTileData(tileDataRes)
+				setIsLoading(false)
+			})
 		}
 	}, [])
 
@@ -70,61 +79,6 @@ export function Dashboard() {
 		}
 	}, [])
 
-	const [tileData, setTileData] = useState<TileData[]>([
-		{
-			id: 'tasduih41',
-			type: 'transaction_manager',
-			position: {
-				top: 30,
-				left: 30,
-			},
-			size: {
-				width: 990,
-				height: 690,
-			},
-			zIndex: 1,
-			options: null,
-		},
-		{
-			id: 'imj432io',
-			type: 'simple_values',
-			position: {
-				top: 300,
-				left: 1050,
-			},
-			size: {
-				width: 330,
-				height: 210,
-			},
-			zIndex: 2,
-			options: {
-				exclude: [],
-				show: 'accounts',
-				title: 'Accounts',
-				showTitle: true,
-			},
-		},
-		{
-			id: '3u4i2h5',
-			type: 'simple_values',
-			position: {
-				top: 30,
-				left: 1050,
-			},
-			size: {
-				width: 330,
-				height: 240,
-			},
-			zIndex: 3,
-			options: {
-				exclude: [],
-				show: 'categories',
-				title: 'Categories',
-				showTitle: true,
-			},
-		},
-	])
-
 	useLayoutEffect(() => {
 		// re-calculate size needed for dashboard component
 
@@ -168,7 +122,10 @@ export function Dashboard() {
 	)
 
 	return (
-		<div className={s.main}>
+		<div className={`${s.main} ${isLoading ? s.loading : ''}`}>
+			<div className={s.loading_anim_container}>
+				<LoadingAnim />
+			</div>
 			<div className={s.tile_wrapper}>
 				<div className={s.tile_container} ref={tileContainerRef}>
 					{tiles}
@@ -188,7 +145,17 @@ export function Dashboard() {
 				>
 					Discard Changes
 				</JButton>
-				<JButton jstyle='primary' className={s.save} disabled={!data.isPendingSave}>
+				<JButton
+					jstyle='primary'
+					className={s.save}
+					disabled={!data.isPendingSave}
+					onClick={() => {
+						setIsLoading(true)
+						delay(4000).then(() => {
+							setIsLoading(false)
+						})
+					}}
+				>
 					Save Changes
 				</JButton>
 			</div>

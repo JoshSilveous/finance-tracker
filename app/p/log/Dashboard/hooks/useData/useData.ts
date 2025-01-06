@@ -396,7 +396,7 @@ export namespace Data {
 		stageCreate: Data.Create
 		isLoading: boolean
 		isPendingSave: boolean
-		reload: () => void
+		reload: () => Promise<void>
 		unstageDelete: Data.Delete
 		clearChanges: () => void
 	}
