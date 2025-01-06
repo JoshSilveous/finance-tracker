@@ -1,24 +1,32 @@
 import { SetStateAction, useEffect, useRef, useState } from 'react'
-import { SimpleValuesTile, TileData } from '../types'
-import s from './EditTilePopup.module.scss'
+import s from './NewSimpleValuesPopup.module.scss'
 import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { Data } from '../../hooks'
-import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
 import { createFocusLoop, delay } from '@/utils'
+import { SimpleValuesTile, TileData } from '../../tiles'
+import { GRID_SPACING } from '@/app/globals'
+import { simpleValuesTileDefaults } from '../../tiles/SimpleValues/SimpleValues'
 
-interface EditTilePopupProps {
-	tile: SimpleValuesTile
+interface NewSimpleValuesPopupProps {
 	setTileData: (value: SetStateAction<TileData[]>) => void
 	data: Data.Controller
 	closePopup: () => void
 }
-export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTilePopupProps) {
-	const [formData, setFormData] = useState(structuredClone(tile.options))
+export function NewSimpleValuesPopup({
+	setTileData,
+	data,
+	closePopup,
+}: NewSimpleValuesPopupProps) {
+	const [formData, setFormData] = useState<SimpleValuesTile['options']>({
+		exclude: [],
+		show: 'categories',
+		title: '',
+		showTitle: false,
+	})
 	const firstNodeRef = useRef<HTMLInputElement>(null)
 	const lastNodeRef = useRef<HTMLButtonElement>(null)
-	console.log('data:', data)
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const key = e.currentTarget.dataset.key
@@ -77,11 +85,25 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 		return loop.cleanup
 	}, [])
 
-	const handleSave = async () => {
+	const handleCreate = async () => {
 		setTileData((prev) => {
 			const clone = structuredClone(prev)
-			const index = prev.findIndex((it) => it.id === tile.id)
-			clone[index].options = structuredClone(formData)
+			clone.push(
+				structuredClone({
+					type: 'simple_values',
+					position: {
+						top: GRID_SPACING,
+						left: GRID_SPACING,
+					},
+					size: {
+						width: simpleValuesTileDefaults.minWidth!,
+						height: simpleValuesTileDefaults.minHeight!,
+					},
+					id: `PENDING_CREATION||${crypto.randomUUID()}`,
+					zIndex: clone.length,
+					options: structuredClone(formData),
+				})
+			)
 			return clone
 		})
 
@@ -90,7 +112,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 
 	return (
 		<div className={s.main}>
-			<h3>Edit "Simple Values" Tile</h3>
+			<h3>New "Simple Values" Tile</h3>
 			<div className={s.title_container}>
 				<div className={s.title}>
 					<label htmlFor='title'>Title:</label>
@@ -199,8 +221,8 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 				<JButton jstyle='secondary' onClick={closePopup}>
 					Cancel
 				</JButton>
-				<JButton jstyle='primary' onClick={handleSave} ref={lastNodeRef}>
-					Save Changes
+				<JButton jstyle='primary' onClick={handleCreate} ref={lastNodeRef}>
+					Create
 				</JButton>
 			</div>
 		</div>

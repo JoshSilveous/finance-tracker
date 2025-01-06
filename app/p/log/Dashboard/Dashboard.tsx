@@ -3,14 +3,16 @@ import s from './Dashboard.module.scss'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useFoldState, useSortOrder, useHistory, useData } from './hooks'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import { delay, getScrollbarWidth } from '@/utils'
+import { areDeeplyEqual, createPopup, delay, getScrollbarWidth } from '@/utils'
 import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
 import { fetchTileData } from '@/database'
+import { AddTilePopup } from './AddTilePopup/AddTilePopup'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
+	const origTileDataRef = useRef<TileData[]>([])
 	const [tileData, setTileData] = useState<TileData[]>([])
 	const data = useData({
 		onReload: (newData) => {
@@ -25,6 +27,7 @@ export function Dashboard() {
 			Promise.all([data.reload(), fetchTileData()]).then(([dataRes, tileDataRes]) => {
 				console.log(dataRes, tileDataRes)
 				setTileData(tileDataRes)
+				origTileDataRef.current = tileDataRes
 				setIsLoading(false)
 			})
 		}
@@ -121,6 +124,29 @@ export function Dashboard() {
 		setTransactionManagerRowRef
 	)
 
+	const handleNewTileClick = () => {
+		const popup = createPopup(
+			<AddTilePopup
+				closePopup={() => popup.close()}
+				data={data}
+				setTileData={setTileData}
+			/>
+		)
+		popup.trigger()
+	}
+
+	const changesArePending: boolean = (() => {
+		if (data.isPendingSave) {
+			// covers sortOrder changes and actual data changes
+			return true
+		}
+		// check differences in tiles
+		if (!areDeeplyEqual(tileData, origTileDataRef.current)) {
+			return true
+		}
+		return false
+	})()
+
 	return (
 		<div className={`${s.main} ${isLoading ? s.loading : ''}`}>
 			<div className={s.loading_anim_container}>
@@ -132,7 +158,7 @@ export function Dashboard() {
 				</div>
 			</div>
 			<div className={s.bottom_container}>
-				<JButton jstyle='secondary' className={s.new}>
+				<JButton jstyle='secondary' className={s.new} onClick={handleNewTileClick}>
 					Add New Tile
 				</JButton>
 				<JButton jstyle='secondary' className={s.reset} onClick={resetTilePositions}>
@@ -141,14 +167,15 @@ export function Dashboard() {
 				<JButton
 					jstyle='secondary'
 					className={s.discard}
-					disabled={!data.isPendingSave}
+					disabled={!changesArePending}
 				>
 					Discard Changes
 				</JButton>
 				<JButton
 					jstyle='primary'
 					className={s.save}
-					disabled={!data.isPendingSave}
+					disabled={!changesArePending}
+					loading={isLoading}
 					onClick={() => {
 						setIsLoading(true)
 						delay(4000).then(() => {
