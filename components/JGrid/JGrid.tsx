@@ -80,17 +80,6 @@ export function JGrid(p: JGridTypes.Props) {
 						// Calculate new width for the column
 						let newWidth = oldWidth + percentageDelta
 
-						// console.log(
-						// 	'\noldWidth',
-						// 	oldWidth,
-						// 	'\nnewWidth',
-						// 	newWidth,
-						// 	'\nminWidth',
-						// 	minColWidthsPcnt[index],
-						// 	'\nmaxWidth',
-						// 	maxColWidthsPcnt[index]
-						// )
-
 						if (
 							maxColWidthsPcnt[index] !== undefined &&
 							newWidth > maxColWidthsPcnt[index]
@@ -148,12 +137,6 @@ export function JGrid(p: JGridTypes.Props) {
 						newWidths[neighborIndex] -= percentageDelta
 
 						newWidths[index] = newWidth
-						// console.log(
-						// 	'old:',
-						// 	structuredClone(prevWidths),
-						// 	'new:',
-						// 	structuredClone(newWidths)
-						// )
 						return newWidths
 					})
 				} else {
@@ -335,7 +318,6 @@ export function JGrid(p: JGridTypes.Props) {
 							(sum, w, i) => (noResizeArr[i] ? sum : sum + w),
 							0
 						)
-						// console.log('calcing', width, totalResizablePercentage)
 						return `${width / totalResizablePercentage}fr`
 					}
 				})

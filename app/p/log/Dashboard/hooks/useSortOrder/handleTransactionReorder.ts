@@ -99,7 +99,6 @@ export const transactionReorderMouseEffect = (
 				node.classList.add(s.drop_shadow)
 			}
 		})
-		console.log('RAN')
 	}, 10)
 
 	let firstRun = true

@@ -1,6 +1,4 @@
 .main {
-	--GRID-SPACING: 30px; // also defined in @\components\Tile\Tile.tsx and Dashboard.tsx
-
 	height: 100%;
 	width: 100%;
 	overflow: hidden;
@@ -29,7 +27,7 @@
 					transparent 1px
 				),
 				linear-gradient(to bottom, var(--bg-color-lighter-1) 1px, transparent 1px);
-			background-size: var(--GRID-SPACING) var(--GRID-SPACING); /* Size of the grid cells */
+			background-size: var(--GRID_SPACING) var(--GRID_SPACING); /* Size of the grid cells */
 
 			--scrollbar-width: 17px; // this is a "default" value, which gets overridden once the component renders with the calculated scrollbar width (since this varies between browsers).
 			.transaction_manager_container {

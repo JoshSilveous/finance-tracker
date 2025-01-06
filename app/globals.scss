@@ -23,6 +23,11 @@ body {
 }
 
 /* END TEMPORARY FIX FOR FONT ISSUE ON WORK COMPUTER */
+
+/* GLOBAL VARIABLES (also defined in ./globals.ts) */
+body {
+	--GRID_SPACING: 30px;
+}
 body {
 	--bg-color: #171717;
 	--bg-color-lighter-1: #222222;

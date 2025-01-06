@@ -3,6 +3,8 @@ import s from './tile.module.scss'
 import { default as ResizeHandle } from '@/public/resize_handle.svg'
 import { default as RepositionHandle } from '@/public/reposition_handle.svg'
 import { default as EditIcon } from '@/public/edit_icon.svg'
+import { roundToMultiple } from '@/utils'
+import { GRID_SPACING } from '@/app/globals'
 
 export interface TileProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onResize'> {
 	children: ReactNode
@@ -40,7 +42,6 @@ export function Tile({
 	...rest
 }: TileProps) {
 	const wrapperRef = useRef<HTMLDivElement>(null)
-	const GRID_SPACING = 30 // also defined in @\app\p\log\Dashboard\Dashboard.module.scss
 
 	useLayoutEffect(() => {
 		// load default width/height
@@ -136,8 +137,6 @@ export function Tile({
 		window.addEventListener('mousemove', onMouseMove)
 		window.addEventListener('mouseup', onMouseUp)
 	}
-	const roundToMultiple = (num: number, multiple: number) =>
-		Math.round(num / multiple) * multiple
 
 	return (
 		<div

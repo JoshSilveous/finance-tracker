@@ -5,10 +5,9 @@ import { useFoldState, useSortOrder, useHistory, useData } from './hooks'
 import { getScrollbarWidth } from '@/utils'
 import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
+import { GRID_SPACING } from '@/app/globals'
 
 export function Dashboard() {
-	const GRID_SPACING = 30
-
 	const data = useData({
 		onReload: (newData) => {
 			// re-generate sort order & foldState
@@ -136,9 +135,8 @@ export function Dashboard() {
 			maxHeight = Math.max(maxHeight, top + height)
 		})
 
-		console.log(maxWidth, maxHeight)
-		tileContainerRef.current!.style.width = `calc(${maxWidth}px + (var(--GRID-SPACING) * 3))`
-		tileContainerRef.current!.style.height = `calc(${maxHeight}px + (var(--GRID-SPACING) * 3))`
+		tileContainerRef.current!.style.width = `calc(${maxWidth}px + (var(--GRID_SPACING) * 3))`
+		tileContainerRef.current!.style.height = `calc(${maxHeight}px + (var(--GRID_SPACING) * 3))`
 	}, [tileData])
 
 	const resetTilePositions = () => {
