@@ -237,7 +237,7 @@ export function TransactionManager({
 			groupedItem.transactions.forEach((transaction, transactionIndex) => {
 				if (transaction.items.length === 1) {
 					const sortPosChanged =
-						sortOrder.def[transaction.date.val].findIndex(
+						sortOrder.def[transaction.date.orig].findIndex(
 							(it) => it === transaction.id
 						) !== transactionIndex
 					const props: SingleRowProps = {
@@ -262,7 +262,7 @@ export function TransactionManager({
 					gridNavIndex++
 				} else {
 					const sortPosChanged =
-						sortOrder.def[transaction.date.val].findIndex(
+						sortOrder.def[transaction.date.orig].findIndex(
 							(it) => it[0] === transaction.id
 						) !== transactionIndex
 					const props: MultiRowProps = {

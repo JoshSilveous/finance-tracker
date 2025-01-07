@@ -51,23 +51,23 @@ export function useSortOrder({
 		// generate default sort order
 		const sortOrder: SortOrder.State = {}
 		transactions.forEach((transaction) => {
-			if (sortOrder[transaction.date.val] === undefined) {
+			if (sortOrder[transaction.date.orig] === undefined) {
 				if (transaction.items.length > 1) {
-					sortOrder[transaction.date.val] = [
+					sortOrder[transaction.date.orig] = [
 						[transaction.id, ...transaction.items.map((item) => item.id)],
 					]
 				} else {
-					sortOrder[transaction.date.val] = [transaction.id]
+					sortOrder[transaction.date.orig] = [transaction.id]
 				}
 			} else {
 				if (transaction.items.length > 1) {
-					sortOrder[transaction.date.val] = [
-						...sortOrder[transaction.date.val],
+					sortOrder[transaction.date.orig] = [
+						...sortOrder[transaction.date.orig],
 						[transaction.id, ...transaction.items.map((item) => item.id)],
 					]
 				} else {
-					sortOrder[transaction.date.val] = [
-						...sortOrder[transaction.date.val],
+					sortOrder[transaction.date.orig] = [
+						...sortOrder[transaction.date.orig],
 						transaction.id,
 					]
 				}
@@ -100,7 +100,7 @@ export function useSortOrder({
 		(transaction: Data.StateTransaction) => (e: KeyboardEvent) => {
 			if (!changesAreDisabled.current) {
 				const transactionIndex = curSortOrderRef.current![
-					transaction.date.val
+					transaction.date.orig
 				].findIndex((sortItem) =>
 					Array.isArray(sortItem)
 						? sortItem[0] === transaction.id
@@ -110,7 +110,7 @@ export function useSortOrder({
 				if (e.key === 'ArrowUp' && transactionIndex !== 0) {
 					e.preventDefault()
 					updateTransactionSortOrder(
-						transaction.date.val,
+						transaction.date.orig,
 						transactionIndex,
 						transactionIndex - 1
 					)
@@ -118,11 +118,11 @@ export function useSortOrder({
 				} else if (
 					e.key === 'ArrowDown' &&
 					transactionIndex !==
-						curSortOrderRef.current![transaction.date.val].length - 1
+						curSortOrderRef.current![transaction.date.orig].length - 1
 				) {
 					e.preventDefault()
 					updateTransactionSortOrder(
-						transaction.date.val,
+						transaction.date.orig,
 						transactionIndex,
 						transactionIndex + 1
 					)
@@ -136,7 +136,7 @@ export function useSortOrder({
 		(transaction: Data.StateTransaction) => (e: MouseEvent) => {
 			if (!changesAreDisabled.current) {
 				const transactionIndex = curSortOrderRef.current![
-					transaction.date.val
+					transaction.date.orig
 				].findIndex((sortItem) =>
 					Array.isArray(sortItem)
 						? sortItem[0] === transaction.id
@@ -148,13 +148,13 @@ export function useSortOrder({
 				return transactionReorderMouseEffect(
 					transaction,
 					transactionIndex,
-					curSortOrderRef.current![transaction.date.val],
+					curSortOrderRef.current![transaction.date.orig],
 					transactionManagerRowsRef,
 					folded,
 					updateFoldState,
 					e,
 					(oldIndex, newIndex) => {
-						updateTransactionSortOrder(transaction.date.val, oldIndex, newIndex)
+						updateTransactionSortOrder(transaction.date.orig, oldIndex, newIndex)
 						// setTransactionToFocusOn(transaction.id)
 						transactionToFocusOnRef.current = transaction.id
 					}
@@ -239,7 +239,7 @@ export function useSortOrder({
 				if (!changesAreDisabled.current) {
 					if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
 						const transactionIndex = curSortOrderRef.current![
-							transaction.date.val
+							transaction.date.orig
 						].findIndex(
 							(sortItem) =>
 								Array.isArray(sortItem) && sortItem[0] === transaction.id
@@ -247,7 +247,7 @@ export function useSortOrder({
 
 						const itemIndex =
 							(
-								curSortOrderRef.current![transaction.date.val][
+								curSortOrderRef.current![transaction.date.orig][
 									transactionIndex
 								] as string[]
 							).findIndex((sortItem) => sortItem === item.id) - 1
@@ -268,7 +268,7 @@ export function useSortOrder({
 							e.key === 'ArrowDown' &&
 							itemIndex !==
 								(
-									curSortOrderRef.current![transaction.date.val][
+									curSortOrderRef.current![transaction.date.orig][
 										transactionIndex
 									] as string[]
 								).length -
@@ -300,14 +300,14 @@ export function useSortOrder({
 			(e: MouseEvent) => {
 				if (!changesAreDisabled.current) {
 					const transactionIndex = curSortOrderRef.current![
-						transaction.date.val
+						transaction.date.orig
 					].findIndex(
 						(sortItem) =>
 							Array.isArray(sortItem) && sortItem[0] === transaction.id
 					)
 
 					const itemIndex = (
-						curSortOrderRef.current![transaction.date.val][
+						curSortOrderRef.current![transaction.date.orig][
 							transactionIndex
 						] as string[]
 					).findIndex((sortItem) => sortItem === item.id)
@@ -374,7 +374,7 @@ export function useSortOrder({
 			setCurSortOrder((prev) => {
 				const clone = structuredClone(prev)
 
-				const thisTransactionOrder = clone[transaction.date.val][
+				const thisTransactionOrder = clone[transaction.date.orig][
 					transactionIndex
 				] as string[]
 

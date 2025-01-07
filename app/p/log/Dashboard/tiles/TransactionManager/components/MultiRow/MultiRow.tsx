@@ -225,7 +225,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 								'item',
 								p.transaction.id,
 								1,
-								p.transaction.date.val
+								p.transaction.date.orig
 							),
 
 						className: s.add_item,
@@ -240,7 +240,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			if (item.pendingCreation) {
 				return true
 			}
-			const defSort = p.sortOrder.def[p.transaction.date.val].find((it) =>
+			const defSort = p.sortOrder.def[p.transaction.date.orig].find((it) =>
 				Array.isArray(it) ? it[0] === p.transaction.id : it === p.transaction.id
 			)!
 			if (Array.isArray(defSort)) {
@@ -271,7 +271,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				'item',
 				p.transaction.id,
 				itemIndex + 2,
-				p.transaction.date.val
+				p.transaction.date.orig
 			)
 
 		return [

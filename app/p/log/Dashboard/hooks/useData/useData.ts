@@ -393,7 +393,7 @@ export function useData(p: UseDataOptions) {
 		const transactions: Data.StateTransaction[] = transactionsRaw.map((transaction) => ({
 			id: transaction.id,
 			name: { val: transaction.name, changed: false },
-			date: { val: transaction.date, changed: false },
+			date: { val: transaction.date, changed: false, orig: transaction.date },
 			pendingCreation: false,
 			pendingDeletion: false,
 			items: transaction.items.map((item) => ({
@@ -468,7 +468,7 @@ export namespace Data {
 	export type StateTransaction = {
 		id: string
 		name: { val: string; changed: boolean }
-		date: { val: string; changed: boolean }
+		date: { val: string; changed: boolean; orig: string }
 		items: {
 			id: string
 			name: { val: string; changed: boolean }
