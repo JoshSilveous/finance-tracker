@@ -149,6 +149,7 @@ export function useData(p: UseDataOptions) {
 					type: 'transaction_deletion',
 					transaction_id,
 				})
+				p.getHistoryController().clearRedo()
 			}
 		} else if (type === 'item') {
 			const [item_id, transaction_id, skipHistoryItem] = args as Data.DeleteItemArgs
@@ -203,6 +204,7 @@ export function useData(p: UseDataOptions) {
 					transaction_id,
 					item_id,
 				})
+				p.getHistoryController().clearRedo()
 			}
 		}
 	}
@@ -235,6 +237,7 @@ export function useData(p: UseDataOptions) {
 					type: 'transaction_deletion_reversed',
 					transaction_id,
 				})
+				p.getHistoryController().clearRedo()
 			}
 		} else if (type === 'item') {
 			const [item_id, transaction_id, skipHistoryItem] = args as Data.DeleteItemArgs
@@ -274,38 +277,40 @@ export function useData(p: UseDataOptions) {
 					transaction_id,
 					item_id,
 				})
+				p.getHistoryController().clearRedo()
 			}
 		}
 	}
 
 	const stageCreate: Data.Create = (type, ...args) => {
 		if (type === 'transaction') {
-			const [transaction] = args as Data.CreateTransactionArgs
-			if (transaction.items.length === 0) {
-				throw new Error('New transaction must have at least one item provided.')
-			}
-			setData((prev) => {
-				const clone = structuredClone(prev)
-
-				const newTransaction: Data.StateTransaction = {
-					id: 'PENDING_CREATION||' + crypto.randomUUID(),
-					name: { val: transaction.name, changed: true },
-					date: { val: transaction.date, changed: true },
-					items: transaction.items.map((item) => ({
-						id: 'PENDING_CREATION||' + crypto.randomUUID(),
-						name: { val: item.name, changed: true },
-						amount: { val: item.amount, changed: true },
-						category_id: { val: item.category_id, changed: true },
-						account_id: { val: item.account_id, changed: true },
-						pendingCreation: true,
-						pendingDeletion: false,
-					})),
-					pendingCreation: true,
-					pendingDeletion: false,
-				}
-				clone.transactions.push(newTransaction)
-				return clone
-			})
+			// NOT READY FOR INLINE TRANSACTION CREATION YET - will come in future update
+			// const [transaction] = args as Data.CreateTransactionArgs
+			// if (transaction.items.length === 0) {
+			// 	throw new Error('New transaction must have at least one item provided.')
+			// }
+			// setData((prev) => {
+			// 	const clone = structuredClone(prev)
+			// 	const newTransaction: Data.StateTransaction = {
+			// 		id: 'PENDING_CREATION||' + crypto.randomUUID(),
+			// 		name: { val: transaction.name, changed: true },
+			// 		date: { val: transaction.date, changed: true },
+			// 		items: transaction.items.map((item) => ({
+			// 			id: 'PENDING_CREATION||' + crypto.randomUUID(),
+			// 			name: { val: item.name, changed: true },
+			// 			amount: { val: item.amount, changed: true },
+			// 			category_id: { val: item.category_id, changed: true },
+			// 			account_id: { val: item.account_id, changed: true },
+			// 			pendingCreation: true,
+			// 			pendingDeletion: false,
+			// 		})),
+			// 		pendingCreation: true,
+			// 		pendingDeletion: false,
+			// 	}
+			// 	clone.transactions.push(newTransaction)
+			// 	return clone
+			// })
+			// p.getHistoryController().clearRedo()
 		} else if (type === 'item') {
 			const [transaction_id, itemInsertIndex, date, item] = args as Data.CreateItemArgs
 			const newItemID = 'PENDING_CREATION||' + crypto.randomUUID()
@@ -362,8 +367,16 @@ export function useData(p: UseDataOptions) {
 				itemInsertIndex,
 				firstItemID
 			)
+			p.getHistoryController().add({
+				type: 'item_deletion_reversed',
+				transaction_id,
+				item_id: newItemID,
+			})
+			p.getHistoryController().clearRedo()
 		}
 	}
+
+	// const unstageCreate: Data.Create
 
 	const reload = async () => {
 		if (isPendingSave) {

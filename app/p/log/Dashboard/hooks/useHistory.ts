@@ -118,6 +118,14 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						data.stageDelete('transaction', historyItem.transaction_id, true)
 						break
 					}
+					case 'item_creation': {
+						data.stageDelete(
+							'item',
+							historyItem.item_id,
+							historyItem.transaction_id,
+							true
+						)
+					}
 				}
 				const thisItem = historyStackRef.current.undoStack.pop()!
 				historyStackRef.current.redoStack.unshift(thisItem)
@@ -197,6 +205,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'item_deletion': {
+						console.log('?AAB')
 						data.stageDelete(
 							'item',
 							historyItem.item_id,
@@ -209,15 +218,16 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						data.stageDelete('transaction', historyItem.transaction_id, true)
 						break
 					}
-					case 'item_deletion_reversed': {
-						data.unstageDelete(
-							'item',
-							historyItem.item_id,
-							historyItem.transaction_id,
-							true
-						)
+					case 'item_deletion_reversed':
+						{
+							data.unstageDelete(
+								'item',
+								historyItem.item_id,
+								historyItem.transaction_id,
+								true
+							)
+						}
 						break
-					}
 					case 'transaction_deletion_reversed': {
 						data.unstageDelete('transaction', historyItem.transaction_id, true)
 						break
