@@ -9,6 +9,7 @@ import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
 import { fetchTileData, upsertTiles } from '@/database'
 import { AddTilePopup } from './AddTilePopup/AddTilePopup'
+import { saveChanges } from './func/saveChanges'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -153,11 +154,7 @@ export function Dashboard() {
 	})()
 
 	const handleSave = async () => {
-		// save tile changes
-		setIsLoading(true)
-		await upsertTiles(tileData)
-		await refreshAllData()
-		setIsLoading(false)
+		await saveChanges(data, tileData, refreshAllData, setIsLoading)
 	}
 
 	const handleDiscard = () => {
