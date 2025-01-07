@@ -91,16 +91,6 @@ export const transactionReorderMouseEffect = (
 		leftOffset += node.clientWidth
 	})
 
-	const classlistPatch = setInterval(() => {
-		// needed because react starting double-rendering multi-row components that get folded. this is the easiest way to make sure this class gets applied
-		thisRow.forEach((node, nodeIndex) => {
-			node.classList.add(s.popped_out)
-			if (nodeIndex === 0 || nodeIndex === thisRow.length - 2) {
-				node.classList.add(s.drop_shadow)
-			}
-		})
-	}, 10)
-
 	let firstRun = true
 	const marginSize = calculatedRowHeight + gapHeight
 	function putMarginGapOnRow(rowIndex: number | 'none') {
@@ -260,8 +250,6 @@ export const transactionReorderMouseEffect = (
 		} else {
 			scroll.stopDown()
 		}
-
-		clearInterval(classlistPatch)
 	}
 
 	function handleReorderMouseUp() {

@@ -27,8 +27,6 @@ export function sortTransactions(
 			}),
 		}
 	}) as GroupedTransaction[]
-	console.log('input:\n', transactions, sortOrder)
-	console.log('output:\n', res)
 	return res
 }
 /**

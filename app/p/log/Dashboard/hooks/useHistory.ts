@@ -205,7 +205,6 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'item_deletion': {
-						console.log('?AAB')
 						data.stageDelete(
 							'item',
 							historyItem.item_id,

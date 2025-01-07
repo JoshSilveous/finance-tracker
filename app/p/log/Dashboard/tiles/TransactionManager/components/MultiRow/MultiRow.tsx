@@ -258,7 +258,6 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					const thisItemRef = itemRowsRef.current!.find(
 						(it) => it.item_id === item.id
 					)!
-					console.log('handleDelete')
 					if (thisItemRef.undoDeleteDiv !== undefined) {
 						;(thisItemRef.undoDeleteDiv.children[0] as HTMLButtonElement).focus()
 					}

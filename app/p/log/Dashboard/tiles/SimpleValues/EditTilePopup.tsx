@@ -18,7 +18,6 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 	const [formData, setFormData] = useState(structuredClone(tile.options))
 	const firstNodeRef = useRef<HTMLInputElement>(null)
 	const lastNodeRef = useRef<HTMLButtonElement>(null)
-	console.log('data:', data)
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const key = e.currentTarget.dataset.key

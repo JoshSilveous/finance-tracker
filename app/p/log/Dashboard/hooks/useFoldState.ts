@@ -19,7 +19,6 @@ export function useFoldState() {
 	}
 
 	const updateFoldState: FoldStateUpdater = useCallback((transaction_id, folded) => {
-		console.log('updateFoldState called')
 		setFoldState((prev) => {
 			const newState = structuredClone(prev)
 			newState[transaction_id] =
