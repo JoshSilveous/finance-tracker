@@ -14,7 +14,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: opacity 0.2s ease;
+		transition: opacity 0.2s ease, filter 0.2s ease;
 		svg {
 			height: 100px;
 		}
@@ -22,9 +22,7 @@
 	&.loading {
 		.loading_anim_container {
 			opacity: 100%;
-		}
-		.tile_wrapper {
-			filter: blur(5px);
+			backdrop-filter: blur(5px);
 		}
 	}
 	&:not(.loading) {
@@ -32,9 +30,7 @@
 			opacity: 0%;
 			user-select: none;
 			pointer-events: none;
-		}
-		.tile_wrapper {
-			filter: blur(0px);
+			backdrop-filter: blur(0px);
 		}
 	}
 
@@ -43,7 +39,7 @@
 		width: 100%;
 		height: 100%;
 		overflow: auto;
-		transition: scrollbar-color 0.3s ease, filter 0.2s ease;
+		transition: scrollbar-color 0.3s ease;
 		scrollbar-color: transparent transparent;
 		&:hover {
 			scrollbar-color: var(--font-color) var(--bg-color-lighter-1);
