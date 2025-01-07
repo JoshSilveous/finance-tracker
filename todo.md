@@ -10,6 +10,7 @@
 
 ### Can wait
 
+-   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
 -   Switch "create new transaction" button to add row to grid
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
     This will require some sortOrder magic and querying when saving.

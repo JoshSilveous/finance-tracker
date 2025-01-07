@@ -401,6 +401,65 @@ export function useSortOrder({
 		[]
 	)
 
+	const addNewItem = (
+		transaction_id: string,
+		date: string,
+		item_id: string,
+		itemInsertIndex: number,
+		/**
+		 * Required if adding an item to a single transaction
+		 */
+		first_item_id?: string
+	) => {
+		setCurSortOrder((prev) => {
+			const clone = structuredClone(prev)
+
+			const transactionIndex = clone[date].findIndex((sortItem) =>
+				Array.isArray(sortItem)
+					? sortItem[0] === transaction_id
+					: sortItem === transaction_id
+			)
+
+			if (Array.isArray(clone[date][transactionIndex])) {
+				clone[date][transactionIndex].splice(itemInsertIndex, 0, item_id)
+			} else {
+				clone[date][transactionIndex] = [
+					clone[date][transactionIndex],
+					first_item_id!,
+					item_id,
+				]
+			}
+
+			return clone
+		})
+	}
+	const removeNewItem = (transaction_id: string, date: string, item_id: string) => {
+		setCurSortOrder((prev) => {
+			const clone = structuredClone(prev)
+			const transactionIndex = clone[date].findIndex((sortItem) =>
+				Array.isArray(sortItem)
+					? sortItem[0] === transaction_id
+					: sortItem === transaction_id
+			)
+			const itemIndex = (clone[date][transactionIndex] as string[]).findIndex(
+				(id) => id === item_id
+			)
+			;(clone[date][transactionIndex] as string[]).splice(itemIndex, 1)
+			return clone
+		})
+	}
+
+	// const addNewTransaction = (
+	// 	transaction_id: string,
+	// 	date: string,
+	// 	transactionIndex: number
+	// ) => {
+	// 	// not yet available
+	// }
+	// const removeNewTransaction = (transaction_id: string, date: string) => {
+	// 	// not yet available
+	// }
+
 	return {
 		setDefault: setDefSortOrder,
 		setCurrent: setCurSortOrder,
@@ -415,6 +474,8 @@ export function useSortOrder({
 			changesAreDisabled.current = false
 		},
 		genDefaultSortOrder,
+		addNewItem,
+		removeNewItem,
 	} as SortOrder.Controller
 }
 
@@ -495,6 +556,14 @@ export namespace SortOrder {
 		disableChanges: () => void
 		enableChanges: () => void
 		genDefaultSortOrder: (transactions: Data.StateTransaction[]) => void
+		addNewItem: (
+			transaction_id: string,
+			date: string,
+			item_id: string,
+			itemInsertIndex: number,
+			first_item_id?: string
+		) => void
+		removeNewItem: (transaction_id: string, date: string, item_id: string) => void
 	}
 
 	/**

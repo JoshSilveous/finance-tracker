@@ -21,6 +21,7 @@ export function Dashboard() {
 			sortOrder.genDefaultSortOrder(newData.transactions)
 		},
 		getSortOrderController: () => sortOrder,
+		getHistoryController: () => historyController,
 	})
 	useEffect(() => {
 		// guard only needed for development

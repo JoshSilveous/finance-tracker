@@ -5,14 +5,11 @@ export function genUniqueLists(p: MultiRowProps) {
 	const uniqueCategories = (() => {
 		const arr: string[] = []
 		Object.values(p.transaction.items).forEach((item) => {
-			if (item.category_id.val !== null) {
+			if (item.category_id.val !== '') {
 				const categoryName = p.dropdownOptions.category.find(
 					(cat) => cat.value === item.category_id.val
 				)!.name
-				if (
-					arr.findIndex((item) => item === categoryName) === -1 &&
-					categoryName !== ''
-				) {
+				if (arr.findIndex((item) => item === categoryName) === -1) {
 					arr.push(categoryName)
 				}
 			}
@@ -22,7 +19,7 @@ export function genUniqueLists(p: MultiRowProps) {
 	const uniqueAccounts = (() => {
 		const arr: string[] = []
 		Object.values(p.transaction.items).forEach((item) => {
-			if (item.account_id.val !== null) {
+			if (item.account_id.val !== '') {
 				const accountName = p.dropdownOptions.account.find(
 					(act) => act.value === item.account_id.val
 				)!.name

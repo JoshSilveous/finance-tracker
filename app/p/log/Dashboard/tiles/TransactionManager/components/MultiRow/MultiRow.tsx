@@ -253,14 +253,17 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		const handleDelete = () => {
 			p.data.stageDelete('item', item.id, p.transaction.id)
 
-			delay(10).then(() => {
-				const thisItemRef = itemRowsRef.current!.find(
-					(it) => it.item_id === item.id
-				)!
-				if (thisItemRef.undoDeleteDiv) {
-					;(thisItemRef.undoDeleteDiv.children[0] as HTMLButtonElement).focus()
-				}
-			})
+			if (!item.pendingCreation) {
+				delay(10).then(() => {
+					const thisItemRef = itemRowsRef.current!.find(
+						(it) => it.item_id === item.id
+					)!
+					console.log('handleDelete')
+					if (thisItemRef.undoDeleteDiv !== undefined) {
+						;(thisItemRef.undoDeleteDiv.children[0] as HTMLButtonElement).focus()
+					}
+				})
+			}
 		}
 
 		const handleAddItem = () =>

@@ -96,24 +96,26 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						data.unstageDelete(
 							'item',
 							historyItem.item_id,
-							historyItem.transaction_id
+							historyItem.transaction_id,
+							true
 						)
 						break
 					}
 					case 'transaction_deletion': {
-						data.unstageDelete('transaction', historyItem.transaction_id)
+						data.unstageDelete('transaction', historyItem.transaction_id, true)
 						break
 					}
 					case 'item_deletion_reversed': {
 						data.stageDelete(
 							'item',
 							historyItem.item_id,
-							historyItem.transaction_id
+							historyItem.transaction_id,
+							true
 						)
 						break
 					}
 					case 'transaction_deletion_reversed': {
-						data.stageDelete('transaction', historyItem.transaction_id)
+						data.stageDelete('transaction', historyItem.transaction_id, true)
 						break
 					}
 				}
@@ -198,24 +200,26 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						data.stageDelete(
 							'item',
 							historyItem.item_id,
-							historyItem.transaction_id
+							historyItem.transaction_id,
+							true
 						)
 						break
 					}
 					case 'transaction_deletion': {
-						data.stageDelete('transaction', historyItem.transaction_id)
+						data.stageDelete('transaction', historyItem.transaction_id, true)
 						break
 					}
 					case 'item_deletion_reversed': {
 						data.unstageDelete(
 							'item',
 							historyItem.item_id,
-							historyItem.transaction_id
+							historyItem.transaction_id,
+							true
 						)
 						break
 					}
 					case 'transaction_deletion_reversed': {
-						data.unstageDelete('transaction', historyItem.transaction_id)
+						data.unstageDelete('transaction', historyItem.transaction_id, true)
 						break
 					}
 				}
@@ -334,6 +338,15 @@ export type HistoryItem =
 	  }
 	| {
 			type: 'transaction_deletion_reversed'
+			transaction_id: string
+	  }
+	| {
+			type: 'item_creation'
+			transaction_id: string
+			item_id: string
+	  }
+	| {
+			type: 'transaction_creation'
 			transaction_id: string
 	  }
 

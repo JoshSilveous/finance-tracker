@@ -2,17 +2,23 @@ import { useEffect, useRef, useState } from 'react'
 import { fetchAccountData, fetchCategoryData, fetchTransactionData } from '@/database'
 import { areDeeplyEqual } from '@/utils'
 import { SortOrder } from '../useSortOrder'
+import { HistoryController } from '../useHistory'
 
 export type UseDataOptions = {
 	onReload?: (newData: Data.State) => void
 	getSortOrderController: () => SortOrder.Controller
+	getHistoryController: () => HistoryController
 }
-export function useData(p?: UseDataOptions) {
+export function useData(p: UseDataOptions) {
 	const [data, setData] = useState<Data.State>({
 		transactions: [],
 		categories: [],
 		accounts: [],
 	})
+	const dataRef = useRef(data)
+	useEffect(() => {
+		dataRef.current = data
+	}, [data])
 	const origDataRef = useRef<Data.State>({
 		transactions: [],
 		categories: [],
@@ -111,7 +117,7 @@ export function useData(p?: UseDataOptions) {
 
 	const stageDelete: Data.Delete = (type, ...args) => {
 		if (type === 'transaction') {
-			const [transaction_id] = args as Data.DeleteTransactionArgs
+			const [transaction_id, skipHistoryItem] = args as Data.DeleteTransactionArgs
 			setData((prev) => {
 				const clone = structuredClone(prev)
 				const transactionIndex = clone.transactions.findIndex(
@@ -121,7 +127,7 @@ export function useData(p?: UseDataOptions) {
 					console.error(
 						`Transaction "${transaction_id}" cannot be found in data.`,
 						'\ndata.transactions:',
-						structuredClone(data.transactions)
+						structuredClone(dataRef.current.transactions)
 					)
 					throw new Error(
 						`Transaction "${transaction_id}" cannot be found in data`
@@ -130,7 +136,7 @@ export function useData(p?: UseDataOptions) {
 				const transaction = clone.transactions[transactionIndex]
 				if (transaction.pendingCreation) {
 					// remove item from array
-					clone.transactions.slice(transactionIndex, 1)
+					clone.transactions.splice(transactionIndex, 1)
 				} else {
 					// stage delete
 					transaction.pendingDeletion = true
@@ -138,37 +144,46 @@ export function useData(p?: UseDataOptions) {
 
 				return clone
 			})
+			if (!skipHistoryItem && transaction_id.split('||')[0] !== 'PENDING_CREATION') {
+				p.getHistoryController().add({
+					type: 'transaction_deletion',
+					transaction_id,
+				})
+			}
 		} else if (type === 'item') {
-			const [item_id, transaction_id] = args as Data.DeleteItemArgs
+			const [item_id, transaction_id, skipHistoryItem] = args as Data.DeleteItemArgs
+			const transactionIndex = dataRef.current.transactions.findIndex(
+				(transaction) => transaction.id === transaction_id
+			)
+			if (transactionIndex === -1) {
+				console.error(
+					`Transaction "${transaction_id}" cannot be found in data.`,
+					'dataRef.current.transactions:',
+					structuredClone(dataRef.current.transactions)
+				)
+				throw new Error(`Transaction "${transaction_id}" cannot be found in data`)
+			}
+			const date = dataRef.current.transactions[transactionIndex].date.val
+			const itemIndex = dataRef.current.transactions[transactionIndex].items.findIndex(
+				(item) => item.id === item_id
+			)
+			if (itemIndex === -1) {
+				console.error(
+					`Item "${item_id}" cannot be found in data.`,
+					'This transaction:',
+					structuredClone(dataRef.current.transactions[transactionIndex])
+				)
+				throw new Error(`Item "${item_id}" cannot be found in data`)
+			}
+
 			setData((prev) => {
 				const clone = structuredClone(prev)
-				const transactionIndex = clone.transactions.findIndex(
-					(transaction) => transaction.id === transaction_id
-				)
-				if (transactionIndex === -1) {
-					console.error(
-						`Transaction "${transaction_id}" cannot be found in data.`,
-						'\ndata.transactions:',
-						structuredClone(data.transactions)
-					)
-					throw new Error(
-						`Transaction "${transaction_id}" cannot be found in data`
-					)
-				}
+
 				const transaction = clone.transactions[transactionIndex]
-				const itemIndex = transaction.items.findIndex((item) => item.id === item_id)
-				if (itemIndex === -1) {
-					console.error(
-						`Item "${item_id}" cannot be found in data.`,
-						'This transaction:',
-						structuredClone(transaction)
-					)
-					throw new Error(`Item "${item_id}" cannot be found in data`)
-				}
 				const item = transaction.items[itemIndex]
 				if (item.pendingCreation) {
 					// remove item from array
-					transaction.items.slice(itemIndex, 1)
+					transaction.items.splice(itemIndex, 1)
 				} else {
 					// stage delete
 					item.pendingDeletion = true
@@ -176,12 +191,25 @@ export function useData(p?: UseDataOptions) {
 
 				return clone
 			})
+			if (
+				dataRef.current.transactions[transactionIndex].items[itemIndex]
+					.pendingCreation === true
+			) {
+				p.getSortOrderController().removeNewItem(transaction_id, date, item_id)
+			}
+			if (!skipHistoryItem && item_id.split('||')[0] !== 'PENDING_CREATION') {
+				p.getHistoryController().add({
+					type: 'item_deletion',
+					transaction_id,
+					item_id,
+				})
+			}
 		}
 	}
 
 	const unstageDelete: Data.Delete = (type, ...args) => {
 		if (type === 'transaction') {
-			const [transaction_id] = args as Data.DeleteTransactionArgs
+			const [transaction_id, skipHistoryItem] = args as Data.DeleteTransactionArgs
 			setData((prev) => {
 				const clone = structuredClone(prev)
 				const transactionIndex = clone.transactions.findIndex(
@@ -202,8 +230,14 @@ export function useData(p?: UseDataOptions) {
 
 				return clone
 			})
+			if (!skipHistoryItem && transaction_id.split('||')[0] !== 'PENDING_CREATION') {
+				p.getHistoryController().add({
+					type: 'transaction_deletion_reversed',
+					transaction_id,
+				})
+			}
 		} else if (type === 'item') {
-			const [item_id, transaction_id] = args as Data.DeleteItemArgs
+			const [item_id, transaction_id, skipHistoryItem] = args as Data.DeleteItemArgs
 			setData((prev) => {
 				const clone = structuredClone(prev)
 				const transactionIndex = clone.transactions.findIndex(
@@ -234,6 +268,13 @@ export function useData(p?: UseDataOptions) {
 
 				return clone
 			})
+			if (!skipHistoryItem && item_id.split('||')[0] !== 'PENDING_CREATION') {
+				p.getHistoryController().add({
+					type: 'item_deletion_reversed',
+					transaction_id,
+					item_id,
+				})
+			}
 		}
 	}
 
@@ -314,28 +355,13 @@ export function useData(p?: UseDataOptions) {
 
 				return clone
 			})
-			p!.getSortOrderController().setCurrent((prev) => {
-				const clone = structuredClone(prev)
-
-				const transactionIndex = clone[date].findIndex((sortItem) =>
-					Array.isArray(sortItem)
-						? sortItem[0] === transaction_id
-						: sortItem === transaction_id
-				)
-
-				if (Array.isArray(clone[date][transactionIndex])) {
-					clone[date][transactionIndex].splice(itemInsertIndex, 0, newItemID)
-				} else {
-					clone[date][transactionIndex] = [
-						clone[date][transactionIndex],
-						firstItemID,
-						newItemID,
-					]
-				}
-				console.log('prev', structuredClone(prev), 'clone', structuredClone(clone))
-
-				return clone
-			})
+			p.getSortOrderController().addNewItem(
+				transaction_id,
+				date,
+				newItemID,
+				itemInsertIndex,
+				firstItemID
+			)
 		}
 	}
 
@@ -516,6 +542,10 @@ export namespace Data {
 		...args: T extends 'transaction' ? DeleteTransactionArgs : DeleteItemArgs
 	) => void
 
-	export type DeleteTransactionArgs = [transaction_id: string]
-	export type DeleteItemArgs = [item_id: string, transaction_id: string]
+	export type DeleteTransactionArgs = [transaction_id: string, skipHistoryItem?: boolean]
+	export type DeleteItemArgs = [
+		item_id: string,
+		transaction_id: string,
+		skipHistoryItem?: boolean
+	]
 }
