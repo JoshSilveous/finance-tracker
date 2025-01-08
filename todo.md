@@ -7,10 +7,10 @@
 -   Switch preferred column widths to localStorage instead of DB
 -   GridNav not working when a row is folded- add a check for disabled inputs
 -   Add save check for "Create New Transaction"
--   Save button should work on reorders alone
 
 ### Can wait
 
+-   Save button should work on reorders alone
 -   Set up all needed data/save methods
 -   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
 -   Switch "create new transaction" button to add row to grid

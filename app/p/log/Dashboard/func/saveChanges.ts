@@ -2,7 +2,6 @@ import {
 	deleteItems,
 	deleteTransactions,
 	getTransactionsCount,
-	insertItems,
 	UpsertItemEntry,
 	upsertTiles,
 	UpsertTransactionEntry,
@@ -11,6 +10,7 @@ import {
 import { Data, SortOrder } from '../hooks'
 import { TileData } from '../tiles'
 import { SetStateAction } from 'react'
+import { areDeeplyEqual } from '@/utils'
 
 export async function saveChanges(
 	data: Data.Controller,
@@ -19,7 +19,7 @@ export async function saveChanges(
 	refreshAllData: () => Promise<void>,
 	setIsLoading: (value: SetStateAction<boolean>) => void
 ) {
-	if (data.isPendingSave) {
+	if (data.isPendingSave || !areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
 		//	1. Filter transactions and items into separate arrays
 		const transactions = (() => {
 			return structuredClone(
@@ -134,7 +134,13 @@ export async function saveChanges(
 		Object.keys(curSortOrderAfterChanges).forEach((key) => {
 			curSortOrderAfterChanges[key].reverse()
 		})
+		const defSortOrder = (() => {
+			const clone = structuredClone(sortOrder.def)
+			Object.keys(clone).forEach((key) => clone[key].reverse())
+			return clone
+		})()
 
+		// apply order_position changes for transactions + items where needed
 		const orderPositionPromises: Promise<any>[] = []
 		transactions.forEach((transaction) => {
 			if (sortOrder.cur[transaction.date.val] !== undefined) {
@@ -147,7 +153,7 @@ export async function saveChanges(
 						: sortItem === transaction.id
 				)
 
-				const defOrderPosition = sortOrder.def[transaction.date.val].findIndex(
+				const defOrderPosition = defSortOrder[transaction.date.val].findIndex(
 					(sortItem) =>
 						Array.isArray(sortItem)
 							? sortItem[0] === transaction.id
@@ -185,7 +191,7 @@ export async function saveChanges(
 				? curTransactionSort.indexOf(item.id)
 				: 1
 
-			const defTransactionSort = sortOrder.def[item.parentTransaction.date.orig].find(
+			const defTransactionSort = defSortOrder[item.parentTransaction.date.orig].find(
 				(sortItem) =>
 					Array.isArray(sortItem)
 						? sortItem[0] === item.parentTransaction.id

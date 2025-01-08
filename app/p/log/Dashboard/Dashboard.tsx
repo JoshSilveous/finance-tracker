@@ -143,7 +143,11 @@ export function Dashboard() {
 
 	const changesArePending: boolean = (() => {
 		if (data.isPendingSave) {
-			// covers sortOrder changes and actual data changes
+			// covers actual data changes
+			return true
+		}
+		if (!areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
+			// covers sort order
 			return true
 		}
 		// check differences in tiles
