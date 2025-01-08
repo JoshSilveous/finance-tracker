@@ -39,6 +39,8 @@ export interface TransactionManagerProps {
 	foldState: FoldStateController
 	historyController: HistoryController
 	setTransactionManagerRowRef: (transaction_id: string) => (node: HTMLInputElement) => void
+	changesArePending: boolean
+	handleSave: () => Promise<void>
 }
 
 export function TransactionManager({
@@ -47,6 +49,8 @@ export function TransactionManager({
 	foldState,
 	historyController,
 	setTransactionManagerRowRef,
+	changesArePending,
+	handleSave,
 }: TransactionManagerProps) {
 	const mainContainerRef = useRef<HTMLDivElement>(null)
 	const prevFoldStateRef = useRef<FoldState>({})
@@ -214,6 +218,8 @@ export function TransactionManager({
 							key={`${groupedItem.date}-TODAY`}
 							tabIndexer={tabIndexer}
 							gridNavIndex={gridNavIndex}
+							changesArePending={changesArePending}
+							handleSave={handleSave}
 						/>
 					)
 					gridRow++
@@ -229,6 +235,8 @@ export function TransactionManager({
 					key={`${groupedItem.date}-${groupedItemIndex}`}
 					tabIndexer={tabIndexer}
 					gridNavIndex={gridNavIndex}
+					changesArePending={changesArePending}
+					handleSave={handleSave}
 				/>
 			)
 			gridRow++

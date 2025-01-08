@@ -328,4 +328,5 @@ export async function saveChanges(
 	await upsertTiles(tileData)
 	await refreshAllData()
 	setIsLoading(false)
+	return
 }

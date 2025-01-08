@@ -16,7 +16,11 @@ export function genDisplayTiles(
 	foldState: FoldStateController,
 	sortOrder: SortOrder.Controller,
 	historyController: HistoryController,
-	setTransactionManagerRowRef: (transaction_id: string) => (node: HTMLInputElement) => void
+	setTransactionManagerRowRef: (
+		transaction_id: string
+	) => (node: HTMLInputElement) => void,
+	changesArePending: boolean,
+	handleSave: () => Promise<void>
 ) {
 	return tileData.map((tile, index) => {
 		const onResize = (width: number, height: number) => {
@@ -79,6 +83,8 @@ export function genDisplayTiles(
 						historyController={historyController}
 						setTransactionManagerRowRef={setTransactionManagerRowRef}
 						key={`tm-${index}`}
+						changesArePending={changesArePending}
+						handleSave={handleSave}
 					/>
 				)}
 				{tile.type === 'simple_values' && (

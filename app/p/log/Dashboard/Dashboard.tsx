@@ -120,27 +120,6 @@ export function Dashboard() {
 		})
 	}
 
-	const tiles = genDisplayTiles(
-		tileData,
-		setTileData,
-		data,
-		foldState,
-		sortOrder,
-		historyController,
-		setTransactionManagerRowRef
-	)
-
-	const handleNewTileClick = () => {
-		const popup = createPopup(
-			<AddTilePopup
-				closePopup={() => popup.close()}
-				data={data}
-				setTileData={setTileData}
-			/>
-		)
-		popup.trigger()
-	}
-
 	const changesArePending: boolean = (() => {
 		if (data.isPendingSave) {
 			// covers actual data changes
@@ -159,6 +138,29 @@ export function Dashboard() {
 
 	const handleSave = async () => {
 		await saveChanges(data, tileData, sortOrder, refreshAllData, setIsLoading)
+	}
+
+	const tiles = genDisplayTiles(
+		tileData,
+		setTileData,
+		data,
+		foldState,
+		sortOrder,
+		historyController,
+		setTransactionManagerRowRef,
+		changesArePending,
+		handleSave
+	)
+
+	const handleNewTileClick = () => {
+		const popup = createPopup(
+			<AddTilePopup
+				closePopup={() => popup.close()}
+				data={data}
+				setTileData={setTileData}
+			/>
+		)
+		popup.trigger()
 	}
 
 	const handleDiscard = () => {

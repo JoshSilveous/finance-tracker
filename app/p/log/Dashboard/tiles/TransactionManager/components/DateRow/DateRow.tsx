@@ -14,6 +14,8 @@ interface DateRowProps {
 	gridRow: number
 	tabIndexer: TabIndexer
 	gridNavIndex: number
+	changesArePending: boolean
+	handleSave: () => Promise<void>
 }
 export function DateRow({
 	date,
@@ -22,8 +24,45 @@ export function DateRow({
 	gridRow,
 	tabIndexer,
 	gridNavIndex,
+	changesArePending,
+	handleSave,
 }: DateRowProps) {
 	const { day, year, month } = formatDate(date)
+
+	const handleNewTransactionClickWhilePendingSaves = () => {
+		// this is temporary, will be removed once inline transaction adding is ready
+		const popup = createPopup(
+			<div>
+				<p>
+					You'll have to save your changes before creating a new transaction (this
+					is temporary, and will soon be updated to support inline transaction
+					creation).
+				</p>
+				<p>Would you like to save your changes?</p>
+				<div style={{ display: 'flex', gap: '10px' }}>
+					<JButton
+						jstyle='secondary'
+						onClick={() => {
+							popup.close()
+						}}
+					>
+						Go Back
+					</JButton>
+					<JButton
+						jstyle='primary'
+						onClick={async () => {
+							await handleSave()
+							popup.close()
+							handleNewTransactionClick()
+						}}
+					>
+						Save
+					</JButton>
+				</div>
+			</div>
+		)
+		popup.trigger()
+	}
 
 	const handleNewTransactionClick = () => {
 		let refreshRequired = false
@@ -74,7 +113,11 @@ export function DateRow({
 				<div className={s.new_transaction_container}>
 					<JButton
 						jstyle='secondary'
-						onClick={handleNewTransactionClick}
+						onClick={
+							changesArePending
+								? handleNewTransactionClickWhilePendingSaves
+								: handleNewTransactionClick
+						}
 						tabIndex={tabIndexer()}
 						data-grid_nav_col='TM_account'
 						data-grid_nav_index={gridNavIndex}
