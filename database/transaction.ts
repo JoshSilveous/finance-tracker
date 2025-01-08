@@ -170,7 +170,6 @@ export async function upsertTransactionsAndItems(
 		console.error(transactionError)
 		throw new Error(transactionError.message)
 	}
-	console.log('db level', itemUpdatesWithUserID)
 
 	const { error: itemError } = await supabase
 		.from('transaction_items')

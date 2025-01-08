@@ -306,8 +306,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 								? -1
 								: p.tabIndexer()
 						}
-						data-grid_nav_col='TM_left_controls'
-						data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
+						data-grid_nav_col={p.folded ? undefined : 'TM_left_controls'}
+						data-grid_nav_index={
+							p.folded ? undefined : p.gridNavIndex + itemIndex + 1
+						}
 					>
 						<ReorderIcon />
 					</JButton>
@@ -349,8 +351,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: p.tabIndexer()
 					}
 					{...eventHandlers}
-					data-grid_nav_col='TM_name'
-					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
+					data-grid_nav_col={p.folded ? undefined : 'TM_name'}
+					data-grid_nav_index={
+						p.folded ? undefined : p.gridNavIndex + itemIndex + 1
+					}
 				/>
 			</div>,
 			<div
@@ -372,8 +376,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: p.tabIndexer()
 					}
 					{...eventHandlers}
-					data-grid_nav_col='TM_amount'
-					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
+					data-grid_nav_col={p.folded ? undefined : 'TM_amount'}
+					data-grid_nav_index={
+						p.folded ? undefined : p.gridNavIndex + itemIndex + 1
+					}
 				/>
 			</div>,
 			<div
@@ -396,8 +402,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: p.tabIndexer()
 					}
 					{...eventHandlers}
-					data-grid_nav_col='TM_category'
-					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
+					data-grid_nav_col={p.folded ? undefined : 'TM_category'}
+					data-grid_nav_index={
+						p.folded ? undefined : p.gridNavIndex + itemIndex + 1
+					}
 				/>
 			</div>,
 			<div
@@ -420,8 +428,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 							: p.tabIndexer()
 					}
 					{...eventHandlers}
-					data-grid_nav_col='TM_account'
-					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
+					data-grid_nav_col={p.folded ? undefined : 'TM_account'}
+					data-grid_nav_index={
+						p.folded ? undefined : p.gridNavIndex + itemIndex + 1
+					}
 				/>
 			</div>,
 			<div
@@ -439,8 +449,10 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					test_transaction_id={p.transaction.name.val}
 					className={s.more_controls}
 					tabIndex={item.pendingDeletion ? undefined : p.tabIndexer()}
-					data-grid_nav_col='TM_right_controls'
-					data-grid_nav_index={p.gridNavIndex + itemIndex + 1}
+					data-grid_nav_col={p.folded ? undefined : 'TM_right_controls'}
+					data-grid_nav_index={
+						p.folded ? undefined : p.gridNavIndex + itemIndex + 1
+					}
 					options={[
 						{
 							text: 'Delete',

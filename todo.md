@@ -4,10 +4,10 @@
 
 -   Set up SimpleValues options for:
     time period (past two weeks, since last item in category (e.x. income), this month)
--   GridNav not working when a row is folded- add a check for disabled inputs
 
 ### Can wait
 
+-   GridNav not working when a row is folded- add a check for disabled inputs
 -   Add save check for "Create New Transaction"
 -   Save button should work on reorders alone
 -   Set up all needed data/save methods
