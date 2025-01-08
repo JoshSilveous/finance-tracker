@@ -8,6 +8,7 @@ import {
 	IsolatedKeyListener,
 	removeIsolatedKeyListeners,
 	setKeyListenerContext,
+	setNumPref,
 } from '@/utils'
 import { FetchedTransaction } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
@@ -124,31 +125,6 @@ export function TransactionManager({
 
 	const tabIndexer = useTabIndexer(0)
 
-	const handleCreateTransaction = () => {
-		// let refreshRequired = false
-		// const setRefreshRequired = () => {
-		// 	refreshRequired = true
-		// }
-		// const afterPopupClosed = () => {
-		// 	if (refreshRequired) {
-		// 		refreshData()
-		// 	}
-		// }
-		// const popup = createPopup(
-		// 	<NewTransactionForm
-		// 		dropdownOptions={dropdownOptions}
-		// 		forceClosePopup={() => {
-		// 			popup.close()
-		// 			afterPopupClosed()
-		// 		}}
-		// 		setRefreshRequired={setRefreshRequired}
-		// 	/>,
-		// 	'normal',
-		// 	afterPopupClosed
-		// )
-		// popup.trigger()
-	}
-
 	useEffect(() => {
 		/**
 		 * `prevFoldStateRef` is used to reference the previous render's fold state during
@@ -161,11 +137,6 @@ export function TransactionManager({
 	const isChangedRef = useRef<boolean>(false)
 	isChangedRef.current =
 		data.isPendingSave || !areDeeplyEqual(sortOrder.cur, sortOrder.def)
-
-	const handleDiscardChanges = () => {
-		data.clearChanges()
-		historyController.clear()
-	}
 
 	const dropdownOptions: DropdownOptions = {
 		category: (() => {
@@ -194,7 +165,7 @@ export function TransactionManager({
 		return sortTransactions(sortOrder.cur, data.cur.transactions)
 	}, [data.cur.transactions, sortOrder.cur])
 
-	const headers: JGridTypes.Header[] = genHeaders(historyController)
+	const headers: JGridTypes.Header[] = useMemo(() => genHeaders(historyController), [])
 
 	let grid: ReactNode
 
@@ -308,12 +279,43 @@ export function TransactionManager({
 		})
 		gridNav.setEndIndex(gridNavIndex)
 		const gridConfig: JGridTypes.Props = {
-			headers: headers,
+			headers: (() => {
+				console.log(
+					'providing to JGrid:',
+					headers.map((header) => header.defaultWidth)
+				)
+				return headers
+			})(),
 			cells: cells,
 			noBorders: true,
 			maxTableWidth: 1000,
 			stickyHeaders: true,
 			useFullWidth: true,
+			onResize: (e) => {
+				const newWidth = Math.round(e.newWidth)
+				switch (e.columnIndex) {
+					case 1: {
+						setNumPref('TransactionManager_Date_Col', newWidth)
+						break
+					}
+					case 2: {
+						setNumPref('TransactionManager_Name_Col', newWidth)
+						break
+					}
+					case 3: {
+						setNumPref('TransactionManager_Amount_Col', newWidth)
+						break
+					}
+					case 4: {
+						setNumPref('TransactionManager_Category_Col', newWidth)
+						break
+					}
+					case 5: {
+						setNumPref('TransactionManager_Account_Col', newWidth)
+						break
+					}
+				}
+			},
 		}
 		grid = <JGrid className={s.grid} {...gridConfig} />
 	}

@@ -32,10 +32,10 @@ export function DateRow({
 	const handleNewTransactionClickWhilePendingSaves = () => {
 		// this is temporary, will be removed once inline transaction adding is ready
 		const popup = createPopup(
-			<div>
+			<div style={{ maxWidth: '300px' }}>
 				<p>
 					You'll have to save your changes before creating a new transaction (this
-					is temporary, and will soon be updated to support inline transaction
+					is temporary, this will soon be updated to support inline transaction
 					creation).
 				</p>
 				<p>Would you like to save your changes?</p>

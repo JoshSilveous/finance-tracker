@@ -4,7 +4,6 @@
 
 -   Set up SimpleValues options for:
     time period (past two weeks, since last item in category (e.x. income), this month)
--   Switch preferred column widths to localStorage instead of DB
 -   GridNav not working when a row is folded- add a check for disabled inputs
 
 ### Can wait
@@ -16,6 +15,9 @@
 -   Switch "create new transaction" button to add row to grid
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
     This will require some sortOrder magic and querying when saving.
+-   Clean up JGrid system to support percentages better
+-   Add better category/account management systems
+-   Switch preferred column widths to localStorage instead of DB
 
 #
 

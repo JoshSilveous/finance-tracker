@@ -3,6 +3,7 @@ import { default as UndoRedoIcon } from '@/public/undo_redo.svg'
 import { HistoryController } from '../../../hooks'
 import s from '../TransactionManager.module.scss'
 import { JGridTypes } from '@/components/JGrid/JGrid'
+import { getNumPref } from '@/utils'
 
 export function genHeaders(historyController: HistoryController) {
 	const undoTitle = 'Undo most recent change.\nShortcut: CTRL + Z'
@@ -40,7 +41,7 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Date</div>
 				</div>
 			),
-			defaultWidth: 140,
+			defaultWidth: getNumPref('TransactionManager_Date_Col', 140),
 			minWidth: 105,
 			maxWidth: 150,
 		},
@@ -50,7 +51,7 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Name</div>
 				</div>
 			),
-			defaultWidth: 260,
+			defaultWidth: getNumPref('TransactionManager_Name_Col', 260),
 			minWidth: 160,
 			maxWidth: 300,
 		},
@@ -60,7 +61,7 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Amount</div>
 				</div>
 			),
-			defaultWidth: 140,
+			defaultWidth: getNumPref('TransactionManager_Amount_Col', 140),
 			minWidth: 95,
 			maxWidth: 160,
 		},
@@ -70,7 +71,7 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Category</div>
 				</div>
 			),
-			defaultWidth: 170,
+			defaultWidth: getNumPref('TransactionManager_Category_Col', 170),
 			minWidth: 110,
 			maxWidth: 200,
 		},
@@ -80,7 +81,7 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Account</div>
 				</div>
 			),
-			defaultWidth: 170,
+			defaultWidth: getNumPref('TransactionManager_Account_Col', 170),
 			minWidth: 110,
 			maxWidth: 200,
 		},
@@ -94,5 +95,11 @@ export function genHeaders(historyController: HistoryController) {
 			noResize: true,
 		},
 	]
+	console.log(
+		'headers:',
+		headers,
+		'clone:',
+		structuredClone(headers.map((val) => val.defaultWidth))
+	)
 	return headers
 }

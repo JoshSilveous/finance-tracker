@@ -7,6 +7,8 @@ export function JGrid(p: JGridTypes.Props) {
 	const defaultWidthsPx = p.headers.map((header) => header.defaultWidth)
 	const totalWidthInPx = defaultWidthsPx.reduce((sum, num) => sum + num, 0)
 
+	console.log('generating JGrid with defaultWidthsPx:', defaultWidthsPx)
+
 	const noResizeArr = p.headers.map((header) => header.noResize)
 
 	const defaultWidthsPcnt = calculatePercentages(defaultWidthsPx, totalWidthInPx)
@@ -220,9 +222,21 @@ export function JGrid(p: JGridTypes.Props) {
 
 			function endResize() {
 				if (p.onResize !== undefined) {
+					const colWidthSum = columnWidthsRef.current.reduce(
+						(acc, curr) => acc + curr,
+						0
+					)
 					columnWidthsRef.current.forEach((colWidth, index) => {
 						if (colWidth !== prevColWidths[index]) {
-							p.onResize!({ columnIndex: index, newWidth: colWidth })
+							const difPercent =
+								colWidth / colWidthSum - prevColWidths[index] / colWidthSum
+
+							p.onResize!({
+								columnIndex: index,
+								newWidth:
+									defaultWidthsPx[index] +
+									defaultWidthsPx[index] * difPercent,
+							})
 						}
 					})
 				}
