@@ -24,6 +24,15 @@ export interface SimpleValuesTile extends TileDataBase {
 		show: 'categories' | 'accounts'
 		title: string
 		showTitle: boolean
+		showDataFor:
+			| 'all_time'
+			| 'per_week'
+			| 'per_two_weeks'
+			| 'per_month'
+			| 'past_week'
+			| 'past_two_weeks'
+			| 'past_month'
+		customDay: string
 	}
 }
 

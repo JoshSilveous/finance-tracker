@@ -16,21 +16,9 @@ interface EditTilePopupProps {
 	closePopup: () => void
 }
 export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTilePopupProps) {
-	interface Temp {
-		exclude: string[]
-		show: 'categories' | 'accounts'
-		title: string
-		showTitle: boolean
-		showDataFor: 'all_time' | 'per_week' | 'per_two_weeks' | 'per_month'
-		startingOn: 'today' | 'custom_day'
-		customDay: string
-	}
-	const [formData, setFormData] = useState<Temp>({
-		...structuredClone(tile.options),
-		showDataFor: 'all_time',
-		startingOn: 'today',
-		customDay: getDateString(),
-	})
+	const [formData, setFormData] = useState<SimpleValuesTile['options']>(
+		structuredClone(tile.options)
+	)
 	const firstNodeRef = useRef<HTMLInputElement>(null)
 	const lastNodeRef = useRef<HTMLButtonElement>(null)
 
@@ -85,16 +73,8 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 				const value = e.target.value
 				setFormData((prev) => {
 					const clone = structuredClone(prev)
-					clone.showDataFor = value as Temp['showDataFor']
-					return clone
-				})
-				break
-			}
-			case 'startingOn': {
-				const value = e.target.value
-				setFormData((prev) => {
-					const clone = structuredClone(prev)
-					clone.startingOn = value as Temp['startingOn']
+					clone.showDataFor = value as SimpleValuesTile['options']['showDataFor']
+					clone.customDay = getDateString()
 					return clone
 				})
 				break
@@ -127,15 +107,150 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 			clone[index].options = structuredClone(formData)
 			return clone
 		})
-
 		closePopup()
 	}
-	const showDataForOptions: JDropdownTypes.Option[] = [
-		{ name: 'For all time', value: 'all_time' },
-		{ name: 'Per week', value: 'per_week' },
-		{ name: 'Per two weeks', value: 'per_two_weeks' },
-		{ name: 'Per month', value: 'per_month' },
-	]
+
+	const ShowDataSection = (() => {
+		const showDataForOptions: JDropdownTypes.Option[] = [
+			{ name: 'For all time', value: 'all_time' },
+			{ name: 'Per week', value: 'per_week' },
+			{ name: 'Per two weeks', value: 'per_two_weeks' },
+			{ name: 'Per month', value: 'per_month' },
+			{ name: 'Past week (7 days)', value: 'past_week' },
+			{ name: 'Past two weeks (14 days)', value: 'past_two_weeks' },
+			{ name: 'Past month (31 days)', value: 'past_month' },
+		]
+
+		const PerWeekSelector = (() => {
+			const datesOfThisWeek = (() => {
+				const today = new Date()
+				const dayOfWeek = today.getDay()
+
+				const startOfWeek = new Date(today)
+				startOfWeek.setDate(today.getDate() - dayOfWeek)
+
+				const datesOfWeek: string[] = []
+				for (let i = 0; i < 7; i++) {
+					const date = new Date(startOfWeek)
+					date.setDate(startOfWeek.getDate() + i)
+
+					// Format the date as YYYY-MM-DD
+					const formattedDate = date.toISOString().split('T')[0]
+					datesOfWeek.push(formattedDate)
+				}
+
+				return datesOfWeek
+			})()
+
+			const dayOfWeekOptions = [
+				{ name: 'Sunday', value: datesOfThisWeek[1] },
+				{ name: 'Monday', value: datesOfThisWeek[2] },
+				{ name: 'Tuesday', value: datesOfThisWeek[3] },
+				{
+					name: 'Wednesday',
+					value: datesOfThisWeek[4],
+				},
+				{
+					name: 'Thursday',
+					value: datesOfThisWeek[5],
+				},
+				{ name: 'Friday', value: datesOfThisWeek[6] },
+				{
+					name: 'Saturday',
+					value: datesOfThisWeek[7],
+				},
+			]
+
+			return (
+				<JDropdown
+					options={dayOfWeekOptions}
+					value={formData.customDay}
+					data-key='customDay'
+					id='perSelector'
+					onChange={handleChange}
+				/>
+			)
+		})()
+
+		const PerTwoWeeksSelector = (() => {
+			const pastTwoWeeksOptions = (() => {
+				const today = new Date()
+				const dayOfWeek = today.getDay()
+
+				const startOfCurrentWeek = new Date(today)
+				startOfCurrentWeek.setDate(today.getDate() - dayOfWeek)
+
+				const startOfPreviousWeek = new Date(startOfCurrentWeek)
+				startOfPreviousWeek.setDate(startOfCurrentWeek.getDate() - 7)
+
+				const datesOfCurrentWeek: JDropdownTypes.Option[] = []
+				const datesOfPreviousWeek: JDropdownTypes.Option[] = []
+
+				const genNameFormat = (date: Date): string => {
+					const options: Intl.DateTimeFormatOptions = {
+						weekday: 'short',
+						month: 'short',
+						day: 'numeric',
+					}
+					return date.toLocaleDateString('en-US', options)
+				}
+
+				for (let i = 0; i < 7; i++) {
+					const thisWeekDate = new Date(startOfCurrentWeek)
+					thisWeekDate.setDate(startOfCurrentWeek.getDate() + i)
+					const thisWeekFormattedValue = thisWeekDate.toISOString().split('T')[0]
+
+					datesOfCurrentWeek.push({
+						value: thisWeekFormattedValue,
+						name: genNameFormat(thisWeekDate),
+					})
+
+					const lastWeekDate = new Date(startOfPreviousWeek)
+					lastWeekDate.setDate(startOfPreviousWeek.getDate() + i)
+					const lastWeekFormattedValue = lastWeekDate.toISOString().split('T')[0]
+					datesOfPreviousWeek.push({
+						value: lastWeekFormattedValue,
+						name: genNameFormat(lastWeekDate),
+					})
+				}
+
+				return [...datesOfPreviousWeek, ...datesOfCurrentWeek]
+			})()
+
+			return (
+				<JDropdown
+					id='perSelector'
+					options={pastTwoWeeksOptions}
+					data-key='customDay'
+					value={formData.customDay}
+					onChange={handleChange}
+				/>
+			)
+		})()
+
+		return (
+			<div className={s.show_data_container}>
+				<div>
+					<label htmlFor='showDataFor'>Show data...</label>
+					<JDropdown
+						id='showDataFor'
+						options={showDataForOptions}
+						value={formData.showDataFor}
+						data-key='showDataFor'
+						onChange={handleChange}
+					/>
+				</div>
+				{(formData.showDataFor === 'per_week' ||
+					formData.showDataFor === 'per_two_weeks') && (
+					<div>
+						<label htmlFor='perSelector'>Starting On...</label>
+						{formData.showDataFor === 'per_week' && PerWeekSelector}
+						{formData.showDataFor === 'per_two_weeks' && PerTwoWeeksSelector}
+					</div>
+				)}
+			</div>
+		)
+	})()
 
 	return (
 		<div className={s.main}>
@@ -244,92 +359,8 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 						  ]}
 				</div>
 			</div>
-			<div>
-				<div>Show data</div>
-				<JDropdown
-					options={showDataForOptions}
-					value={formData.showDataFor}
-					data-key='showDataFor'
-					onChange={handleChange}
-				/>
-				{formData.showDataFor !== 'all_time' && (
-					<>
-						<div>Starting on...</div>
+			{ShowDataSection}
 
-						<JDropdown
-							options={[
-								{ name: 'Today', value: 'today' },
-								{ name: 'Custom day', value: 'custom_day' },
-							]}
-							value={formData.startingOn}
-							data-key='startingOn'
-							onChange={handleChange}
-						/>
-
-						{formData.startingOn === 'custom_day' && (
-							<>
-								{formData.showDataFor === 'per_week' && (
-									<JDropdown
-										options={(() => {
-											const datesOfWeek = (() => {
-												const today = new Date()
-												const dayOfWeek = today.getDay()
-
-												const startOfWeek = new Date(today)
-												startOfWeek.setDate(
-													today.getDate() - dayOfWeek
-												)
-
-												const datesOfWeek: string[] = []
-												for (let i = 0; i < 7; i++) {
-													const date = new Date(startOfWeek)
-													date.setDate(startOfWeek.getDate() + i)
-
-													// Format the date as YYYY-MM-DD
-													const formattedDate = date
-														.toISOString()
-														.split('T')[0]
-													datesOfWeek.push(formattedDate)
-												}
-
-												return datesOfWeek
-											})()
-											return [
-												{ name: 'Sunday', value: datesOfWeek[1] },
-												{ name: 'Monday', value: datesOfWeek[2] },
-												{ name: 'Tuesday', value: datesOfWeek[3] },
-												{
-													name: 'Wednesday',
-													value: datesOfWeek[4],
-												},
-												{
-													name: 'Thursday',
-													value: datesOfWeek[5],
-												},
-												{ name: 'Friday', value: datesOfWeek[6] },
-												{
-													name: 'Saturday',
-													value: datesOfWeek[7],
-												},
-											]
-										})()}
-										value={formData.customDay}
-										data-key='customDay'
-										onChange={handleChange}
-									/>
-								)}
-								{formData.showDataFor === 'per_two_weeks' && (
-									<JDatePicker
-										value={formData.customDay}
-										data-key='customDay'
-										onChange={handleChange}
-									/>
-								)}
-							</>
-						)}
-					</>
-				)}
-			</div>
 			<div className={s.button_container}>
 				<JButton jstyle='secondary' onClick={closePopup}>
 					Cancel
