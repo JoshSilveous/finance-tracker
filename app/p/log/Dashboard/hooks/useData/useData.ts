@@ -379,9 +379,8 @@ export function useData(p: UseDataOptions) {
 	// const unstageCreate: Data.Create
 
 	const reload = async () => {
-		if (isPendingSave) {
-			throw new Error('Cannot reload data while pending save.')
-		} else if (isLoading) {
+		setIsPendingSave(false)
+		if (isLoading) {
 			throw new Error('Cannot reload data while already loading.')
 		}
 		setIsLoading(true)

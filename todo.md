@@ -2,14 +2,16 @@
 
 ### Needed before beta
 
--   Set up all needed data/save methods
 -   Set up SimpleValues options for:
     time period (past two weeks, since last item in category (e.x. income), this month)
 -   Switch preferred column widths to localStorage instead of DB
 -   GridNav not working when a row is folded- add a check for disabled inputs
+-   Add save check for "Create New Transaction"
+-   Save button should work on reorders alone
 
 ### Can wait
 
+-   Set up all needed data/save methods
 -   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
 -   Switch "create new transaction" button to add row to grid
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.

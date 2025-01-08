@@ -123,18 +123,18 @@ export async function insertTransactionAndItems(transaction: InsertTransactionEn
 }
 
 export interface UpsertTransactionEntry {
-	id: string
+	id?: string
 	name: string
 	date: string
-	order_position: number
+	order_position?: number
 }
 export interface UpsertItemEntry {
-	id: string
+	id?: string
 	name: string | null
 	amount: string
 	category_id: string | null
 	account_id: string | null
-	order_position: number
+	order_position?: number
 	transaction_id: string
 }
 export async function upsertTransactionsAndItems(
@@ -153,38 +153,39 @@ export async function upsertTransactionsAndItems(
 		return {
 			...item,
 			amount: Number(item.amount),
+			category_id: item.category_id ? item.category_id : null,
+			account_id: item.account_id ? item.account_id : null,
 			user_id: user_id,
 		}
 	})
 
-	const transactionUpsert = supabase
+	const { error: transactionError } = await supabase
 		.from('transactions')
 		.upsert(transactionUpdatesWithUserID, {
 			defaultToNull: false,
 			onConflict: 'id',
 			ignoreDuplicates: false,
 		})
-	const itemUpsert = supabase.from('transaction_items').upsert(itemUpdatesWithUserID, {
-		defaultToNull: false,
-		onConflict: 'id',
-		ignoreDuplicates: false,
-	})
+	if (transactionError) {
+		console.error(transactionError)
+		throw new Error(transactionError.message)
+	}
+	console.log('db level', itemUpdatesWithUserID)
 
-	return Promise.all([transactionUpsert, itemUpsert])
-		.then(([transactionRes, itemRes]) => {
-			if (transactionRes.error) {
-				console.error(transactionRes.error)
-				throw new Error(transactionRes.error.message)
-			}
-			if (itemRes.error) {
-				console.error(itemRes.error)
-				throw new Error(itemRes.error.message)
-			}
+	const { error: itemError } = await supabase
+		.from('transaction_items')
+		.upsert(itemUpdatesWithUserID, {
+			defaultToNull: false,
+			onConflict: 'id',
+			ignoreDuplicates: false,
 		})
-		.catch((e) => {
-			console.error(e)
-			throw new Error(e.message)
-		})
+
+	if (itemError) {
+		console.error(itemError)
+		throw new Error(itemError.message)
+	}
+
+	return
 }
 
 export interface InsertItemEntry {
@@ -193,7 +194,7 @@ export interface InsertItemEntry {
 	category_id: string | null
 	account_id: string | null
 	transaction_id: string
-	order_position: number
+	order_position?: number
 }
 export async function insertItems(items: InsertItemEntry[]) {
 	const user_id = await getUserID()
@@ -218,7 +219,7 @@ export async function insertItems(items: InsertItemEntry[]) {
 
 export async function deleteItems(ids: string[]) {
 	if (!ids.length) {
-		throw new Error('No item IDs provided for deletion.')
+		return
 	}
 
 	const { error } = await supabase.from('transaction_items').delete().in('id', ids)
@@ -232,7 +233,7 @@ export async function deleteItems(ids: string[]) {
 
 export async function deleteTransactions(ids: string[]) {
 	if (!ids.length) {
-		throw new Error('No transaction IDs provided for deletion.')
+		return
 	}
 
 	const { error } = await supabase.from('transactions').delete().in('id', ids)

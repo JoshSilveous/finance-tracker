@@ -154,7 +154,7 @@ export function Dashboard() {
 	})()
 
 	const handleSave = async () => {
-		await saveChanges(data, tileData, refreshAllData, setIsLoading)
+		await saveChanges(data, tileData, sortOrder, refreshAllData, setIsLoading)
 	}
 
 	const handleDiscard = () => {
