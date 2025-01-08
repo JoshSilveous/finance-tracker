@@ -95,11 +95,5 @@ export function genHeaders(historyController: HistoryController) {
 			noResize: true,
 		},
 	]
-	console.log(
-		'headers:',
-		headers,
-		'clone:',
-		structuredClone(headers.map((val) => val.defaultWidth))
-	)
 	return headers
 }

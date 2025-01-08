@@ -279,13 +279,7 @@ export function TransactionManager({
 		})
 		gridNav.setEndIndex(gridNavIndex)
 		const gridConfig: JGridTypes.Props = {
-			headers: (() => {
-				console.log(
-					'providing to JGrid:',
-					headers.map((header) => header.defaultWidth)
-				)
-				return headers
-			})(),
+			headers: headers,
 			cells: cells,
 			noBorders: true,
 			maxTableWidth: 1000,

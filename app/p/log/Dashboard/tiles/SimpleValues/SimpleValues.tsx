@@ -2,15 +2,13 @@ import { JGrid } from '@/components/JGrid'
 import { Data } from '../../hooks'
 import { SimpleValuesTile, TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
-import { addCommas, createPopup } from '@/utils'
+import { addCommas, createPopup, getNumPref, setNumPref } from '@/utils'
 import { JGridTypes } from '@/components/JGrid/JGrid'
 import { EditTilePopup } from './EditTilePopup'
 export interface SimpleValuesProps {
 	data: Data.Controller
-	show: 'accounts' | 'categories'
-	exclude: string[]
-	title: string
-	showTitle: boolean
+	tileOptions: SimpleValuesTile['options']
+	tileID: string
 }
 
 export const simpleValuesTileDefaults: TileDefaultSettings = {
@@ -32,13 +30,15 @@ export const simpleValuesTileDefaults: TileDefaultSettings = {
 	},
 }
 
-export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleValuesProps) {
+export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 	const cells: JGridTypes.Props['cells'] = (() => {
-		if (show === 'categories') {
+		if (tileOptions.show === 'categories') {
 			const categories = [
-				...data.cur.categories.filter((cat) => !exclude.includes(cat.id)),
+				...data.cur.categories.filter(
+					(cat) => !tileOptions.exclude.includes(cat.id)
+				),
 			]
-			if (!exclude.includes('no_category')) {
+			if (!tileOptions.exclude.includes('no_category')) {
 				categories.push({
 					id: '',
 					name: { val: 'No Category', changed: false },
@@ -101,9 +101,9 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 			})
 		} else {
 			const accounts: Data.StateAccount[] = [
-				...data.cur.accounts.filter((act) => !exclude.includes(act.id)),
+				...data.cur.accounts.filter((act) => !tileOptions.exclude.includes(act.id)),
 			]
-			if (!exclude.includes('no_account')) {
+			if (!tileOptions.exclude.includes('no_account')) {
 				accounts.push({
 					id: '',
 					name: { val: 'No Account', changed: false },
@@ -171,27 +171,40 @@ export function SimpleValues({ data, show, exclude, title, showTitle }: SimpleVa
 
 	const headers: JGridTypes.Props['headers'] = [
 		{
-			defaultWidth: 50,
+			defaultWidth: getNumPref(`SimpleValues-${tileID}-Name`, 50),
 			minWidth: 40,
 			content: <div className={s.header}>Name</div>,
 		},
 		{
-			defaultWidth: 50,
+			defaultWidth: getNumPref(`SimpleValues-${tileID}-Amount`, 50),
 			minWidth: 40,
 			content: <div className={s.header}>Amount</div>,
 		},
 	]
+	const gridConfig: JGridTypes.Props = {
+		className: s.grid,
+		headers: headers,
+		cells: cells,
+		useFullWidth: true,
+		noBorders: true,
+		onResize: (e) => {
+			switch (e.columnIndex) {
+				case 0: {
+					setNumPref(`SimpleValues-${tileID}-Name`, e.newWidth)
+					break
+				}
+				case 1: {
+					setNumPref(`SimpleValues-${tileID}-Amount`, e.newWidth)
+					break
+				}
+			}
+		},
+	}
 
 	return (
 		<div className={s.main}>
-			{showTitle && <div className={s.title}>{title}</div>}
-			<JGrid
-				className={s.grid}
-				headers={headers}
-				cells={cells}
-				useFullWidth
-				noBorders
-			/>
+			{tileOptions.showTitle && <div className={s.title}>{tileOptions.title}</div>}
+			<JGrid {...gridConfig} />
 		</div>
 	)
 }

@@ -90,10 +90,8 @@ export function genDisplayTiles(
 				{tile.type === 'simple_values' && (
 					<SimpleValues
 						data={data}
-						exclude={tile.options!.exclude}
-						show={tile.options!.show}
-						showTitle={tile.options!.showTitle}
-						title={tile.options!.title}
+						tileOptions={tile.options!}
+						tileID={tile.id}
 						key={`sv-${index}`}
 					/>
 				)}

@@ -7,7 +7,6 @@
 export function setNumPref(key: string, value: number) {
 	try {
 		localStorage.setItem(key, value.toString())
-		console.log(`setting "${key}" to "${value}"`)
 	} catch (e) {}
 }
 
@@ -22,7 +21,6 @@ export function getNumPref(key: string, fallback: number) {
 	try {
 		const value = localStorage.getItem(key)
 		if (value !== null) {
-			console.log(`value retrieved for "${key}":`, Number(value))
 			return Number(value)
 		}
 	} catch (e) {}
