@@ -5,8 +5,9 @@ import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { Data } from '../../hooks'
-import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
-import { createFocusLoop, delay } from '@/utils'
+import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
+import { createFocusLoop, delay, getDateString } from '@/utils'
+import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 
 interface EditTilePopupProps {
 	tile: SimpleValuesTile
@@ -15,11 +16,25 @@ interface EditTilePopupProps {
 	closePopup: () => void
 }
 export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTilePopupProps) {
-	const [formData, setFormData] = useState(structuredClone(tile.options))
+	interface Temp {
+		exclude: string[]
+		show: 'categories' | 'accounts'
+		title: string
+		showTitle: boolean
+		showDataFor: 'all_time' | 'per_week' | 'per_two_weeks' | 'per_month'
+		startingOn: 'today' | 'custom_day'
+		customDay: string
+	}
+	const [formData, setFormData] = useState<Temp>({
+		...structuredClone(tile.options),
+		showDataFor: 'all_time',
+		startingOn: 'today',
+		customDay: getDateString(),
+	})
 	const firstNodeRef = useRef<HTMLInputElement>(null)
 	const lastNodeRef = useRef<HTMLButtonElement>(null)
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const key = e.currentTarget.dataset.key
 
 		switch (key) {
@@ -33,7 +48,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 				break
 			}
 			case 'showTitle': {
-				const checked = e.currentTarget.checked
+				const checked = (e.currentTarget as HTMLInputElement).checked
 				setFormData((prev) => {
 					const clone = structuredClone(prev)
 					clone.showTitle = checked
@@ -50,6 +65,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 					clone.show = option
 					return clone
 				})
+				break
 			}
 			case 'exclude': {
 				const catID = e.target.id
@@ -63,6 +79,34 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 					}
 					return clone
 				})
+				break
+			}
+			case 'showDataFor': {
+				const value = e.target.value
+				setFormData((prev) => {
+					const clone = structuredClone(prev)
+					clone.showDataFor = value as Temp['showDataFor']
+					return clone
+				})
+				break
+			}
+			case 'startingOn': {
+				const value = e.target.value
+				setFormData((prev) => {
+					const clone = structuredClone(prev)
+					clone.startingOn = value as Temp['startingOn']
+					return clone
+				})
+				break
+			}
+			case 'customDay': {
+				const value = e.target.value
+				setFormData((prev) => {
+					const clone = structuredClone(prev)
+					clone.customDay = value
+					return clone
+				})
+				break
 			}
 		}
 	}
@@ -86,6 +130,12 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 
 		closePopup()
 	}
+	const showDataForOptions: JDropdownTypes.Option[] = [
+		{ name: 'For all time', value: 'all_time' },
+		{ name: 'Per week', value: 'per_week' },
+		{ name: 'Per two weeks', value: 'per_two_weeks' },
+		{ name: 'Per month', value: 'per_month' },
+	]
 
 	return (
 		<div className={s.main}>
@@ -121,7 +171,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 						id='show_categories'
 						data-radio_option='categories'
 						checked={formData.show === 'categories'}
-						onChange={handleChange}
+						onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>}
 					>
 						Categories
 					</JRadio>
@@ -130,7 +180,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 						data-key='show'
 						data-radio_option='accounts'
 						checked={formData.show === 'accounts'}
-						onChange={handleChange}
+						onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>}
 					>
 						Accounts
 					</JRadio>
@@ -193,6 +243,92 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 								</div>,
 						  ]}
 				</div>
+			</div>
+			<div>
+				<div>Show data</div>
+				<JDropdown
+					options={showDataForOptions}
+					value={formData.showDataFor}
+					data-key='showDataFor'
+					onChange={handleChange}
+				/>
+				{formData.showDataFor !== 'all_time' && (
+					<>
+						<div>Starting on...</div>
+
+						<JDropdown
+							options={[
+								{ name: 'Today', value: 'today' },
+								{ name: 'Custom day', value: 'custom_day' },
+							]}
+							value={formData.startingOn}
+							data-key='startingOn'
+							onChange={handleChange}
+						/>
+
+						{formData.startingOn === 'custom_day' && (
+							<>
+								{formData.showDataFor === 'per_week' && (
+									<JDropdown
+										options={(() => {
+											const datesOfWeek = (() => {
+												const today = new Date()
+												const dayOfWeek = today.getDay()
+
+												const startOfWeek = new Date(today)
+												startOfWeek.setDate(
+													today.getDate() - dayOfWeek
+												)
+
+												const datesOfWeek: string[] = []
+												for (let i = 0; i < 7; i++) {
+													const date = new Date(startOfWeek)
+													date.setDate(startOfWeek.getDate() + i)
+
+													// Format the date as YYYY-MM-DD
+													const formattedDate = date
+														.toISOString()
+														.split('T')[0]
+													datesOfWeek.push(formattedDate)
+												}
+
+												return datesOfWeek
+											})()
+											return [
+												{ name: 'Sunday', value: datesOfWeek[1] },
+												{ name: 'Monday', value: datesOfWeek[2] },
+												{ name: 'Tuesday', value: datesOfWeek[3] },
+												{
+													name: 'Wednesday',
+													value: datesOfWeek[4],
+												},
+												{
+													name: 'Thursday',
+													value: datesOfWeek[5],
+												},
+												{ name: 'Friday', value: datesOfWeek[6] },
+												{
+													name: 'Saturday',
+													value: datesOfWeek[7],
+												},
+											]
+										})()}
+										value={formData.customDay}
+										data-key='customDay'
+										onChange={handleChange}
+									/>
+								)}
+								{formData.showDataFor === 'per_two_weeks' && (
+									<JDatePicker
+										value={formData.customDay}
+										data-key='customDay'
+										onChange={handleChange}
+									/>
+								)}
+							</>
+						)}
+					</>
+				)}
 			</div>
 			<div className={s.button_container}>
 				<JButton jstyle='secondary' onClick={closePopup}>
