@@ -26,3 +26,11 @@ export function getCurDateString(): string {
 export function getCurDate(): Date {
 	return parseDateString(getCurDateString())
 }
+
+export function subtractDaysFromUTCDate(date: Date, daysToSubtract: number) {
+	const resultDate = new Date(date)
+
+	resultDate.setUTCDate(resultDate.getUTCDate() - daysToSubtract)
+
+	return resultDate
+}

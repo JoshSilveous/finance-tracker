@@ -6,10 +6,13 @@ import s from './SimpleValues.module.scss'
 import {
 	addCommas,
 	createPopup,
+	getCurDate,
 	getCurDateString,
+	getDateString,
 	getNumPref,
 	parseDateString,
 	setNumPref,
+	subtractDaysFromUTCDate,
 } from '@/utils'
 import { JGridTypes } from '@/components/JGrid/JGrid'
 import { EditTilePopup } from './EditTilePopup'
@@ -55,17 +58,17 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 
 				switch (showDataFor) {
 					case 'past_month': {
-						startDate = getCurDateString(-30)
+						startDate = getDateString(subtractDaysFromUTCDate(getCurDate(), 30))
 						endDate = getCurDateString()
 						break
 					}
 					case 'past_two_weeks': {
-						startDate = getCurDateString(-14)
+						startDate = getDateString(subtractDaysFromUTCDate(getCurDate(), 14))
 						endDate = getCurDateString()
 						break
 					}
 					case 'past_week': {
-						startDate = getCurDateString(-7)
+						startDate = getDateString(subtractDaysFromUTCDate(getCurDate(), 7))
 						endDate = getCurDateString()
 						break
 					}
