@@ -1,51 +1,77 @@
 .main {
 	padding: 20px;
+	padding-right: calc(20px - var(--scrollbar-width-thin));
+	height: 100%;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 
 	.title {
 		font-weight: 500;
 		font-size: 18px;
 		margin-bottom: 10px;
 	}
-	.grid {
-		width: 100%;
-		.header {
-			background-color: var(--bg-color-lighter-2);
-			width: 100%;
-			height: 100%;
-			padding: 1px 3px;
+	.grid_container {
+		flex: 1;
+		overflow-y: auto;
+		scrollbar-gutter: stable;
+		scrollbar-width: thin;
+		transition: scrollbar-color 0.3s ease;
+		scrollbar-color: transparent transparent;
+		&:hover {
+			scrollbar-color: var(--font-color) transparent;
 		}
-		.cell {
-			padding: 1px 3px;
-			border-bottom: 1px solid var(--bg-color-lighter-2);
-			width: 100%;
-			&.amount {
-				display: flex;
-				width: 100%;
-				--RIGHT_OFFSET: 10px;
-				.symbol,
-				.left_parenthesis,
-				.right_parenthesis,
-				.number {
-					display: inline;
-				}
-
-				.left_parenthesis {
-					margin: 0 5px;
-				}
-				.right_parenthesis {
-					width: var(--RIGHT_OFFSET);
-					text-align: end;
-				}
-				.number {
-					margin-left: auto;
-					overflow: hidden;
-				}
-				&:not(.negative) .number {
-					margin-right: var(--RIGHT_OFFSET);
-				}
+		.loading_container {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100%;
+			svg {
+				width: 50px;
+				height: 50px;
 			}
-			&.changed {
-				color: var(--font-color-changed);
+		}
+		.grid {
+			width: 100%;
+			.header {
+				background-color: var(--bg-color-lighter-2);
+				width: 100%;
+				height: 100%;
+				padding: 1px 3px;
+			}
+			.cell {
+				padding: 1px 3px;
+				border-bottom: 1px solid var(--bg-color-lighter-2);
+				width: 100%;
+				&.amount {
+					display: flex;
+					width: 100%;
+					--RIGHT_OFFSET: 10px;
+					.symbol,
+					.left_parenthesis,
+					.right_parenthesis,
+					.number {
+						display: inline;
+					}
+
+					.left_parenthesis {
+						margin: 0 5px;
+					}
+					.right_parenthesis {
+						width: var(--RIGHT_OFFSET);
+						text-align: end;
+					}
+					.number {
+						margin-left: auto;
+						overflow: hidden;
+					}
+					&:not(.negative) .number {
+						margin-right: var(--RIGHT_OFFSET);
+					}
+				}
+				&.changed {
+					color: var(--font-color-changed);
+				}
 			}
 		}
 	}

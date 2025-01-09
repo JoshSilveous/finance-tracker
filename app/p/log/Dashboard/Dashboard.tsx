@@ -3,7 +3,7 @@ import s from './Dashboard.module.scss'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useFoldState, useSortOrder, useHistory, useData } from './hooks'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import { areDeeplyEqual, createPopup, delay, getScrollbarWidth } from '@/utils'
+import { areDeeplyEqual, createPopup } from '@/utils'
 import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
@@ -76,17 +76,6 @@ export function Dashboard() {
 		sortOrder,
 	})
 	const tileContainerRef = useRef<HTMLDivElement>(null)
-	useLayoutEffect(() => {
-		/**
-		 * Sets the `--scrollbar-width` css variable, used for smooth scrollbar animations across any browser
-		 */
-		if (tileContainerRef.current !== null) {
-			tileContainerRef.current.style.setProperty(
-				'--scrollbar-width',
-				getScrollbarWidth() + 'px'
-			)
-		}
-	}, [])
 
 	useLayoutEffect(() => {
 		// re-calculate size needed for dashboard component

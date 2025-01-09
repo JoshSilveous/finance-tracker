@@ -1,10 +1,12 @@
 import { JGrid } from '@/components/JGrid'
 import { Data } from '../../hooks'
+import { default as LoadingAnim } from '@/public/loading.svg'
 import { SimpleValuesTile, TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
 import { addCommas, createPopup, getNumPref, setNumPref } from '@/utils'
 import { JGridTypes } from '@/components/JGrid/JGrid'
 import { EditTilePopup } from './EditTilePopup'
+import { useEffect, useRef, useState } from 'react'
 export interface SimpleValuesProps {
 	data: Data.Controller
 	tileOptions: SimpleValuesTile['options']
@@ -31,6 +33,7 @@ export const simpleValuesTileDefaults: TileDefaultSettings = {
 }
 
 export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
+	const [isLoading, setIsLoading] = useState(false)
 	const cells: JGridTypes.Props['cells'] = (() => {
 		if (tileOptions.show === 'categories') {
 			const categories = [
@@ -168,6 +171,7 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 			})
 		}
 	})()
+	const testRef = useRef<HTMLDivElement>(null)
 
 	const headers: JGridTypes.Props['headers'] = [
 		{
@@ -204,7 +208,15 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 	return (
 		<div className={s.main}>
 			{tileOptions.showTitle && <div className={s.title}>{tileOptions.title}</div>}
-			<JGrid {...gridConfig} />
+			<div className={s.grid_container} ref={testRef}>
+				{isLoading ? (
+					<div className={s.loading_container}>
+						<LoadingAnim />
+					</div>
+				) : (
+					<JGrid {...gridConfig} />
+				)}
+			</div>
 		</div>
 	)
 }

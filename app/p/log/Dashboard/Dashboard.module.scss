@@ -42,7 +42,7 @@
 		transition: scrollbar-color 0.3s ease;
 		scrollbar-color: transparent transparent;
 		&:hover {
-			scrollbar-color: var(--font-color) var(--bg-color-lighter-1);
+			scrollbar-color: var(--font-color) var(--bg-color);
 		}
 
 		.tile_container {

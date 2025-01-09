@@ -380,9 +380,6 @@ export function useData(p: UseDataOptions) {
 
 	const reload = async () => {
 		setIsPendingSave(false)
-		if (isLoading) {
-			throw new Error('Cannot reload data while already loading.')
-		}
 		setIsLoading(true)
 		const [transactionsRaw, categoriesRaw, accountsRaw] = await Promise.all([
 			fetchTransactionData(),
