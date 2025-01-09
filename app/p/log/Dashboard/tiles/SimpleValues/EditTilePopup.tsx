@@ -6,7 +6,7 @@ import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { Data } from '../../hooks'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { createFocusLoop, delay, getDateString } from '@/utils'
+import { createFocusLoop, delay, getCurDate, getCurDateString } from '@/utils'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 
 interface EditTilePopupProps {
@@ -74,7 +74,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 				setFormData((prev) => {
 					const clone = structuredClone(prev)
 					clone.showDataFor = value as SimpleValuesTile['options']['showDataFor']
-					clone.customDay = getDateString()
+					clone.customDay = getCurDateString()
 					return clone
 				})
 				break
@@ -123,10 +123,10 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 
 		const PerWeekSelector = (() => {
 			const datesOfThisWeek = (() => {
-				const today = new Date()
+				const today = getCurDate()
 				const dayOfWeek = today.getDay()
 
-				const startOfWeek = new Date(today)
+				const startOfWeek = getCurDate()
 				startOfWeek.setDate(today.getDate() - dayOfWeek)
 
 				const datesOfWeek: string[] = []
@@ -174,10 +174,10 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 
 		const PerTwoWeeksSelector = (() => {
 			const pastTwoWeeksOptions = (() => {
-				const today = new Date()
+				const today = getCurDate()
 				const dayOfWeek = today.getDay()
 
-				const startOfCurrentWeek = new Date(today)
+				const startOfCurrentWeek = getCurDate()
 				startOfCurrentWeek.setDate(today.getDate() - dayOfWeek - 7)
 
 				const startOfPreviousWeek = new Date(startOfCurrentWeek)

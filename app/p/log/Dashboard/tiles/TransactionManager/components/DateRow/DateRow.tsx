@@ -5,7 +5,7 @@ import { createPopup } from '@/utils'
 import { NewTransactionForm } from './NewTransactionForm/NewTransactionForm'
 import { DropdownOptions } from '../../TransactionManager'
 import { TabIndexer } from '../../hooks'
-import { getDateString } from '@/utils/getDateString'
+import { getRelDateString } from '@/utils/getDateString'
 
 interface DateRowProps {
 	date: string
@@ -92,8 +92,8 @@ export function DateRow({
 		popup.trigger()
 	}
 
-	const isToday = date === getDateString()
-	const isYesterday = date === getDateString(-1)
+	const isToday = date === getRelDateString()
+	const isYesterday = date === getRelDateString(-1)
 
 	const dateDisplay = (
 		<div className={s.date_container}>

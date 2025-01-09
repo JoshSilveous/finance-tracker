@@ -3,7 +3,14 @@ import { Data } from '../../hooks'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { SimpleValuesTile, TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
-import { addCommas, createPopup, getDateString, getNumPref, setNumPref } from '@/utils'
+import {
+	addCommas,
+	createPopup,
+	getCurDateString,
+	getNumPref,
+	parseDateString,
+	setNumPref,
+} from '@/utils'
 import { JGridTypes } from '@/components/JGrid/JGrid'
 import { EditTilePopup } from './EditTilePopup'
 import { useEffect, useRef, useState } from 'react'
@@ -48,18 +55,18 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 
 				switch (showDataFor) {
 					case 'past_month': {
-						startDate = getDateString(-30)
-						endDate = getDateString()
+						startDate = getCurDateString(-30)
+						endDate = getCurDateString()
 						break
 					}
 					case 'past_two_weeks': {
-						startDate = getDateString(-14)
-						endDate = getDateString()
+						startDate = getCurDateString(-14)
+						endDate = getCurDateString()
 						break
 					}
 					case 'past_week': {
-						startDate = getDateString(-7)
-						endDate = getDateString()
+						startDate = getCurDateString(-7)
+						endDate = getCurDateString()
 						break
 					}
 					case 'per_month': {
@@ -67,16 +74,10 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 					}
 					case 'per_two_weeks': {
 						startDate = (() => {
-							const today = getDateString()
-							const twoWeeksAgo = getDateString(-14)
-							const startDay = new Date(customDay)
-							startDay.setHours(0, 0, 0, 0)
+							const today = getCurDateString()
+							const startDay = parseDateString(customDay)
 
-							console.log(
-								today,
-								twoWeeksAgo,
-								startDay.toUTCString().split('T')[0]
-							)
+							// some logic here //
 
 							return 'abc'
 						})()

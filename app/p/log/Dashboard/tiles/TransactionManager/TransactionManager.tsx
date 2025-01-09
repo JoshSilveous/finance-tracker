@@ -9,6 +9,9 @@ import {
 	removeIsolatedKeyListeners,
 	setKeyListenerContext,
 	setNumPref,
+	getCurDate,
+	parseDateString,
+	getCurDateString,
 } from '@/utils'
 import { FetchedTransaction } from '@/database'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
@@ -174,11 +177,11 @@ export function TransactionManager({
 
 		let gridRow = 2
 		let gridNavIndex = 0
+
 		sortedData.forEach((groupedItem, groupedItemIndex) => {
 			if (groupedItemIndex === 0) {
-				const today = new Date()
-				today.setHours(0, 0, 0, 0)
-				const inputDate = new Date(`${groupedItem.date}T00:00:00`)
+				const today = getCurDate()
+				const inputDate = parseDateString(groupedItem.date)
 				if (inputDate < today) {
 					cells.push(
 						<DateRow
@@ -334,7 +337,7 @@ export function TransactionManager({
 							const popup = createPopup(
 								<NewTransactionForm
 									dropdownOptions={dropdownOptions}
-									defaultDate={new Date().toLocaleDateString('en-CA')}
+									defaultDate={getCurDateString()}
 									forceClosePopup={() => popup.close()}
 								/>
 							)

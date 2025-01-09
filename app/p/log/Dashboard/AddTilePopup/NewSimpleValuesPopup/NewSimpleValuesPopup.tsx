@@ -4,7 +4,7 @@ import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { Data } from '../../hooks'
-import { createFocusLoop, delay, getDateString } from '@/utils'
+import { createFocusLoop, delay, getCurDate, getCurDateString } from '@/utils'
 import { SimpleValuesTile, TileData } from '../../tiles'
 import { GRID_SPACING } from '@/app/globals'
 import { simpleValuesTileDefaults } from '../../tiles/SimpleValues/SimpleValues'
@@ -26,7 +26,7 @@ export function NewSimpleValuesPopup({
 		title: '',
 		showTitle: false,
 		showDataFor: 'all_time',
-		customDay: getDateString(),
+		customDay: getCurDateString(),
 	})
 	const firstNodeRef = useRef<HTMLInputElement>(null)
 	const lastNodeRef = useRef<HTMLButtonElement>(null)
@@ -81,7 +81,7 @@ export function NewSimpleValuesPopup({
 				setFormData((prev) => {
 					const clone = structuredClone(prev)
 					clone.showDataFor = value as SimpleValuesTile['options']['showDataFor']
-					clone.customDay = getDateString()
+					clone.customDay = getCurDateString()
 					return clone
 				})
 				break
@@ -145,10 +145,10 @@ export function NewSimpleValuesPopup({
 
 		const PerWeekSelector = (() => {
 			const datesOfThisWeek = (() => {
-				const today = new Date()
+				const today = getCurDate()
 				const dayOfWeek = today.getDay()
 
-				const startOfWeek = new Date(today)
+				const startOfWeek = getCurDate()
 				startOfWeek.setDate(today.getDate() - dayOfWeek)
 
 				const datesOfWeek: string[] = []
@@ -196,10 +196,10 @@ export function NewSimpleValuesPopup({
 
 		const PerTwoWeeksSelector = (() => {
 			const pastTwoWeeksOptions = (() => {
-				const today = new Date()
+				const today = getCurDate()
 				const dayOfWeek = today.getDay()
 
-				const startOfCurrentWeek = new Date(today)
+				const startOfCurrentWeek = getCurDate()
 				startOfCurrentWeek.setDate(today.getDate() - dayOfWeek)
 
 				const startOfPreviousWeek = new Date(startOfCurrentWeek)

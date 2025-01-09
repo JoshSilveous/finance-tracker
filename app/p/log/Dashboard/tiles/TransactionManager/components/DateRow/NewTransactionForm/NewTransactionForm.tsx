@@ -14,6 +14,7 @@ import {
 	IsolatedKeyListener,
 	addIsolatedKeyListeners,
 	removeIsolatedKeyListeners,
+	getCurDateString,
 } from '@/utils'
 import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
@@ -46,7 +47,7 @@ export function NewTransactionForm({
 	setRefreshRequired,
 }: NewTransactionFormProps) {
 	if (defaultDate === undefined) {
-		defaultDate = new Date().toLocaleDateString('en-CA')
+		defaultDate = getCurDateString()
 	}
 	const [formData, setFormData] = useState<TransactionFormData>({
 		name: '',
