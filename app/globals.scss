@@ -28,6 +28,12 @@ body {
 body {
 	--GRID_SPACING: 30px;
 }
+
+/* Sets the scrollbar width variables (for chrome), which will be overwritten with browser-specific values once setScrollbarWidth() is ran. */
+body {
+	--scrollbar-width: 17px;
+	--scrollbar-width-thin: 11px;
+}
 body {
 	--bg-color: #171717;
 	--bg-color-lighter-1: #222222;
