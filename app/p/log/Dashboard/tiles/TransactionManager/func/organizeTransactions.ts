@@ -4,7 +4,10 @@ export function sortTransactions(
 	sortOrder: SortOrder.State,
 	transactions: Data.StateTransaction[]
 ) {
-	const res = Object.entries(sortOrder).map((entry) => {
+	const sortedDates = Object.entries(sortOrder)
+		.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+		.reverse()
+	const res = sortedDates.map((entry) => {
 		return {
 			date: entry[0],
 			transactions: entry[1].map((sortID) => {

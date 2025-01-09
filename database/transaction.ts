@@ -16,14 +16,18 @@ export interface FetchedTransaction {
 		order_position: number
 	}[]
 }
-export async function fetchTransactionData() {
-	const { data, error } = (await supabase.rpc('get_transactions_with_items')) as {
+export async function fetchTransactionData(startingDate: string) {
+	const { data, error } = (await supabase.rpc('get_transactions_with_items', {
+		starting_date: startingDate,
+	})) as {
 		data: FetchedTransaction[]
 		error: PostgrestError | null
 	}
+
 	if (error) {
 		throw new Error(error.message)
 	}
+
 	// this should realistically never happen outside of dev, but just in case
 	const filteredData = data.filter((transaction) => transaction.items !== null)
 	return filteredData

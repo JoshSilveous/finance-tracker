@@ -3,10 +3,11 @@ import { Data } from '../../hooks'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { SimpleValuesTile, TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
-import { addCommas, createPopup, getNumPref, setNumPref } from '@/utils'
+import { addCommas, createPopup, getDateString, getNumPref, setNumPref } from '@/utils'
 import { JGridTypes } from '@/components/JGrid/JGrid'
 import { EditTilePopup } from './EditTilePopup'
 import { useEffect, useRef, useState } from 'react'
+import { CategoryTotal, fetchCategoryTotalsWithinDateRange } from '@/database'
 export interface SimpleValuesProps {
 	data: Data.Controller
 	tileOptions: SimpleValuesTile['options']
@@ -33,7 +34,105 @@ export const simpleValuesTileDefaults: TileDefaultSettings = {
 }
 
 export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
-	const [isLoading, setIsLoading] = useState(false)
+	const [isLoading, setIsLoading] = useState(true)
+	const databaseFetchedDataRef = useRef<CategoryTotal[]>([])
+	useEffect(() => {
+		;(async () => {
+			const showDataFor = tileOptions.showDataFor
+
+			if (showDataFor === 'all_time') {
+			} else {
+				const customDay = tileOptions.customDay
+				let startDate = ''
+				let endDate = ''
+
+				switch (showDataFor) {
+					case 'past_month': {
+						startDate = getDateString(-30)
+						endDate = getDateString()
+						break
+					}
+					case 'past_two_weeks': {
+						startDate = getDateString(-14)
+						endDate = getDateString()
+						break
+					}
+					case 'past_week': {
+						startDate = getDateString(-7)
+						endDate = getDateString()
+						break
+					}
+					case 'per_month': {
+						break
+					}
+					case 'per_two_weeks': {
+						startDate = (() => {
+							const today = getDateString()
+							const twoWeeksAgo = getDateString(-14)
+							const startDay = new Date(customDay)
+							startDay.setHours(0, 0, 0, 0)
+
+							console.log(
+								today,
+								twoWeeksAgo,
+								startDay.toUTCString().split('T')[0]
+							)
+
+							return 'abc'
+						})()
+
+						endDate = (() => {
+							return 'abc'
+						})()
+
+						console.log(
+							'startDate',
+							startDate,
+							'endDate',
+							endDate,
+							'customDay',
+							customDay
+						)
+
+						break
+					}
+					case 'per_week': {
+						break
+					}
+				}
+			}
+
+			setIsLoading(true)
+			const fetchedTotals = await fetchCategoryTotalsWithinDateRange(
+				'2024-12-05',
+				'2025-01-05'
+			)
+			const mappedTotals: CategoryTotal[] = data.cur.categories.map((cat) => {
+				const thisFetchedTotal = fetchedTotals.find(
+					(res) => res.category_id === cat.id
+				)
+				if (thisFetchedTotal !== undefined) {
+					return { category_id: cat.id, sum: thisFetchedTotal.sum }
+				} else {
+					return { category_id: cat.id, sum: 0 }
+				}
+			})
+
+			const fetchedWithNoID = fetchedTotals.find((it) => it.category_id === '')
+
+			mappedTotals.push({
+				category_id: '',
+				sum: fetchedWithNoID !== undefined ? fetchedWithNoID.sum : 0,
+			})
+
+			/* add logic to subtract current */
+
+			databaseFetchedDataRef.current === mappedTotals
+
+			setIsLoading(false)
+		})()
+	}, [tileOptions.showDataFor, tileOptions.customDay, data.isLoading])
+
 	const cells: JGridTypes.Props['cells'] = (() => {
 		if (tileOptions.show === 'categories') {
 			const categories = [

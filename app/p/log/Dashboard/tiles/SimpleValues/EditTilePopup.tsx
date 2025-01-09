@@ -135,7 +135,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 					date.setDate(startOfWeek.getDate() + i)
 
 					// Format the date as YYYY-MM-DD
-					const formattedDate = date.toISOString().split('T')[0]
+					const formattedDate = date.toLocaleDateString('en-CA')
 					datesOfWeek.push(formattedDate)
 				}
 
@@ -178,7 +178,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 				const dayOfWeek = today.getDay()
 
 				const startOfCurrentWeek = new Date(today)
-				startOfCurrentWeek.setDate(today.getDate() - dayOfWeek)
+				startOfCurrentWeek.setDate(today.getDate() - dayOfWeek - 7)
 
 				const startOfPreviousWeek = new Date(startOfCurrentWeek)
 				startOfPreviousWeek.setDate(startOfCurrentWeek.getDate() - 7)
@@ -198,7 +198,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 				for (let i = 0; i < 7; i++) {
 					const thisWeekDate = new Date(startOfCurrentWeek)
 					thisWeekDate.setDate(startOfCurrentWeek.getDate() + i)
-					const thisWeekFormattedValue = thisWeekDate.toISOString().split('T')[0]
+					const thisWeekFormattedValue = thisWeekDate.toLocaleDateString('en-CA')
 
 					datesOfCurrentWeek.push({
 						value: thisWeekFormattedValue,
@@ -207,7 +207,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 
 					const lastWeekDate = new Date(startOfPreviousWeek)
 					lastWeekDate.setDate(startOfPreviousWeek.getDate() + i)
-					const lastWeekFormattedValue = lastWeekDate.toISOString().split('T')[0]
+					const lastWeekFormattedValue = lastWeekDate.toLocaleDateString('en-CA')
 					datesOfPreviousWeek.push({
 						value: lastWeekFormattedValue,
 						name: genNameFormat(lastWeekDate),
@@ -320,7 +320,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 										</div>
 									)
 								}),
-								<div className={s.item}>
+								<div className={s.item} key={`no_cat_${tile.id}`}>
 									<JCheckbox
 										id='no_category'
 										data-key='exclude'
@@ -346,7 +346,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 										</div>
 									)
 								}),
-								<div className={s.item}>
+								<div className={s.item} key={`no_act_${tile.id}`}>
 									<JCheckbox
 										id='no_account'
 										data-key='exclude'

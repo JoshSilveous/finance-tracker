@@ -182,7 +182,7 @@ export function TransactionManager({
 				if (inputDate < today) {
 					cells.push(
 						<DateRow
-							date={today.toISOString().split('T')[0]}
+							date={today.toLocaleDateString('en-CA')}
 							dropdownOptions={dropdownOptions}
 							refreshData={data.reload}
 							gridRow={gridRow}
@@ -334,7 +334,7 @@ export function TransactionManager({
 							const popup = createPopup(
 								<NewTransactionForm
 									dropdownOptions={dropdownOptions}
-									defaultDate={new Date().toISOString().split('T')[0]}
+									defaultDate={new Date().toLocaleDateString('en-CA')}
 									forceClosePopup={() => popup.close()}
 								/>
 							)

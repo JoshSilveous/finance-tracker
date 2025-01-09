@@ -157,7 +157,7 @@ export function NewSimpleValuesPopup({
 					date.setDate(startOfWeek.getDate() + i)
 
 					// Format the date as YYYY-MM-DD
-					const formattedDate = date.toISOString().split('T')[0]
+					const formattedDate = date.toLocaleDateString('en-CA')
 					datesOfWeek.push(formattedDate)
 				}
 
@@ -220,7 +220,7 @@ export function NewSimpleValuesPopup({
 				for (let i = 0; i < 7; i++) {
 					const thisWeekDate = new Date(startOfCurrentWeek)
 					thisWeekDate.setDate(startOfCurrentWeek.getDate() + i)
-					const thisWeekFormattedValue = thisWeekDate.toISOString().split('T')[0]
+					const thisWeekFormattedValue = thisWeekDate.toLocaleDateString('en-CA')
 
 					datesOfCurrentWeek.push({
 						value: thisWeekFormattedValue,
@@ -229,7 +229,7 @@ export function NewSimpleValuesPopup({
 
 					const lastWeekDate = new Date(startOfPreviousWeek)
 					lastWeekDate.setDate(startOfPreviousWeek.getDate() + i)
-					const lastWeekFormattedValue = lastWeekDate.toISOString().split('T')[0]
+					const lastWeekFormattedValue = lastWeekDate.toLocaleDateString('en-CA')
 					datesOfPreviousWeek.push({
 						value: lastWeekFormattedValue,
 						name: genNameFormat(lastWeekDate),

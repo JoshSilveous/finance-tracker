@@ -46,7 +46,7 @@ export function NewTransactionForm({
 	setRefreshRequired,
 }: NewTransactionFormProps) {
 	if (defaultDate === undefined) {
-		defaultDate = new Date().toISOString().split('T')[0]
+		defaultDate = new Date().toLocaleDateString('en-CA')
 	}
 	const [formData, setFormData] = useState<TransactionFormData>({
 		name: '',

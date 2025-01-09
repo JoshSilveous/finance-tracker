@@ -139,9 +139,9 @@ export async function deleteCategoryAndReplace(
 	}
 }
 
-interface CategoryTotal {
+export interface CategoryTotal {
 	category_id: string
-	total_amount: number
+	sum: number
 }
 export async function fetchCategoryTotals() {
 	const { data, error } = await supabase.rpc('get_totals_by_category')
@@ -149,4 +149,25 @@ export async function fetchCategoryTotals() {
 		throw new Error(error.message)
 	}
 	return data as CategoryTotal[]
+}
+
+export async function fetchCategoryTotalsWithinDateRange(
+	startDate: string,
+	endDate: string
+) {
+	const { data, error } = (await supabase.rpc('get_sum_by_category_within_dates', {
+		start_date: startDate,
+		end_date: endDate,
+	})) as {
+		data: CategoryTotal[]
+		error: any
+	}
+
+	if (error) {
+		throw new Error(error.message)
+	}
+
+	return data.map((item) =>
+		item.category_id === null ? { category_id: '', sum: item.sum } : item
+	) as CategoryTotal[]
 }

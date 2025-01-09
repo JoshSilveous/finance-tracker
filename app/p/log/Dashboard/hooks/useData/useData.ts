@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchAccountData, fetchCategoryData, fetchTransactionData } from '@/database'
-import { areDeeplyEqual } from '@/utils'
+import { areDeeplyEqual, getDateString } from '@/utils'
 import { SortOrder } from '../useSortOrder'
 import { HistoryController } from '../useHistory'
 
@@ -381,8 +381,9 @@ export function useData(p: UseDataOptions) {
 	const reload = async () => {
 		setIsPendingSave(false)
 		setIsLoading(true)
+		console.log('two weeks ago string:', getDateString(-14))
 		const [transactionsRaw, categoriesRaw, accountsRaw] = await Promise.all([
-			fetchTransactionData(),
+			fetchTransactionData(getDateString(-14)),
 			fetchCategoryData(),
 			fetchAccountData(),
 		])
