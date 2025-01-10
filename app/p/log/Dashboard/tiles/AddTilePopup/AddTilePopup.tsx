@@ -1,10 +1,10 @@
 import { JButton } from '@/components/JForm'
 import s from './AddTilePopup.module.scss'
 import { createPopup } from '@/utils'
-import { NewSimpleValuesPopup } from './NewSimpleValuesPopup/NewSimpleValuesPopup'
 import { SetStateAction } from 'react'
-import { Data } from '../hooks'
-import { TileData } from '../tiles'
+import { SimpleValuesSettingsPopup } from '../SimpleValues/settings_popup/SimpleValuesSettingsPopup'
+import { Data } from '../../hooks/useData/useData'
+import { TileData } from '..'
 
 interface AddTilePopupProps {
 	closePopup: () => void
@@ -15,7 +15,8 @@ export function AddTilePopup({ closePopup, setTileData, data }: AddTilePopupProp
 	const handleNewSimpleValuesTile = () => {
 		closePopup()
 		const popup = createPopup(
-			<NewSimpleValuesPopup
+			<SimpleValuesSettingsPopup
+				context='create'
 				setTileData={setTileData}
 				data={data}
 				closePopup={() => popup.close()}

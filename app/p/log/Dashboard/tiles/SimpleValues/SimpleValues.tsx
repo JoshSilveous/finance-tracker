@@ -3,21 +3,11 @@ import { Data } from '../../hooks'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { SimpleValuesTile, TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
-import {
-	addCommas,
-	createPopup,
-	getCurDate,
-	getCurDateString,
-	getDateString,
-	getNumPref,
-	parseDateString,
-	setNumPref,
-} from '@/utils'
+import { addCommas, createPopup, getNumPref, setNumPref } from '@/utils'
 import { JGridTypes } from '@/components/JGrid/JGrid'
-import { EditTilePopup } from './EditTilePopup'
 import { useEffect, useRef, useState } from 'react'
-import { CategoryTotal } from '@/database'
-import { getStartingAmounts as getStartingAmounts } from './func/getStartingCategoryAmounts'
+import { getStartingAmounts as getStartingAmounts } from './func/getStartingAmounts'
+import { SimpleValuesSettingsPopup } from './settings_popup/SimpleValuesSettingsPopup'
 export interface SimpleValuesProps {
 	data: Data.Controller
 	tileOptions: SimpleValuesTile['options']
@@ -32,7 +22,8 @@ export const simpleValuesTileDefaults: TileDefaultSettings = {
 	showEditButton: true,
 	onEditButtonClick: (tile, setTileData, data) => {
 		const popup = createPopup(
-			<EditTilePopup
+			<SimpleValuesSettingsPopup
+				context='edit'
 				tile={tile as SimpleValuesTile}
 				setTileData={setTileData}
 				data={data}
@@ -70,7 +61,7 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 					if (!tileOptions.exclude.includes('no_category')) {
 						categories.push({
 							id: '',
-							name: { val: 'No Category', changed: false },
+							name: 'No Category',
 						})
 					}
 
@@ -108,13 +99,8 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 						return total
 					})()
 					return [
-						<div
-							className={`${s.cell} ${s.name} ${
-								cat.name.changed ? s.changed : ''
-							}`}
-							key={`${cat.id}-${index}-1`}
-						>
-							{cat.name.val}
+						<div className={`${s.cell} ${s.name}`} key={`${cat.id}-${index}-1`}>
+							{cat.name}
 						</div>,
 						<div
 							className={`${s.cell} ${s.amount} ${
@@ -152,8 +138,7 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 					if (!tileOptions.exclude.includes('no_account')) {
 						accounts.push({
 							id: '',
-							name: { val: 'No Account', changed: false },
-							starting_amount: { val: '0', changed: false },
+							name: 'No Account',
 						})
 					}
 
@@ -174,7 +159,7 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 				return accounts.map((act, index) => {
 					let totalChanged = false
 					const actTotal = (() => {
-						let total = Number(act.starting_amount.val)
+						let total = act.amtBeforeCurrentTransactions
 						data.cur.transactions.forEach((transaction) => {
 							transaction.items.forEach((item) => {
 								if (item.account_id.val === act.id) {
@@ -192,13 +177,8 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 					})()
 
 					return [
-						<div
-							className={`${s.cell} ${s.name} ${
-								act.name.changed ? s.changed : ''
-							}`}
-							key={`${act.id}-${index}-1`}
-						>
-							{act.name.val}
+						<div className={`${s.cell} ${s.name}`} key={`${act.id}-${index}-1`}>
+							{act.name}
 						</div>,
 						<div
 							className={`${s.cell} ${s.amount} ${

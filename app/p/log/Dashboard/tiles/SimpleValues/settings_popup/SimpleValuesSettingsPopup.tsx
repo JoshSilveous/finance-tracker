@@ -1,23 +1,40 @@
 import { SetStateAction, useEffect, useRef, useState } from 'react'
-import { SimpleValuesTile, TileData } from '../types'
-import s from './EditTilePopup.module.scss'
+import s from './SimpleValuesSettingsPopup.module.scss'
 import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
-import { Data } from '../../hooks'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { createFocusLoop, delay, getCurDate, getCurDateString, getDateString } from '@/utils'
-import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
+import { Data } from '../../../hooks'
+import { SimpleValuesTile, TileData } from '../../types'
+import { GRID_SPACING } from '@/app/globals'
+import { simpleValuesTileDefaults } from '../SimpleValues'
 
-interface EditTilePopupProps {
-	tile: SimpleValuesTile
+interface SimpleValuesSettingsPopupProps {
+	context: 'edit' | 'create'
+	tile?: SimpleValuesTile
 	setTileData: (value: SetStateAction<TileData[]>) => void
 	data: Data.Controller
 	closePopup: () => void
 }
-export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTilePopupProps) {
+export function SimpleValuesSettingsPopup({
+	context,
+	tile,
+	setTileData,
+	data,
+	closePopup,
+}: SimpleValuesSettingsPopupProps) {
 	const [formData, setFormData] = useState<SimpleValuesTile['options']>(
-		structuredClone(tile.options)
+		context === 'edit'
+			? structuredClone(tile!.options)
+			: {
+					exclude: [],
+					show: 'categories',
+					title: 'Name your tile',
+					showTitle: true,
+					showDataFor: 'all_time',
+					customDay: '',
+			  }
 	)
 	const firstNodeRef = useRef<HTMLInputElement>(null)
 	const lastNodeRef = useRef<HTMLButtonElement>(null)
@@ -101,12 +118,34 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 	}, [])
 
 	const handleSave = async () => {
-		setTileData((prev) => {
-			const clone = structuredClone(prev)
-			const index = prev.findIndex((it) => it.id === tile.id)
-			clone[index].options = structuredClone(formData)
-			return clone
-		})
+		context === 'edit'
+			? setTileData((prev) => {
+					const clone = structuredClone(prev)
+					const index = prev.findIndex((it) => it.id === tile!.id)
+					clone[index].options = structuredClone(formData)
+					return clone
+			  })
+			: setTileData((prev) => {
+					const clone = structuredClone(prev)
+					clone.push(
+						structuredClone({
+							type: 'simple_values',
+							position: {
+								top: GRID_SPACING,
+								left: GRID_SPACING,
+							},
+							size: {
+								width: simpleValuesTileDefaults.minWidth!,
+								height: simpleValuesTileDefaults.minHeight!,
+							},
+							id: `PENDING_CREATION||${crypto.randomUUID()}`,
+							zIndex: clone.length + 1,
+							options: structuredClone(formData),
+						})
+					)
+					return clone
+			  })
+
 		closePopup()
 	}
 
@@ -259,7 +298,7 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 
 	return (
 		<div className={s.main}>
-			<h3>Edit "Simple Values" Tile</h3>
+			<h3>{context === 'create' ? 'Create' : 'Edit'} "Simple Values" Tile</h3>
 			<div className={s.title_container}>
 				<div className={s.title}>
 					<label htmlFor='title'>Title:</label>
@@ -321,11 +360,11 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 												bgColor='var(--bg-color-lighter-3)'
 												onChange={handleChange}
 											/>
-											<label htmlFor={cat.id}>{cat.name.val}</label>
+											<label htmlFor={cat.id}>{cat.name}</label>
 										</div>
 									)
 								}),
-								<div className={s.item} key={`no_cat_${tile.id}`}>
+								<div className={s.item} key='no_cat'>
 									<JCheckbox
 										id='no_category'
 										data-key='exclude'
@@ -347,11 +386,11 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 												bgColor='var(--bg-color-lighter-3)'
 												onChange={handleChange}
 											/>
-											<label htmlFor={act.id}>{act.name.val}</label>
+											<label htmlFor={act.id}>{act.name}</label>
 										</div>
 									)
 								}),
-								<div className={s.item} key={`no_act_${tile.id}`}>
+								<div className={s.item} key='no_act'>
 									<JCheckbox
 										id='no_account'
 										data-key='exclude'

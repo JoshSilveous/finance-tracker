@@ -8,8 +8,8 @@ import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
 import { fetchTileData, upsertTiles } from '@/database'
-import { AddTilePopup } from './AddTilePopup/AddTilePopup'
 import { saveChanges } from './func/saveChanges'
+import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
