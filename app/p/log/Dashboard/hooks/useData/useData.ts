@@ -381,7 +381,6 @@ export function useData(p: UseDataOptions) {
 	const reload = async () => {
 		setIsPendingSave(false)
 		setIsLoading(true)
-		console.log('two weeks ago string:', getCurDateString(-14))
 		const [transactionsRaw, categoriesRaw, accountsRaw] = await Promise.all([
 			fetchTransactionData(getCurDateString(-14)),
 			fetchCategoryData(),

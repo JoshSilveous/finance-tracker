@@ -52,6 +52,16 @@
 			flex: 1;
 		}
 	}
+	.explanation_container {
+		padding: 15px;
+		background-color: var(--bg-color-lighter-1);
+		border-radius: 15px;
+		.heading {
+			font-weight: 500;
+			font-size: 18px;
+			margin-bottom: 5px;
+		}
+	}
 	.button_container {
 		display: flex;
 		gap: 15px;

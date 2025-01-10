@@ -4,11 +4,12 @@ import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { createFocusLoop, delay, getCurDate, getCurDateString, getDateString } from '@/utils'
+import { createFocusLoop, delay, getCurDate, getCurDateString } from '@/utils'
 import { Data } from '../../../hooks'
 import { SimpleValuesTile, TileData } from '../../types'
 import { GRID_SPACING } from '@/app/globals'
 import { simpleValuesTileDefaults } from '../SimpleValues'
+import { genExplanationSection } from './genExplanationSection'
 
 interface SimpleValuesSettingsPopupProps {
 	context: 'edit' | 'create'
@@ -33,7 +34,7 @@ export function SimpleValuesSettingsPopup({
 					title: 'Name your tile',
 					showTitle: true,
 					showDataFor: 'all_time',
-					customDay: '',
+					customDay: getCurDateString(),
 			  }
 	)
 	const firstNodeRef = useRef<HTMLInputElement>(null)
@@ -168,8 +169,6 @@ export function SimpleValuesSettingsPopup({
 				const startOfWeek = getCurDate()
 				startOfWeek.setDate(today.getDate() - dayOfWeek)
 
-				console.log('startOfWeek:', getDateString(startOfWeek))
-
 				const datesOfWeek: string[] = []
 				for (let i = 0; i < 7; i++) {
 					const date = new Date(startOfWeek)
@@ -201,7 +200,6 @@ export function SimpleValuesSettingsPopup({
 					value: datesOfThisWeek[6],
 				},
 			]
-			console.log('dayOfWeekOptions', dayOfWeekOptions)
 
 			return (
 				<JDropdown
@@ -259,8 +257,6 @@ export function SimpleValuesSettingsPopup({
 				return [...datesOfPreviousWeek, ...datesOfCurrentWeek]
 			})()
 
-			console.log('pastTwoWeeksOptions', pastTwoWeeksOptions)
-
 			return (
 				<JDropdown
 					id='perSelector'
@@ -295,6 +291,8 @@ export function SimpleValuesSettingsPopup({
 			</div>
 		)
 	})()
+
+	const ExplanationSection = genExplanationSection(formData)
 
 	return (
 		<div className={s.main}>
@@ -404,7 +402,7 @@ export function SimpleValuesSettingsPopup({
 				</div>
 			</div>
 			{ShowDataSection}
-
+			{ExplanationSection}
 			<div className={s.button_container}>
 				<JButton jstyle='secondary' onClick={closePopup}>
 					Cancel

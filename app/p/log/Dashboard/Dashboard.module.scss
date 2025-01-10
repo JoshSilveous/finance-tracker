@@ -59,7 +59,7 @@
 			background-size: var(--GRID_SPACING) var(--GRID_SPACING); /* Size of the grid cells */
 
 			--scrollbar-width: 17px; // this is a "default" value, which gets overridden once the component renders with the calculated scrollbar width (since this varies between browsers).
-			.transaction_manager_container {
+			.tile {
 				display: flex;
 				flex-direction: column;
 				overflow: auto;

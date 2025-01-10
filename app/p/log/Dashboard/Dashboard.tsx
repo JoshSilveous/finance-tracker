@@ -131,6 +131,7 @@ export function Dashboard() {
 
 	const tiles = genDisplayTiles(
 		tileData,
+		origTileDataRef,
 		setTileData,
 		data,
 		foldState,

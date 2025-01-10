@@ -1,6 +1,6 @@
 import Tile from '@/components/Tile/Tile'
 import s from '../Dashboard.module.scss'
-import { SetStateAction } from 'react'
+import { MutableRefObject, SetStateAction } from 'react'
 import { Data, FoldStateController, SortOrder, HistoryController } from '../hooks'
 import { SimpleValues, simpleValuesTileDefaults } from './SimpleValues/SimpleValues'
 import {
@@ -8,9 +8,11 @@ import {
 	transactionManagerTileDefaults,
 } from './TransactionManager/TransactionManager'
 import { TileData } from './types'
+import { areDeeplyEqual } from '@/utils'
 
 export function genDisplayTiles(
 	tileData: TileData[],
+	origTileDataRef: MutableRefObject<TileData[]>,
 	setTileData: (value: SetStateAction<TileData[]>) => void,
 	data: Data.Controller,
 	foldState: FoldStateController,
@@ -50,6 +52,8 @@ export function genDisplayTiles(
 			}
 		}
 
+		const changed = !areDeeplyEqual(origTileDataRef.current![index], tile)
+
 		const tileDefaults =
 			tile.type === 'simple_values'
 				? simpleValuesTileDefaults
@@ -57,7 +61,7 @@ export function genDisplayTiles(
 
 		return (
 			<Tile
-				className={s.transaction_manager_container}
+				className={s.tile}
 				style={{ zIndex: tile.zIndex }}
 				onMouseDown={onMouseDown}
 				onResize={onResize}
@@ -90,6 +94,7 @@ export function genDisplayTiles(
 				{tile.type === 'simple_values' && (
 					<SimpleValues
 						data={data}
+						changed={changed}
 						tileOptions={tile.options!}
 						tileID={tile.id}
 						key={`sv-${index}`}

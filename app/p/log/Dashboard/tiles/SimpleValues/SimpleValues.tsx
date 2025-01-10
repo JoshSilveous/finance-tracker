@@ -10,6 +10,7 @@ import { getStartingAmounts as getStartingAmounts } from './func/getStartingAmou
 import { SimpleValuesSettingsPopup } from './settings_popup/SimpleValuesSettingsPopup'
 export interface SimpleValuesProps {
 	data: Data.Controller
+	changed: boolean
 	tileOptions: SimpleValuesTile['options']
 	tileID: string
 }
@@ -36,7 +37,7 @@ export const simpleValuesTileDefaults: TileDefaultSettings = {
 
 export type TotalEntry = { id: string; total_amount: number }
 
-export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
+export function SimpleValues({ data, changed, tileOptions, tileID }: SimpleValuesProps) {
 	const [isLoading, setIsLoading] = useState(true)
 	const databaseFetchedDataRef = useRef<TotalEntry[]>([])
 
@@ -245,7 +246,11 @@ export function SimpleValues({ data, tileOptions, tileID }: SimpleValuesProps) {
 
 	return (
 		<div className={s.main}>
-			{tileOptions.showTitle && <div className={s.title}>{tileOptions.title}</div>}
+			{tileOptions.showTitle && (
+				<div className={`${s.title} ${changed ? s.changed : ''}`}>
+					{tileOptions.title}
+				</div>
+			)}
 			<div className={s.grid_container} ref={testRef}>
 				{isLoading && (
 					<div className={s.loading_overlay}>
