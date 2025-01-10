@@ -4,7 +4,15 @@ import s from './JGrid.module.scss'
 import { calculatePercentages } from '@/utils'
 
 export function JGrid(p: JGridTypes.Props) {
-	const defaultWidthsPx = p.headers.map((header) => header.defaultWidth)
+	const defaultWidthsPx = p.headers.map((header) => {
+		if (header.minWidth && header.defaultWidth < header.minWidth) {
+			return header.minWidth
+		} else if (header.maxWidth && header.defaultWidth > header.maxWidth) {
+			return header.maxWidth
+		} else {
+			return header.defaultWidth
+		}
+	})
 	const totalWidthInPx = defaultWidthsPx.reduce((sum, num) => sum + num, 0)
 
 	const noResizeArr = p.headers.map((header) => header.noResize)
