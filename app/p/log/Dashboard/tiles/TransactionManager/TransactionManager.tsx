@@ -145,7 +145,7 @@ export function TransactionManager({
 		category: (() => {
 			const options = data.cur.categories.map((cat) => {
 				return {
-					name: cat.name.val,
+					name: cat.name,
 					value: cat.id,
 				}
 			})
@@ -155,7 +155,7 @@ export function TransactionManager({
 		account: (() => {
 			const options = data.cur.accounts.map((act) => {
 				return {
-					name: act.name.val,
+					name: act.name,
 					value: act.id,
 				}
 			})

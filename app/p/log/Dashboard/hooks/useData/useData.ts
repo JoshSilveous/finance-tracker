@@ -412,14 +412,11 @@ export function useData(p: UseDataOptions) {
 
 		const categories: Data.StateCategory[] = categoriesRaw.map((category) => ({
 			id: category.id,
-			name: { val: category.name, changed: false },
-			amtBeforeCurrentTransactions: 0, // will change once page-by-page transaction loading is added
+			name: category.name,
 		}))
 		const accounts: Data.StateAccount[] = accountsRaw.map((account) => ({
 			id: account.id,
-			name: { val: account.name, changed: false },
-			starting_amount: { val: account.starting_amount.toFixed(2), changed: false },
-			amtBeforeCurrentTransactions: 0, // will change once page-by-page transaction loading is added
+			name: account.name,
 		}))
 
 		const newData = { transactions, categories, accounts }
@@ -481,12 +478,11 @@ export namespace Data {
 	}
 	export type StateCategory = {
 		id: string
-		name: { val: string; changed: boolean }
+		name: string
 	}
 	export type StateAccount = {
 		id: string
-		name: { val: string; changed: boolean }
-		starting_amount: { val: string; changed: boolean }
+		name: string
 	}
 
 	export type Controller = {
