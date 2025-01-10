@@ -180,12 +180,11 @@ export function TransactionManager({
 
 		sortedData.forEach((groupedItem, groupedItemIndex) => {
 			if (groupedItemIndex === 0) {
-				const today = getCurDate()
 				const inputDate = parseDateString(groupedItem.date)
-				if (inputDate < today) {
+				if (inputDate < getCurDate()) {
 					cells.push(
 						<DateRow
-							date={today.toLocaleDateString('en-CA')}
+							date={getCurDateString()}
 							dropdownOptions={dropdownOptions}
 							refreshData={data.reload}
 							gridRow={gridRow}
