@@ -62,8 +62,16 @@
 			margin-bottom: 5px;
 		}
 	}
+	.delete_container {
+		button {
+			color: var(--font-color-error);
+		}
+	}
 	.button_container {
 		display: flex;
 		gap: 15px;
 	}
+}
+.delete_tile_popup {
+	width: 300px;
 }

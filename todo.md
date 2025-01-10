@@ -2,11 +2,13 @@
 
 ### Needed before beta
 
--   Set up SimpleValues options for:
-    time period (past two weeks, since last item in category (e.x. income), this month)
+-   Add delete tiles option
+-   Pretty up the popups
 
 ### Can wait
 
+-   Set up SimpleValues options for:
+    time period (past two weeks, since last item in category (e.x. income), this month)
 -   GridNav not working when a row is folded- add a check for disabled inputs
 -   Add save check for "Create New Transaction"
 -   Save button should work on reorders alone

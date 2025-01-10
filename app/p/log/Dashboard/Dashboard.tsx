@@ -126,7 +126,14 @@ export function Dashboard() {
 	})()
 
 	const handleSave = async () => {
-		await saveChanges(data, tileData, sortOrder, refreshAllData, setIsLoading)
+		await saveChanges(
+			data,
+			tileData,
+			origTileDataRef,
+			sortOrder,
+			refreshAllData,
+			setIsLoading
+		)
 	}
 
 	const tiles = genDisplayTiles(

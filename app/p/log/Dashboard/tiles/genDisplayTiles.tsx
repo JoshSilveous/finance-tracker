@@ -52,7 +52,24 @@ export function genDisplayTiles(
 			}
 		}
 
-		const changed = !areDeeplyEqual(origTileDataRef.current![index], tile)
+		const changed = (() => {
+			// if new tile
+			if (origTileDataRef.current![index] === undefined) {
+				return true
+			}
+
+			// check for changes to this tile BESIDES zIndex. zIndex changes quite often, and isn't really important enough to notify the user that it'll need to be saved.
+			const origTileWithoutZIndex = (() => {
+				const { zIndex, ...rest } = origTileDataRef.current![index]
+				return rest
+			})()
+			const curTileWithoutZIndex = (() => {
+				const { zIndex, ...rest } = tile
+				return rest
+			})()
+
+			return !areDeeplyEqual(origTileWithoutZIndex, curTileWithoutZIndex)
+		})()
 
 		const tileDefaults =
 			tile.type === 'simple_values'
@@ -76,7 +93,7 @@ export function genDisplayTiles(
 						? () => tileDefaults.onEditButtonClick!(tile, setTileData, data)
 						: undefined
 				}
-				key={index}
+				key={tile.id}
 				resizable
 			>
 				{tile.type === 'transaction_manager' && (

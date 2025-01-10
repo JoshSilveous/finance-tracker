@@ -1,5 +1,6 @@
 import {
 	deleteItems,
+	deleteTiles,
 	deleteTransactions,
 	getTransactionsCount,
 	UpsertItemEntry,
@@ -9,16 +10,18 @@ import {
 } from '@/database'
 import { Data, SortOrder } from '../hooks'
 import { TileData } from '../tiles'
-import { SetStateAction } from 'react'
+import { MutableRefObject, SetStateAction } from 'react'
 import { areDeeplyEqual } from '@/utils'
 
 export async function saveChanges(
 	data: Data.Controller,
 	tileData: TileData[],
+	origTileDataRef: MutableRefObject<TileData[]>,
 	sortOrder: SortOrder.Controller,
 	refreshAllData: () => Promise<void>,
 	setIsLoading: (value: SetStateAction<boolean>) => void
 ) {
+	setIsLoading(true)
 	if (data.isPendingSave || !areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
 		//	1. Filter transactions and items into separate arrays
 		const transactions = (() => {
@@ -320,12 +323,35 @@ export async function saveChanges(
 		await Promise.all([deleteTransactionsPromise, deleteItemsPromise])
 		await upsertPromise
 	}
+
 	// check for tile changes
+	if (!areDeeplyEqual(tileData, origTileDataRef.current)) {
+		// check for changed / new tiles
+		const changedTiles: TileData[] = []
+		tileData.forEach((tile) => {
+			const origTile = origTileDataRef.current.find(
+				(origTile) => origTile.id === tile.id
+			)
+			if (origTile === undefined || !areDeeplyEqual(origTile, tile)) {
+				changedTiles.push(tile)
+			}
+		})
 
-	// save tile changes
+		// check for deleted tiles
+		const deletedTiles: TileData[] = []
+		origTileDataRef.current.forEach((tile) => {
+			const curTileIndex = tileData.findIndex((curTile) => curTile.id === tile.id)
+			if (curTileIndex === -1) {
+				deletedTiles.push(tile)
+			}
+		})
 
-	setIsLoading(true)
-	await upsertTiles(tileData)
+		// save tile changes
+		await Promise.all([
+			upsertTiles(changedTiles),
+			deleteTiles(deletedTiles.map((it) => it.id)),
+		])
+	}
 	await refreshAllData()
 	setIsLoading(false)
 	return

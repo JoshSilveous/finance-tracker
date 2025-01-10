@@ -37,11 +37,25 @@ export async function upsertTiles(tiles: TileData[]) {
 		user_id: user_id,
 	}))
 
-	const { data, error } = await supabase.from('tiles').upsert(tilesWithUserID, {
+	const { error } = await supabase.from('tiles').upsert(tilesWithUserID, {
 		defaultToNull: false,
 		onConflict: 'id',
 		ignoreDuplicates: false,
 	})
+
+	if (error) {
+		throw new Error(error.message)
+	}
+
+	return
+}
+
+export async function deleteTiles(ids: string[]) {
+	if (!ids.length) {
+		return
+	}
+
+	const { error } = await supabase.from('tiles').delete().in('id', ids)
 
 	if (error) {
 		throw new Error(error.message)

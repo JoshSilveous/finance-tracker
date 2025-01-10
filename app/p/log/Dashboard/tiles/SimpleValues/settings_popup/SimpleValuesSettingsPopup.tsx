@@ -4,7 +4,7 @@ import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { createFocusLoop, delay, getCurDate, getCurDateString } from '@/utils'
+import { createFocusLoop, createPopup, delay, getCurDate, getCurDateString } from '@/utils'
 import { Data } from '../../../hooks'
 import { SimpleValuesTile, TileData } from '../../types'
 import { GRID_SPACING } from '@/app/globals'
@@ -294,6 +294,45 @@ export function SimpleValuesSettingsPopup({
 
 	const ExplanationSection = genExplanationSection(formData)
 
+	const onDeleteClick = () => {
+		const handleDelete = () => {
+			setTileData((prev) => {
+				const clone = structuredClone(prev)
+				const thisTileIndex = clone.findIndex((entry) => entry.id === tile!.id)
+				clone.splice(thisTileIndex, 1)
+				return clone
+			})
+			deletePopup.close()
+			closePopup()
+		}
+
+		const deletePopup = createPopup(
+			<div className={s.delete_tile_popup}>
+				<h3>Delete Tile</h3>
+				<p>
+					<strong>This cannot be undone</strong>
+					<br />
+					Are you sure?
+				</p>
+				<div style={{ display: 'flex', gap: '10px' }}>
+					<JButton
+						jstyle='secondary'
+						onClick={() => {
+							deletePopup.close()
+						}}
+					>
+						Go Back
+					</JButton>
+					<JButton jstyle='secondary' onClick={handleDelete}>
+						Delete
+					</JButton>
+				</div>
+			</div>,
+			'error'
+		)
+		deletePopup.trigger()
+	}
+
 	return (
 		<div className={s.main}>
 			<h3>{context === 'create' ? 'Create' : 'Edit'} "Simple Values" Tile</h3>
@@ -403,6 +442,13 @@ export function SimpleValuesSettingsPopup({
 			</div>
 			{ShowDataSection}
 			{ExplanationSection}
+			{context === 'edit' && (
+				<div className={s.delete_container}>
+					<JButton jstyle='invisible' onClick={onDeleteClick}>
+						Delete Tile
+					</JButton>
+				</div>
+			)}
 			<div className={s.button_container}>
 				<JButton jstyle='secondary' onClick={closePopup}>
 					Cancel
