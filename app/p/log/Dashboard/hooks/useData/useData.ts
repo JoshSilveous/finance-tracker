@@ -442,6 +442,7 @@ export function useData(p: UseDataOptions) {
 
 	const controller: Data.Controller = {
 		cur: data,
+		def: origDataRef.current,
 		update,
 		stageDelete,
 		stageCreate,
@@ -481,17 +482,16 @@ export namespace Data {
 	export type StateCategory = {
 		id: string
 		name: { val: string; changed: boolean }
-		amtBeforeCurrentTransactions: number
 	}
 	export type StateAccount = {
 		id: string
 		name: { val: string; changed: boolean }
 		starting_amount: { val: string; changed: boolean }
-		amtBeforeCurrentTransactions: number
 	}
 
 	export type Controller = {
 		cur: Data.State
+		def: Data.State
 		update: Data.Update
 		stageDelete: Data.Delete
 		stageCreate: Data.Create

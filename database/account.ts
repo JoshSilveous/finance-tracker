@@ -131,3 +131,39 @@ export async function deleteAccountAndReplace(account_id: string, new_account_id
 		throw new Error(accountDeleteRes.error.message)
 	}
 }
+
+export interface AccountTotal {
+	account_id: string
+	total_amount: number
+}
+export async function fetchAccountTotals() {
+	const { data, error } = await supabase.rpc('get_totals_by_account')
+	if (error) {
+		throw new Error(error.message)
+	}
+	return data as AccountTotal[]
+}
+
+/**
+ * Within those two dates INCLUDING startDate and endDate
+ * @param startDate
+ * @param endDate
+ * @returns
+ */
+export async function fetchAccountTotalsWithinDateRange(startDate: string, endDate: string) {
+	const { data, error } = (await supabase.rpc('get_totals_by_account_within_dates', {
+		start_date: startDate,
+		end_date: endDate,
+	})) as {
+		data: AccountTotal[]
+		error: any
+	}
+
+	if (error) {
+		throw new Error(error.message)
+	}
+
+	return data.map((item) =>
+		item.account_id === null ? { account_id: '', total_amount: item.total_amount } : item
+	) as AccountTotal[]
+}

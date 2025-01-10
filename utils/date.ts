@@ -15,22 +15,20 @@ export function getDateString(date: Date): string {
 
 /**
  * Returns the local user's current date in `"YYYY-MM-DD"` format.
+ * @param offset Add/subtract days from today's date
  */
-export function getCurDateString(): string {
-	return new Date().toLocaleDateString('en-CA') // Local date as "YYYY-MM-DD"
+export function getCurDateString(offset?: number): string {
+	const date = new Date()
+	if (offset) {
+		date.setDate(date.getDate() + offset)
+	}
+	return date.toLocaleDateString('en-CA')
 }
 
 /**
  * Returns the local user's current date in `"YYYY-MM-DD"` format, normalized to UTC 00:00:00
+ * @param offset Add/subtract days from today's date
  */
-export function getCurDate(): Date {
-	return parseDateString(getCurDateString())
-}
-
-export function subtractDaysFromUTCDate(date: Date, daysToSubtract: number) {
-	const resultDate = new Date(date)
-
-	resultDate.setUTCDate(resultDate.getUTCDate() - daysToSubtract)
-
-	return resultDate
+export function getCurDate(offset?: number): Date {
+	return parseDateString(getCurDateString(offset))
 }

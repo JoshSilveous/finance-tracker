@@ -6,7 +6,7 @@ import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { Data } from '../../hooks'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { createFocusLoop, delay, getCurDate, getCurDateString } from '@/utils'
+import { createFocusLoop, delay, getCurDate, getCurDateString, getDateString } from '@/utils'
 import { JDatePicker } from '@/components/JForm/JDatePicker/JDatePicker'
 
 interface EditTilePopupProps {
@@ -129,6 +129,8 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 				const startOfWeek = getCurDate()
 				startOfWeek.setDate(today.getDate() - dayOfWeek)
 
+				console.log('startOfWeek:', getDateString(startOfWeek))
+
 				const datesOfWeek: string[] = []
 				for (let i = 0; i < 7; i++) {
 					const date = new Date(startOfWeek)
@@ -143,23 +145,24 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 			})()
 
 			const dayOfWeekOptions = [
-				{ name: 'Sunday', value: datesOfThisWeek[1] },
-				{ name: 'Monday', value: datesOfThisWeek[2] },
-				{ name: 'Tuesday', value: datesOfThisWeek[3] },
+				{ name: 'Sunday', value: datesOfThisWeek[0] },
+				{ name: 'Monday', value: datesOfThisWeek[1] },
+				{ name: 'Tuesday', value: datesOfThisWeek[2] },
 				{
 					name: 'Wednesday',
-					value: datesOfThisWeek[4],
+					value: datesOfThisWeek[3],
 				},
 				{
 					name: 'Thursday',
-					value: datesOfThisWeek[5],
+					value: datesOfThisWeek[4],
 				},
-				{ name: 'Friday', value: datesOfThisWeek[6] },
+				{ name: 'Friday', value: datesOfThisWeek[5] },
 				{
 					name: 'Saturday',
-					value: datesOfThisWeek[7],
+					value: datesOfThisWeek[6],
 				},
 			]
+			console.log('dayOfWeekOptions', dayOfWeekOptions)
 
 			return (
 				<JDropdown
@@ -216,6 +219,8 @@ export function EditTilePopup({ tile, setTileData, data, closePopup }: EditTileP
 
 				return [...datesOfPreviousWeek, ...datesOfCurrentWeek]
 			})()
+
+			console.log('pastTwoWeeksOptions', pastTwoWeeksOptions)
 
 			return (
 				<JDropdown

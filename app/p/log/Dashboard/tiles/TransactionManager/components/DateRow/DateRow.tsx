@@ -1,11 +1,11 @@
 import s from './DateRow.module.scss'
 import { formatDate } from '@/utils/formatDate'
 import { JButton } from '@/components/JForm'
-import { createPopup } from '@/utils'
+import { createPopup, parseDateString } from '@/utils'
 import { NewTransactionForm } from './NewTransactionForm/NewTransactionForm'
 import { DropdownOptions } from '../../TransactionManager'
 import { TabIndexer } from '../../hooks'
-import { getRelDateString } from '@/utils/getDateString'
+import { getCurDateString } from '@/utils'
 
 interface DateRowProps {
 	date: string
@@ -92,8 +92,8 @@ export function DateRow({
 		popup.trigger()
 	}
 
-	const isToday = date === getRelDateString()
-	const isYesterday = date === getRelDateString(-1)
+	const isToday = date === getCurDateString()
+	const isYesterday = date === getCurDateString(-1)
 
 	const dateDisplay = (
 		<div className={s.date_container}>

@@ -141,7 +141,7 @@ export async function deleteCategoryAndReplace(
 
 export interface CategoryTotal {
 	category_id: string
-	sum: number
+	total_amount: number
 }
 export async function fetchCategoryTotals() {
 	const { data, error } = await supabase.rpc('get_totals_by_category')
@@ -151,11 +151,17 @@ export async function fetchCategoryTotals() {
 	return data as CategoryTotal[]
 }
 
+/**
+ * Within those two dates INCLUDING startDate and endDate
+ * @param startDate
+ * @param endDate
+ * @returns
+ */
 export async function fetchCategoryTotalsWithinDateRange(
 	startDate: string,
 	endDate: string
 ) {
-	const { data, error } = (await supabase.rpc('get_sum_by_category_within_dates', {
+	const { data, error } = (await supabase.rpc('get_totals_by_category_within_dates', {
 		start_date: startDate,
 		end_date: endDate,
 	})) as {
@@ -168,6 +174,8 @@ export async function fetchCategoryTotalsWithinDateRange(
 	}
 
 	return data.map((item) =>
-		item.category_id === null ? { category_id: '', sum: item.sum } : item
+		item.category_id === null
+			? { category_id: '', total_amount: item.total_amount }
+			: item
 	) as CategoryTotal[]
 }
