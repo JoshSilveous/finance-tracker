@@ -41,7 +41,8 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Date</div>
 				</div>
 			),
-			defaultWidth: getNumPref('TransactionManager_Date_Col', 140),
+			defaultWidth: 140,
+			// defaultWidth: getNumPref('TransactionManager_Date_Col', 140), disabling until JGrid percentages is refined
 			minWidth: 105,
 			maxWidth: 150,
 		},
@@ -51,7 +52,8 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Name</div>
 				</div>
 			),
-			defaultWidth: getNumPref('TransactionManager_Name_Col', 260),
+			defaultWidth: 260,
+			// defaultWidth: getNumPref('TransactionManager_Name_Col', 260), disabling until JGrid percentages is refined
 			minWidth: 160,
 			maxWidth: 300,
 		},
@@ -61,7 +63,8 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Amount</div>
 				</div>
 			),
-			defaultWidth: getNumPref('TransactionManager_Amount_Col', 140),
+			defaultWidth: 140,
+			// defaultWidth: getNumPref('TransactionManager_Amount_Col', 140), disabling until JGrid percentages is refined
 			minWidth: 95,
 			maxWidth: 160,
 		},
@@ -71,7 +74,8 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Category</div>
 				</div>
 			),
-			defaultWidth: getNumPref('TransactionManager_Category_Col', 170),
+			defaultWidth: 170,
+			// defaultWidth: getNumPref('TransactionManager_Category_Col', 170), disabling until JGrid percentages is refined
 			minWidth: 110,
 			maxWidth: 200,
 		},
@@ -81,7 +85,8 @@ export function genHeaders(historyController: HistoryController) {
 					<div className={s.text}>Account</div>
 				</div>
 			),
-			defaultWidth: getNumPref('TransactionManager_Account_Col', 170),
+			defaultWidth: 170,
+			// defaultWidth: getNumPref('TransactionManager_Account_Col', 170), disabling until JGrid percentages is refined
 			minWidth: 110,
 			maxWidth: 200,
 		},

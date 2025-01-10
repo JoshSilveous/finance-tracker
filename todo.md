@@ -2,6 +2,11 @@
 
 ### Needed before beta
 
+-   Update Category / Account Managers
+-   Make sure that data methods don't have any cross-user overlap (they shouldn't)
+-   Add different signup/login methods
+-   Add error reporting mechanism
+
 ### Can wait
 
 -   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]

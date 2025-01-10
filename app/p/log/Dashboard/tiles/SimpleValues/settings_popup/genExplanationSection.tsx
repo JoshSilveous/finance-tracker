@@ -12,8 +12,8 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 			case 'all_time': {
 				text = (
 					<span>
-						show the <strong>current values</strong> of your <em>accounts</em>{' '}
-						(the <strong>balance</strong> of your accounts)
+						show the <strong>current values</strong> of your accounts (the{' '}
+						<strong>balance</strong> of your accounts)
 					</span>
 				)
 				break
@@ -21,9 +21,8 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 			case 'per_week': {
 				text = (
 					<span>
-						show the <strong>balance difference</strong> of your{' '}
-						<em>accounts</em> between now and last{' '}
-						<strong>{customDayFormatted.day.long}</strong>
+						show the <strong>balance difference</strong> of your accounts between
+						now and last <strong>{customDayFormatted.day.long}</strong>
 					</span>
 				)
 				break
@@ -31,9 +30,9 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 			case 'per_two_weeks': {
 				text = (
 					<span>
-						show the <strong>balance difference</strong> of your{' '}
-						<em>accounts</em> for each <strong>two-week period</strong>, starting
-						from the specified date and continuing at two-week intervals
+						show the <strong>balance difference</strong> of your accounts for
+						each <strong>two-week period</strong>, starting from the specified
+						date and continuing at two-week intervals
 					</span>
 				)
 				break
@@ -41,10 +40,9 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 			case 'per_month': {
 				text = (
 					<span>
-						show the <strong>balance difference</strong> of your{' '}
-						<em>accounts</em> for each <strong>calendar month</strong>, starting
-						from the beginning of the earliest recorded month and continuing to
-						the present
+						show the <strong>balance difference</strong> of your accounts for
+						each <strong>calendar month</strong>, starting from the beginning of
+						the earliest recorded month and continuing to the present
 					</span>
 				)
 				break
@@ -52,8 +50,8 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 			case 'past_week': {
 				text = (
 					<span>
-						show the <strong>balance difference</strong> of your{' '}
-						<em>accounts</em> over the <strong>past 7 days</strong>
+						show the <strong>balance difference</strong> of your accounts over
+						the <strong>past 7 days</strong>
 					</span>
 				)
 				break
@@ -61,8 +59,8 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 			case 'past_two_weeks': {
 				text = (
 					<span>
-						show the <strong>balance difference</strong> of your{' '}
-						<em>accounts</em> over the <strong>past 14 days</strong> (two weeks)
+						show the <strong>balance difference</strong> of your accounts over
+						the <strong>past 14 days</strong> (two weeks)
 					</span>
 				)
 				break
@@ -70,9 +68,8 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 			case 'past_month': {
 				text = (
 					<span>
-						show the <strong>balance difference</strong> of your{' '}
-						<em>accounts</em> over the <strong>past 30 days</strong>{' '}
-						(approximately one month)
+						show the <strong>balance difference</strong> of your accounts over
+						the <strong>past 30 days</strong> (approximately one month)
 					</span>
 				)
 				break
@@ -84,7 +81,7 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 				text = (
 					<span>
 						show the <strong>total spending</strong> and{' '}
-						<strong>earnings</strong> for each <em>category</em> over{' '}
+						<strong>earnings</strong> for each category over{' '}
 						<strong>all time</strong>
 					</span>
 				)
@@ -94,7 +91,7 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 				text = (
 					<span>
 						show the <strong>spending</strong> and <strong>earnings</strong> for
-						each <em>category</em> between now and last{' '}
+						each category between now and last{' '}
 						<strong>{customDayFormatted.day.long}</strong>
 					</span>
 				)
@@ -104,8 +101,8 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 				text = (
 					<span>
 						show the <strong>spending</strong> and <strong>earnings</strong> for
-						each <em>category</em> for every <strong>two-week period</strong>,
-						starting from the specified date and continuing at two-week intervals
+						each category for every <strong>two-week period</strong>, starting
+						from the specified date and continuing at two-week intervals
 					</span>
 				)
 				break
@@ -114,9 +111,9 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 				text = (
 					<span>
 						show the <strong>spending</strong> and <strong>earnings</strong> for
-						each <em>category</em> for every <strong>calendar month</strong>,
-						starting from the beginning of the earliest recorded month and
-						continuing to the present
+						each category for every <strong>calendar month</strong>, starting
+						from the beginning of the earliest recorded month and continuing to
+						the present
 					</span>
 				)
 				break
@@ -125,7 +122,7 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 				text = (
 					<span>
 						show the <strong>spending</strong> and <strong>earnings</strong> for
-						each <em>category</em> over the <strong>past 7 days</strong>
+						each category over the <strong>past 7 days</strong>
 					</span>
 				)
 				break
@@ -134,8 +131,7 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 				text = (
 					<span>
 						show the <strong>spending</strong> and <strong>earnings</strong> for
-						each <em>category</em> over the <strong>past 14 days</strong> (two
-						weeks)
+						each category over the <strong>past 14 days</strong> (two weeks)
 					</span>
 				)
 				break
@@ -144,8 +140,8 @@ export function genExplanationSection(formData: SimpleValuesTile['options']) {
 				text = (
 					<span>
 						show the <strong>spending</strong> and <strong>earnings</strong> for
-						each <em>category</em> over the <strong>past 30 days</strong>{' '}
-						(approximately one month)
+						each category over the <strong>past 30 days</strong> (approximately
+						one month)
 					</span>
 				)
 				break

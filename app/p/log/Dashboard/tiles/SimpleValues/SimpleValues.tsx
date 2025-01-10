@@ -211,12 +211,14 @@ export function SimpleValues({ data, changed, tileOptions, tileID }: SimpleValue
 		})()
 		const headers: JGridTypes.Props['headers'] = [
 			{
-				defaultWidth: getNumPref(`SimpleValues-${tileID}-Name`, 50),
+				// defaultWidth: getNumPref(`SimpleValues-${tileID}-Name`, 50),
+				defaultWidth: 50,
 				minWidth: 40,
 				content: <div className={s.header}>Name</div>,
 			},
 			{
-				defaultWidth: getNumPref(`SimpleValues-${tileID}-Amount`, 50),
+				// defaultWidth: getNumPref(`SimpleValues-${tileID}-Amount`, 50),
+				defaultWidth: 50,
 				minWidth: 40,
 				content: <div className={s.header}>Amount</div>,
 			},
