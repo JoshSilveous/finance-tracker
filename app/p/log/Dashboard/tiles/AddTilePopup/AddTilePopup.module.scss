@@ -1,0 +1,11 @@
+.main {
+	max-width: 300px;
+	.add_button_container {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+	}
+	.bottom_button_container {
+		margin-top: 30px;
+	}
+}

@@ -2,17 +2,8 @@
 
 ### Needed before beta
 
--   Add delete tiles option
--   Pretty up the popups
-
 ### Can wait
 
--   Set up SimpleValues options for:
-    time period (past two weeks, since last item in category (e.x. income), this month)
--   GridNav not working when a row is folded- add a check for disabled inputs
--   Add save check for "Create New Transaction"
--   Save button should work on reorders alone
--   Set up all needed data/save methods
 -   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
 -   Switch "create new transaction" button to add row to grid
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
@@ -35,6 +26,14 @@
 
 ## Solved
 
+-   Add save check for "Create New Transaction"
+-   Save button should work on reorders alone
+-   Set up all needed data/save methods
+-   Set up SimpleValues options for:
+    time period (past two weeks, since last item in category (e.x. income), this month)
+-   GridNav not working when a row is folded- add a check for disabled inputs
+-   Add delete tiles option
+-   Pretty up the popups
 -   Make pop-out scrollbar not appear when not needed: https://i.imgur.com/sAXGkIZ.gif
 -   Get transaction data (db and changed) into dashboard component for other items
 -   Make TransactionManager card resizable, where the grid always takes up 100%.

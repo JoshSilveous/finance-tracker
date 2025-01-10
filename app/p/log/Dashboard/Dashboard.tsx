@@ -10,6 +10,7 @@ import { GRID_SPACING } from '@/app/globals'
 import { fetchTileData, upsertTiles } from '@/database'
 import { saveChanges } from './func/saveChanges'
 import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
+import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -193,6 +194,19 @@ export function Dashboard() {
 		popup.trigger()
 	}
 
+	const handleFeedback = () => {
+		const popup = createPopup(
+			<FeedbackPopup
+				closePopup={() => {
+					popup.close()
+				}}
+				feedbackSource='dashboard_general'
+				header='Submit Feedback'
+			/>
+		)
+		popup.trigger()
+	}
+
 	return (
 		<div className={`${s.main} ${isLoading ? s.loading : ''}`}>
 			<div className={s.loading_anim_container}>
@@ -209,6 +223,9 @@ export function Dashboard() {
 				</JButton>
 				<JButton jstyle='secondary' className={s.reset} onClick={resetTilePositions}>
 					Reset Tile Positions
+				</JButton>
+				<JButton jstyle='invisible' onClick={handleFeedback}>
+					Submit Feedback
 				</JButton>
 				<JButton
 					jstyle='secondary'
