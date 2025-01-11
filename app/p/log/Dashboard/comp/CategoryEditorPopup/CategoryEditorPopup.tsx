@@ -7,8 +7,7 @@ import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import { fetchCategoryData } from '@/database'
 import { JButton, JInput } from '@/components/JForm'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
-import { createPopup } from '@/utils'
-import { CreateCategoryPopup } from './CreateCategoryPopup/CreateCategoryPopup'
+import { createFocusLoop, createPopup, delay } from '@/utils'
 
 interface NewCategoryManagerPopupProps {
 	closePopup: () => void
@@ -25,6 +24,12 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 	const addToItemRowRefs = (category_id: string) => (node: HTMLDivElement) => {
 		itemRowRefs.current[category_id] = node
 	}
+	useEffect(() => {
+		if (sortOrder) {
+			const topCatID = sortOrder[0]
+			itemRowRefs.current[topCatID]
+		}
+	})
 
 	const refreshData = async () => {
 		setIsLoading(true)
@@ -49,6 +54,9 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 	}, [])
 
 	const areChanges = (() => {
+		if (catData.length !== defCatData.current.length) {
+			return true
+		}
 		if (catData.some((cat) => cat.name.changed)) {
 			return true
 		}
@@ -61,7 +69,7 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 		}
 		return false
 	})()
-	console.log('re-rendered')
+
 	let grid = <></>
 	if (!isLoading) {
 		const headers: JGridTypes.Header[] = [
@@ -122,20 +130,32 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 		})
 
 		const newCategoryRow = (() => {
-			const newCategoryPopup = () => {
-				const popup = createPopup(
-					<CreateCategoryPopup
-						closePopup={() => popup.close()}
-						afterSuccess={refreshData}
-					/>
-				)
-				popup.trigger()
+			const createNewCategory = () => {
+				const tempID = 'PENDING_CREATION||' + crypto.randomUUID()
+
+				setCatData((prev) => {
+					const clone = structuredClone(prev)
+					clone.push({ name: { val: '', changed: true }, id: tempID })
+					return clone
+				})
+				setSortOrder((prev) => {
+					const clone = structuredClone(prev)
+					clone.push(tempID)
+					return clone
+				})
+				delay(10).then(() => {
+					if (itemRowRefs.current[tempID]) {
+						const input = itemRowRefs.current[tempID].children[1].children[0]
+							.children[0] as HTMLInputElement
+						input.focus()
+					}
+				})
 			}
 
 			return (
 				<div style={{ display: 'contents' }}>
 					<div className={`${s.cell} ${s.new_button_container}`}>
-						<JButton jstyle='primary' onClick={newCategoryPopup}>
+						<JButton jstyle='primary' onClick={createNewCategory}>
 							Create New Category
 						</JButton>
 					</div>
