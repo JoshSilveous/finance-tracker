@@ -40,6 +40,10 @@
 				align-items: center;
 				box-sizing: border-box;
 
+				&.changed .reorder_container button {
+					color: var(--font-color-changed) !important;
+				}
+
 				button {
 					height: fit-content;
 					padding: 2px;
@@ -70,6 +74,7 @@
 			}
 			&.control_header {
 				background-color: var(--bg-color-lighter-2);
+				height: 100%;
 			}
 			&.name_header {
 				background-color: var(--bg-color-lighter-2);

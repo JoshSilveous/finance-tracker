@@ -30,7 +30,7 @@ export async function getCategoryCount() {
 
 export async function getCategoryCountAssocWithTransaction(category_id: string) {
 	const { count, error } = await supabase
-		.from('transactions')
+		.from('transaction_items')
 		.select('*', { count: 'exact', head: true })
 		.eq('category_id', category_id)
 	if (error) {
@@ -89,54 +89,43 @@ export async function upsertCategories(categoryUpdates: UpsertCategoryEntry[]) {
 }
 
 export async function deleteCategoryAndTransactions(category_id: string) {
-	const transactionsUpdate = await supabase
-		.from('transactions')
-		.delete()
-		.eq('category_id', category_id)
+	const { error } = await supabase.rpc('delete_category_and_associated_items', {
+		category_id_input: category_id,
+	})
 
-	if (transactionsUpdate.error) {
-		throw new Error(transactionsUpdate.error.message)
+	if (error) {
+		throw new Error(error.message)
 	}
 
-	const categoryDeleteRes = await supabase
-		.from('categories')
-		.delete()
-		.eq('id', category_id)
-	if (categoryDeleteRes.error) {
-		throw new Error(categoryDeleteRes.error.message)
-	}
+	return
 }
 
 export async function deleteCategoryAndSetNull(category_id: string) {
-	// by default, transactions category_id are set null when associated category is deleted
-	const res = await supabase.from('categories').delete().eq('id', category_id)
+	const { error } = await supabase.rpc('delete_category_and_null_associated_items', {
+		category_id_input: category_id,
+	})
 
-	if (res.error) {
-		throw new Error(res.error.message)
+	if (error) {
+		throw new Error(error.message)
 	}
+
+	return
 }
 
 export async function deleteCategoryAndReplace(
 	category_id: string,
 	new_category_id: string
 ) {
-	const transactionsUpdate = await supabase
-		.from('transactions')
-		.update({ category_id: new_category_id })
-		.eq('category_id', category_id)
+	const { error } = await supabase.rpc('delete_category_and_replace_associated_items', {
+		category_id_input: category_id,
+		new_category_id,
+	})
 
-	if (transactionsUpdate.error) {
-		throw new Error(transactionsUpdate.error.message)
+	if (error) {
+		throw new Error(error.message)
 	}
 
-	const categoryDeleteRes = await supabase
-		.from('categories')
-		.delete()
-		.eq('id', category_id)
-
-	if (categoryDeleteRes.error) {
-		throw new Error(categoryDeleteRes.error.message)
-	}
+	return
 }
 
 export interface CategoryTotal {

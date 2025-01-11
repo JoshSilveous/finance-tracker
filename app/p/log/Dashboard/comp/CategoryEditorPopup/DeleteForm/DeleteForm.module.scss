@@ -1,0 +1,65 @@
+.main {
+	max-width: 300px;
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		max-height: 80vh;
+		&.loading {
+			height: 220px;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			svg {
+				height: 50px;
+				width: 50px;
+			}
+		}
+		&.zero_transactions {
+			height: 220px;
+		}
+		&.has_transactions {
+			height: 300px;
+			&.no_other_categories {
+				height: 200px;
+			}
+			.radio_options {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			.replace_dropdown {
+				margin: 20px 0;
+				p {
+					margin: 5px 0;
+				}
+			}
+		}
+	}
+	.button_container {
+		display: flex;
+		gap: 15px;
+	}
+}
+
+.warning {
+	color: var(--font-color-error);
+	text-decoration: underline;
+	font-size: 20px;
+	font-weight: 700;
+	text-align: center;
+	margin: 30px 0 50px 0;
+}
+
+.confirm_popup {
+	.name {
+		font-weight: 700;
+	}
+	.button_container {
+		display: flex;
+		gap: 20px;
+	}
+}

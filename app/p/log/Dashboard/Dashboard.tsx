@@ -237,6 +237,7 @@ export function Dashboard() {
 								closePopup={() => {
 									testPopup.close()
 								}}
+								refreshAllData={refreshAllData}
 							/>
 						)
 						testPopup.trigger()

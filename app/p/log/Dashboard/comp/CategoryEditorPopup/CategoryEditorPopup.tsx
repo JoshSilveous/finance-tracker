@@ -3,34 +3,38 @@ import s from './CategoryEditorPopup.module.scss'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
-import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import { fetchCategoryData } from '@/database'
 import { JButton, JInput } from '@/components/JForm'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
-import { createFocusLoop, delay, moveItemInArray } from '@/utils'
+import { createFocusLoop, createPopup, delay, moveItemInArray } from '@/utils'
 import { handleReorder } from './handleReorder'
+import { DeleteForm } from './DeleteForm/DeleteForm'
 
 interface NewCategoryManagerPopupProps {
 	closePopup: () => void
+	refreshAllData: () => Promise<void>
 }
-export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps) {
+export function CategoryEditorPopup({
+	closePopup,
+	refreshAllData,
+}: NewCategoryManagerPopupProps) {
 	const [isLoading, setIsLoading] = useState(true)
 	const [catData, setCatData] = useState<CategoryItem[]>([])
 	const defCatData = useRef<CategoryItem[]>([])
 	const [sortOrder, setSortOrder] = useState<string[]>([])
 	const defSortOrder = useRef<string[]>([])
 
-	const itemRowRefs = useRef<ItemRowsRef>({})
+	const catRowRefs = useRef<CatRowsRef>({})
 
 	const addToItemRowRefs =
-		<T extends keyof ItemRowsRef[string]>(category_id: string, key: T) =>
-		(node: ItemRowsRef[string][T] | null) => {
-			if (itemRowRefs.current[category_id] === undefined) {
-				itemRowRefs.current[category_id] = {
+		<T extends keyof CatRowsRef[string]>(category_id: string, key: T) =>
+		(node: CatRowsRef[string][T] | null) => {
+			if (catRowRefs.current[category_id] === undefined) {
+				catRowRefs.current[category_id] = {
 					[key]: node || undefined,
-				} as ItemRowsRef[string]
+				} as CatRowsRef[string]
 			} else {
-				itemRowRefs.current[category_id][key] = node || undefined
+				catRowRefs.current[category_id][key] = node || undefined
 			}
 		}
 
@@ -38,12 +42,12 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 	useEffect(() => {
 		if (
 			sortOrder &&
-			itemRowRefs.current[sortOrder[0]] &&
-			itemRowRefs.current[sortOrder[0]].deleteButton &&
+			catRowRefs.current[sortOrder[0]] &&
+			catRowRefs.current[sortOrder[0]].deleteButton &&
 			lastNodeRef.current
 		) {
 			createFocusLoop(
-				itemRowRefs.current[sortOrder[0]].deleteButton!,
+				catRowRefs.current[sortOrder[0]].deleteButton!,
 				lastNodeRef.current
 			)
 		}
@@ -68,6 +72,18 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 		refreshData()
 	}, [])
 
+	const updateVal = (category_id: string, val: string) => {
+		setCatData((prev) => {
+			const clone = structuredClone(prev)
+			const index = clone.findIndex((it) => it.id === category_id)
+			clone[index].name.val = val
+			clone[index].name.changed = defCatData.current[index]
+				? defCatData.current[index].name.val !== val
+				: true
+			return clone
+		})
+	}
+
 	const areChanges = (() => {
 		if (catData.length !== defCatData.current.length) {
 			return true
@@ -85,23 +101,26 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 		return false
 	})()
 
-	const handleInputChange =
-		(category_id: string) => (e: ChangeEvent<HTMLInputElement>) => {
-			const val = e.target.value
-			setCatData((prev) => {
-				const clone = structuredClone(prev)
-				const index = clone.findIndex((entry) => entry.id === category_id)
-				clone[index].name.val = val
-				clone[index].name.changed = defCatData.current[index].name.val !== val
-				return clone
-			})
+	const handleInputBlur = (category_id: string) => (e: ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value
+		const trimmed = value.trim()
+		if (value !== trimmed) {
+			e.target.value = trimmed
+			updateVal(category_id, trimmed)
 		}
+	}
 
 	const applyReorder = (oldIndex: number, newIndex: number) => {
+		const thisTransactionID = sortOrder[oldIndex]
 		setSortOrder((prev) => {
 			const clone = structuredClone(prev)
 			moveItemInArray(clone, oldIndex, newIndex)
 			return clone
+		})
+		console.log('apl:', thisTransactionID)
+		delay(5).then(() => {
+			catRowRefs.current[thisTransactionID] &&
+				catRowRefs.current[thisTransactionID].reorderButton!.focus()
 		})
 	}
 
@@ -134,13 +153,42 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 				>
 					<div
 						className={`${s.cell} ${s.control} ${
-							defSortIndex !== sortIndex && s.changed
+							defSortIndex !== sortIndex ? s.changed : ''
 						}`}
 					>
 						<div className={s.delete_container}>
 							<JButton
 								jstyle='invisible'
 								ref={addToItemRowRefs(cat.id, 'deleteButton')}
+								onClick={() => {
+									if (cat.id.split('||')[0] === 'PENDING_CREATION') {
+										setCatData((prev) => {
+											const clone = structuredClone(prev)
+											const index = clone.findIndex(
+												(it) => it.id === cat.id
+											)
+											clone.splice(index, 1)
+											return clone
+										})
+										setSortOrder((prev) => {
+											const clone = structuredClone(prev)
+											clone.splice(clone.indexOf(cat.id), 1)
+											return clone
+										})
+									} else {
+										const popup = createPopup(
+											<DeleteForm
+												category_id={cat.id}
+												category_name={cat.name.val}
+												closePopup={() => popup.close()}
+												afterDelete={() => {
+													refreshAllData()
+												}}
+											/>
+										)
+										popup.trigger()
+									}
+								}}
 							>
 								<DeleteIcon />
 							</JButton>
@@ -149,26 +197,39 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 							<JButton
 								jstyle='invisible'
 								ref={addToItemRowRefs(cat.id, 'reorderButton')}
-								onMouseDown={(e) =>
+								onMouseDown={(e) => {
+									if (window.getSelection()) {
+										window.getSelection()!.removeAllRanges()
+									}
 									handleReorder(
 										cat.id,
-										itemRowRefs,
+										catRowRefs,
 										sortOrder,
 										sortIndex,
 										e,
 										applyReorder
 									)
-								}
+								}}
 							>
 								<ReorderIcon />
 							</JButton>
 						</div>
 					</div>
-					<div className={`${s.cell} ${s.name} ${cat.name.changed && s.changed}`}>
+					<div
+						className={`${s.cell} ${s.name} ${
+							cat.name.changed ? s.changed : ''
+						}`}
+					>
 						<JInput
 							value={cat.name.val}
-							onChange={handleInputChange(cat.id)}
+							onChange={(e) => updateVal(cat.id, e.target.value)}
 							ref={addToItemRowRefs(cat.id, 'nameInput')}
+							placeholder={
+								defCatData.current[defSortIndex]
+									? defCatData.current[defSortIndex].name.val
+									: undefined
+							}
+							onBlur={handleInputBlur(cat.id)}
 						/>
 					</div>
 				</div>
@@ -190,8 +251,8 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 					return clone
 				})
 				delay(10).then(() => {
-					if (itemRowRefs.current[tempID]) {
-						const input = itemRowRefs.current[tempID].nameInput!
+					if (catRowRefs.current[tempID]) {
+						const input = catRowRefs.current[tempID].nameInput!
 						input.focus()
 					}
 				})
@@ -245,9 +306,9 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 	)
 }
 
-type CategoryItem = { id: string; name: { val: string; changed: boolean } }
+export type CategoryItem = { id: string; name: { val: string; changed: boolean } }
 
-export type ItemRowsRef = {
+export type CatRowsRef = {
 	[category_id: string]: {
 		container?: HTMLDivElement
 		nameInput?: HTMLInputElement

@@ -1,11 +1,11 @@
 import { delay } from '@/utils'
 import s from './CategoryEditorPopup.module.scss'
 import { MouseEvent, MutableRefObject } from 'react'
-import { ItemRowsRef } from './CategoryEditorPopup'
+import { CatRowsRef } from './CategoryEditorPopup'
 
 export function handleReorder(
 	category_id: string,
-	itemRowsRef: MutableRefObject<ItemRowsRef>,
+	catRowsRef: MutableRefObject<CatRowsRef>,
 	sortOrder: string[],
 	sortIndex: number,
 	e: MouseEvent<HTMLButtonElement>,
@@ -13,7 +13,7 @@ export function handleReorder(
 ) {
 	document.body.style.cursor = 'grabbing'
 	const rowRefsOrdered = sortOrder.map((cat_id) => ({
-		...itemRowsRef.current[cat_id],
+		...catRowsRef.current[cat_id],
 		category_id: cat_id,
 	}))
 	const thisRef = rowRefsOrdered.find((it) => it.category_id === category_id)!
@@ -46,7 +46,6 @@ export function handleReorder(
 
 	let firstRun = true
 	function putMarginGapOnRow(rowIndex: number | 'none') {
-		console.log('putMarginGapOnRow', rowIndex)
 		// if ending the animation, remove transition effects
 		if (rowIndex === 'none') {
 			allRows.forEach((rowNodes) => {
@@ -229,7 +228,7 @@ export function handleReorder(
 		window.removeEventListener('mouseup', handleReorderMouseUp)
 		window.removeEventListener('contextmenu', handleRightClick)
 	}
-	function handleKeyDown(e: KeyboardEvent) {
+	function handleKeyDown() {
 		// cancel on key down
 		closestBreakpointIndex = sortIndex
 		handleReorderMouseUp()
