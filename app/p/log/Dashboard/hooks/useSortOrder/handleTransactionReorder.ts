@@ -62,6 +62,7 @@ export const transactionReorderMouseEffect = (
 		calculatedRowHeight = thisRow[1].offsetHeight
 	}
 
+	document.body.style.cursor = 'grabbing'
 	const breakpoints: number[] = (() => {
 		const arr = otherRows.map((row, index) => {
 			if (forceFolded && index > transactionIndex - 1) {

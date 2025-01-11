@@ -10,6 +10,7 @@
 		scrollbar-width: thin;
 		transition: scrollbar-color 0.3s ease;
 		scrollbar-color: transparent transparent;
+		--grid-padding-val: 3px;
 		&:hover {
 			scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
 		}
@@ -27,12 +28,12 @@
 
 		.cell {
 			width: 100%;
-			padding: 1.5px;
-			height: 100%;
+			padding: calc(var(--grid-padding-val) / 2);
 			box-sizing: border-box;
 			&.name {
 			}
 			&.control {
+				height: 39px;
 				display: flex;
 				justify-content: center;
 				gap: 5px;
@@ -97,6 +98,37 @@
 			&.changed {
 				color: var(--font-color-changed);
 			}
+		}
+		/* POPPED-OUT ROW STYLES */
+		.cell.popped_out {
+			display: flex;
+			position: fixed;
+			z-index: 999;
+
+			&.name input {
+				box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+			}
+			&.control {
+				filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
+			}
+		}
+
+		/* RE-ORDERING ROW EFFECT STYLES */
+		--margin-gap-size: calc(36px + var(--grid-padding-val));
+		.transitions {
+			transition: margin 0.2s ease;
+		}
+		.margin_top {
+			margin-top: calc(var(--margin-gap-size) / 2);
+		}
+		.margin_bottom {
+			margin-bottom: calc(var(--margin-gap-size) / 2);
+		}
+		.margin_top_double {
+			margin-top: var(--margin-gap-size);
+		}
+		.margin_bottom_double {
+			margin-bottom: var(--margin-gap-size);
 		}
 	}
 	.button_container {
