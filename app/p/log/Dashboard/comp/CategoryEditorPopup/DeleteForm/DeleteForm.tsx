@@ -1,33 +1,27 @@
 import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import s from './DeleteForm.module.scss'
 import { ChangeEvent, ChangeEventHandler, useEffect, useState } from 'react'
-import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import {
-	deleteCategoryAndTransactions,
-	deleteCategoryAndReplace,
-	deleteCategoryAndSetNull,
-	fetchCategoryData,
-	getCategoryCountAssocWithTransaction,
-} from '@/database'
+import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
+import { fetchCategoryData, getCategoryCountAssocWithTransaction } from '@/database'
 import { JButton } from '@/components/JForm'
 import { addCommas, promptError, createPopup, isStandardError } from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
+import { DeleteCatItem } from '../CategoryEditorPopup'
 
 interface DeleteFormProps {
 	category_name: string
 	category_id: string
 	closePopup: () => void
-	afterDelete: () => void
+	handleConfirm: (item: DeleteCatItem) => void
 }
-type DeleteMethods = 'delete' | 'set_null' | 'replace'
 export function DeleteForm({
 	category_name,
 	category_id,
-	afterDelete,
+	handleConfirm,
 	closePopup,
 }: DeleteFormProps) {
 	// this'll be redone at some point
-	const [deleteMethod, setDeleteMethod] = useState<DeleteMethods>()
+	const [deleteMethod, setDeleteMethod] = useState<DeleteCatItem['method']>()
 	const [otherCategories, setOtherCategories] = useState<{ name: string; id: string }[]>()
 	const [readyToConfirm, setReadyToConfirm] = useState(false)
 	const [categoryToChangeTo, setCategoryToChangeTo] = useState<string>()
@@ -70,26 +64,6 @@ export function DeleteForm({
 			</div>
 		)
 	} else if (associatedTransactionCount === 0) {
-		const handleConfirm = () => {
-			deleteCategoryAndTransactions(category_id)
-				.then(() => {
-					closePopup()
-					afterDelete()
-				})
-				.catch((e) => {
-					if (isStandardError(e)) {
-						afterDelete()
-						promptError(
-							'An unexpected error has occurred while deleting this category:',
-							e.message,
-							'Try refreshing the page to resolve this issue.'
-						)
-						console.error(e.message)
-					} else {
-						console.error(e)
-					}
-				})
-		}
 		return (
 			<div className={s.main}>
 				<h1>Delete "{category_name}"</h1>
@@ -108,7 +82,10 @@ export function DeleteForm({
 						jstyle='primary'
 						className={s.confirm_button}
 						disabled={!readyToConfirm}
-						onClick={handleConfirm}
+						onClick={() => {
+							handleConfirm({ id: category_id, method: 'delete' })
+							closePopup()
+						}}
 					>
 						Confirm
 					</JButton>
@@ -117,7 +94,7 @@ export function DeleteForm({
 		)
 	} else {
 		const handleRadioChange = (e: ChangeEvent<HTMLInputElement>) => {
-			const selectedMethod = e.target.id as DeleteMethods
+			const selectedMethod = e.target.id as DeleteCatItem['method']
 			setDeleteMethod(selectedMethod)
 			setReadyToConfirm(true)
 			setCategoryToChangeTo(undefined)
@@ -137,7 +114,7 @@ export function DeleteForm({
 				setCategoryToChangeTo(e.target.value)
 			}
 		}
-		const handleConfirm = () => {
+		const handleConfirmClick = () => {
 			let confirmMessage = <></>
 			let newCategoryName: string | undefined = undefined
 			if (deleteMethod === 'replace') {
@@ -187,79 +164,27 @@ export function DeleteForm({
 						>
 							Go Back
 						</JButton>
-						<ConfirmButton onClick={handleConfirm} />
+						<JButton onClick={handleConfirmClick} jstyle='primary'>
+							Confirm
+						</JButton>
 					</div>
 				</div>
 			)
 			myPopup.trigger()
 
-			function handleConfirm() {
-				switch (deleteMethod) {
-					case 'delete':
-						deleteCategoryAndTransactions(category_id)
-							.then(() => {
-								myPopup.close()
-								closePopup()
-								afterDelete()
-							})
-							.catch((e) => {
-								if (isStandardError(e)) {
-									myPopup.close()
-									afterDelete()
-									promptError(
-										"An unexpected error has occurred while deleting this category and it's associated transactions:",
-										e.message,
-										'Try refreshing the page to resolve this issue.'
-									)
-									console.error(e.message)
-								} else {
-									console.error(e)
-								}
-							})
-						break
-					case 'set_null':
-						deleteCategoryAndSetNull(category_id)
-							.then(() => {
-								myPopup.close()
-								afterDelete()
-							})
-							.catch((e) => {
-								if (isStandardError(e)) {
-									myPopup.close()
-									afterDelete()
-									promptError(
-										"An unexpected error has occurred while deleting this category and setting it's associated transactions to empty:",
-										e.message,
-										'Try refreshing the page to resolve this issue.'
-									)
-									console.error(e.message)
-								} else {
-									console.error(e)
-								}
-							})
-						break
-					case 'replace':
-						deleteCategoryAndReplace(category_id, categoryToChangeTo!)
-							.then(() => {
-								myPopup.close()
-								afterDelete()
-							})
-							.catch((e) => {
-								if (isStandardError(e)) {
-									myPopup.close()
-									afterDelete()
-									promptError(
-										"An unexpected error has occurred while deleting this category and replacing the category of it's associated transactions:",
-										e.message,
-										'Try refreshing the page to resolve this issue.'
-									)
-									console.error(e.message)
-								} else {
-									console.error(e)
-								}
-							})
-						break
+			function handleConfirmClick() {
+				if (deleteMethod === 'replace') {
+					handleConfirm({
+						id: category_id,
+						method: 'replace',
+						new_id: categoryToChangeTo!,
+					})
+				} else {
+					handleConfirm({ id: category_id, method: deleteMethod! })
 				}
+
+				myPopup.close()
+				closePopup()
 			}
 		}
 		return (
@@ -337,7 +262,7 @@ export function DeleteForm({
 						jstyle='primary'
 						className={s.confirm_button}
 						disabled={!readyToConfirm}
-						onClick={handleConfirm}
+						onClick={handleConfirmClick}
 					>
 						Confirm
 					</JButton>
@@ -345,19 +270,4 @@ export function DeleteForm({
 			</div>
 		)
 	}
-}
-function ConfirmButton({ onClick }: { onClick: () => void }) {
-	const [isProcessing, setIsProcessing] = useState(false)
-	return (
-		<JButton
-			onClick={() => {
-				setIsProcessing(true)
-				onClick()
-			}}
-			jstyle='primary'
-			loading={isProcessing}
-		>
-			Confirm
-		</JButton>
-	)
 }

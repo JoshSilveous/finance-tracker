@@ -11,6 +11,7 @@
 		transition: scrollbar-color 0.3s ease;
 		scrollbar-color: transparent transparent;
 		--grid-padding-val: 3px;
+		height: 340px;
 		&:hover {
 			scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
 		}

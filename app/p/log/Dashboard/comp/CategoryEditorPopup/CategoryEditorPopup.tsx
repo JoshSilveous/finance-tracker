@@ -22,6 +22,8 @@ export function CategoryEditorPopup({
 	const [catData, setCatData] = useState<CategoryItem[]>([])
 	const defCatData = useRef<CategoryItem[]>([])
 	const [sortOrder, setSortOrder] = useState<string[]>([])
+	const [deletedCategories, setDeletedCategories] = useState<DeleteCatItem[]>([])
+	const [isSaving, setIsSaving] = useState(false)
 	const defSortOrder = useRef<string[]>([])
 
 	const catRowRefs = useRef<CatRowsRef>({})
@@ -85,6 +87,9 @@ export function CategoryEditorPopup({
 	}
 
 	const areChanges = (() => {
+		if (deletedCategories.length > 0) {
+			return true
+		}
 		if (catData.length !== defCatData.current.length) {
 			return true
 		}
@@ -150,6 +155,7 @@ export function CategoryEditorPopup({
 				<div
 					style={{ display: 'contents' }}
 					ref={addToItemRowRefs(cat.id, 'container')}
+					key={sortIndex}
 				>
 					<div
 						className={`${s.cell} ${s.control} ${
@@ -181,8 +187,31 @@ export function CategoryEditorPopup({
 												category_id={cat.id}
 												category_name={cat.name.val}
 												closePopup={() => popup.close()}
-												afterDelete={() => {
-													refreshAllData()
+												handleConfirm={(item: DeleteCatItem) => {
+													console.log('handleConfirm:', item)
+													setDeletedCategories((prev) => {
+														const clone = structuredClone(prev)
+														clone.push(item)
+														return clone
+													})
+													setSortOrder((prev) => {
+														const clone = structuredClone(prev)
+														clone.splice(
+															clone.indexOf(item.id),
+															1
+														)
+														return clone
+													})
+													setCatData((prev) => {
+														const clone = structuredClone(prev)
+														clone.splice(
+															clone.findIndex(
+																(it) => it.id === item.id
+															),
+															1
+														)
+														return clone
+													})
 												}}
 											/>
 										)
@@ -274,6 +303,18 @@ export function CategoryEditorPopup({
 		grid = <JGrid cells={cells} headers={headers} useFullWidth noBorders stickyHeaders />
 	}
 
+	const handleSave = () => {
+		setIsSaving(true)
+
+		// look for delete/replace overlaps
+
+		// run through deletions
+
+		// prepare name/order_position updates
+
+		// process
+	}
+
 	return (
 		<div className={s.main}>
 			<h2>Category Editor</h2>
@@ -298,12 +339,20 @@ export function CategoryEditorPopup({
 					jstyle='primary'
 					disabled={!areChanges}
 					ref={areChanges ? lastNodeRef : undefined}
+					onClick={handleSave}
+					loading={isSaving}
 				>
 					Save
 				</JButton>
 			</div>
 		</div>
 	)
+}
+
+export type DeleteCatItem = {
+	id: string
+	method: 'delete' | 'set_null' | 'replace'
+	new_id?: string
 }
 
 export type CategoryItem = { id: string; name: { val: string; changed: boolean } }
