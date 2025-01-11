@@ -11,6 +11,8 @@ import { fetchTileData, upsertTiles } from '@/database'
 import { saveChanges } from './func/saveChanges'
 import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
 import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
+import { CategoryManager } from '../../categories/CategoryManager/CategoryManager'
+import { CategoryEditorPopup } from './comp/CategoryEditorPopup/CategoryEditorPopup'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -226,6 +228,21 @@ export function Dashboard() {
 				</JButton>
 				<JButton jstyle='invisible' onClick={handleFeedback}>
 					Submit Feedback
+				</JButton>
+				<JButton
+					jstyle='invisible'
+					onClick={() => {
+						const testPopup = createPopup(
+							<CategoryEditorPopup
+								closePopup={() => {
+									testPopup.close()
+								}}
+							/>
+						)
+						testPopup.trigger()
+					}}
+				>
+					Test
 				</JButton>
 				<JButton
 					jstyle='secondary'

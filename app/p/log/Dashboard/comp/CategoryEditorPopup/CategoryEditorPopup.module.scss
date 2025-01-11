@@ -1,0 +1,107 @@
+.main {
+	width: 300px;
+	display: flex;
+	max-height: 450px;
+	flex-direction: column;
+	.grid_container {
+		flex-grow: 1;
+		overflow: auto;
+		scrollbar-gutter: stable;
+		scrollbar-width: thin;
+		transition: scrollbar-color 0.3s ease;
+		scrollbar-color: transparent transparent;
+		&:hover {
+			scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
+		}
+
+		.loading_anim_container {
+			display: flex;
+			height: 100%;
+			align-items: center;
+			justify-content: center;
+			svg {
+				height: 30px;
+				width: 30px;
+			}
+		}
+
+		.cell {
+			width: 100%;
+			padding: 1.5px;
+			height: 100%;
+			box-sizing: border-box;
+			&.name {
+			}
+			&.control {
+				display: flex;
+				justify-content: center;
+				gap: 5px;
+				align-items: center;
+				box-sizing: border-box;
+
+				button {
+					height: fit-content;
+					padding: 2px;
+					svg {
+						width: 20px;
+						height: 20px;
+					}
+				}
+				.reorder_container button {
+					cursor: grab;
+					scale: 100%;
+					transition: scale 0.2s ease;
+					&:hover {
+						scale: 110%;
+					}
+					&:active {
+						cursor: grabbing;
+					}
+				}
+				.delete_container button {
+					scale: 100%;
+					transition: scale 0.2s ease, color 0.2s ease;
+					&:hover {
+						color: var(--font-color-error);
+						scale: 110%;
+					}
+				}
+			}
+			&.control_header {
+				background-color: var(--bg-color-lighter-2);
+			}
+			&.name_header {
+				background-color: var(--bg-color-lighter-2);
+				.header {
+					background-color: var(--bg-color-lighter-3);
+					height: 30px;
+					margin: 1px;
+					border-radius: 2px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font-weight: 500px;
+				}
+			}
+			&.new_button_container {
+				grid-column: 2 / 3;
+				box-sizing: border-box;
+				padding: 2px;
+				display: flex;
+				align-items: center;
+				button {
+					box-sizing: border-box;
+				}
+			}
+
+			&.changed {
+				color: var(--font-color-changed);
+			}
+		}
+	}
+	.button_container {
+		margin-top: 15px;
+		display: flex;
+		gap: 15px;
+	}
+}
