@@ -84,7 +84,7 @@ export async function upsertAccounts(accountUpdates: UpsertAccountEntry[]) {
 
 export async function getAccountCountAssocWithTransaction(account_id: string) {
 	const { count, error } = await supabase
-		.from('transactions')
+		.from('transaction_items')
 		.select('*', { count: 'exact', head: true })
 		.eq('account_id', account_id)
 	if (error) {
@@ -92,44 +92,42 @@ export async function getAccountCountAssocWithTransaction(account_id: string) {
 	}
 	return count as number
 }
+
 export async function deleteAccountAndTransactions(account_id: string) {
-	const transactionsUpdate = await supabase
-		.from('transactions')
-		.delete()
-		.eq('account_id', account_id)
+	const { error } = await supabase.rpc('delete_account_and_associated_items', {
+		account_id_input: account_id,
+	})
 
-	if (transactionsUpdate.error) {
-		throw new Error(transactionsUpdate.error.message)
+	if (error) {
+		throw new Error(error.message)
 	}
 
-	const accountDeleteRes = await supabase.from('accounts').delete().eq('id', account_id)
-	if (accountDeleteRes.error) {
-		throw new Error(accountDeleteRes.error.message)
-	}
+	return
 }
+
 export async function deleteAccountAndSetNull(account_id: string) {
-	// by default, transactions account_id are set null when associated account is
-	const res = await supabase.from('accounts').delete().eq('id', account_id)
+	const { error } = await supabase.rpc('delete_account_and_null_associated_items', {
+		account_id_input: account_id,
+	})
 
-	if (res.error) {
-		throw new Error(res.error.message)
+	if (error) {
+		throw new Error(error.message)
 	}
+
+	return
 }
+
 export async function deleteAccountAndReplace(account_id: string, new_account_id: string) {
-	const transactionsUpdate = await supabase
-		.from('transactions')
-		.update({ account_id: new_account_id })
-		.eq('account_id', account_id)
+	const { error } = await supabase.rpc('delete_account_and_replace_associated_items', {
+		account_id_input: account_id,
+		new_account_id,
+	})
 
-	if (transactionsUpdate.error) {
-		throw new Error(transactionsUpdate.error.message)
+	if (error) {
+		throw new Error(error.message)
 	}
 
-	const accountDeleteRes = await supabase.from('accounts').delete().eq('id', account_id)
-
-	if (accountDeleteRes.error) {
-		throw new Error(accountDeleteRes.error.message)
-	}
+	return
 }
 
 export interface AccountTotal {
