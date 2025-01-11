@@ -113,10 +113,12 @@ export function SimpleValuesSettingsPopup({
 		delay(20).then(() => {
 			firstNodeRef.current!.focus()
 		})
-		const loop = createFocusLoop({ firstRef: firstNodeRef, lastRef: lastNodeRef })
-
-		return loop.cleanup
 	}, [])
+	useEffect(() => {
+		if (firstNodeRef.current && lastNodeRef.current) {
+			createFocusLoop(firstNodeRef.current, lastNodeRef.current)
+		}
+	})
 
 	const handleSave = async () => {
 		context === 'edit'

@@ -1,7 +1,7 @@
 import { JButton } from '@/components/JForm'
 import s from './AddTilePopup.module.scss'
 import { createFocusLoop, createPopup, delay } from '@/utils'
-import { SetStateAction, useLayoutEffect, useRef } from 'react'
+import { SetStateAction, useEffect, useLayoutEffect, useRef } from 'react'
 import { SimpleValuesSettingsPopup } from '../SimpleValues/settings_popup/SimpleValuesSettingsPopup'
 import { Data } from '../../hooks/useData/useData'
 import { TileData } from '..'
@@ -16,12 +16,16 @@ export function AddTilePopup({ closePopup, setTileData, data }: AddTilePopupProp
 	const firstFocusRef = useRef<HTMLButtonElement>(null)
 	const lastFocusRef = useRef<HTMLButtonElement>(null)
 
-	useLayoutEffect(() => {
-		createFocusLoop({ firstRef: firstFocusRef, lastRef: lastFocusRef })
+	useEffect(() => {
 		delay(20).then(() => {
 			firstFocusRef.current?.focus()
 		})
 	}, [])
+	useEffect(() => {
+		if (firstFocusRef.current && lastFocusRef.current) {
+			createFocusLoop(firstFocusRef.current, lastFocusRef.current)
+		}
+	})
 
 	const handleNewSimpleValuesTile = () => {
 		closePopup()

@@ -16,9 +16,13 @@ export function FeedbackPopup({ closePopup, feedbackSource, header }: FeedbackPo
 	const [val, setVal] = useState('')
 	const textboxRef = useRef<HTMLTextAreaElement>(null)
 	const lastFocusRef = useRef<HTMLButtonElement>(null)
+
 	useEffect(() => {
-		createFocusLoop({ firstRef: textboxRef, lastRef: lastFocusRef })
-	}, [textboxRef.current, lastFocusRef.current])
+		if (textboxRef.current && lastFocusRef.current) {
+			createFocusLoop(textboxRef.current, lastFocusRef.current)
+		}
+	})
+
 	useLayoutEffect(() => {
 		delay(20).then(() => {
 			textboxRef.current!.focus()

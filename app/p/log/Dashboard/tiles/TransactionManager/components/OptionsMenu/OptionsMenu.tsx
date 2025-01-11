@@ -37,15 +37,10 @@ export function OptionsMenu({
 	}
 
 	useEffect(() => {
-		if (optionsIsOpen) {
-			const focusLoop = createFocusLoop({
-				firstRef: togglerRef,
-				lastRef: optionsRef,
-				lastRefIndex: optionsRef.current.length - 1,
-			})
-			return focusLoop.cleanup
+		if (optionsIsOpen && togglerRef.current && optionsRef.current) {
+			createFocusLoop(togglerRef.current, optionsRef.current.at(-1)!)
 		}
-	}, [optionsIsOpen, togglerRef, optionsRef])
+	})
 
 	const TRANSITION_TIME_S = 0.3 // also defined in OptionsMenu.module.scss, update there as well
 

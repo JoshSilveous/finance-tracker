@@ -10,11 +10,11 @@ import {
 	isStandardError,
 	promptError,
 	setKeyListenerContext,
-	createFocusLoop,
 	IsolatedKeyListener,
 	addIsolatedKeyListeners,
 	removeIsolatedKeyListeners,
 	getCurDateString,
+	createFocusLoop,
 } from '@/utils'
 import { insertTransactionAndItems } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
@@ -65,9 +65,13 @@ export function NewTransactionForm({
 		if (!creationFinished) {
 			firstFocusRef.current!.focus()
 		}
-		const loop = createFocusLoop({ firstRef: firstFocusRef, lastRef: lastFocusRef })
-		return loop.cleanup
 	}, [creationFinished])
+
+	useEffect(() => {
+		if (firstFocusRef.current && lastFocusRef.current) {
+			createFocusLoop(firstFocusRef.current, lastFocusRef.current)
+		}
+	})
 
 	useEffect(() => {
 		setKeyListenerContext('NewTransactionForm')

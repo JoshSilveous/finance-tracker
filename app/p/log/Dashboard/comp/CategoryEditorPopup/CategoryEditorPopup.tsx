@@ -7,7 +7,7 @@ import { default as InsertRowIcon } from '@/public/insert_row.svg'
 import { fetchCategoryData } from '@/database'
 import { JButton, JInput } from '@/components/JForm'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
-import { createFocusLoop, createPopup, delay } from '@/utils'
+import { createFocusLoop, delay } from '@/utils'
 
 interface NewCategoryManagerPopupProps {
 	closePopup: () => void
@@ -19,15 +19,40 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 	const [sortOrder, setSortOrder] = useState<string[]>([])
 	const defSortOrder = useRef<string[]>([])
 
-	type ItemRowsRef = { [category_id: string]: HTMLDivElement }
-	const itemRowRefs = useRef<ItemRowsRef>({})
-	const addToItemRowRefs = (category_id: string) => (node: HTMLDivElement) => {
-		itemRowRefs.current[category_id] = node
+	type ItemRowsRef = {
+		[category_id: string]: {
+			container?: HTMLDivElement
+			nameInput?: HTMLInputElement
+			deleteButton?: HTMLButtonElement
+			reorderButton?: HTMLButtonElement
+		}
 	}
+
+	const itemRowRefs = useRef<ItemRowsRef>({})
+
+	const addToItemRowRefs =
+		<T extends keyof ItemRowsRef[string]>(category_id: string, key: T) =>
+		(node: ItemRowsRef[string][T] | null) => {
+			if (itemRowRefs.current[category_id] === undefined) {
+				itemRowRefs.current[category_id] = {
+					[key]: node || undefined,
+				} as ItemRowsRef[string]
+			} else {
+				itemRowRefs.current[category_id][key] = node || undefined
+			}
+		}
+
+	const lastNodeRef = useRef<HTMLButtonElement>(null)
 	useEffect(() => {
 		if (sortOrder) {
 			const topCatID = sortOrder[0]
-			itemRowRefs.current[topCatID]
+			if (
+				itemRowRefs.current[topCatID] &&
+				itemRowRefs.current[topCatID].nameInput &&
+				lastNodeRef.current
+			) {
+				createFocusLoop(itemRowRefs.current[topCatID].nameInput, lastNodeRef.current)
+			}
 		}
 	})
 
@@ -105,25 +130,38 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 			}
 
 			return (
-				<div style={{ display: 'contents' }} ref={addToItemRowRefs(cat.id)}>
+				<div
+					style={{ display: 'contents' }}
+					ref={addToItemRowRefs(cat.id, 'container')}
+				>
 					<div
 						className={`${s.cell} ${s.control} ${
 							defSortIndex !== sortIndex && s.changed
 						}`}
 					>
 						<div className={s.delete_container}>
-							<JButton jstyle='invisible'>
+							<JButton
+								jstyle='invisible'
+								ref={addToItemRowRefs(cat.id, 'deleteButton')}
+							>
 								<DeleteIcon />
 							</JButton>
 						</div>
 						<div className={s.reorder_container}>
-							<JButton jstyle='invisible'>
+							<JButton
+								jstyle='invisible'
+								ref={addToItemRowRefs(cat.id, 'reorderButton')}
+							>
 								<ReorderIcon />
 							</JButton>
 						</div>
 					</div>
 					<div className={`${s.cell} ${s.name} ${cat.name.changed && s.changed}`}>
-						<JInput value={cat.name.val} onChange={handleInputChange} />
+						<JInput
+							value={cat.name.val}
+							onChange={handleInputChange}
+							ref={addToItemRowRefs(cat.id, 'nameInput')}
+						/>
 					</div>
 				</div>
 			)
@@ -145,8 +183,7 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 				})
 				delay(10).then(() => {
 					if (itemRowRefs.current[tempID]) {
-						const input = itemRowRefs.current[tempID].children[1].children[0]
-							.children[0] as HTMLInputElement
+						const input = itemRowRefs.current[tempID].nameInput!
 						input.focus()
 					}
 				})
@@ -181,10 +218,18 @@ export function CategoryEditorPopup({ closePopup }: NewCategoryManagerPopupProps
 				)}
 			</div>
 			<div className={s.button_container}>
-				<JButton jstyle='secondary' onClick={closePopup}>
+				<JButton
+					jstyle='secondary'
+					onClick={closePopup}
+					ref={areChanges ? undefined : lastNodeRef}
+				>
 					Go Back
 				</JButton>
-				<JButton jstyle='primary' disabled={!areChanges}>
+				<JButton
+					jstyle='primary'
+					disabled={!areChanges}
+					ref={areChanges ? lastNodeRef : undefined}
+				>
 					Save
 				</JButton>
 			</div>
