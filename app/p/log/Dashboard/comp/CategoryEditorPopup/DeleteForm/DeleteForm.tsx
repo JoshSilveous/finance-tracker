@@ -6,19 +6,23 @@ import { fetchCategoryData, getCategoryCountAssocWithTransaction } from '@/datab
 import { JButton } from '@/components/JForm'
 import { addCommas, promptError, createPopup, isStandardError } from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
-import { DeleteCatItem } from '../CategoryEditorPopup'
+import { CategoryItem, DeleteCatItem } from '../CategoryEditorPopup'
 
 interface DeleteFormProps {
 	category_name: string
 	category_id: string
 	closePopup: () => void
 	handleConfirm: (item: DeleteCatItem) => void
+	catData: CategoryItem[]
+	deletedCategories: DeleteCatItem[]
 }
 export function DeleteForm({
 	category_name,
 	category_id,
 	handleConfirm,
 	closePopup,
+	catData,
+	deletedCategories,
 }: DeleteFormProps) {
 	// this'll be redone at some point
 	const [deleteMethod, setDeleteMethod] = useState<DeleteCatItem['method']>()
@@ -28,15 +32,13 @@ export function DeleteForm({
 	const [associatedTransactionCount, setAssociatedTransactionCount] = useState<number>()
 
 	useEffect(() => {
-		Promise.all([getCategoryCountAssocWithTransaction(category_id), fetchCategoryData()])
-			.then((values) => {
-				const count = values[0]
-				const categories = values[1]
+		getCategoryCountAssocWithTransaction(category_id)
+			.then((count) => {
 				setAssociatedTransactionCount(count)
 				setOtherCategories(
-					categories
-						.filter((category) => category.id !== category_id)
-						.map((category) => ({ name: category.name, id: category.id }))
+					catData
+						.map((it) => ({ name: it.name.val, id: it.id }))
+						.filter((it) => it.id !== category_id)
 				)
 			})
 			.catch((e) => {
@@ -81,7 +83,6 @@ export function DeleteForm({
 					<JButton
 						jstyle='primary'
 						className={s.confirm_button}
-						disabled={!readyToConfirm}
 						onClick={() => {
 							handleConfirm({ id: category_id, method: 'delete' })
 							closePopup()
@@ -114,79 +115,21 @@ export function DeleteForm({
 				setCategoryToChangeTo(e.target.value)
 			}
 		}
+
 		const handleConfirmClick = () => {
-			let confirmMessage = <></>
-			let newCategoryName: string | undefined = undefined
 			if (deleteMethod === 'replace') {
-				newCategoryName = otherCategories!.find(
-					(act) => act.id === categoryToChangeTo
-				)!.name
-			}
-			switch (deleteMethod) {
-				case 'delete':
-					confirmMessage = (
-						<p>
-							Are you sure you want to delete <strong>{category_name}</strong>{' '}
-							and any transactions associated with it?
-						</p>
-					)
-					break
-				case 'set_null':
-					confirmMessage = (
-						<p>
-							Are you sure you want to delete <strong>{category_name}</strong>{' '}
-							and set the category attribute of associated transactions to
-							Empty?
-						</p>
-					)
-					break
-				case 'replace':
-					confirmMessage = (
-						<p>
-							Are you sure you want to delete <strong>{category_name}</strong>{' '}
-							and set the category attribute of associated transactions to{' '}
-							<strong>{newCategoryName!}</strong>?
-						</p>
-					)
-					break
+				handleConfirm({
+					id: category_id,
+					method: 'replace',
+					new_id: categoryToChangeTo!,
+				})
+			} else {
+				handleConfirm({ id: category_id, method: deleteMethod! })
 			}
 
-			const myPopup = createPopup(
-				<div className={s.confirm_popup}>
-					{confirmMessage}
-					<div className={s.warning}>THIS CANNOT BE UNDONE</div>
-					<div className={s.button_container}>
-						<JButton
-							onClick={() => {
-								myPopup.close()
-							}}
-							jstyle='secondary'
-						>
-							Go Back
-						</JButton>
-						<JButton onClick={handleConfirmClick} jstyle='primary'>
-							Confirm
-						</JButton>
-					</div>
-				</div>
-			)
-			myPopup.trigger()
-
-			function handleConfirmClick() {
-				if (deleteMethod === 'replace') {
-					handleConfirm({
-						id: category_id,
-						method: 'replace',
-						new_id: categoryToChangeTo!,
-					})
-				} else {
-					handleConfirm({ id: category_id, method: deleteMethod! })
-				}
-
-				myPopup.close()
-				closePopup()
-			}
+			closePopup()
 		}
+
 		return (
 			<div className={s.main}>
 				<h1>Delete "{category_name}"</h1>

@@ -41,24 +41,25 @@ export async function getCategoryCountAssocWithTransaction(category_id: string) 
 
 export interface InsertCategoryEntry {
 	name: string
+	order_position: number
 }
 export async function insertCategory(category: InsertCategoryEntry) {
 	const user_id = await getUserID()
 
-	const numOfCategories = await getCategoryCount()
-
 	const newCategory = {
 		...category,
 		user_id: user_id,
-		order_position: numOfCategories!,
 	}
 
-	const { error } = await supabase.from('categories').insert([newCategory])
+	const { data, error } = await supabase
+		.from('categories')
+		.insert([newCategory])
+		.select('id')
 
 	if (error) {
 		throw new Error(error.message)
 	}
-	return
+	return data[0].id as string
 }
 
 export interface UpsertCategoryEntry {

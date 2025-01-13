@@ -232,15 +232,15 @@ export function Dashboard() {
 				<JButton
 					jstyle='invisible'
 					onClick={() => {
-						const testPopup = createPopup(
+						const catEditorPopup = createPopup(
 							<CategoryEditorPopup
 								closePopup={() => {
-									testPopup.close()
+									catEditorPopup.close()
 								}}
 								refreshAllData={refreshAllData}
 							/>
 						)
-						testPopup.trigger()
+						catEditorPopup.trigger()
 					}}
 				>
 					Test

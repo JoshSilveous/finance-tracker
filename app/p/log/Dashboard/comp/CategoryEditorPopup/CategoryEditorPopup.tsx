@@ -3,7 +3,16 @@ import s from './CategoryEditorPopup.module.scss'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
-import { fetchCategoryData } from '@/database'
+import {
+	deleteAccountAndSetNull,
+	deleteCategoryAndReplace,
+	deleteCategoryAndSetNull,
+	deleteCategoryAndTransactions,
+	fetchCategoryData,
+	insertCategory,
+	upsertCategories,
+	UpsertCategoryEntry,
+} from '@/database'
 import { JButton, JInput } from '@/components/JForm'
 import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { createFocusLoop, createPopup, delay, moveItemInArray } from '@/utils'
@@ -122,7 +131,6 @@ export function CategoryEditorPopup({
 			moveItemInArray(clone, oldIndex, newIndex)
 			return clone
 		})
-		console.log('apl:', thisTransactionID)
 		delay(5).then(() => {
 			catRowRefs.current[thisTransactionID] &&
 				catRowRefs.current[thisTransactionID].reorderButton!.focus()
@@ -167,56 +175,39 @@ export function CategoryEditorPopup({
 								jstyle='invisible'
 								ref={addToItemRowRefs(cat.id, 'deleteButton')}
 								onClick={() => {
-									if (cat.id.split('||')[0] === 'PENDING_CREATION') {
-										setCatData((prev) => {
-											const clone = structuredClone(prev)
-											const index = clone.findIndex(
-												(it) => it.id === cat.id
-											)
-											clone.splice(index, 1)
-											return clone
-										})
-										setSortOrder((prev) => {
-											const clone = structuredClone(prev)
-											clone.splice(clone.indexOf(cat.id), 1)
-											return clone
-										})
-									} else {
-										const popup = createPopup(
-											<DeleteForm
-												category_id={cat.id}
-												category_name={cat.name.val}
-												closePopup={() => popup.close()}
-												handleConfirm={(item: DeleteCatItem) => {
-													console.log('handleConfirm:', item)
-													setDeletedCategories((prev) => {
-														const clone = structuredClone(prev)
-														clone.push(item)
-														return clone
-													})
-													setSortOrder((prev) => {
-														const clone = structuredClone(prev)
-														clone.splice(
-															clone.indexOf(item.id),
-															1
-														)
-														return clone
-													})
-													setCatData((prev) => {
-														const clone = structuredClone(prev)
-														clone.splice(
-															clone.findIndex(
-																(it) => it.id === item.id
-															),
-															1
-														)
-														return clone
-													})
-												}}
-											/>
-										)
-										popup.trigger()
-									}
+									const popup = createPopup(
+										<DeleteForm
+											category_id={cat.id}
+											catData={catData}
+											deletedCategories={deletedCategories}
+											category_name={cat.name.val}
+											closePopup={() => popup.close()}
+											handleConfirm={(item: DeleteCatItem) => {
+												console.log('handleConfirm:', item)
+												setDeletedCategories((prev) => {
+													const clone = structuredClone(prev)
+													clone.push(item)
+													return clone
+												})
+												setSortOrder((prev) => {
+													const clone = structuredClone(prev)
+													clone.splice(clone.indexOf(item.id), 1)
+													return clone
+												})
+												setCatData((prev) => {
+													const clone = structuredClone(prev)
+													clone.splice(
+														clone.findIndex(
+															(it) => it.id === item.id
+														),
+														1
+													)
+													return clone
+												})
+											}}
+										/>
+									)
+									popup.trigger()
 								}}
 							>
 								<DeleteIcon />
@@ -303,16 +294,96 @@ export function CategoryEditorPopup({
 		grid = <JGrid cells={cells} headers={headers} useFullWidth noBorders stickyHeaders />
 	}
 
-	const handleSave = () => {
+	const handleSave = async () => {
 		setIsSaving(true)
 
-		// look for delete/replace overlaps
+		// create new categories
+		const newCategories = catData.filter((cat) => cat.id.startsWith('PENDING_CREATION'))
+		const newIDMap: { [pendingId: string]: string } = {}
+		const newCategoryPromises = newCategories.map((cat) => {
+			return insertCategory({
+				name: cat.name.val,
+				order_position: sortOrder.indexOf(cat.id),
+			}).then((new_id) => {
+				newIDMap[cat.id] = new_id
+			})
+		})
+		await Promise.all(newCategoryPromises)
 
-		// run through deletions
+		/* 	make sure id replacement chains are resolved
+			e.x.:
+				{ id: 'cat1', method: 'replace', new_id: 'cat2' },
+    			{ id: 'cat2', method: 'replace', new_id: 'cat3' }
+		 		turns into
+		 		{ id: 'cat1', method: 'replace', new_id: 'cat3' },
+    			{ id: 'cat2', method: 'replace', new_id: 'cat3' }
+		*/
+		const idsUsedForReplacement: string[] = []
+		deletedCategories.forEach((item) => {
+			if (item.method === 'replace') {
+				idsUsedForReplacement.push(item.new_id!)
+			}
+		})
+		deletedCategories.forEach((item) => {
+			if (item.method === 'replace' && idsUsedForReplacement.includes(item.id)) {
+				deletedCategories.forEach((item2) => {
+					if (item2.method === 'replace' && item2.new_id === item.id) {
+						item2.new_id = item.new_id
+					}
+				})
+			}
+		})
+		const deleteCategoryPromises = deletedCategories.map((item) => {
+			if (item.id.startsWith('PENDING_CREATION')) {
+				item.id = newIDMap[item.id]
+			}
+			if (item.new_id && item.new_id.startsWith('PENDING_CREATION')) {
+				item.new_id = newIDMap[item.new_id!]
+			}
+			if (item.method === 'delete') {
+				return deleteCategoryAndTransactions(item.id)
+			} else if (item.method === 'set_null') {
+				return deleteCategoryAndSetNull(item.id)
+			} else if (item.method === 'replace') {
+				return deleteCategoryAndReplace(item.id, item.new_id!)
+			}
+		})
 
-		// prepare name/order_position updates
+		await Promise.all(deleteCategoryPromises)
 
-		// process
+		// upsert remaining changes
+		const categoryUpserts: UpsertCategoryEntry[] = (() => {
+			const categoryUpserts: UpsertCategoryEntry[] = []
+			catData.forEach((cat) => {
+				if (cat.id.startsWith('PENDING_CREATION')) {
+					return
+				}
+				const newOrderPos = sortOrder.indexOf(cat.id)
+				const origOrderPos = defSortOrder.current.indexOf(cat.id)
+				if (newOrderPos !== origOrderPos || cat.name.changed) {
+					categoryUpserts.push({
+						id: cat.id,
+						name: cat.name.val,
+						order_position: newOrderPos,
+					})
+				}
+			})
+			return categoryUpserts
+		})()
+
+		await upsertCategories(categoryUpserts)
+		setIsSaving(false)
+		refreshAllData()
+		closePopup()
+		const catEditorPopup = createPopup(
+			<CategoryEditorPopup
+				closePopup={() => {
+					catEditorPopup.close()
+				}}
+				refreshAllData={refreshAllData}
+			/>
+		)
+		catEditorPopup.trigger()
 	}
 
 	return (

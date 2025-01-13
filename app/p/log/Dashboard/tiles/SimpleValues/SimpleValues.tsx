@@ -70,11 +70,13 @@ export function SimpleValues({ data, changed, tileOptions, tileID }: SimpleValue
 						const fetchedEntry = databaseFetchedDataRef.current.find(
 							(entry) => entry.id === cat.id
 						)!
+						console.log('fetchedEntry:', fetchedEntry)
 
 						return {
 							id: cat.id,
 							name: cat.name,
-							amtBeforeCurrentTransactions: fetchedEntry.total_amount,
+							amtBeforeCurrentTransactions:
+								fetchedEntry !== undefined ? fetchedEntry.total_amount : 0,
 						}
 					})
 
@@ -229,6 +231,7 @@ export function SimpleValues({ data, changed, tileOptions, tileID }: SimpleValue
 			cells: cells,
 			useFullWidth: true,
 			noBorders: true,
+			stickyHeaders: true,
 			onResize: (e) => {
 				switch (e.columnIndex) {
 					case 0: {
