@@ -1,5 +1,5 @@
 'use client'
-import { TileData } from '@/app/p/log/Dashboard/tiles'
+import { TileData } from '@/app/p/dashboard/Dashboard/tiles'
 import { createClient, getUserID } from '@/database/supabase/client'
 
 const supabase = createClient()

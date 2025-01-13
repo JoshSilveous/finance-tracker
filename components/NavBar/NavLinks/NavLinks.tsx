@@ -9,11 +9,7 @@ export function NavLinks() {
 	const linksRef = useRef<HTMLDivElement>(null)
 	const pathname = usePathname()
 
-	const navLinks = [
-		{ title: 'Log', href: '/p/log' },
-		{ title: 'Categories', href: '/p/categories' },
-		{ title: 'Accounts', href: '/p/accounts' },
-	]
+	const navLinks = [{ title: 'Dashboard', href: '/p/dashboard' }]
 
 	useEffect(() => {
 		const linksElemArray = linksRef.current!.childNodes as NodeListOf<HTMLDivElement>

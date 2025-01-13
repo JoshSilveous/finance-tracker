@@ -1,4 +1,3 @@
-import { Data } from '@/app/p/log/Dashboard/hooks'
 import { MultiRowProps } from '../MultiRow'
 
 export function genUniqueLists(p: MultiRowProps) {
