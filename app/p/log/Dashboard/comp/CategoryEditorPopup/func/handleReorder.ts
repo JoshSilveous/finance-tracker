@@ -1,7 +1,7 @@
 import { delay } from '@/utils'
 import s from './CategoryEditorPopup.module.scss'
 import { MouseEvent, MutableRefObject } from 'react'
-import { CatRowsRef } from './CategoryEditorPopup'
+import { CatRowsRef } from '../CategoryEditorPopup'
 
 export function handleReorder(
 	category_id: string,
