@@ -12,7 +12,8 @@ import { saveChanges } from './func/saveChanges'
 import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
 import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
 import { CategoryManager } from '../../categories/CategoryManager/CategoryManager'
-import { CategoryEditorPopup } from './comp/CategoryEditorPopup/CategoryEditorPopup'
+import { CategoryEditorPopup } from './components/CategoryEditorPopup/CategoryEditorPopup'
+import { AccountEditorPopup } from './components/AccountEditorPopup/AccountEditorPopup'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -243,7 +244,23 @@ export function Dashboard() {
 						catEditorPopup.trigger()
 					}}
 				>
-					Test
+					Cat
+				</JButton>
+				<JButton
+					jstyle='invisible'
+					onClick={() => {
+						const actEditorPopup = createPopup(
+							<AccountEditorPopup
+								closePopup={() => {
+									actEditorPopup.close()
+								}}
+								refreshAllData={refreshAllData}
+							/>
+						)
+						actEditorPopup.trigger()
+					}}
+				>
+					Act
 				</JButton>
 				<JButton
 					jstyle='secondary'

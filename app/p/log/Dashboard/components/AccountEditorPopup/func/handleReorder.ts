@@ -1,22 +1,22 @@
 import { delay } from '@/utils'
-import s from './CategoryEditorPopup.module.scss'
+import s from '../AccountEditorPopup.module.scss'
 import { MouseEvent, MutableRefObject } from 'react'
-import { CatRowsRef } from '../CategoryEditorPopup'
+import { ActRowsRef } from '../AccountEditorPopup'
 
 export function handleReorder(
-	category_id: string,
-	catRowsRef: MutableRefObject<CatRowsRef>,
+	account_id: string,
+	actRowsRef: MutableRefObject<ActRowsRef>,
 	sortOrder: string[],
 	sortIndex: number,
 	e: MouseEvent<HTMLButtonElement>,
 	handleReorder: (oldIndex: number, newIndex: number) => void
 ) {
 	document.body.style.cursor = 'grabbing'
-	const rowRefsOrdered = sortOrder.map((cat_id) => ({
-		...catRowsRef.current[cat_id],
-		category_id: cat_id,
+	const rowRefsOrdered = sortOrder.map((act_id) => ({
+		...actRowsRef.current[act_id],
+		account_id: act_id,
 	}))
-	const thisRef = rowRefsOrdered.find((it) => it.category_id === category_id)!
+	const thisRef = rowRefsOrdered.find((it) => it.account_id === account_id)!
 	const grabberNode = thisRef.reorderButton!
 	const thisRow = Array.from(thisRef.container!.children) as HTMLDivElement[]
 	const allRows = rowRefsOrdered.map(

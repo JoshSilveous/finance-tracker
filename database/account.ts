@@ -33,6 +33,7 @@ export async function getAccountsCount() {
 export interface InsertAccountEntry {
 	name: string
 	starting_amount: number
+	order_position: number
 }
 export async function insertAccount(account: InsertAccountEntry) {
 	const user_id = await getUserID()
@@ -40,18 +41,16 @@ export async function insertAccount(account: InsertAccountEntry) {
 	const numOfAccounts = await getAccountsCount()
 
 	const newAccount = {
-		name: account.name,
-		starting_amount: account.starting_amount,
+		...account,
 		user_id: user_id,
-		order_position: numOfAccounts!,
 	}
 
-	const { error } = await supabase.from('accounts').insert([newAccount])
+	const { data, error } = await supabase.from('accounts').insert([newAccount]).select('id')
 
 	if (error) {
 		throw new Error(error.message)
 	}
-	return
+	return data[0].id as string
 }
 
 export interface UpsertAccountEntry {

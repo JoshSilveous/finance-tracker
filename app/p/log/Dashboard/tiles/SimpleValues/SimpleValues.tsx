@@ -153,7 +153,8 @@ export function SimpleValues({ data, changed, tileOptions, tileID }: SimpleValue
 						return {
 							id: act.id,
 							name: act.name,
-							amtBeforeCurrentTransactions: fetchedEntry.total_amount,
+							amtBeforeCurrentTransactions:
+								fetchedEntry !== undefined ? fetchedEntry.total_amount : 0,
 						}
 					})
 
