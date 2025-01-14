@@ -4,10 +4,12 @@ import { useRouter } from 'next/navigation'
 import s from './page.module.scss'
 import { LoginForm } from '@/components/LoginForm/LoginForm'
 import { SignupForm } from '@/components/SignupForm/SignupForm'
+import { default as LoadingAnim } from '@/public/loading.svg'
+import { JButton } from '@/components/JForm'
 
 type FormType = 'login' | 'signup'
 export default function LoginPage() {
-	const [loading, setLoading] = useState(true)
+	const [formLoading, setFormLoading] = useState(true)
 	const loginContainerRef = useRef<HTMLDivElement>(null)
 	const signupContainerRef = useRef<HTMLDivElement>(null)
 	const [currentForm, setCurrentForm] = useState<FormType>('login')
@@ -18,7 +20,7 @@ export default function LoginPage() {
 			setCurrentForm('signup')
 		} else {
 		}
-		setLoading(false)
+		setFormLoading(false)
 	}, [])
 
 	function toggleForm() {
@@ -33,8 +35,10 @@ export default function LoginPage() {
 
 	return (
 		<div className={s.container}>
-			{loading ? (
-				<div>Loading...</div>
+			{formLoading ? (
+				<div>
+					<LoadingAnim />
+				</div>
 			) : currentForm === 'login' ? (
 				<div className={s.login_container} ref={loginContainerRef}>
 					<h1>Sign in to your account</h1>
