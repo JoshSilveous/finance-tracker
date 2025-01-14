@@ -2,10 +2,11 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { login } from './login'
 import s from './LoginForm.module.scss'
-import { JButton, JInput } from '../JForm'
+import { JButton, JInput } from '../../../components/JForm'
 import { createClient } from '@/database/supabase/client'
 import { default as GitHubLogo } from '@/public/github_logo.svg'
 import { useRouter } from 'next/navigation'
+import { GithubButton } from '../GithubButton/GithubButton'
 
 interface Errors {
 	email: string
@@ -83,7 +84,7 @@ export function LoginForm() {
 
 	const handleGithubSignIn = async () => {
 		setGithubIsLoading(true)
-		const { data, error } = await supabase.auth.signInWithOAuth({
+		const { error } = await supabase.auth.signInWithOAuth({
 			provider: 'github',
 			options: {
 				redirectTo: `${window.location.origin}/auth/callback`,
@@ -130,14 +131,7 @@ export function LoginForm() {
 					{errors.general && <div>{errors.general}</div>}
 				</div>
 				<div className={s.github_container}>
-					<JButton
-						jstyle='secondary'
-						onClick={handleGithubSignIn}
-						loading={githubIsLoading}
-					>
-						<GitHubLogo />
-						Sign in with GitHub
-					</JButton>
+					<GithubButton context='' />
 				</div>
 			</div>
 		</form>

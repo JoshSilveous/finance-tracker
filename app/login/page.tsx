@@ -2,8 +2,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import s from './page.module.scss'
-import { LoginForm } from '@/components/LoginForm/LoginForm'
-import { SignupForm } from '@/components/SignupForm/SignupForm'
+import { LoginForm } from '@/app/login/LoginForm/LoginForm'
+import { SignupForm } from '@/app/login/SignupForm/SignupForm'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { JButton } from '@/components/JForm'
 
