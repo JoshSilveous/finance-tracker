@@ -10,6 +10,7 @@ import {
 	deleteCategoryAndTransactions,
 	fetchCategoryData,
 	insertCategory,
+	reportErrorToDB,
 	upsertCategories,
 	UpsertCategoryEntry,
 } from '@/database'
@@ -19,6 +20,7 @@ import {
 	createFocusLoop,
 	createPopup,
 	delay,
+	errToObj,
 	isStandardError,
 	moveItemInArray,
 	promptError,
@@ -171,7 +173,7 @@ export function CategoryEditorPopup({
 				<div
 					style={{ display: 'contents' }}
 					ref={addToItemRowRefs(cat.id, 'container')}
-					key={sortIndex}
+					key={`${sortIndex}-${sortIndex}`}
 				>
 					<div
 						className={`${s.cell} ${s.control} ${
@@ -183,39 +185,56 @@ export function CategoryEditorPopup({
 								jstyle='invisible'
 								ref={addToItemRowRefs(cat.id, 'deleteButton')}
 								onClick={() => {
-									const popup = createPopup(
-										<DeleteForm
-											category_id={cat.id}
-											catData={catData}
-											deletedCategories={deletedCategories}
-											category_name={cat.name.val}
-											closePopup={() => popup.close()}
-											handleConfirm={(item: DeleteCatItem) => {
-												console.log('handleConfirm:', item)
-												setDeletedCategories((prev) => {
-													const clone = structuredClone(prev)
-													clone.push(item)
-													return clone
-												})
-												setSortOrder((prev) => {
-													const clone = structuredClone(prev)
-													clone.splice(clone.indexOf(item.id), 1)
-													return clone
-												})
-												setCatData((prev) => {
-													const clone = structuredClone(prev)
-													clone.splice(
-														clone.findIndex(
-															(it) => it.id === item.id
-														),
-														1
-													)
-													return clone
-												})
-											}}
-										/>
-									)
-									popup.trigger()
+									if (cat.id.startsWith('PENDING_CREATION')) {
+										setDeletedCategories((prev) => {
+											const clone = structuredClone(prev)
+											return clone.filter((it) => it.new_id !== cat.id)
+										})
+										setCatData((prev) => {
+											const clone = structuredClone(prev)
+											return clone.filter((it) => it.id !== cat.id)
+										})
+										setSortOrder((prev) => {
+											const clone = structuredClone(prev)
+											return clone.filter((it) => it !== cat.id)
+										})
+									} else {
+										const popup = createPopup(
+											<DeleteForm
+												category_id={cat.id}
+												catData={catData}
+												deletedCategories={deletedCategories}
+												category_name={cat.name.val}
+												closePopup={() => popup.close()}
+												handleConfirm={(item: DeleteCatItem) => {
+													setDeletedCategories((prev) => {
+														const clone = structuredClone(prev)
+														clone.push(item)
+														return clone
+													})
+													setSortOrder((prev) => {
+														const clone = structuredClone(prev)
+														clone.splice(
+															clone.indexOf(item.id),
+															1
+														)
+														return clone
+													})
+													setCatData((prev) => {
+														const clone = structuredClone(prev)
+														clone.splice(
+															clone.findIndex(
+																(it) => it.id === item.id
+															),
+															1
+														)
+														return clone
+													})
+												}}
+											/>
+										)
+										popup.trigger()
+									}
 								}}
 							>
 								<DeleteIcon />
@@ -308,9 +327,10 @@ export function CategoryEditorPopup({
 		try {
 			await saveChanges(catData, sortOrder, deletedCategories, defSortOrder)
 		} catch (e) {
+			reportErrorToDB(e as Error)
 			if (isStandardError(e)) {
 				promptError(
-					'An unexpected error has occurred while propagating table layout preferences in the database:',
+					'An unexpected error has occurred while saving your changes:',
 					e.message,
 					'Try refreshing the page to resolve this issue.'
 				)

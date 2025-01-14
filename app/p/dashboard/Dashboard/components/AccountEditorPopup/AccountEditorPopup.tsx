@@ -184,39 +184,56 @@ export function AccountEditorPopup({
 								jstyle='invisible'
 								ref={addToItemRowRefs(act.id, 'deleteButton')}
 								onClick={() => {
-									const popup = createPopup(
-										<DeleteForm
-											account_id={act.id}
-											actData={actData}
-											deletedAccounts={deletedAccounts}
-											account_name={act.name.val}
-											closePopup={() => popup.close()}
-											handleConfirm={(item: DeleteActItem) => {
-												console.log('handleConfirm:', item)
-												setDeletedAccounts((prev) => {
-													const clone = structuredClone(prev)
-													clone.push(item)
-													return clone
-												})
-												setSortOrder((prev) => {
-													const clone = structuredClone(prev)
-													clone.splice(clone.indexOf(item.id), 1)
-													return clone
-												})
-												setActData((prev) => {
-													const clone = structuredClone(prev)
-													clone.splice(
-														clone.findIndex(
-															(it) => it.id === item.id
-														),
-														1
-													)
-													return clone
-												})
-											}}
-										/>
-									)
-									popup.trigger()
+									if (act.id.startsWith('PENDING_CREATION')) {
+										setDeletedAccounts((prev) => {
+											const clone = structuredClone(prev)
+											return clone.filter((it) => it.new_id !== act.id)
+										})
+										setActData((prev) => {
+											const clone = structuredClone(prev)
+											return clone.filter((it) => it.id !== act.id)
+										})
+										setSortOrder((prev) => {
+											const clone = structuredClone(prev)
+											return clone.filter((it) => it !== act.id)
+										})
+									} else {
+										const popup = createPopup(
+											<DeleteForm
+												account_id={act.id}
+												actData={actData}
+												deletedAccounts={deletedAccounts}
+												account_name={act.name.val}
+												closePopup={() => popup.close()}
+												handleConfirm={(item: DeleteActItem) => {
+													setDeletedAccounts((prev) => {
+														const clone = structuredClone(prev)
+														clone.push(item)
+														return clone
+													})
+													setSortOrder((prev) => {
+														const clone = structuredClone(prev)
+														clone.splice(
+															clone.indexOf(item.id),
+															1
+														)
+														return clone
+													})
+													setActData((prev) => {
+														const clone = structuredClone(prev)
+														clone.splice(
+															clone.findIndex(
+																(it) => it.id === item.id
+															),
+															1
+														)
+														return clone
+													})
+												}}
+											/>
+										)
+										popup.trigger()
+									}
 								}}
 							>
 								<DeleteIcon />
