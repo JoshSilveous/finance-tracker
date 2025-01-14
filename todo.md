@@ -5,11 +5,9 @@
 -   Make sure that data methods don't have any cross-user overlap (they shouldn't)
 -   Add different signup/login methods
 -   Add error reporting mechanism
--   Phase out old Category/Account managers + implement new ones
 
 ### Can wait
 
--   Update Category / Account Managers
 -   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
 -   Switch "create new transaction" button to add row to grid
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
@@ -32,6 +30,8 @@
 
 ## Solved
 
+-   Phase out old Category/Account managers + implement new ones
+-   Update Category / Account Managers
 -   Add save check for "Create New Transaction"
 -   Save button should work on reorders alone
 -   Set up all needed data/save methods

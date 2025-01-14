@@ -11,7 +11,6 @@ import { fetchTileData, upsertTiles } from '@/database'
 import { saveChanges } from './func/saveChanges'
 import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
 import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
-import { CategoryManager } from '../../categories/CategoryManager/CategoryManager'
 import { CategoryEditorPopup } from './components/CategoryEditorPopup/CategoryEditorPopup'
 import { AccountEditorPopup } from './components/AccountEditorPopup/AccountEditorPopup'
 

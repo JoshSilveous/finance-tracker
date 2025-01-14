@@ -1,0 +1,94 @@
+.stable_container {
+	--button-height: 36px;
+	--gap: 5px;
+	position: relative;
+	width: 100%;
+	height: var(--button-height);
+	.expandable_container {
+		--button-height: 36px;
+		position: absolute;
+		width: 100%;
+		bottom: 0;
+		overflow: hidden;
+		border-radius: 3px;
+		box-shadow: inset 0 0 0 1px var(--input-border-color);
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-end;
+		overflow: hidden;
+		flex-direction: column;
+		gap: var(--gap);
+		transition: background-color 0.15s ease, outline 0.1s ease, transform 0.05s ease,
+			height 0.3s ease;
+		&.open_upward {
+			.toggle {
+				position: sticky;
+				bottom: 0;
+			}
+		}
+		&.open_downward {
+			.toggle {
+				position: sticky;
+				top: 0;
+			}
+		}
+		&:focus-within {
+			outline: 2px solid var(--font-color);
+		}
+
+		&.primary:not(:disabled) {
+			background-color: var(--prim-bg);
+		}
+
+		&.secondary:not(:disabled) {
+			background-color: var(--bg-color-lighter-1);
+		}
+		.options_wrapper {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			gap: var(--gap);
+			.option_container {
+				min-height: var(--button-height);
+				max-height: var(--button-height);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 100%;
+				.option {
+					color: inherit;
+				}
+			}
+		}
+		button {
+			width: 100%;
+			min-height: var(--button-height);
+			max-height: var(--button-height);
+			font-weight: 600;
+			background-color: transparent;
+			border: none;
+			color: inherit;
+			font-family: inherit;
+			cursor: pointer;
+			outline: none;
+			&:focus:not(:disabled),
+			&:active:not(:disabled) {
+				outline: 2px solid var(--font-color);
+			}
+
+			&.primary:not(:disabled) {
+				&:hover,
+				&:focus {
+					background-color: var(--prim-bg-light-1);
+				}
+			}
+
+			&.secondary:not(:disabled) {
+				&:hover,
+				&:focus {
+					background-color: var(--bg-color-lighter-2);
+				}
+			}
+		}
+	}
+}
