@@ -75,10 +75,12 @@
 		padding: 10px;
 		box-sizing: border-box;
 		justify-content: flex-end;
-		button {
+		z-index: 10;
+		button,
+		.options_flyout {
 			width: 200px;
 		}
-		.reset {
+		.submit_feedback {
 			margin-right: auto;
 		}
 	}

@@ -13,6 +13,7 @@ import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
 import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
 import { CategoryEditorPopup } from './components/CategoryEditorPopup/CategoryEditorPopup'
 import { AccountEditorPopup } from './components/AccountEditorPopup/AccountEditorPopup'
+import { JFlyoutMenu } from '@/components/JFlyoutMenu/JFlyoutMenu'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -220,46 +221,49 @@ export function Dashboard() {
 				</div>
 			</div>
 			<div className={s.bottom_container}>
-				<JButton jstyle='secondary' className={s.new} onClick={handleNewTileClick}>
-					Add New Tile
-				</JButton>
-				<JButton jstyle='secondary' className={s.reset} onClick={resetTilePositions}>
-					Reset Tile Positions
-				</JButton>
-				<JButton jstyle='invisible' onClick={handleFeedback}>
+				<JFlyoutMenu
+					title={<>Options</>}
+					jstyle='secondary'
+					className={s.options_flyout}
+					options={[
+						{ content: <>Add New Tile</>, onClick: handleNewTileClick },
+						{ content: <>Reset Tile Positions</>, onClick: resetTilePositions },
+						{
+							content: <>Edit Categories</>,
+							onClick: () => {
+								const catEditorPopup = createPopup(
+									<CategoryEditorPopup
+										closePopup={() => {
+											catEditorPopup.close()
+										}}
+										refreshAllData={refreshAllData}
+									/>
+								)
+								catEditorPopup.trigger()
+							},
+						},
+						{
+							content: <>Edit Accounts</>,
+							onClick: () => {
+								const actEditorPopup = createPopup(
+									<AccountEditorPopup
+										closePopup={() => {
+											actEditorPopup.close()
+										}}
+										refreshAllData={refreshAllData}
+									/>
+								)
+								actEditorPopup.trigger()
+							},
+						},
+					]}
+				/>
+				<JButton
+					jstyle='invisible'
+					className={s.submit_feedback}
+					onClick={handleFeedback}
+				>
 					Submit Feedback
-				</JButton>
-				<JButton
-					jstyle='invisible'
-					onClick={() => {
-						const catEditorPopup = createPopup(
-							<CategoryEditorPopup
-								closePopup={() => {
-									catEditorPopup.close()
-								}}
-								refreshAllData={refreshAllData}
-							/>
-						)
-						catEditorPopup.trigger()
-					}}
-				>
-					Cat
-				</JButton>
-				<JButton
-					jstyle='invisible'
-					onClick={() => {
-						const actEditorPopup = createPopup(
-							<AccountEditorPopup
-								closePopup={() => {
-									actEditorPopup.close()
-								}}
-								refreshAllData={refreshAllData}
-							/>
-						)
-						actEditorPopup.trigger()
-					}}
-				>
-					Act
 				</JButton>
 				<JButton
 					jstyle='secondary'
