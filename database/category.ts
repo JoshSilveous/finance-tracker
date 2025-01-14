@@ -90,7 +90,7 @@ export async function upsertCategories(categoryUpdates: UpsertCategoryEntry[]) {
 }
 
 export async function deleteCategoryAndTransactions(category_id: string) {
-	const { error } = await supabase.rpc('delete_category_and_associated_items', {
+	const { error } = await supabase.rpc('delete_categorys_and_associated_items', {
 		category_id_input: category_id,
 	})
 

@@ -4,7 +4,6 @@
 
 -   Make sure that data methods don't have any cross-user overlap (they shouldn't)
 -   Add different signup/login methods
--   Add error reporting mechanism
 
 ### Can wait
 
@@ -30,6 +29,7 @@
 
 ## Solved
 
+-   Add error reporting mechanism
 -   Phase out old Category/Account managers + implement new ones
 -   Update Category / Account Managers
 -   Add save check for "Create New Transaction"

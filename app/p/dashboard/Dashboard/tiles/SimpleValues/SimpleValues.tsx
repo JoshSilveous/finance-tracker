@@ -70,7 +70,6 @@ export function SimpleValues({ data, changed, tileOptions, tileID }: SimpleValue
 						const fetchedEntry = databaseFetchedDataRef.current.find(
 							(entry) => entry.id === cat.id
 						)!
-						console.log('fetchedEntry:', fetchedEntry)
 
 						return {
 							id: cat.id,
