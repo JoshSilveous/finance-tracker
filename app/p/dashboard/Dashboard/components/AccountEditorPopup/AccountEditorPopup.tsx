@@ -44,6 +44,7 @@ export function AccountEditorPopup({
 	const defSortOrder = useRef<string[]>([])
 
 	const actRowsRef = useRef<ActRowsRef>({})
+	const createButtonRef = useRef<HTMLButtonElement>(null)
 
 	const addToItemRowRefs =
 		<T extends keyof ActRowsRef[string]>(account_id: string, key: T) =>
@@ -75,7 +76,11 @@ export function AccountEditorPopup({
 	const firstLoadRef = useRef(false)
 	useLayoutEffect(() => {
 		if (firstLoadRef.current && !isLoading) {
-			actRowsRef.current[sortOrder[0]].nameInput!.focus()
+			if (actData.length) {
+				actRowsRef.current[sortOrder[0]].nameInput!.focus()
+			} else {
+				createButtonRef.current!.focus()
+			}
 		}
 	}, [firstLoadRef.current])
 
@@ -358,7 +363,11 @@ export function AccountEditorPopup({
 			return (
 				<div style={{ display: 'contents' }}>
 					<div className={`${s.cell} ${s.new_button_container}`}>
-						<JButton jstyle='primary' onClick={createNewAccount}>
+						<JButton
+							jstyle='primary'
+							onClick={createNewAccount}
+							ref={createButtonRef}
+						>
 							Create New Account
 						</JButton>
 					</div>

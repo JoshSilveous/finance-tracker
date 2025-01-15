@@ -74,9 +74,14 @@ export function CategoryEditorPopup({
 		}
 	})
 	const firstLoadRef = useRef(false)
+	const createButtonRef = useRef<HTMLButtonElement>(null)
 	useLayoutEffect(() => {
 		if (firstLoadRef.current && !isLoading) {
-			catRowRefs.current[sortOrder[0]].nameInput!.focus()
+			if (catData.length) {
+				catRowRefs.current[sortOrder[0]].nameInput!.focus()
+			} else {
+				createButtonRef.current!.focus()
+			}
 		}
 	}, [firstLoadRef.current])
 
@@ -328,7 +333,11 @@ export function CategoryEditorPopup({
 			return (
 				<div style={{ display: 'contents' }}>
 					<div className={`${s.cell} ${s.new_button_container}`}>
-						<JButton jstyle='primary' onClick={createNewCategory}>
+						<JButton
+							jstyle='primary'
+							onClick={createNewCategory}
+							ref={createButtonRef}
+						>
 							Create New Category
 						</JButton>
 					</div>
