@@ -6,6 +6,7 @@ import { NewTransactionForm } from './NewTransactionForm/NewTransactionForm'
 import { DropdownOptions } from '../../TransactionManager'
 import { TabIndexer } from '../../hooks'
 import { getCurDateString } from '@/utils'
+import { SavePrompt } from './SavePrompt/SavePrompt'
 
 interface DateRowProps {
 	date: string
@@ -32,43 +33,17 @@ export function DateRow({
 	const handleNewTransactionClickWhilePendingSaves = () => {
 		// this is temporary, will be removed once inline transaction adding is ready
 		const popup = createPopup(
-			<div style={{ maxWidth: '300px' }}>
-				<p>
-					You'll have to save your changes before creating a new transaction (this
-					is temporary, this will soon be updated to support inline transaction
-					creation).
-				</p>
-				<p>Would you like to save your changes?</p>
-				<div style={{ display: 'flex', gap: '10px' }}>
-					<JButton
-						jstyle='secondary'
-						onClick={() => {
-							popup.close()
-						}}
-					>
-						Go Back
-					</JButton>
-					<JButton
-						jstyle='primary'
-						onClick={async () => {
-							await handleSave()
-							popup.close()
-							handleNewTransactionClick()
-						}}
-					>
-						Save
-					</JButton>
-				</div>
-			</div>
+			<SavePrompt
+				closePopup={() => popup.close()}
+				afterSave={() => handleNewTransactionClick()}
+				handleSave={handleSave}
+			/>
 		)
 		popup.trigger()
 	}
 
 	const handleNewTransactionClick = () => {
 		let refreshRequired = false
-		const setRefreshRequired = () => {
-			refreshRequired = true
-		}
 
 		const afterPopupClosed = () => {
 			if (refreshRequired) {
@@ -84,7 +59,7 @@ export function DateRow({
 					popup.close()
 					afterPopupClosed()
 				}}
-				setRefreshRequired={setRefreshRequired}
+				setRefreshRequired={() => (refreshRequired = true)}
 			/>,
 			'normal',
 			afterPopupClosed
