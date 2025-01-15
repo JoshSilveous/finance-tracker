@@ -3,7 +3,6 @@
 ### Needed before beta
 
 -   Transaction form isn't auto-refreshing on exit
--   Cat / Act managers should take focus on popup
 
 ### Can wait
 
@@ -29,6 +28,7 @@
 
 ## Solved
 
+-   Cat / Act managers should take focus on popup
 -   Add different signup/login methods
 -   Make sure that data methods don't have any cross-user overlap (they shouldn't)
 -   Add error reporting mechanism

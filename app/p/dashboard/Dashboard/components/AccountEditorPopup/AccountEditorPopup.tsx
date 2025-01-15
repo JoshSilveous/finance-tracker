@@ -208,13 +208,21 @@ export function AccountEditorPopup({
 											return clone.filter((it) => it !== act.id)
 										})
 									} else {
+										const refocus = () => {
+											if (lastNodeRef.current) {
+												lastNodeRef.current.focus()
+											}
+										}
 										const popup = createPopup(
 											<DeleteForm
 												account_id={act.id}
 												actData={actData}
 												deletedAccounts={deletedAccounts}
 												account_name={act.name.val}
-												closePopup={() => popup.close()}
+												closePopup={() => {
+													popup.close()
+													refocus()
+												}}
 												handleConfirm={(item: DeleteActItem) => {
 													setDeletedAccounts((prev) => {
 														const clone = structuredClone(prev)
@@ -239,8 +247,11 @@ export function AccountEditorPopup({
 														)
 														return clone
 													})
+													refocus()
 												}}
-											/>
+											/>,
+											undefined,
+											refocus
 										)
 										popup.trigger()
 									}
