@@ -29,6 +29,7 @@ import {
 	FoldState,
 } from '../../hooks'
 import { TileDefaultSettings } from '../types'
+import { SavePrompt } from './components/DateRow/SavePrompt/SavePrompt'
 
 export const transactionManagerTileDefaults: TileDefaultSettings = {
 	minWidth: 740,
@@ -58,7 +59,6 @@ export function TransactionManager({
 }: TransactionManagerProps) {
 	const mainContainerRef = useRef<HTMLDivElement>(null)
 	const prevFoldStateRef = useRef<FoldState>({})
-	const saveChangesButtonRef = useRef<HTMLButtonElement>(null)
 
 	const gridNav = useGridNav(
 		[
@@ -333,14 +333,43 @@ export function TransactionManager({
 					<JButton
 						jstyle='primary'
 						onClick={() => {
-							const popup = createPopup(
-								<NewTransactionForm
-									dropdownOptions={dropdownOptions}
-									defaultDate={getCurDateString()}
-									forceClosePopup={() => popup.close()}
-								/>
-							)
-							popup.trigger()
+							const createNewTransactionPopup = () => {
+								let refreshRequired = false
+
+								const onClose = () => {
+									if (refreshRequired) {
+										handleSave()
+									}
+								}
+
+								const popup = createPopup(
+									<NewTransactionForm
+										dropdownOptions={dropdownOptions}
+										defaultDate={getCurDateString()}
+										forceClosePopup={() => {
+											popup.close()
+											onClose()
+										}}
+										setRefreshRequired={() => (refreshRequired = true)}
+									/>,
+									undefined,
+									onClose
+								)
+								popup.trigger()
+							}
+							if (changesArePending) {
+								// this is temporary, will be removed once inline transaction adding is ready
+								const popup = createPopup(
+									<SavePrompt
+										closePopup={() => popup.close()}
+										afterSave={() => createNewTransactionPopup()}
+										handleSave={handleSave}
+									/>
+								)
+								popup.trigger()
+							} else {
+								createNewTransactionPopup()
+							}
 						}}
 					>
 						Create new transaction

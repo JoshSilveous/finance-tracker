@@ -1,6 +1,6 @@
 ## Unsolved
 
--   Transaction form isn't auto-refreshing on exit. Seems to happen when entering the first item? idk
+-   Set up tutorial system
 
 ### Needed before beta
 
@@ -34,6 +34,7 @@
 
 ## Solved
 
+-   Transaction form isn't auto-refreshing on exit. Seems to happen when entering the first item? idk
 -   Cat / Act managers should take focus on popup
 -   Add different signup/login methods
 -   Make sure that data methods don't have any cross-user overlap (they shouldn't)

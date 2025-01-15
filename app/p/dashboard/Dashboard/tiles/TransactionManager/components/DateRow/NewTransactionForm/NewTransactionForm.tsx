@@ -34,7 +34,7 @@ interface NewTransactionFormProps {
 	defaultDate?: string
 	dropdownOptions: DropdownOptions
 	forceClosePopup: () => void
-	setRefreshRequired?: () => void
+	setRefreshRequired: () => void
 }
 
 type Type = 'transaction' | 'item'
