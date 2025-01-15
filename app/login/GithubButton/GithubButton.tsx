@@ -2,13 +2,14 @@
 import { JButton } from '@/components/JForm'
 import { createClient } from '@/database/supabase/client'
 import { default as GitHubLogo } from '@/public/github_logo.svg'
-import { useState } from 'react'
+import { HTMLAttributes, useState } from 'react'
+import s from './GithubButton.module.scss'
 
 const supabase = createClient()
 
-export function GithubButton({ context }: { context: 'sign_in' | 'sign_up' }) {
+export function GithubButton({ className, ...props }: HTMLAttributes<HTMLButtonElement>) {
 	const [loading, setLoading] = useState(false)
-	const handleGithubSignIn = async () => {
+	const handleClick = async () => {
 		setLoading(true)
 		const { error } = await supabase.auth.signInWithOAuth({
 			provider: 'github',
@@ -21,9 +22,15 @@ export function GithubButton({ context }: { context: 'sign_in' | 'sign_up' }) {
 		}
 	}
 	return (
-		<JButton jstyle='secondary' onClick={handleGithubSignIn} loading={loading}>
+		<JButton
+			jstyle='secondary'
+			onClick={handleClick}
+			loading={loading}
+			className={`${s.button} ${className ? className : ''}`}
+			{...props}
+		>
 			<GitHubLogo />
-			{context === 'sign_in' ? 'Sign in with GitHub' : 'Sign up with GitHub'}
+			Sign in with GitHub
 		</JButton>
 	)
 }

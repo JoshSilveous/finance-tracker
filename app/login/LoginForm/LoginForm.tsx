@@ -4,9 +4,6 @@ import { login } from './login'
 import s from './LoginForm.module.scss'
 import { JButton, JInput } from '../../../components/JForm'
 import { createClient } from '@/database/supabase/client'
-import { default as GitHubLogo } from '@/public/github_logo.svg'
-import { useRouter } from 'next/navigation'
-import { GithubButton } from '../GithubButton/GithubButton'
 
 interface Errors {
 	email: string
@@ -24,7 +21,6 @@ export function LoginForm() {
 		general: '',
 	})
 	const [isSubmitting, setIsSubmitting] = useState(false)
-	const [githubIsLoading, setGithubIsLoading] = useState(false)
 
 	function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
 		const { name, value } = e.target
@@ -82,18 +78,6 @@ export function LoginForm() {
 		}
 	}
 
-	const handleGithubSignIn = async () => {
-		setGithubIsLoading(true)
-		const { error } = await supabase.auth.signInWithOAuth({
-			provider: 'github',
-			options: {
-				redirectTo: `${window.location.origin}/auth/callback`,
-			},
-		})
-		if (error) {
-			console.error('Error signing in:', error.message)
-		}
-	}
 	return (
 		<form className={s.form} onSubmit={handleSubmit} noValidate>
 			<div className={errors.email ? s.error : ''}>
@@ -129,9 +113,6 @@ export function LoginForm() {
 				</JButton>
 				<div className={s.error_container}>
 					{errors.general && <div>{errors.general}</div>}
-				</div>
-				<div className={s.github_container}>
-					<GithubButton context='' />
 				</div>
 			</div>
 		</form>

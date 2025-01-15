@@ -1,0 +1,13 @@
+.main {
+	width: 100%;
+	button {
+		svg {
+			margin-right: 1em;
+		}
+	}
+	p {
+		margin: 0;
+		font-size: 12px;
+		color: var(--font-color-disabled);
+	}
+}

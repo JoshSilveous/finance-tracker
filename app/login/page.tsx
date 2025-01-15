@@ -6,6 +6,8 @@ import { LoginForm } from '@/app/login/LoginForm/LoginForm'
 import { SignupForm } from '@/app/login/SignupForm/SignupForm'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { JButton } from '@/components/JForm'
+import { GithubButton } from './GithubButton/GithubButton'
+import { SignInAnonymouslyButton } from './SignInAnonymouslyButton/SignInAnonymouslyButton'
 
 type FormType = 'login' | 'signup'
 export default function LoginPage() {
@@ -58,6 +60,9 @@ export default function LoginPage() {
 					</div>
 				</div>
 			)}
+			<div className={s.separator}>or</div>
+			<GithubButton className={s.github_button} />
+			<SignInAnonymouslyButton />
 		</div>
 	)
 }
