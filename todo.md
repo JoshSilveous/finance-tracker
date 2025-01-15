@@ -1,8 +1,14 @@
 ## Unsolved
 
+-   Transaction form isn't auto-refreshing on exit. Seems to happen when entering the first item? idk
+
 ### Needed before beta
 
--   Transaction form isn't auto-refreshing on exit
+-   Add "Tutorial / Setup" sequence
+    -   Basic intro page
+    -   Set up categories
+    -   Set up accounts
+    -   Quick UI Guide
 
 ### Can wait
 
