@@ -9,7 +9,11 @@ import {
 	useState,
 } from 'react'
 import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
-import { fetchCategoryData, getCategoryCountAssocWithTransaction } from '@/database'
+import {
+	fetchCategoryData,
+	getCategoryCountAssocWithTransaction,
+	reportErrorToDB,
+} from '@/database'
 import { JButton } from '@/components/JForm'
 import {
 	addCommas,
@@ -85,6 +89,7 @@ export function DeleteForm({
 				)
 			})
 			.catch((e) => {
+				reportErrorToDB(e as Error)
 				if (isStandardError(e)) {
 					console.error(e)
 					promptError(

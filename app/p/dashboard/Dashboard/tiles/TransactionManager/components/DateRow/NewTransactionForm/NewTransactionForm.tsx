@@ -16,7 +16,7 @@ import {
 	getCurDateString,
 	createFocusLoop,
 } from '@/utils'
-import { insertTransactionAndItems } from '@/database'
+import { insertTransactionAndItems, reportErrorToDB } from '@/database'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 
 export interface TransactionFormData {
@@ -216,6 +216,7 @@ export function NewTransactionForm({
 					}
 					setCreationFinished(true)
 				} catch (e) {
+					reportErrorToDB(e as Error)
 					if (isStandardError(e)) {
 						promptError(
 							'Error occurred while creating your transaction.',

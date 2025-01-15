@@ -2,7 +2,11 @@ import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import s from './DeleteForm.module.scss'
 import { ChangeEvent, ChangeEventHandler, useEffect, useRef, useState } from 'react'
 import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
-import { fetchAccountData, getAccountCountAssocWithTransaction } from '@/database'
+import {
+	fetchAccountData,
+	getAccountCountAssocWithTransaction,
+	reportErrorToDB,
+} from '@/database'
 import { JButton } from '@/components/JForm'
 import {
 	addCommas,
@@ -73,6 +77,7 @@ export function DeleteForm({
 				)
 			})
 			.catch((e) => {
+				reportErrorToDB(e as Error)
 				if (isStandardError(e)) {
 					console.error(e)
 					promptError(
