@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import s from './CategoryEditorPopup.module.scss'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
@@ -73,6 +73,12 @@ export function CategoryEditorPopup({
 			)
 		}
 	})
+	const firstLoadRef = useRef(false)
+	useLayoutEffect(() => {
+		if (firstLoadRef.current && !isLoading) {
+			catRowRefs.current[sortOrder[0]].nameInput!.focus()
+		}
+	}, [firstLoadRef.current])
 
 	const refreshData = async () => {
 		setIsLoading(true)
@@ -87,6 +93,9 @@ export function CategoryEditorPopup({
 		setSortOrder(fetchedSortOrder)
 		defSortOrder.current = fetchedSortOrder
 		setIsLoading(false)
+		if (!firstLoadRef.current) {
+			firstLoadRef.current = true
+		}
 	}
 
 	useEffect(() => {
@@ -199,13 +208,21 @@ export function CategoryEditorPopup({
 											return clone.filter((it) => it !== cat.id)
 										})
 									} else {
+										const refocus = () => {
+											if (lastNodeRef.current) {
+												lastNodeRef.current.focus()
+											}
+										}
 										const popup = createPopup(
 											<DeleteForm
 												category_id={cat.id}
 												catData={catData}
 												deletedCategories={deletedCategories}
 												category_name={cat.name.val}
-												closePopup={() => popup.close()}
+												closePopup={() => {
+													popup.close()
+													refocus()
+												}}
 												handleConfirm={(item: DeleteCatItem) => {
 													setDeletedCategories((prev) => {
 														const clone = structuredClone(prev)
@@ -230,8 +247,11 @@ export function CategoryEditorPopup({
 														)
 														return clone
 													})
+													refocus()
 												}}
-											/>
+											/>,
+											undefined,
+											refocus
 										)
 										popup.trigger()
 									}

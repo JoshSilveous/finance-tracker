@@ -1,10 +1,24 @@
 import { JRadio } from '@/components/JForm/JRadio/JRadio'
 import s from './DeleteForm.module.scss'
-import { ChangeEvent, ChangeEventHandler, useEffect, useState } from 'react'
+import {
+	ChangeEvent,
+	ChangeEventHandler,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from 'react'
 import { JDropdown } from '@/components/JForm/JDropdown/JDropdown'
 import { fetchCategoryData, getCategoryCountAssocWithTransaction } from '@/database'
 import { JButton } from '@/components/JForm'
-import { addCommas, promptError, createPopup, isStandardError } from '@/utils'
+import {
+	addCommas,
+	promptError,
+	createPopup,
+	isStandardError,
+	createFocusLoop,
+	clearFocusLoop,
+} from '@/utils'
 import { default as LoadingIcon } from '@/public/loading.svg'
 import { CategoryItem, DeleteCatItem } from '../CategoryEditorPopup'
 
@@ -30,6 +44,35 @@ export function DeleteForm({
 	const [readyToConfirm, setReadyToConfirm] = useState(false)
 	const [categoryToChangeTo, setCategoryToChangeTo] = useState<string>()
 	const [associatedTransactionCount, setAssociatedTransactionCount] = useState<number>()
+
+	const firstNodeRef = useRef<HTMLInputElement | HTMLButtonElement>(null)
+	const lastNodeRef = useRef<HTMLButtonElement>(null)
+	useEffect(() => {
+		let clearLoops = () => {}
+		if (firstNodeRef.current && lastNodeRef.current) {
+			console.log(
+				'CREATING NEW FOCUS LOOP BETWEEN',
+				firstNodeRef.current,
+				lastNodeRef.current
+			)
+			clearFocusLoop(firstNodeRef.current, lastNodeRef.current)
+			const loop = createFocusLoop(firstNodeRef.current, lastNodeRef.current)
+			if (loop) {
+				clearLoops = loop.clearLoops
+			}
+		}
+		return () => {
+			clearLoops()
+		}
+	}, [firstNodeRef.current, lastNodeRef.current, deleteMethod, associatedTransactionCount])
+
+	const firstLoadRef = useRef(false)
+	useEffect(() => {
+		if (firstNodeRef.current && !firstLoadRef.current) {
+			firstLoadRef.current = true
+			firstNodeRef.current.focus()
+		}
+	}, [firstLoadRef.current, firstNodeRef.current, associatedTransactionCount])
 
 	useEffect(() => {
 		getCategoryCountAssocWithTransaction(category_id)
@@ -77,7 +120,11 @@ export function DeleteForm({
 					<div className={s.warning}>THIS CANNOT BE UNDONE</div>
 				</div>
 				<div className={s.button_container}>
-					<JButton jstyle='secondary' onClick={closePopup}>
+					<JButton
+						jstyle='secondary'
+						onClick={closePopup}
+						ref={firstNodeRef as React.RefObject<HTMLButtonElement>}
+					>
 						Go Back
 					</JButton>
 					<JButton
@@ -87,6 +134,7 @@ export function DeleteForm({
 							handleConfirm({ id: category_id, method: 'delete' })
 							closePopup()
 						}}
+						ref={lastNodeRef}
 					>
 						Confirm
 					</JButton>
@@ -159,6 +207,7 @@ export function DeleteForm({
 							id='delete'
 							name='handle_delete'
 							onChange={handleRadioChange}
+							ref={firstNodeRef as React.RefObject<HTMLInputElement>}
 						>
 							Delete the transactions
 						</JRadio>
@@ -198,7 +247,11 @@ export function DeleteForm({
 					)}
 				</div>
 				<div className={s.button_container}>
-					<JButton jstyle='secondary' onClick={closePopup}>
+					<JButton
+						jstyle='secondary'
+						onClick={closePopup}
+						ref={readyToConfirm ? undefined : lastNodeRef}
+					>
 						Go Back
 					</JButton>
 					<JButton
@@ -206,6 +259,7 @@ export function DeleteForm({
 						className={s.confirm_button}
 						disabled={!readyToConfirm}
 						onClick={handleConfirmClick}
+						ref={readyToConfirm ? lastNodeRef : undefined}
 					>
 						Confirm
 					</JButton>

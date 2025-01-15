@@ -7,7 +7,6 @@
 
 ### Can wait
 
--   Add different signup/login methods
 -   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
 -   Switch "create new transaction" button to add row to grid
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
@@ -30,6 +29,7 @@
 
 ## Solved
 
+-   Add different signup/login methods
 -   Make sure that data methods don't have any cross-user overlap (they shouldn't)
 -   Add error reporting mechanism
 -   Phase out old Category/Account managers + implement new ones

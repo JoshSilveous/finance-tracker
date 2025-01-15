@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import s from './AccountEditorPopup.module.scss'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
@@ -71,6 +71,13 @@ export function AccountEditorPopup({
 		}
 	})
 
+	const firstLoadRef = useRef(false)
+	useLayoutEffect(() => {
+		if (firstLoadRef.current && !isLoading) {
+			actRowsRef.current[sortOrder[0]].nameInput!.focus()
+		}
+	}, [firstLoadRef.current])
+
 	const refreshData = async () => {
 		setIsLoading(true)
 		const fetchedData = await fetchAccountData()
@@ -85,6 +92,9 @@ export function AccountEditorPopup({
 		setSortOrder(fetchedSortOrder)
 		defSortOrder.current = fetchedSortOrder
 		setIsLoading(false)
+		if (!firstLoadRef.current) {
+			firstLoadRef.current = true
+		}
 	}
 
 	useEffect(() => {

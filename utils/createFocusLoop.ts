@@ -6,6 +6,7 @@ const clearFocusLoopBuffer: { node: HTMLElement; clear: () => void }[] = []
  * Creates a focus loop that will restrict `tab` navigation between two nodes.
  * @param firstNode The first node in the loop
  * @param lastNode The last node in the loop
+ * @returns a cleanup function that removes the nodes from the clearFocusLoop() buffer, and removes the event listeners.
  */
 export function createFocusLoop(firstNode: HTMLElement, lastNode: HTMLElement) {
 	if (
@@ -47,6 +48,20 @@ export function createFocusLoop(firstNode: HTMLElement, lastNode: HTMLElement) {
 				clear: () => firstNode.removeEventListener('keydown', onLastNodeKeydown),
 			}
 		)
+		return {
+			clearLoops: () => {
+				firstNode.removeEventListener('keydown', onFirstNodeKeydown)
+				lastNode.removeEventListener('keydown', onLastNodeKeydown)
+				const firstNodeIndex = clearFocusLoopBuffer.findIndex(
+					(it) => it.node === firstNode
+				)
+				const lastNodeIndex = clearFocusLoopBuffer.findIndex(
+					(it) => it.node === lastNode
+				)
+				clearFocusLoopBuffer.splice(firstNodeIndex, 1)
+				clearFocusLoopBuffer.splice(lastNodeIndex, 1)
+			},
+		}
 	}
 }
 
