@@ -8,26 +8,39 @@ export function handleReorder(
 	catRowsRef: MutableRefObject<CatRowsRef>,
 	index: number,
 	e: MouseEvent<HTMLButtonElement>,
-	handleReorder: (oldIndex: number, newIndex: number) => void
+	afterReorderComplete: (oldIndex: number, newIndex: number) => void
 ) {
 	document.body.style.cursor = 'grabbing'
 	const rowRefsFormatted = Object.entries(catRowsRef.current).map(([cat_id, ref]) => ({
 		...ref,
 		category_id: cat_id,
 	}))
-	const thisRef = rowRefsFormatted.find((it) => it.category_id === category_id)!
+	const thisRefIndex = rowRefsFormatted.findIndex((it) => it.category_id === category_id)
+	const thisRef = rowRefsFormatted[thisRefIndex]
 	const grabberNode = thisRef.reorderButton!
 	const thisRow = Array.from(thisRef.container!.children) as HTMLDivElement[]
 	const allRows = rowRefsFormatted.map(
 		(ref) => Array.from(ref.container!.children) as HTMLDivElement[]
 	)
-	const otherRows = allRows.toSpliced(index, 1)
+	const otherRows = allRows.toSpliced(thisRefIndex, 1)
 	const gridElem = thisRef.container!.parentNode!.parentNode!.parentNode as HTMLDivElement
+	const popupContainerElem = gridElem.parentNode!.parentNode!.parentNode!.parentNode!
+		.parentNode!.parentNode! as HTMLDivElement
 	console.log('gridElem;', gridElem, gridElem.getBoundingClientRect())
+	console.log(
+		'popupContainerElem;',
+		popupContainerElem,
+		popupContainerElem.getBoundingClientRect()
+	)
 	const computed = gridElem.getBoundingClientRect()
-	const offsetX = computed.left
-	const offsetY = computed.top - gridElem.offsetTop + grabberNode.offsetHeight / 2 + 10
-	console.log('\noffsetX', offsetX, '\noffsetY', offsetY)
+	const offsetX =
+		popupContainerElem.getBoundingClientRect().left +
+		thisRef.reorderButton!.offsetLeft +
+		thisRef.reorderButton!.offsetWidth / 2
+	const offsetY =
+		popupContainerElem.getBoundingClientRect().top +
+		(thisRef.container!.childNodes[0] as HTMLDivElement).offsetHeight / 2
+	console.log((thisRef.container!.childNodes[0] as HTMLDivElement).offsetHeight)
 	// off by +100
 	const startX = e.clientX
 
@@ -215,7 +228,7 @@ export function handleReorder(
 		scroll.stopDown()
 
 		if (index !== closestBreakpointIndex) {
-			handleReorder(index, closestBreakpointIndex)
+			afterReorderComplete(index, closestBreakpointIndex)
 		}
 
 		document.body.style.cursor = ''

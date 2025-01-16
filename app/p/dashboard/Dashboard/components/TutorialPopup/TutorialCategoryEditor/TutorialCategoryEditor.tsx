@@ -82,7 +82,7 @@ export function TutorialCategoryEditor({
 			<div
 				style={{ display: 'contents' }}
 				ref={addToCatRowRefs(cat.id, 'container')}
-				key={`${index}-${index}`}
+				key={`${cat.id}-${index}`}
 			>
 				<div className={`${s.cell} ${s.control}`}>
 					<div className={s.delete_container}>
@@ -158,7 +158,6 @@ export function TutorialCategoryEditor({
 
 	return (
 		<div className={s.main}>
-			<h2>Category Editor</h2>
 			<div className={s.grid_container}>
 				<JGrid
 					cells={cells}

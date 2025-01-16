@@ -13,22 +13,23 @@ export function TutorialPopup({ startingStage }: { startingStage: number }) {
 		name: string
 		content: JSX.Element
 	}
+	const tempContent = <TutorialCategoryEditor catData={catData} setCatData={setCatData} />
 	const stages: Stage[] = [
 		{
 			name: 'Category Editor 1',
-			content: <CategoryEditorPopup isPopup={false} />,
+			content: tempContent,
 		},
 		{
 			name: 'Category Editor 2',
-			content: <TutorialCategoryEditor catData={catData} setCatData={setCatData} />,
+			content: tempContent,
 		},
 		{
 			name: 'Category Editor 3',
-			content: <TutorialCategoryEditor catData={catData} setCatData={setCatData} />,
+			content: tempContent,
 		},
 		{
 			name: 'Category Editor 4',
-			content: <TutorialCategoryEditor catData={catData} setCatData={setCatData} />,
+			content: tempContent,
 		},
 	]
 	const progressBar = (() => {
