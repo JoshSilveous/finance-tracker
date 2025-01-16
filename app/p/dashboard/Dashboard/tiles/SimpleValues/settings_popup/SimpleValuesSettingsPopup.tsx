@@ -308,30 +308,32 @@ export function SimpleValuesSettingsPopup({
 			closePopup()
 		}
 
-		const deletePopup = createPopup(
-			<div className={s.delete_tile_popup}>
-				<h3>Delete Tile</h3>
-				<p>
-					<strong>This cannot be undone</strong>
-					<br />
-					Are you sure?
-				</p>
-				<div style={{ display: 'flex', gap: '10px' }}>
-					<JButton
-						jstyle='secondary'
-						onClick={() => {
-							deletePopup.close()
-						}}
-					>
-						Go Back
-					</JButton>
-					<JButton jstyle='secondary' onClick={handleDelete}>
-						Delete
-					</JButton>
+		const deletePopup = createPopup({
+			content: (
+				<div className={s.delete_tile_popup}>
+					<h3>Delete Tile</h3>
+					<p>
+						<strong>This cannot be undone</strong>
+						<br />
+						Are you sure?
+					</p>
+					<div style={{ display: 'flex', gap: '10px' }}>
+						<JButton
+							jstyle='secondary'
+							onClick={() => {
+								deletePopup.close()
+							}}
+						>
+							Go Back
+						</JButton>
+						<JButton jstyle='secondary' onClick={handleDelete}>
+							Delete
+						</JButton>
+					</div>
 				</div>
-			</div>,
-			'error'
-		)
+			),
+			type: 'error',
+		})
 		deletePopup.trigger()
 	}
 

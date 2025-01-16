@@ -34,7 +34,9 @@ export function Dashboard() {
 			.then((res) => {
 				if (!res.completed) {
 					console.log('tutorial not completed!', res)
-					const popup = createPopup(<TutorialPopup startingStage={res.stage} />)
+					const popup = createPopup({
+						content: <TutorialPopup startingStage={res.stage} />,
+					})
 					popup.trigger()
 				}
 			})
@@ -166,13 +168,15 @@ export function Dashboard() {
 	)
 
 	const handleNewTileClick = () => {
-		const popup = createPopup(
-			<AddTilePopup
-				closePopup={() => popup.close()}
-				data={data}
-				setTileData={setTileData}
-			/>
-		)
+		const popup = createPopup({
+			content: (
+				<AddTilePopup
+					closePopup={() => popup.close()}
+					data={data}
+					setTileData={setTileData}
+				/>
+			),
+		})
 		popup.trigger()
 	}
 
@@ -181,44 +185,48 @@ export function Dashboard() {
 			data.clearChanges()
 			setTileData(origTileDataRef.current)
 		}
-		const popup = createPopup(
-			<div>
-				<h3>Discard Changes</h3>
-				<p>Are you sure?</p>
-				<div style={{ display: 'flex', gap: '10px' }}>
-					<JButton
-						jstyle='secondary'
-						onClick={() => {
-							popup.close()
-						}}
-					>
-						No
-					</JButton>
-					<JButton
-						jstyle='primary'
-						onClick={() => {
-							discardChanges()
-							popup.close()
-						}}
-					>
-						Yes
-					</JButton>
+		const popup = createPopup({
+			content: (
+				<div>
+					<h3>Discard Changes</h3>
+					<p>Are you sure?</p>
+					<div style={{ display: 'flex', gap: '10px' }}>
+						<JButton
+							jstyle='secondary'
+							onClick={() => {
+								popup.close()
+							}}
+						>
+							No
+						</JButton>
+						<JButton
+							jstyle='primary'
+							onClick={() => {
+								discardChanges()
+								popup.close()
+							}}
+						>
+							Yes
+						</JButton>
+					</div>
 				</div>
-			</div>
-		)
+			),
+		})
 		popup.trigger()
 	}
 
 	const handleFeedback = () => {
-		const popup = createPopup(
-			<FeedbackPopup
-				closePopup={() => {
-					popup.close()
-				}}
-				feedbackSource='dashboard_general'
-				header='Submit Feedback'
-			/>
-		)
+		const popup = createPopup({
+			content: (
+				<FeedbackPopup
+					closePopup={() => {
+						popup.close()
+					}}
+					feedbackSource='dashboard_general'
+					header='Submit Feedback'
+				/>
+			),
+		})
 		popup.trigger()
 	}
 
@@ -243,28 +251,32 @@ export function Dashboard() {
 						{
 							content: <>Edit Categories</>,
 							onClick: () => {
-								const catEditorPopup = createPopup(
-									<CategoryEditorPopup
-										closePopup={() => {
-											catEditorPopup.close()
-										}}
-										refreshAllData={refreshAllData}
-									/>
-								)
+								const catEditorPopup = createPopup({
+									content: (
+										<CategoryEditorPopup
+											closePopup={() => {
+												catEditorPopup.close()
+											}}
+											refreshAllData={refreshAllData}
+										/>
+									),
+								})
 								catEditorPopup.trigger()
 							},
 						},
 						{
 							content: <>Edit Accounts</>,
 							onClick: () => {
-								const actEditorPopup = createPopup(
-									<AccountEditorPopup
-										closePopup={() => {
-											actEditorPopup.close()
-										}}
-										refreshAllData={refreshAllData}
-									/>
-								)
+								const actEditorPopup = createPopup({
+									content: (
+										<AccountEditorPopup
+											closePopup={() => {
+												actEditorPopup.close()
+											}}
+											refreshAllData={refreshAllData}
+										/>
+									),
+								})
 								actEditorPopup.trigger()
 							},
 						},

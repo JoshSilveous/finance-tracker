@@ -342,30 +342,35 @@ export function TransactionManager({
 									}
 								}
 
-								const popup = createPopup(
-									<NewTransactionForm
-										dropdownOptions={dropdownOptions}
-										defaultDate={getCurDateString()}
-										forceClosePopup={() => {
-											popup.close()
-											onClose()
-										}}
-										setRefreshRequired={() => (refreshRequired = true)}
-									/>,
-									undefined,
-									onClose
-								)
+								const popup = createPopup({
+									content: (
+										<NewTransactionForm
+											dropdownOptions={dropdownOptions}
+											defaultDate={getCurDateString()}
+											forceClosePopup={() => {
+												popup.close()
+												onClose()
+											}}
+											setRefreshRequired={() =>
+												(refreshRequired = true)
+											}
+										/>
+									),
+									handleClose: onClose,
+								})
 								popup.trigger()
 							}
 							if (changesArePending) {
 								// this is temporary, will be removed once inline transaction adding is ready
-								const popup = createPopup(
-									<SavePrompt
-										closePopup={() => popup.close()}
-										afterSave={() => createNewTransactionPopup()}
-										handleSave={handleSave}
-									/>
-								)
+								const popup = createPopup({
+									content: (
+										<SavePrompt
+											closePopup={() => popup.close()}
+											afterSave={() => createNewTransactionPopup()}
+											handleSave={handleSave}
+										/>
+									),
+								})
 								popup.trigger()
 							} else {
 								createNewTransactionPopup()

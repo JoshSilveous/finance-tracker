@@ -6,14 +6,16 @@ export function promptError(
 	instructions: string,
 	onClose?: () => void
 ) {
-	createPopup(
-		<div>
-			<h2>{context}</h2>
-			<h4>{errorMsg.toUpperCase()}</h4>
-			<hr />
-			<p>{instructions}</p>
-		</div>,
-		'error',
-		onClose
-	).trigger()
+	createPopup({
+		content: (
+			<div>
+				<h2>{context}</h2>
+				<h4>{errorMsg.toUpperCase()}</h4>
+				<hr />
+				<p>{instructions}</p>
+			</div>
+		),
+		type: 'error',
+		handleClose: onClose,
+	}).trigger()
 }

@@ -219,46 +219,50 @@ export function AccountEditorPopup({
 												lastNodeRef.current.focus()
 											}
 										}
-										const popup = createPopup(
-											<DeleteForm
-												account_id={act.id}
-												actData={actData}
-												deletedAccounts={deletedAccounts}
-												account_name={act.name.val}
-												closePopup={() => {
-													popup.close()
-													refocus()
-												}}
-												handleConfirm={(item: DeleteActItem) => {
-													setDeletedAccounts((prev) => {
-														const clone = structuredClone(prev)
-														clone.push(item)
-														return clone
-													})
-													setSortOrder((prev) => {
-														const clone = structuredClone(prev)
-														clone.splice(
-															clone.indexOf(item.id),
-															1
-														)
-														return clone
-													})
-													setActData((prev) => {
-														const clone = structuredClone(prev)
-														clone.splice(
-															clone.findIndex(
-																(it) => it.id === item.id
-															),
-															1
-														)
-														return clone
-													})
-													refocus()
-												}}
-											/>,
-											undefined,
-											refocus
-										)
+										const popup = createPopup({
+											content: (
+												<DeleteForm
+													account_id={act.id}
+													actData={actData}
+													deletedAccounts={deletedAccounts}
+													account_name={act.name.val}
+													closePopup={() => {
+														popup.close()
+														refocus()
+													}}
+													handleConfirm={(item: DeleteActItem) => {
+														setDeletedAccounts((prev) => {
+															const clone =
+																structuredClone(prev)
+															clone.push(item)
+															return clone
+														})
+														setSortOrder((prev) => {
+															const clone =
+																structuredClone(prev)
+															clone.splice(
+																clone.indexOf(item.id),
+																1
+															)
+															return clone
+														})
+														setActData((prev) => {
+															const clone =
+																structuredClone(prev)
+															clone.splice(
+																clone.findIndex(
+																	(it) => it.id === item.id
+																),
+																1
+															)
+															return clone
+														})
+														refocus()
+													}}
+												/>
+											),
+											handleClose: refocus,
+										})
 										popup.trigger()
 									}
 								}}
@@ -400,14 +404,16 @@ export function AccountEditorPopup({
 		setIsSaving(false)
 		refreshAllData()
 		closePopup()
-		const actEditorPopup = createPopup(
-			<AccountEditorPopup
-				closePopup={() => {
-					actEditorPopup.close()
-				}}
-				refreshAllData={refreshAllData}
-			/>
-		)
+		const actEditorPopup = createPopup({
+			content: (
+				<AccountEditorPopup
+					closePopup={() => {
+						actEditorPopup.close()
+					}}
+					refreshAllData={refreshAllData}
+				/>
+			),
+		})
 		actEditorPopup.trigger()
 	}
 

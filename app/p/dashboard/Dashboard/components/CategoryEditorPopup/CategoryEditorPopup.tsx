@@ -220,46 +220,50 @@ export function CategoryEditorPopup({
 												lastNodeRef.current.focus()
 											}
 										}
-										const popup = createPopup(
-											<DeleteForm
-												category_id={cat.id}
-												catData={catData}
-												deletedCategories={deletedCategories}
-												category_name={cat.name.val}
-												closePopup={() => {
-													popup.close()
-													refocus()
-												}}
-												handleConfirm={(item: DeleteCatItem) => {
-													setDeletedCategories((prev) => {
-														const clone = structuredClone(prev)
-														clone.push(item)
-														return clone
-													})
-													setSortOrder((prev) => {
-														const clone = structuredClone(prev)
-														clone.splice(
-															clone.indexOf(item.id),
-															1
-														)
-														return clone
-													})
-													setCatData((prev) => {
-														const clone = structuredClone(prev)
-														clone.splice(
-															clone.findIndex(
-																(it) => it.id === item.id
-															),
-															1
-														)
-														return clone
-													})
-													refocus()
-												}}
-											/>,
-											undefined,
-											refocus
-										)
+										const popup = createPopup({
+											content: (
+												<DeleteForm
+													category_id={cat.id}
+													catData={catData}
+													deletedCategories={deletedCategories}
+													category_name={cat.name.val}
+													closePopup={() => {
+														popup.close()
+														refocus()
+													}}
+													handleConfirm={(item: DeleteCatItem) => {
+														setDeletedCategories((prev) => {
+															const clone =
+																structuredClone(prev)
+															clone.push(item)
+															return clone
+														})
+														setSortOrder((prev) => {
+															const clone =
+																structuredClone(prev)
+															clone.splice(
+																clone.indexOf(item.id),
+																1
+															)
+															return clone
+														})
+														setCatData((prev) => {
+															const clone =
+																structuredClone(prev)
+															clone.splice(
+																clone.findIndex(
+																	(it) => it.id === item.id
+																),
+																1
+															)
+															return clone
+														})
+														refocus()
+													}}
+												/>
+											),
+											handleClose: refocus,
+										})
 										popup.trigger()
 									}
 								}}
@@ -373,14 +377,16 @@ export function CategoryEditorPopup({
 			setIsSaving(false)
 			refreshAllData()
 			closePopup()
-			const catEditorPopup = createPopup(
-				<CategoryEditorPopup
-					closePopup={() => {
-						catEditorPopup.close()
-					}}
-					refreshAllData={refreshAllData}
-				/>
-			)
+			const catEditorPopup = createPopup({
+				content: (
+					<CategoryEditorPopup
+						closePopup={() => {
+							catEditorPopup.close()
+						}}
+						refreshAllData={refreshAllData}
+					/>
+				),
+			})
 			catEditorPopup.trigger()
 		}
 	}

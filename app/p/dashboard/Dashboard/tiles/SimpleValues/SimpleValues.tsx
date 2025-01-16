@@ -22,15 +22,17 @@ export const simpleValuesTileDefaults: TileDefaultSettings = {
 	maxHeight: undefined,
 	showEditButton: true,
 	onEditButtonClick: (tile, setTileData, data) => {
-		const popup = createPopup(
-			<SimpleValuesSettingsPopup
-				context='edit'
-				tile={tile as SimpleValuesTile}
-				setTileData={setTileData}
-				data={data}
-				closePopup={() => popup.close()}
-			/>
-		)
+		const popup = createPopup({
+			content: (
+				<SimpleValuesSettingsPopup
+					context='edit'
+					tile={tile as SimpleValuesTile}
+					setTileData={setTileData}
+					data={data}
+					closePopup={() => popup.close()}
+				/>
+			),
+		})
 		popup.trigger()
 	},
 }

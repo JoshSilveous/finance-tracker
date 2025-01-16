@@ -29,31 +29,34 @@ export function AddTilePopup({ closePopup, setTileData, data }: AddTilePopupProp
 
 	const handleNewSimpleValuesTile = () => {
 		closePopup()
-		const popup = createPopup(
-			<SimpleValuesSettingsPopup
-				context='create'
-				setTileData={setTileData}
-				data={data}
-				closePopup={() => popup.close()}
-			/>
-		)
+		const popup = createPopup({
+			content: (
+				<SimpleValuesSettingsPopup
+					context='create'
+					setTileData={setTileData}
+					data={data}
+					closePopup={() => popup.close()}
+				/>
+			),
+		})
 		popup.trigger()
 	}
 	const suggestTile = () => {
-		const popup = createPopup(
-			<FeedbackPopup
-				closePopup={() => {
-					popup.close()
-					firstFocusRef.current!.focus()
-				}}
-				feedbackSource='suggest_a_tile'
-				header='Suggest a tile'
-			/>,
-			undefined,
-			() => {
+		const popup = createPopup({
+			content: (
+				<FeedbackPopup
+					closePopup={() => {
+						popup.close()
+						firstFocusRef.current!.focus()
+					}}
+					feedbackSource='suggest_a_tile'
+					header='Suggest a tile'
+				/>
+			),
+			handleClose: () => {
 				firstFocusRef.current!.focus()
-			}
-		)
+			},
+		})
 		popup.trigger()
 	}
 	return (

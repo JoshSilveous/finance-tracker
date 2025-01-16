@@ -32,13 +32,15 @@ export function DateRow({
 
 	const handleNewTransactionClickWhilePendingSaves = () => {
 		// this is temporary, will be removed once inline transaction adding is ready
-		const popup = createPopup(
-			<SavePrompt
-				closePopup={() => popup.close()}
-				afterSave={() => handleNewTransactionClick()}
-				handleSave={handleSave}
-			/>
-		)
+		const popup = createPopup({
+			content: (
+				<SavePrompt
+					closePopup={() => popup.close()}
+					afterSave={() => handleNewTransactionClick()}
+					handleSave={handleSave}
+				/>
+			),
+		})
 		popup.trigger()
 	}
 
@@ -51,19 +53,20 @@ export function DateRow({
 			}
 		}
 
-		const popup = createPopup(
-			<NewTransactionForm
-				defaultDate={date}
-				dropdownOptions={dropdownOptions}
-				forceClosePopup={() => {
-					popup.close()
-					afterPopupClosed()
-				}}
-				setRefreshRequired={() => (refreshRequired = true)}
-			/>,
-			'normal',
-			afterPopupClosed
-		)
+		const popup = createPopup({
+			content: (
+				<NewTransactionForm
+					defaultDate={date}
+					dropdownOptions={dropdownOptions}
+					forceClosePopup={() => {
+						popup.close()
+						afterPopupClosed()
+					}}
+					setRefreshRequired={() => (refreshRequired = true)}
+				/>
+			),
+			handleClose: afterPopupClosed,
+		})
 		popup.trigger()
 	}
 
