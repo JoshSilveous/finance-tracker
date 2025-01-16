@@ -383,6 +383,7 @@ export function CategoryEditorPopup({
 						closePopup={() => {
 							catEditorPopup.close()
 						}}
+						isPopup
 						refreshAllData={refreshAllData}
 					/>
 				),

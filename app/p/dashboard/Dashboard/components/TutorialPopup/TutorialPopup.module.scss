@@ -3,4 +3,66 @@
 	height: calc(100vh - 200px);
 	min-width: 300px;
 	overflow: hidden;
+	display: flex;
+	.welcome {
+		flex: 0 0 50%;
+	}
+	.stage_container {
+		flex: 0 0 50%;
+		width: 100%;
+		.progress_container {
+			width: 100%;
+			.progress_bar {
+				--animation-time: 0.5s;
+				display: flex;
+				align-items: center;
+				width: 100%;
+				.circle {
+					--size: 15px;
+
+					flex-shrink: 0;
+					padding: 5px;
+					border-radius: 50%;
+					background-color: transparent;
+					box-shadow: inset 0 0 0 2px var(--font-color);
+					box-sizing: border-box;
+					min-width: var(--size);
+					min-height: var(--size);
+					max-width: var(--size);
+					max-height: var(--size);
+					transition: box-shadow calc(var(--animation-time) / 3) ease;
+					&.before {
+						box-shadow: inset 0 0 0 calc(var(--size) / 2 + 1px)
+							var(--font-color-changed);
+					}
+					&.current {
+						box-shadow: inset 0 0 0 2px var(--font-color-changed);
+						transition-delay: calc((var(--animation-time) / 3) * 2);
+					}
+					&.after {
+					}
+				}
+				.bar {
+					--height: 3px;
+
+					flex-grow: 1;
+					height: var(--height);
+					.progress {
+						background-color: var(--font-color-changed);
+						height: var(--height);
+						transition: width calc(var(--animation-time) / 3) ease;
+						transition-delay: calc(var(--animation-time) / 3);
+					}
+					&.before .progress {
+						width: 100%;
+					}
+					&.after .progress {
+						width: 0px;
+					}
+				}
+			}
+		}
+		.stage_content {
+		}
+	}
 }

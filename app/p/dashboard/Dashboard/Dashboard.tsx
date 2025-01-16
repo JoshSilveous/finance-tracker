@@ -36,6 +36,7 @@ export function Dashboard() {
 					console.log('tutorial not completed!', res)
 					const popup = createPopup({
 						content: <TutorialPopup startingStage={res.stage} />,
+						hideExitButton: true,
 					})
 					popup.trigger()
 				}
@@ -258,6 +259,7 @@ export function Dashboard() {
 												catEditorPopup.close()
 											}}
 											refreshAllData={refreshAllData}
+											isPopup
 										/>
 									),
 								})

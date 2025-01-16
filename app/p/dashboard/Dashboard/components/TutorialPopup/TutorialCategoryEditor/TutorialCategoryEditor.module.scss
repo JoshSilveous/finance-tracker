@@ -1,0 +1,134 @@
+.main {
+	width: 300px;
+	display: flex;
+	max-height: 450px;
+	flex-direction: column;
+	.grid_container {
+		flex-grow: 1;
+		overflow: auto;
+		scrollbar-gutter: stable;
+		scrollbar-width: thin;
+		transition: scrollbar-color 0.3s ease;
+		scrollbar-color: transparent transparent;
+		--grid-padding-val: 3px;
+		height: 340px;
+		&:hover {
+			scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
+		}
+
+		.cell {
+			width: 100%;
+			padding: calc(var(--grid-padding-val) / 2);
+			box-sizing: border-box;
+			&.name {
+			}
+			&.control {
+				height: 39px;
+				display: flex;
+				justify-content: center;
+				gap: 5px;
+				align-items: center;
+				box-sizing: border-box;
+
+				&.changed .reorder_container button {
+					color: var(--font-color-changed) !important;
+				}
+
+				button {
+					height: fit-content;
+					padding: 2px;
+					svg {
+						width: 20px;
+						height: 20px;
+					}
+				}
+				.reorder_container button {
+					cursor: grab;
+					scale: 100%;
+					transition: scale 0.2s ease;
+					&:hover {
+						scale: 110%;
+					}
+					&:active {
+						cursor: grabbing;
+					}
+				}
+				.delete_container button {
+					scale: 100%;
+					transition: scale 0.2s ease, color 0.2s ease;
+					&:hover {
+						color: var(--font-color-error);
+						scale: 110%;
+					}
+				}
+			}
+			&.control_header {
+				background-color: var(--bg-color-lighter-2);
+				height: 100%;
+			}
+			&.name_header {
+				background-color: var(--bg-color-lighter-2);
+				.header {
+					background-color: var(--bg-color-lighter-3);
+					height: 30px;
+					margin: 1px;
+					border-radius: 2px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font-weight: 500px;
+				}
+			}
+			&.new_button_container {
+				grid-column: 2 / 3;
+				box-sizing: border-box;
+				padding: 2px;
+				display: flex;
+				align-items: center;
+				button {
+					box-sizing: border-box;
+				}
+			}
+
+			&.changed {
+				color: var(--font-color-changed);
+			}
+		}
+		/* POPPED-OUT ROW STYLES */
+		.cell.popped_out {
+			display: flex;
+			position: fixed;
+			z-index: 999;
+
+			&.name input {
+				box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+			}
+			&.control {
+				filter: drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3));
+			}
+		}
+
+		/* RE-ORDERING ROW EFFECT STYLES */
+		--margin-gap-size: calc(36px + var(--grid-padding-val));
+		.transitions {
+			transition: margin 0.2s ease;
+		}
+		.margin_top {
+			margin-top: calc(var(--margin-gap-size) / 2);
+		}
+		.margin_bottom {
+			margin-bottom: calc(var(--margin-gap-size) / 2);
+		}
+		.margin_top_double {
+			margin-top: var(--margin-gap-size);
+		}
+		.margin_bottom_double {
+			margin-bottom: var(--margin-gap-size);
+		}
+	}
+	.button_container {
+		margin-top: 15px;
+		display: flex;
+		gap: 15px;
+	}
+}

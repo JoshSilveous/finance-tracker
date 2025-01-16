@@ -48,7 +48,11 @@ export function createPopup({
 		trigger() {
 			popupDomLocation.render(
 				<div className={`${s.popup_background} ${s[type]}`}>
-					<div className={s.popup_container}>
+					<div
+						className={`${s.popup_container} ${
+							hideExitButton ? s.exit_hidden : ''
+						}`}
+					>
 						{!hideExitButton && (
 							<div
 								className={s.popup_exit}
