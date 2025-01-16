@@ -30,11 +30,13 @@ import { DeleteForm } from './DeleteForm/DeleteForm'
 import { saveChanges } from './func/saveChanges'
 
 interface NewCategoryManagerPopupProps {
-	closePopup: () => void
-	refreshAllData: () => Promise<void>
+	isPopup?: boolean
+	closePopup?: () => void
+	refreshAllData?: () => Promise<void>
 }
 export function CategoryEditorPopup({
 	closePopup,
+	isPopup,
 	refreshAllData,
 }: NewCategoryManagerPopupProps) {
 	const [isLoading, setIsLoading] = useState(true)
@@ -351,34 +353,36 @@ export function CategoryEditorPopup({
 	}
 
 	const handleSave = async () => {
-		setIsSaving(true)
+		if (isPopup && closePopup && refreshAllData) {
+			setIsSaving(true)
 
-		try {
-			await saveChanges(catData, sortOrder, deletedCategories, defSortOrder)
-		} catch (e) {
-			reportErrorToDB(e as Error)
-			if (isStandardError(e)) {
-				promptError(
-					'An unexpected error has occurred while saving your changes:',
-					e.message,
-					'Try refreshing the page to resolve this issue.'
-				)
-				console.error(e.message)
+			try {
+				await saveChanges(catData, sortOrder, deletedCategories, defSortOrder)
+			} catch (e) {
+				reportErrorToDB(e as Error)
+				if (isStandardError(e)) {
+					promptError(
+						'An unexpected error has occurred while saving your changes:',
+						e.message,
+						'Try refreshing the page to resolve this issue.'
+					)
+					console.error(e.message)
+				}
 			}
-		}
 
-		setIsSaving(false)
-		refreshAllData()
-		closePopup()
-		const catEditorPopup = createPopup(
-			<CategoryEditorPopup
-				closePopup={() => {
-					catEditorPopup.close()
-				}}
-				refreshAllData={refreshAllData}
-			/>
-		)
-		catEditorPopup.trigger()
+			setIsSaving(false)
+			refreshAllData()
+			closePopup()
+			const catEditorPopup = createPopup(
+				<CategoryEditorPopup
+					closePopup={() => {
+						catEditorPopup.close()
+					}}
+					refreshAllData={refreshAllData}
+				/>
+			)
+			catEditorPopup.trigger()
+		}
 	}
 
 	return (
@@ -393,24 +397,26 @@ export function CategoryEditorPopup({
 					grid
 				)}
 			</div>
-			<div className={s.button_container}>
-				<JButton
-					jstyle='secondary'
-					onClick={closePopup}
-					ref={areChanges ? undefined : lastNodeRef}
-				>
-					Go Back
-				</JButton>
-				<JButton
-					jstyle='primary'
-					disabled={!areChanges}
-					ref={areChanges ? lastNodeRef : undefined}
-					onClick={handleSave}
-					loading={isSaving}
-				>
-					Save
-				</JButton>
-			</div>
+			{isPopup && (
+				<div className={s.button_container}>
+					<JButton
+						jstyle='secondary'
+						onClick={closePopup}
+						ref={areChanges ? undefined : lastNodeRef}
+					>
+						Go Back
+					</JButton>
+					<JButton
+						jstyle='primary'
+						disabled={!areChanges}
+						ref={areChanges ? lastNodeRef : undefined}
+						onClick={handleSave}
+						loading={isSaving}
+					>
+						Save
+					</JButton>
+				</div>
+			)}
 		</div>
 	)
 }

@@ -4,10 +4,9 @@
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
-	--NAVBAR-HEIGHT: 60px;
 
 	.navbar_container {
-		min-height: var(--NAVBAR-HEIGHT);
+		min-height: var(--NAVBAR-HEIGHT); // defined in globals.scss
 		width: 100%;
 		box-sizing: border-box;
 	}

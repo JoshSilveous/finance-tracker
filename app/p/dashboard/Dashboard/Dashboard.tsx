@@ -7,13 +7,14 @@ import { areDeeplyEqual, createPopup } from '@/utils'
 import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
-import { fetchTileData, upsertTiles } from '@/database'
+import { fetchTileData, fetchTutorialProgress, upsertTiles } from '@/database'
 import { saveChanges } from './func/saveChanges'
 import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
 import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
 import { CategoryEditorPopup } from './components/CategoryEditorPopup/CategoryEditorPopup'
 import { AccountEditorPopup } from './components/AccountEditorPopup/AccountEditorPopup'
 import { JFlyoutMenu } from '@/components/JFlyoutMenu/JFlyoutMenu'
+import { TutorialPopup } from './components/TutorialPopup/TutorialPopup'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -28,6 +29,17 @@ export function Dashboard() {
 		getSortOrderController: () => sortOrder,
 		getHistoryController: () => historyController,
 	})
+	useEffect(() => {
+		fetchTutorialProgress()
+			.then((res) => {
+				if (!res.completed) {
+					console.log('tutorial not completed!', res)
+					const popup = createPopup(<TutorialPopup startingStage={res.stage} />)
+					popup.trigger()
+				}
+			})
+			.catch((e) => console.error(e))
+	}, [])
 	useEffect(() => {
 		// guard only needed for development
 		if (!data.isPendingSave) {
