@@ -102,12 +102,20 @@ export function TutorialCategoryEditor({
 					<div className={s.reorder_container}>
 						<JButton
 							jstyle='invisible'
+							disabled={catData.length <= 1}
 							ref={addToCatRowRefs(cat.id, 'reorderButton')}
 							onMouseDown={(e) => {
 								if (window.getSelection()) {
 									window.getSelection()!.removeAllRanges()
 								}
-								handleReorder(cat.id, catRowRefs, index, e, applyReorder)
+								handleReorder(
+									cat.id,
+									catRowRefs,
+									catData.map((cat) => cat.id),
+									index,
+									e,
+									applyReorder
+								)
 							}}
 						>
 							<ReorderIcon />
@@ -120,6 +128,7 @@ export function TutorialCategoryEditor({
 						onChange={(e) => updateVal(cat.id, e.target.value)}
 						ref={addToCatRowRefs(cat.id, 'nameInput')}
 						onBlur={handleInputBlur(cat.id)}
+						placeholder='e.x. Food, Gas, Rent'
 					/>
 				</div>
 			</div>

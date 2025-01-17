@@ -5,33 +5,17 @@ import {
 	TutorialCategoryEditor,
 } from './TutorialCategoryEditor/TutorialCategoryEditor'
 import { CategoryEditorPopup } from '../CategoryEditorPopup/CategoryEditorPopup'
+import { JButton } from '@/components/JForm'
+import { genStages } from './genStages/genStages'
 export function TutorialPopup({ startingStage }: { startingStage: number }) {
 	const [currentStage, setCurrentStage] = useState(1)
-	const [catData, setCatData] = useState<CategoryItem[]>([])
+	const [catData, setCatData] = useState<CategoryItem[]>([
+		{ id: crypto.randomUUID(), name: '' },
+		{ id: crypto.randomUUID(), name: '' },
+		{ id: crypto.randomUUID(), name: '' },
+	])
 
-	type Stage = {
-		name: string
-		content: JSX.Element
-	}
-	const tempContent = <TutorialCategoryEditor catData={catData} setCatData={setCatData} />
-	const stages: Stage[] = [
-		{
-			name: 'Category Editor 1',
-			content: tempContent,
-		},
-		{
-			name: 'Category Editor 2',
-			content: tempContent,
-		},
-		{
-			name: 'Category Editor 3',
-			content: tempContent,
-		},
-		{
-			name: 'Category Editor 4',
-			content: tempContent,
-		},
-	]
+	const stages = genStages(catData, setCatData, setCurrentStage)
 	const progressBar = (() => {
 		const items: JSX.Element[] = []
 		for (let i = 1; i <= stages.length; i++) {
@@ -66,43 +50,36 @@ export function TutorialPopup({ startingStage }: { startingStage: number }) {
 
 	return (
 		<div className={s.main}>
-			<div className={s.welcome}>
-				<h2>Welcome!</h2>
-				<p>Thank you for using my app!</p>
-				<div style={{ display: 'flex' }}>
-					<button
-						onClick={() =>
-							setCurrentStage((p) => {
-								if (p === 1) {
-									return p
-								}
-								return p - 1
-							})
-						}
-					>
-						-
-					</button>
-					{currentStage}
-					<button
-						onClick={() =>
-							setCurrentStage((p) => {
-								if (p === stages.length) {
-									return p
-								}
-								return p + 1
-							})
-						}
-					>
-						+
-					</button>
-				</div>
-			</div>
 			<div className={s.stage_container}>
 				<div className={s.progress_container}>{progressBar}</div>
-				<div className={s.stage_content}>
-					<div className={s.title}>{stages[currentStage - 1].name}</div>
-					<div className={s.content}>{stages[currentStage - 1].content}</div>
-				</div>
+				<div className={s.stage_content}>{stages[currentStage - 1]}</div>
+			</div>
+			<div style={{ display: 'flex' }}>
+				<button
+					onClick={() =>
+						setCurrentStage((p) => {
+							if (p === 1) {
+								return p
+							}
+							return p - 1
+						})
+					}
+				>
+					-
+				</button>
+				{currentStage}
+				<button
+					onClick={() =>
+						setCurrentStage((p) => {
+							if (p === stages.length) {
+								return p
+							}
+							return p + 1
+						})
+					}
+				>
+					+
+				</button>
 			</div>
 		</div>
 	)

@@ -1,9 +1,7 @@
 .main {
 	width: 300px;
 	display: flex;
-	max-height: 450px;
 	flex-direction: column;
-	position: fixed;
 	.grid_container {
 		flex-grow: 1;
 		overflow: auto;
@@ -12,7 +10,6 @@
 		transition: scrollbar-color 0.3s ease;
 		scrollbar-color: transparent transparent;
 		--grid-padding-val: 3px;
-		height: 340px;
 		&:hover {
 			scrollbar-color: var(--font-color) var(--bg-color-lighter-2);
 		}
@@ -43,7 +40,7 @@
 						height: 20px;
 					}
 				}
-				.reorder_container button {
+				.reorder_container button:not(:disabled) {
 					cursor: grab;
 					scale: 100%;
 					transition: scale 0.2s ease;
@@ -52,6 +49,7 @@
 					}
 					&:active {
 						cursor: grabbing;
+						transform: none;
 					}
 				}
 				.delete_container button {

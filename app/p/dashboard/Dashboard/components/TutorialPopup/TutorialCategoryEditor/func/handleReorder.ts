@@ -6,43 +6,44 @@ import { CatRowsRef } from '../TutorialCategoryEditor'
 export function handleReorder(
 	category_id: string,
 	catRowsRef: MutableRefObject<CatRowsRef>,
+	sortOrder: string[],
 	index: number,
 	e: MouseEvent<HTMLButtonElement>,
 	afterReorderComplete: (oldIndex: number, newIndex: number) => void
 ) {
 	document.body.style.cursor = 'grabbing'
-	const rowRefsFormatted = Object.entries(catRowsRef.current).map(([cat_id, ref]) => ({
-		...ref,
+	const rowRefsFormatted = sortOrder.map((cat_id) => ({
+		...catRowsRef.current[cat_id],
 		category_id: cat_id,
 	}))
-	const thisRefIndex = rowRefsFormatted.findIndex((it) => it.category_id === category_id)
-	const thisRef = rowRefsFormatted[thisRefIndex]
+	const thisRef = rowRefsFormatted[index]
 	const grabberNode = thisRef.reorderButton!
 	const thisRow = Array.from(thisRef.container!.children) as HTMLDivElement[]
 	const allRows = rowRefsFormatted.map(
 		(ref) => Array.from(ref.container!.children) as HTMLDivElement[]
 	)
-	const otherRows = allRows.toSpliced(thisRefIndex, 1)
+	const otherRows = allRows.toSpliced(index, 1)
 	const gridElem = thisRef.container!.parentNode!.parentNode!.parentNode as HTMLDivElement
 	const popupContainerElem = gridElem.parentNode!.parentNode!.parentNode!.parentNode!
-		.parentNode!.parentNode! as HTMLDivElement
-	console.log('gridElem;', gridElem, gridElem.getBoundingClientRect())
-	console.log(
-		'popupContainerElem;',
-		popupContainerElem,
-		popupContainerElem.getBoundingClientRect()
-	)
+		.parentNode!.parentNode!.parentNode!.parentNode! as HTMLDivElement
+	if (!popupContainerElem.className.includes('popup_container')) {
+		console.error(
+			`popupContainerElem isn't matching the correct node. If the DOM structure was changed, popupContainerElem needs to be updated. Currently:`,
+			popupContainerElem
+		)
+		throw new Error(
+			`popupContainerElem isn't matching the correct node. If the DOM structure was changed, popupContainerElem needs to be updated.`
+		)
+	}
 	const computed = gridElem.getBoundingClientRect()
 	const offsetX =
 		popupContainerElem.getBoundingClientRect().left +
-		thisRef.reorderButton!.offsetLeft +
-		thisRef.reorderButton!.offsetWidth / 2
+		(grabberNode.parentElement as HTMLDivElement).clientWidth +
+		grabberNode.offsetWidth / 2 +
+		9
 	const offsetY =
 		popupContainerElem.getBoundingClientRect().top +
 		(thisRef.container!.childNodes[0] as HTMLDivElement).offsetHeight / 2
-	console.log((thisRef.container!.childNodes[0] as HTMLDivElement).offsetHeight)
-	// off by +100
-	const startX = e.clientX
 
 	let leftOffset = 0
 	const startWidths = thisRow.map((item) => item.offsetWidth)
@@ -185,7 +186,6 @@ export function handleReorder(
 	})()
 
 	function handleReorderMouseMove(e: globalThis.MouseEvent) {
-		console.log('x offset:', e.clientX - startX)
 		let leftOffset = 0
 		thisRow.forEach((node) => {
 			node.style.left = `${e.clientX - offsetX + leftOffset}px`
