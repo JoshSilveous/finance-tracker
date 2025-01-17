@@ -1,12 +1,8 @@
 import { useState } from 'react'
 import s from './TutorialPopup.module.scss'
-import {
-	CategoryItem,
-	TutorialCategoryEditor,
-} from './TutorialCategoryEditor/TutorialCategoryEditor'
-import { CategoryEditorPopup } from '../CategoryEditorPopup/CategoryEditorPopup'
-import { JButton } from '@/components/JForm'
+import { CategoryItem } from './TutorialCategoryEditor/TutorialCategoryEditor'
 import { genStages } from './genStages/genStages'
+import { AccountItem } from './TutorialAccountEditor/TutorialAccountEditor'
 export function TutorialPopup({ startingStage }: { startingStage: number }) {
 	const [currentStage, setCurrentStage] = useState(1)
 	const [catData, setCatData] = useState<CategoryItem[]>([
@@ -14,8 +10,13 @@ export function TutorialPopup({ startingStage }: { startingStage: number }) {
 		{ id: crypto.randomUUID(), name: '' },
 		{ id: crypto.randomUUID(), name: '' },
 	])
+	const [actData, setActData] = useState<AccountItem[]>([
+		{ id: crypto.randomUUID(), name: '', starting_amount: '0.00' },
+		{ id: crypto.randomUUID(), name: '', starting_amount: '0.00' },
+		{ id: crypto.randomUUID(), name: '', starting_amount: '0.00' },
+	])
 
-	const stages = genStages(catData, setCatData, setCurrentStage)
+	const stages = genStages(catData, setCatData, setCurrentStage, actData, setActData)
 	const progressBar = (() => {
 		const items: JSX.Element[] = []
 		for (let i = 1; i <= stages.length; i++) {

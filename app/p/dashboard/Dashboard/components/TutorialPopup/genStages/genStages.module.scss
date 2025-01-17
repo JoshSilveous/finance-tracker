@@ -8,6 +8,12 @@
 		margin: 0;
 	}
 	.top_text {
+		p:first-child {
+			margin-top: 0px;
+		}
+		p:last-child {
+			margin-bottom: 0px;
+		}
 		margin-top: 20px;
 		max-width: 400px;
 	}

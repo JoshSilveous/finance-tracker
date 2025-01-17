@@ -7,14 +7,14 @@ import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { delay, moveItemInArray } from '@/utils'
 import { handleReorder } from './func/handleReorder'
 
-interface NewCategoryManagerPopupProps {
+interface TutorialCategoryEditorProps {
 	catData: CategoryItem[]
 	setCatData: Dispatch<SetStateAction<CategoryItem[]>>
 }
 export function TutorialCategoryEditor({
 	catData,
 	setCatData,
-}: NewCategoryManagerPopupProps) {
+}: TutorialCategoryEditorProps) {
 	const catRowRefs = useRef<CatRowsRef>({})
 
 	const addToCatRowRefs =
@@ -137,7 +137,7 @@ export function TutorialCategoryEditor({
 
 	const newCategoryRow = (() => {
 		const createNewCategory = () => {
-			const tempID = 'PENDING_CREATION||' + crypto.randomUUID()
+			const tempID = crypto.randomUUID()
 
 			setCatData((prev) => {
 				const clone = structuredClone(prev)
