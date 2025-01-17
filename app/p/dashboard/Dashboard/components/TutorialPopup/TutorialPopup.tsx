@@ -3,7 +3,16 @@ import s from './TutorialPopup.module.scss'
 import { CategoryItem } from './TutorialCategoryEditor/TutorialCategoryEditor'
 import { genStages } from './genStages/genStages'
 import { AccountItem } from './TutorialAccountEditor/TutorialAccountEditor'
-export function TutorialPopup({ startingStage }: { startingStage: number }) {
+import { default as LoadingAnim } from '@/public/loading.svg'
+import { delay } from '@/utils'
+
+export function TutorialPopup({
+	startingStage,
+	closePopup,
+}: {
+	startingStage: number
+	closePopup: () => void
+}) {
 	const [currentStage, setCurrentStage] = useState(1)
 	const [catData, setCatData] = useState<CategoryItem[]>([
 		{ id: crypto.randomUUID(), name: '' },
@@ -49,38 +58,28 @@ export function TutorialPopup({ startingStage }: { startingStage: number }) {
 		return <div className={s.progress_bar}>{items}</div>
 	})()
 
+	const applyChangesAndProceed = async () => {
+		await delay(1000)
+		closePopup()
+	}
+
+	if (currentStage > stages.length) {
+		applyChangesAndProceed()
+	}
+
 	return (
 		<div className={s.main}>
 			<div className={s.stage_container}>
 				<div className={s.progress_container}>{progressBar}</div>
-				<div className={s.stage_content}>{stages[currentStage - 1]}</div>
-			</div>
-			<div style={{ display: 'flex' }}>
-				<button
-					onClick={() =>
-						setCurrentStage((p) => {
-							if (p === 1) {
-								return p
-							}
-							return p - 1
-						})
-					}
-				>
-					-
-				</button>
-				{currentStage}
-				<button
-					onClick={() =>
-						setCurrentStage((p) => {
-							if (p === stages.length) {
-								return p
-							}
-							return p + 1
-						})
-					}
-				>
-					+
-				</button>
+				{currentStage <= stages.length ? (
+					<div className={s.stage_content}>{stages[currentStage - 1]}</div>
+				) : (
+					<div className={s.saving_container}>
+						<div className={s.icon_container}>
+							<LoadingAnim />
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	)

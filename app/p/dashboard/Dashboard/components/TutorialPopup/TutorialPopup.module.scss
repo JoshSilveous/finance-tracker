@@ -66,4 +66,15 @@
 			height: 100%;
 		}
 	}
+	.saving_container {
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		.icon_container {
+			width: 100px;
+			height: 100px;
+		}
+	}
 }

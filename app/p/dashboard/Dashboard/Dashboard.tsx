@@ -35,7 +35,14 @@ export function Dashboard() {
 				if (!res.completed) {
 					console.log('tutorial not completed!', res)
 					const popup = createPopup({
-						content: <TutorialPopup startingStage={res.stage} />,
+						content: (
+							<TutorialPopup
+								startingStage={res.stage}
+								closePopup={() => {
+									popup.close()
+								}}
+							/>
+						),
 						hideExitButton: true,
 					})
 					popup.trigger()

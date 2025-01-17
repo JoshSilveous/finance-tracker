@@ -79,7 +79,7 @@ export function genStages(
 				</JButton>
 			</div>
 		</div>,
-		<div className={s.stage_categories}>
+		<div className={s.stage_accounts}>
 			<h2>Set up Accounts</h2>
 			<div className={s.top_text}>
 				<p>
@@ -113,7 +113,7 @@ export function genStages(
 					}
 					onClick={() => setCurrentStage((p) => p + 1)}
 				>
-					Next
+					Finish
 				</JButton>
 			</div>
 		</div>,
