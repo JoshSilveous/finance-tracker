@@ -1,14 +1,14 @@
 import { JButton } from '@/components/JForm'
 import {
 	CategoryItem,
-	TutorialCategoryEditor,
-} from '../TutorialCategoryEditor/TutorialCategoryEditor'
+	InitialSetupCategoryEditor,
+} from '../InitialSetupCategoryEditor/InitialSetupCategoryEditor'
 import s from './genStages.module.scss'
 import { Dispatch, SetStateAction } from 'react'
 import {
 	AccountItem,
-	TutorialAccountEditor,
-} from '../TutorialAccountEditor/TutorialAccountEditor'
+	InitialSetupAccountEditor,
+} from '../InitialSetupAccountEditor/InitialSetupAccountEditor'
 export function genStages(
 	catData: CategoryItem[],
 	setCatData: Dispatch<SetStateAction<CategoryItem[]>>,
@@ -58,7 +58,7 @@ export function genStages(
 			</div>
 			<div className={s.editor_container}>
 				<div className={s.editor}>
-					<TutorialCategoryEditor catData={catData} setCatData={setCatData} />
+					<InitialSetupCategoryEditor catData={catData} setCatData={setCatData} />
 				</div>
 			</div>
 			<div className={s.button_container}>
@@ -96,7 +96,7 @@ export function genStages(
 			</div>
 			<div className={s.editor_container}>
 				<div className={s.editor}>
-					<TutorialAccountEditor actData={actData} setActData={setActData} />
+					<InitialSetupAccountEditor actData={actData} setActData={setActData} />
 				</div>
 			</div>
 			<div className={s.button_container}>

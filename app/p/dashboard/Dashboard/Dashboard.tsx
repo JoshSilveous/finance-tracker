@@ -7,14 +7,14 @@ import { areDeeplyEqual, createPopup } from '@/utils'
 import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
-import { fetchTileData, fetchTutorialProgress, upsertTiles } from '@/database'
+import { fetchTileData, upsertTiles, fetchTutorialProgress } from '@/database'
 import { saveChanges } from './func/saveChanges'
 import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
 import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
 import { CategoryEditorPopup } from './components/CategoryEditorPopup/CategoryEditorPopup'
 import { AccountEditorPopup } from './components/AccountEditorPopup/AccountEditorPopup'
 import { JFlyoutMenu } from '@/components/JFlyoutMenu/JFlyoutMenu'
-import { TutorialPopup } from './components/TutorialPopup/TutorialPopup'
+import { InitialSetupPopup } from './components/InitialSetupPopup/InitialSetupPopup'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -33,10 +33,10 @@ export function Dashboard() {
 		fetchTutorialProgress()
 			.then((res) => {
 				if (!res.completed) {
-					console.log('tutorial not completed!', res)
+					console.log('InitialSetup not completed!', res)
 					const popup = createPopup({
 						content: (
-							<TutorialPopup
+							<InitialSetupPopup
 								startingStage={res.stage}
 								closePopup={() => {
 									popup.close()

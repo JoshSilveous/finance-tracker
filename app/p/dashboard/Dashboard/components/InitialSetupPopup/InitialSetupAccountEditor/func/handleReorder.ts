@@ -1,7 +1,7 @@
 import { delay } from '@/utils'
-import s from '../TutorialAccountEditor.module.scss'
+import s from '../InitialSetupAccountEditor.module.scss'
 import { MouseEvent, MutableRefObject } from 'react'
-import { ActRowsRef } from '../TutorialAccountEditor'
+import { ActRowsRef } from '../InitialSetupAccountEditor'
 
 export function handleReorder(
 	account_id: string,

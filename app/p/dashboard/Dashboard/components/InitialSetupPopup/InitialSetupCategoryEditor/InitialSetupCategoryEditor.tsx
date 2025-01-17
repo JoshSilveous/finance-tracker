@@ -1,5 +1,5 @@
 import { ChangeEvent, Dispatch, SetStateAction, useRef } from 'react'
-import s from './TutorialCategoryEditor.module.scss'
+import s from './InitialSetupCategoryEditor.module.scss'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
 import { JButton, JInput } from '@/components/JForm'
@@ -7,14 +7,14 @@ import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { delay, moveItemInArray } from '@/utils'
 import { handleReorder } from './func/handleReorder'
 
-interface TutorialCategoryEditorProps {
+interface InitialSetupCategoryEditorProps {
 	catData: CategoryItem[]
 	setCatData: Dispatch<SetStateAction<CategoryItem[]>>
 }
-export function TutorialCategoryEditor({
+export function InitialSetupCategoryEditor({
 	catData,
 	setCatData,
-}: TutorialCategoryEditorProps) {
+}: InitialSetupCategoryEditorProps) {
 	const catRowRefs = useRef<CatRowsRef>({})
 
 	const addToCatRowRefs =

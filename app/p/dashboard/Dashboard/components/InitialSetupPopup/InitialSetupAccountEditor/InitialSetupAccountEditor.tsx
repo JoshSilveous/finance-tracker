@@ -1,5 +1,5 @@
 import { ChangeEvent, Dispatch, SetStateAction, useRef } from 'react'
-import s from './TutorialAccountEditor.module.scss'
+import s from './InitialSetupAccountEditor.module.scss'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
 import { JButton, JInput, JNumberAccounting } from '@/components/JForm'
@@ -7,11 +7,14 @@ import { JGrid, JGridTypes } from '@/components/JGrid/JGrid'
 import { delay, moveItemInArray } from '@/utils'
 import { handleReorder } from './func/handleReorder'
 
-interface TutorialAccountEditorProps {
+interface InitialSetupAccountEditorProps {
 	actData: AccountItem[]
 	setActData: Dispatch<SetStateAction<AccountItem[]>>
 }
-export function TutorialAccountEditor({ actData, setActData }: TutorialAccountEditorProps) {
+export function InitialSetupAccountEditor({
+	actData,
+	setActData,
+}: InitialSetupAccountEditorProps) {
 	const actRowRefs = useRef<ActRowsRef>({})
 
 	const addToActRowRefs =

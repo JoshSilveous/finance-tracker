@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import s from './TutorialPopup.module.scss'
-import { CategoryItem } from './TutorialCategoryEditor/TutorialCategoryEditor'
+import s from './InitialSetupPopup.module.scss'
+import { CategoryItem } from './InitialSetupCategoryEditor/InitialSetupCategoryEditor'
 import { genStages } from './genStages/genStages'
-import { AccountItem } from './TutorialAccountEditor/TutorialAccountEditor'
+import { AccountItem } from './InitialSetupAccountEditor/InitialSetupAccountEditor'
 import { default as LoadingAnim } from '@/public/loading.svg'
 import { delay } from '@/utils'
 
-export function TutorialPopup({
+export function InitialSetupPopup({
 	startingStage,
 	closePopup,
 }: {
