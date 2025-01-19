@@ -1,0 +1,25 @@
+.container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 9999;
+
+	.cutout {
+		position: absolute;
+		transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
+		border-radius: 10px;
+		background: transparent;
+		box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); /* Cut-out effect */
+		pointer-events: none; /* Prevent interaction with this element */
+		border: 2px solid white;
+		z-index: 2; /* Below content */
+	}
+
+	.content {
+		position: relative;
+		z-index: 3; /* Above all other elements */
+		pointer-events: auto; /* Ensure interactions are allowed */
+	}
+}
