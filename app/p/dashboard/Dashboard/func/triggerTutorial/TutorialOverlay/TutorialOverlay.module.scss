@@ -8,18 +8,34 @@
 
 	.cutout {
 		position: absolute;
-		transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
 		border-radius: 10px;
 		background: transparent;
-		box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); /* Cut-out effect */
-		pointer-events: none; /* Prevent interaction with this element */
+		box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+		pointer-events: none;
 		border: 2px solid white;
-		z-index: 2; /* Below content */
+		z-index: 2;
 	}
 
 	.content {
-		position: relative;
-		z-index: 3; /* Above all other elements */
-		pointer-events: auto; /* Ensure interactions are allowed */
+		position: absolute;
+		transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease,
+			border-radius 0.3s ease;
+		border-radius: 10px;
+		background: transparent;
+		pointer-events: none;
+		border: 2px solid white;
+		z-index: 3;
+		pointer-events: auto;
+		overflow: hidden;
+		padding: 10px;
+
+		.tip {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+	.devbuttons {
+		z-index: 3;
 	}
 }

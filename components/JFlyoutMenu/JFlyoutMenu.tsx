@@ -1,7 +1,13 @@
 'use client'
 import { forwardRef, useLayoutEffect, useRef, useState } from 'react'
 import s from './JFlyoutMenu.module.scss'
-import { clearFocusLoop, createFocusLoop, delay } from '@/utils'
+import {
+	clearFocusLoop,
+	createFocusLoop,
+	delay,
+	removeWindowListener,
+	setWindowListener,
+} from '@/utils'
 
 interface JFlyoutMenuProps {
 	jstyle: 'primary' | 'secondary'
@@ -60,12 +66,18 @@ export const JFlyoutMenu = forwardRef<HTMLButtonElement, JFlyoutMenuProps>(
 			if (isOpen) {
 				createFocusLoop(toggleButtonRef.current!, lastOptionRef.current!)
 
+				const randInstanceID = crypto.randomUUID()
+
 				const windowClickHandler = () => {
 					setIsOpen(false)
-					window.removeEventListener('click', windowClickHandler)
+					removeWindowListener(`JFLYOUT_${randInstanceID}`)
 				}
 				delay(10).then(() => {
-					window.addEventListener('click', windowClickHandler)
+					setWindowListener(
+						`JFLYOUT_${randInstanceID}`,
+						'click',
+						windowClickHandler
+					)
 				})
 				toggleButtonRef.current!.tabIndex = 1 + TABINDEX_OFFSET
 				if (shouldOpenUpward()) {
