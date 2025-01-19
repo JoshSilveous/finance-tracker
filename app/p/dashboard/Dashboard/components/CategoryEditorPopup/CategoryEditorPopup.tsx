@@ -9,7 +9,7 @@ import {
 	deleteCategoryAndSetNull,
 	deleteCategoryAndTransactions,
 	fetchCategoryData,
-	insertCategory,
+	insertCategories,
 	reportErrorToDB,
 	upsertCategories,
 	UpsertCategoryEntry,

@@ -35,26 +35,29 @@ export interface InsertAccountEntry {
 	starting_amount: number
 	order_position: number
 }
-export async function insertAccount(account: InsertAccountEntry) {
+
+export async function insertAccounts<T extends InsertAccountEntry | InsertAccountEntry[]>(
+	accounts: T
+): Promise<T extends InsertAccountEntry ? string : string[]> {
 	const user_id = await getUserID()
 
-	const numOfAccounts = await getAccountsCount()
+	const newAccounts = Array.isArray(accounts)
+		? accounts.map((account) => ({ ...account, user_id }))
+		: [{ ...accounts, user_id }]
 
-	const newAccount = {
-		...account,
-		user_id: user_id,
-	}
-
-	const { data, error } = await supabase.from('accounts').insert([newAccount]).select('id')
+	const { data, error } = await supabase.from('accounts').insert(newAccounts).select('id')
 
 	if (error) {
 		throw new Error(error.message)
 	}
-	return data[0].id as string
+
+	return (
+		Array.isArray(accounts) ? data.map((account) => account.id) : data[0].id
+	) as T extends InsertAccountEntry ? string : string[]
 }
 
 export interface UpsertAccountEntry {
-	id: string
+	id?: string
 	name: string
 	starting_amount: number
 	order_position: number

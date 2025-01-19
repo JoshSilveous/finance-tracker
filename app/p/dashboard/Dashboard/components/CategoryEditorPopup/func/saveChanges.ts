@@ -1,5 +1,5 @@
 import {
-	insertCategory,
+	insertCategories,
 	deleteCategoryAndTransactions,
 	deleteCategoryAndSetNull,
 	deleteCategoryAndReplace,
@@ -19,7 +19,7 @@ export async function saveChanges(
 	const newCategories = catData.filter((cat) => cat.id.startsWith('PENDING_CREATION'))
 	const newIDMap: { [pendingId: string]: string } = {}
 	const newCategoryPromises = newCategories.map((cat) => {
-		return insertCategory({
+		return insertCategories({
 			name: cat.name.val,
 			order_position: sortOrder.indexOf(cat.id),
 		}).then((new_id) => {

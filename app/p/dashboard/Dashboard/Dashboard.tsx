@@ -3,11 +3,11 @@ import s from './Dashboard.module.scss'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useFoldState, useSortOrder, useHistory, useData } from './hooks'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import { areDeeplyEqual, createPopup } from '@/utils'
+import { areDeeplyEqual, createPopup, delay } from '@/utils'
 import { JButton } from '@/components/JForm'
 import { genDisplayTiles, TileData } from './tiles'
 import { GRID_SPACING } from '@/app/globals'
-import { fetchTileData, upsertTiles, fetchTutorialProgress } from '@/database'
+import { fetchTileData, upsertTiles, fetchInitSetupProgress } from '@/database'
 import { saveChanges } from './func/saveChanges'
 import { AddTilePopup } from './tiles/AddTilePopup/AddTilePopup'
 import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
@@ -15,6 +15,7 @@ import { CategoryEditorPopup } from './components/CategoryEditorPopup/CategoryEd
 import { AccountEditorPopup } from './components/AccountEditorPopup/AccountEditorPopup'
 import { JFlyoutMenu } from '@/components/JFlyoutMenu/JFlyoutMenu'
 import { InitialSetupPopup } from './components/InitialSetupPopup/InitialSetupPopup'
+import { triggerTutorial } from './func/triggerTutorial/triggerTutorial'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -29,18 +30,27 @@ export function Dashboard() {
 		getSortOrderController: () => sortOrder,
 		getHistoryController: () => historyController,
 	})
+	const tutorialTriggered = useRef(false)
 	useEffect(() => {
-		fetchTutorialProgress()
+		if (tutorialTriggered.current === false) {
+			tutorialTriggered.current = true
+			delay(500).then(() => {
+				triggerTutorial()
+			})
+		}
+	}, [isLoading])
+	useEffect(() => {
+		fetchInitSetupProgress()
 			.then((res) => {
 				if (!res.completed) {
-					console.log('InitialSetup not completed!', res)
+					console.log('InitialSetup not completed! triggering popup')
 					const popup = createPopup({
 						content: (
 							<InitialSetupPopup
-								startingStage={res.stage}
 								closePopup={() => {
 									popup.close()
 								}}
+								refreshAllData={refreshAllData}
 							/>
 						),
 						hideExitButton: true,
@@ -59,10 +69,9 @@ export function Dashboard() {
 		}
 	}, [])
 	const refreshAllData = async () => {
-		Promise.all([data.reload(), fetchTileData()]).then(([dataRes, tileDataRes]) => {
-			setTileData(tileDataRes)
-			origTileDataRef.current = tileDataRes
-		})
+		const [_, tileDataRes] = await Promise.all([data.reload(), fetchTileData()])
+		setTileData(tileDataRes)
+		origTileDataRef.current = tileDataRes
 	}
 
 	const transactionManagerRowsRef = useRef<TransactionManagerRowsRef>({})

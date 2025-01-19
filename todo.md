@@ -1,6 +1,8 @@
 ## Unsolved
 
 -   Set up tutorial system
+    -   Add a SimpleTile to the default user stuff
+    -   Add a system that highlights different parts of the window and explains them
 
 ### Needed before beta
 

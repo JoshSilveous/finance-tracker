@@ -153,7 +153,7 @@ export function InitialSetupCategoryEditor({
 		}
 
 		return (
-			<div style={{ display: 'contents' }}>
+			<div style={{ display: 'contents' }} key={'new_category_row'}>
 				<div className={`${s.cell} ${s.new_button_container}`}>
 					<JButton jstyle='primary' onClick={createNewCategory}>
 						Create New Category

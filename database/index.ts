@@ -1,6 +1,6 @@
 export * from './account'
 export * from './category'
 export * from './feedback'
+export * from './initial_setup'
 export * from './tiles'
 export * from './transaction'
-export * from './tutorial'

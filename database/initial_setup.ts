@@ -1,32 +1,29 @@
 'use client'
 import { PostgrestError } from '@supabase/supabase-js'
 import { createClient } from './supabase/client'
-import { getUserID } from './supabase/server'
 
 const supabase = createClient()
 
 interface TutorialProgress {
-	stage: number
 	completed: boolean
 }
-export async function fetchTutorialProgress() {
-	const { data, error } = await supabase
-		.from('tutorial_progress')
-		.select('completed, stage')
+export async function fetchInitSetupProgress() {
+	const { data, error } = await supabase.from('setup_is_complete').select('completed')
 
+	console.log('res:', data ? data[0] : 'null')
 	if (error) {
 		throw new Error(error.message)
 	}
 	return data[0] as TutorialProgress
 }
-export async function setTutorialProgress(stage: number, completed: boolean) {
+export async function setInitSetupProgress(completed: boolean) {
 	interface Result extends TutorialProgress {
 		id: string
 		user_id: string
 	}
 	const { data, error: fetchError } = (await supabase
-		.from('tutorial_progress')
-		.select('id, user_id, stage, completed')) as {
+		.from('setup_is_complete')
+		.select('id, user_id, completed')) as {
 		data: Result[]
 		error: PostgrestError | null
 	}
@@ -34,10 +31,10 @@ export async function setTutorialProgress(stage: number, completed: boolean) {
 		throw new Error(fetchError.message)
 	}
 
-	const newData = { ...data[0], stage, completed }
+	const newData = { ...data[0], completed }
 
 	const { error: updateError } = await supabase
-		.from('tutorial_progress')
+		.from('setup_is_complete')
 		.upsert([newData], {
 			defaultToNull: false,
 			onConflict: 'id',

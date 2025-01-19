@@ -43,27 +43,31 @@ export interface InsertCategoryEntry {
 	name: string
 	order_position: number
 }
-export async function insertCategory(category: InsertCategoryEntry) {
+export async function insertCategories<
+	T extends InsertCategoryEntry | InsertCategoryEntry[]
+>(categories: T): Promise<T extends InsertCategoryEntry ? string : string[]> {
 	const user_id = await getUserID()
 
-	const newCategory = {
-		...category,
-		user_id: user_id,
-	}
+	const newCategories = Array.isArray(categories)
+		? categories.map((cat) => ({ ...cat, user_id }))
+		: [{ ...categories, user_id }]
 
 	const { data, error } = await supabase
 		.from('categories')
-		.insert([newCategory])
+		.insert(newCategories)
 		.select('id')
 
 	if (error) {
 		throw new Error(error.message)
 	}
-	return data[0].id as string
+
+	return (
+		Array.isArray(categories) ? data.map((category) => category.id) : data[0].id
+	) as T extends InsertCategoryEntry ? string : string[]
 }
 
 export interface UpsertCategoryEntry {
-	id: string
+	id?: string
 	name: string
 	order_position: number
 }

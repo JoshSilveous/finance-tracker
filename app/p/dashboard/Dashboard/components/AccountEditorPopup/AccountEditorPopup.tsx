@@ -8,7 +8,7 @@ import {
 	deleteAccountAndReplace,
 	deleteAccountAndTransactions,
 	fetchAccountData,
-	insertAccount,
+	insertAccounts,
 	upsertAccounts,
 	UpsertAccountEntry,
 	reportErrorToDB,

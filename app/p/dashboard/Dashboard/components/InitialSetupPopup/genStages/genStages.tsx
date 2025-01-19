@@ -14,7 +14,8 @@ export function genStages(
 	setCatData: Dispatch<SetStateAction<CategoryItem[]>>,
 	setCurrentStage: Dispatch<SetStateAction<number>>,
 	actData: AccountItem[],
-	setActData: Dispatch<SetStateAction<AccountItem[]>>
+	setActData: Dispatch<SetStateAction<AccountItem[]>>,
+	afterComplete: () => void
 ) {
 	const categoriesContinueDisabled: boolean = (() => {
 		if (catData.length === 0) {
@@ -112,6 +113,36 @@ export function genStages(
 							: undefined
 					}
 					onClick={() => setCurrentStage((p) => p + 1)}
+				>
+					Next
+				</JButton>
+			</div>
+		</div>,
+		<div className={s.stage_confirm}>
+			<h2>Ready to continue?</h2>
+			<div className={s.top_text}>
+				<p>
+					After continuing, the categories and accounts you've set up will be
+					saved. These can be edited at any time.
+				</p>
+				<p>Up next is a brief walkthrough of how to navigate the dashboard.</p>
+			</div>
+			<div className={s.button_container}>
+				<JButton jstyle='secondary' onClick={() => setCurrentStage((p) => p - 1)}>
+					Back
+				</JButton>
+				<JButton
+					jstyle='primary'
+					disabled={accountContinueDisabled}
+					title={
+						accountContinueDisabled
+							? 'You must have at least 1 account before continuing'
+							: undefined
+					}
+					onClick={() => {
+						setCurrentStage((p) => p + 1)
+						afterComplete()
+					}}
 				>
 					Finish
 				</JButton>

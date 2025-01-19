@@ -1,5 +1,5 @@
 import {
-	insertAccount,
+	insertAccounts,
 	deleteAccountAndTransactions,
 	deleteAccountAndSetNull,
 	deleteAccountAndReplace,
@@ -19,7 +19,7 @@ export async function saveChanges(
 	const newAccounts = actData.filter((act) => act.id.startsWith('PENDING_CREATION'))
 	const newIDMap: { [pendingId: string]: string } = {}
 	const newAccountPromises = newAccounts.map((act) => {
-		return insertAccount({
+		return insertAccounts({
 			name: act.name.val,
 			starting_amount: Number(act.starting_amount.val),
 			order_position: sortOrder.indexOf(act.id),
