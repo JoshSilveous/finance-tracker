@@ -43,7 +43,6 @@ export function Dashboard() {
 		fetchInitSetupProgress()
 			.then((res) => {
 				if (!res.completed) {
-					console.log('InitialSetup not completed! triggering popup')
 					const popup = createPopup({
 						content: (
 							<InitialSetupPopup

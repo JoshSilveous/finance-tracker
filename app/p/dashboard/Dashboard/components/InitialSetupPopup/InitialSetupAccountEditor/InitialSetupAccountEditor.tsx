@@ -28,7 +28,6 @@ export function InitialSetupAccountEditor({
 				actRowRefs.current[account_id][key] = node || undefined
 			}
 		}
-	console.log(actRowRefs)
 	type AccountKey = 'name' | 'starting_amount'
 
 	const updateVal = (account_id: string, key: AccountKey, val: string) => {

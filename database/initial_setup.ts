@@ -10,7 +10,6 @@ interface TutorialProgress {
 export async function fetchInitSetupProgress() {
 	const { data, error } = await supabase.from('setup_is_complete').select('completed')
 
-	console.log('res:', data ? data[0] : 'null')
 	if (error) {
 		throw new Error(error.message)
 	}

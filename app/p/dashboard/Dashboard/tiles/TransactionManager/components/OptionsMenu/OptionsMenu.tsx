@@ -106,6 +106,8 @@ export function OptionsMenu({
 			<div
 				className={`${s.popout} ${optionsIsOpen ? s.revealed : ''}`}
 				ref={containerRef}
+				data-opened_height={height}
+				data-opened_width={width}
 			>
 				<div className={s.top_container}>
 					<div className={s.title_container}>

@@ -17,6 +17,7 @@ export function setWindowListener<T extends keyof WindowEventMap>(
 	if (Object.keys(listenerRegistry).includes(key)) {
 		const prevListener = listenerRegistry[key]
 		window.removeEventListener(prevListener.type, prevListener.callback)
+		console.log('listener removed for ovveride:', key)
 		delete listenerRegistry[key]
 	}
 
@@ -27,18 +28,18 @@ export function setWindowListener<T extends keyof WindowEventMap>(
 	// check if event type is currently isolated
 	const typeIsCurrentlyIsolated = Object.entries(listenerRegistry).some(
 		([key, config]) => {
-			console.log('CHECKING', key, config)
 			return config.type === type && config.isolated === true
 		}
 	)
-
 	if (!typeIsCurrentlyIsolated) {
+		console.log('listener added:', key)
 		window.addEventListener(type, callback)
 	}
 }
 
 export function removeWindowListener(key: string) {
 	if (Object.keys(listenerRegistry).includes(key)) {
+		console.log('listener removed:', key)
 		const listener = listenerRegistry[key]
 		window.removeEventListener(listener.type, listener.callback)
 
