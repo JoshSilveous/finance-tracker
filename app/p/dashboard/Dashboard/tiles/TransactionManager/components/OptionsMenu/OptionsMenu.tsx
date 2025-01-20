@@ -2,7 +2,7 @@ import { HTMLAttributes, useEffect, useRef, useState } from 'react'
 import s from './OptionsMenu.module.scss'
 import { JButton } from '@/components/JForm'
 import { default as OptionsIcon } from '@/public/options-vertical.svg'
-import { delay, createFocusLoop } from '@/utils'
+import { delay, createFocusLoop, setWindowListener, removeWindowListener } from '@/utils'
 
 export type Option = {
 	text: string
@@ -62,9 +62,10 @@ export function OptionsMenu({
 					) {
 						setOptionsIsOpen(false)
 						window.removeEventListener('mousedown', handleWindowClick)
+						removeWindowListener('OPTIONS_MENU_CLOSE')
 					}
 				}
-				window.addEventListener('mousedown', handleWindowClick)
+				setWindowListener('OPTIONS_MENU_CLOSE', 'click', handleWindowClick)
 			} else {
 				containerRef.current.style.height = ''
 				containerRef.current.style.width = ''

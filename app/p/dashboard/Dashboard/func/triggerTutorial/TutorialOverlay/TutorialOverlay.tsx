@@ -14,9 +14,6 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 		'transaction_manager_more_options',
 		'options',
 	]
-	const containerRef = useRef<HTMLDivElement>(null)
-	const backButtonRef = useRef<HTMLButtonElement>(null)
-	const nextButtonRef = useRef<HTMLButtonElement>(null)
 	const [currentStage, setCurrentStage] = useState<StageName>(stageNamesOrdered[0])
 	const prevStageRef = useRef<StageName | null>(null)
 	const [stages, setStages] = useState<Stages>(genStages(regenStages, prevStageRef))
@@ -43,6 +40,9 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 		regenStages()
 	}, [currentStage])
 
+	const containerRef = useRef<HTMLDivElement>(null)
+	const backButtonRef = useRef<HTMLButtonElement>(null)
+	const nextButtonRef = useRef<HTMLButtonElement>(null)
 	useEffect(() => {
 		const windowClickHandler = (event: MouseEvent) => {}
 		const updateOnResize = () => {
@@ -65,6 +65,15 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 			document.removeEventListener('focusin', handleFocus)
 		}
 	}, [])
+
+	const currentButtonRef = useRef<'back' | 'next'>('next')
+	useEffect(() => {
+		if (currentButtonRef.current === 'next') {
+			nextButtonRef.current!.focus()
+		} else {
+			backButtonRef.current!.focus()
+		}
+	})
 
 	const transitionStr = `top ${TRANSITION_TIME_MS}ms ease, left ${TRANSITION_TIME_MS}ms ease, width ${TRANSITION_TIME_MS}ms ease, height ${TRANSITION_TIME_MS}ms ease,
 			border-radius ${TRANSITION_TIME_MS}ms ease`
@@ -108,6 +117,7 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 									return stageNamesOrdered[index - 1]
 								})
 							}
+							onFocus={() => (currentButtonRef.current = 'back')}
 							disabled={currentStage === stageNamesOrdered[0]}
 							ref={backButtonRef}
 						>
@@ -115,19 +125,20 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 						</JButton>
 						<JButton
 							jstyle='invisible'
-							onClick={() =>
-								setCurrentStage((p) => {
-									const index = stageNamesOrdered.indexOf(p)
-									return stageNamesOrdered[index + 1]
-								})
-							}
-							disabled={
-								currentStage ===
-								stageNamesOrdered[stageNamesOrdered.length - 1]
-							}
+							onClick={() => {
+								if (currentStage === stageNamesOrdered.at(-1)) {
+									close()
+								} else {
+									setCurrentStage((p) => {
+										const index = stageNamesOrdered.indexOf(p)
+										return stageNamesOrdered[index + 1]
+									})
+								}
+							}}
+							onFocus={() => (currentButtonRef.current = 'next')}
 							ref={nextButtonRef}
 						>
-							Next
+							{currentStage === stageNamesOrdered.at(-1) ? 'Exit' : 'Next'}
 						</JButton>
 					</div>
 				</div>

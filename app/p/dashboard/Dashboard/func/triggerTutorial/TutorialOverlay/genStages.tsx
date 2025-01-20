@@ -107,9 +107,14 @@ export function genStages(
 			const nodeRect = foldNode.getBoundingClientRect()
 
 			const onSwitchedTo = () => {
-				setGlobalInterval('FOLD_ANIM', 2000, () => {
+				setGlobalInterval('FOLD_ANIM', 2200, () => {
 					if (prevStageRef.current === 'transaction_manager_fold') {
 						foldNodeButton.click()
+						delay(800).then(() => {
+							if (prevStageRef.current === 'transaction_manager_fold') {
+								foldNodeButton.click()
+							}
+						})
 					}
 				})
 			}

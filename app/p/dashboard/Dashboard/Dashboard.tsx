@@ -297,6 +297,12 @@ export function Dashboard() {
 								actEditorPopup.trigger()
 							},
 						},
+						{
+							content: <>Tutorial</>,
+							onClick: () => {
+								triggerTutorial()
+							},
+						},
 					]}
 				/>
 				<JButton

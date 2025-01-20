@@ -26,11 +26,9 @@ export function setWindowListener<T extends keyof WindowEventMap>(
 	>
 
 	// check if event type is currently isolated
-	const typeIsCurrentlyIsolated = Object.entries(listenerRegistry).some(
-		([key, config]) => {
-			return config.type === type && config.isolated === true
-		}
-	)
+	const typeIsCurrentlyIsolated = Object.entries(listenerRegistry).some(([_, config]) => {
+		return config.type === type && config.isolated === true
+	})
 	if (!typeIsCurrentlyIsolated) {
 		console.log('listener added:', key)
 		window.addEventListener(type, callback)
