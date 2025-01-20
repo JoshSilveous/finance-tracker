@@ -1,44 +1,39 @@
 import { useEffect, useRef, useState } from 'react'
 import s from './TutorialOverlay.module.scss'
-import { genStages, StageName, Stages } from './genStages'
+import { genStages, StageConfig } from './genStages'
 import { isolateWindowListener, removeWindowListener, setWindowListener } from '@/utils'
 import { JButton } from '@/components/JForm'
 
 export const TRANSITION_TIME_MS = 300
 
 export function TutorialOverlay({ close }: { close: () => void }) {
-	const stageNamesOrdered: StageName[] = [
-		'transaction_manager_overview',
-		'transaction_manager_reorder',
-		'transaction_manager_fold',
-		'transaction_manager_more_options',
-		'options',
-	]
-	const [currentStage, setCurrentStage] = useState<StageName>(stageNamesOrdered[0])
-	const prevStageRef = useRef<StageName | null>(null)
-	const [stages, setStages] = useState<Stages>(genStages(regenStages, prevStageRef))
+	const [currentStageIndex, setCurrentStageIndex] = useState(0)
+	const prevStageIndexRef = useRef<number | null>(null)
+	const [stages, setStages] = useState<StageConfig[]>(
+		genStages(regenStages, prevStageIndexRef)
+	)
 
 	function regenStages() {
-		setStages(genStages(regenStages, prevStageRef))
+		setStages(genStages(regenStages, prevStageIndexRef))
 	}
 
 	useEffect(() => {}, [])
 
 	useEffect(() => {
-		if (prevStageRef.current !== currentStage) {
-			if (stages[currentStage].onSwitchedTo) {
-				stages[currentStage].onSwitchedTo()
+		if (prevStageIndexRef.current !== currentStageIndex) {
+			if (stages[currentStageIndex].onSwitchedTo) {
+				stages[currentStageIndex].onSwitchedTo()
 			}
 			if (
-				prevStageRef.current !== null &&
-				stages[prevStageRef.current].onSwitchedOff
+				prevStageIndexRef.current !== null &&
+				stages[prevStageIndexRef.current].onSwitchedOff
 			) {
-				stages[prevStageRef.current].onSwitchedOff!()
+				stages[prevStageIndexRef.current].onSwitchedOff!()
 			}
 		}
-		prevStageRef.current = currentStage
+		prevStageIndexRef.current = currentStageIndex
 		regenStages()
-	}, [currentStage])
+	}, [currentStageIndex])
 
 	const containerRef = useRef<HTMLDivElement>(null)
 	const backButtonRef = useRef<HTMLButtonElement>(null)
@@ -83,13 +78,13 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 			<div
 				className={s.cutout}
 				style={{
-					...stages[currentStage].cutoutDimensions,
+					...stages[currentStageIndex].cutoutDimensions,
 					transition: transitionStr,
 				}}
 			/>
 
-			{stages[currentStage].subHighlights !== undefined &&
-				stages[currentStage].subHighlights.map((highlight, index) => {
+			{stages[currentStageIndex].subHighlights !== undefined &&
+				stages[currentStageIndex].subHighlights.map((highlight, index) => {
 					return (
 						<div
 							className={s.sub_highlight}
@@ -104,62 +99,63 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 
 			<div
 				className={s.content}
-				style={{ ...stages[currentStage].tipDimensions, transition: transitionStr }}
+				style={{
+					...stages[currentStageIndex].tipDimensions,
+					transition: transitionStr,
+				}}
 			>
 				<div className={s.tip_container}>
-					<div className={s.tip_content}>{stages[currentStage].tipContent}</div>
+					<div className={s.progress_container}>
+						{stages.map((_, index) => {
+							if (index === 0) {
+								return ''
+							}
+							return (
+								<div
+									key={index}
+									className={`${s.circle} ${
+										index <= currentStageIndex ? s.completed : ''
+									}`}
+								/>
+							)
+						})}
+					</div>
+					<div className={s.tip_content}>
+						{stages[currentStageIndex].tipContent}
+					</div>
 					<div className={s.button_container}>
 						<JButton
 							jstyle='invisible'
-							onClick={() =>
-								setCurrentStage((p) => {
-									const index = stageNamesOrdered.indexOf(p)
-									return stageNamesOrdered[index - 1]
-								})
-							}
+							onClick={() => {
+								if (currentStageIndex === 0) {
+									close()
+								} else {
+									setCurrentStageIndex((p) => p - 1)
+								}
+							}}
 							onFocus={() => (currentButtonRef.current = 'back')}
-							disabled={currentStage === stageNamesOrdered[0]}
 							ref={backButtonRef}
 						>
-							Back
+							{currentStageIndex === 0 ? 'Exit' : 'Back'}
 						</JButton>
 						<JButton
 							jstyle='invisible'
 							onClick={() => {
-								if (currentStage === stageNamesOrdered.at(-1)) {
+								if (currentStageIndex === stages.length - 1) {
 									close()
 								} else {
-									setCurrentStage((p) => {
-										const index = stageNamesOrdered.indexOf(p)
-										return stageNamesOrdered[index + 1]
-									})
+									setCurrentStageIndex((p) => p + 1)
 								}
 							}}
 							onFocus={() => (currentButtonRef.current = 'next')}
 							ref={nextButtonRef}
 						>
-							{currentStage === stageNamesOrdered.at(-1) ? 'Exit' : 'Next'}
+							{currentStageIndex === stages.length - 1 ? 'Exit' : 'Next'}
 						</JButton>
 					</div>
 				</div>
 
 				<div className={s.content_backdrop} />
-			</div>
-			<div className={s.devbuttons}>
-				<button onClick={() => setCurrentStage('transaction_manager_overview')}>
-					transaction_manager_overview
-				</button>
-				<button onClick={() => setCurrentStage('transaction_manager_reorder')}>
-					transaction_manager_reorder
-				</button>
-				<button onClick={() => setCurrentStage('transaction_manager_fold')}>
-					transaction_manager_fold
-				</button>
-				<button onClick={() => setCurrentStage('transaction_manager_more_options')}>
-					transaction_manager_more_options
-				</button>
-				<button onClick={() => setCurrentStage('options')}>options</button>
-				<button onClick={close}>Close me!</button>
 			</div>
 		</div>
 	)

@@ -54,11 +54,6 @@ export function DeleteForm({
 	useEffect(() => {
 		let clearLoops = () => {}
 		if (firstNodeRef.current && lastNodeRef.current) {
-			console.log(
-				'CREATING NEW FOCUS LOOP BETWEEN',
-				firstNodeRef.current,
-				lastNodeRef.current
-			)
 			clearFocusLoop(firstNodeRef.current, lastNodeRef.current)
 			const loop = createFocusLoop(firstNodeRef.current, lastNodeRef.current)
 			if (loop) {

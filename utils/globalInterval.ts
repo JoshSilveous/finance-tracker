@@ -15,7 +15,6 @@ export function setGlobalInterval(
 ) {
 	const prevInterval = intervalRegistry[key]
 	if (prevInterval !== undefined) {
-		console.log('overriding,', prevInterval)
 		if (prevInterval.cleanup) {
 			prevInterval.cleanup()
 		}
@@ -38,7 +37,6 @@ export function setGlobalInterval(
 
 export function clearGlobalInterval(key: string) {
 	const interval = intervalRegistry[key]
-	console.log('clearing', interval)
 	if (interval !== undefined) {
 		if (interval.cleanup) {
 			interval.cleanup()

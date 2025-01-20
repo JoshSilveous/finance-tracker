@@ -53,15 +53,37 @@
 			padding: 10px;
 			box-sizing: border-box;
 
-			p:first-child {
-				margin-top: 0;
+			.progress_container {
+				height: 13px;
+				display: flex;
+				justify-content: center;
+				align-items: flex-start;
+				gap: 10px;
+
+				.circle {
+					height: 5px;
+					width: 5px;
+					border-radius: 50%;
+					border: 1px solid var(--font-color);
+					transition: background-color 0.2s ease;
+					&.completed {
+						background-color: var(--font-color);
+					}
+					&:not(.completed) {
+						background-color: transparent;
+					}
+				}
 			}
-			p:last-child {
-				margin-bottom: 0;
-			}
+
 			.tip_content {
 				z-index: 2;
 				flex-grow: 1;
+				p:first-child {
+					margin-top: 0;
+				}
+				p:last-child {
+					margin-bottom: 0;
+				}
 			}
 			.button_container {
 				z-index: 2;
@@ -69,8 +91,5 @@
 				gap: 10px;
 			}
 		}
-	}
-	.devbuttons {
-		z-index: 3;
 	}
 }
