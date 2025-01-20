@@ -1,6 +1,8 @@
 import transactionManagerStyles from '../../../tiles/TransactionManager/TransactionManager.module.scss'
 import dashboardStyles from '../../../Dashboard.module.scss'
 import s from './TutorialOverlay.module.scss'
+import { delay, runRepeatedly } from '@/utils'
+import { JFLYOUT_TRANSITION_TIME_MS } from '@/components/JFlyoutMenu/JFlyoutMenu'
 
 export function genStages() {
 	const transaction_manager: StageConfig = (() => {
@@ -31,32 +33,40 @@ export function genStages() {
 		const node = document.querySelector(`.${dashboardStyles.options_flyout}`)!
 			.children[0] as HTMLDivElement
 
+		const flyoutOpenedHeight = Number(node.dataset.opened_height)!
 		const rect = node.getBoundingClientRect()
 
 		const margin = 10
 
 		const tip = <div className={s.tip}>Tip!</div>
 		const tipHeight = 100
-		const tipWidth = 100
-		console.log('re-calcing with node', node)
 		return {
 			cutoutDimensions: {
-				top: rect.top - margin,
+				top: rect.top + rect.height - flyoutOpenedHeight - margin,
 				left: rect.left - margin,
 				width: rect.width + margin * 2 - 3,
-				height: rect.height + margin * 2 - 3,
+				height: flyoutOpenedHeight + margin * 2 - 3,
 				borderRadius: 10,
 			},
 			tipDimentions: {
-				top: rect.top - margin - rect.height - tipHeight,
+				top: rect.top + rect.height - flyoutOpenedHeight - margin * 2 - tipHeight,
 				left: rect.left - margin,
-				width: tipWidth,
+				width: rect.width + margin * 2 - 3,
 				height: tipHeight,
 				borderRadius: 10,
 			},
 			tipContent: tip,
 			onSwitchedTo: () => {
 				// select the button node to open/close menu
+				const buttonNode = node.children[1] as HTMLButtonElement
+				if (buttonNode.tagName !== 'BUTTON') {
+					throw new Error(
+						'buttonNode seems to be pointing to the wrong node now. update the DOM path to point to the correct node.'
+					)
+				}
+				buttonNode.click()
+			},
+			onSwitchedOff: () => {
 				const buttonNode = node.children[1] as HTMLButtonElement
 				if (buttonNode.tagName !== 'BUTTON') {
 					throw new Error(

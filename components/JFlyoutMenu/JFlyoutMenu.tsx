@@ -18,6 +18,9 @@ interface JFlyoutMenuProps {
 	}[]
 	className?: string
 }
+
+export const JFLYOUT_TRANSITION_TIME_MS = 300
+
 export const JFlyoutMenu = forwardRef<HTMLButtonElement, JFlyoutMenuProps>(
 	({ jstyle, title, options, className }, ref) => {
 		const [isOpen, setIsOpen] = useState(false)
@@ -113,6 +116,7 @@ export const JFlyoutMenu = forwardRef<HTMLButtonElement, JFlyoutMenuProps>(
 				<div
 					ref={expandableContainerRef}
 					className={`${s.expandable_container} ${s[jstyle]}`}
+					data-opened_height={openedHeight}
 				>
 					<div className={s.options_wrapper}>{optionsDisplay}</div>
 					<button
