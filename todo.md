@@ -1,14 +1,10 @@
 ## Unsolved
 
--   Make better discard changes confirm form
-
 ### Needed before beta
 
--   Add "Tutorial / Setup" sequence
-    -   Basic intro page
-    -   Set up categories
-    -   Set up accounts
-    -   Quick UI Guide
+-   Make better discard changes confirm form
+-   Add some welcome text
+-   Add a recruiter welcome page /recruiter-login, with a link to create temp account
 
 ### Can wait
 
@@ -34,6 +30,11 @@
 
 ## Solved
 
+-   Add "Tutorial / Setup" sequence
+    -   Basic intro page
+    -   Set up categories
+    -   Set up accounts
+    -   Quick UI Guide
 -   Add data.clearchanges method + sortorder clear
 -   Remove delete confirm for tiles
 -   Fix mouse position when moving tiles around
