@@ -150,6 +150,7 @@ export function SignupForm() {
 					id='email'
 					name='email'
 					type='email'
+					autoComplete='email'
 					required
 					onChange={handleInputChange}
 				/>
@@ -163,6 +164,7 @@ export function SignupForm() {
 					id='password'
 					name='password'
 					type='password'
+					autoComplete='new-password'
 					required
 					onChange={handleInputChange}
 				/>
@@ -176,6 +178,7 @@ export function SignupForm() {
 					id='password_confirm'
 					name='password_confirm'
 					type='password'
+					autoComplete='new-password'
 					required
 					onChange={handleInputChange}
 				/>

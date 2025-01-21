@@ -86,6 +86,7 @@ export function LoginForm() {
 					id='email'
 					name='email'
 					type='email'
+					autoComplete='email'
 					required
 					onChange={handleInputChange}
 				/>
@@ -99,6 +100,7 @@ export function LoginForm() {
 					id='password'
 					name='password'
 					type='password'
+					autoComplete='current-password'
 					required
 					onChange={handleInputChange}
 					disabled={isSubmitting}
