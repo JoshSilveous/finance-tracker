@@ -168,7 +168,7 @@ export function TransactionManager({
 		return sortTransactions(sortOrder.cur, data.cur.transactions)
 	}, [data.cur.transactions, sortOrder.cur])
 
-	const headers: JGridTypes.Header[] = useMemo(() => genHeaders(historyController), [])
+	const headers: JGridTypes.Header[] = genHeaders(historyController)
 
 	let grid: ReactNode
 

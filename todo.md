@@ -2,7 +2,6 @@
 
 ### Needed before beta
 
--   History buttons don't seem to be working
 -   Add some welcome text
 -   Add a recruiter welcome page /recruiter-login, with a link to create temp account
 
@@ -17,6 +16,7 @@
 -   Switch preferred column widths to localStorage instead of DB
 -   Add Theme system
 -   Standardize margins/padding to CSS variables
+-   Make history system work for all types of changes in the dashboard
 
 #
 
@@ -32,6 +32,7 @@
 
 ## Solved
 
+-   History buttons don't seem to be working
 -   Make better discard changes confirm form
 -   Add "Tutorial / Setup" sequence
     -   Basic intro page

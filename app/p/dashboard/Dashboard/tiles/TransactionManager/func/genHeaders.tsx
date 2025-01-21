@@ -8,6 +8,7 @@ import { getNumPref } from '@/utils'
 export function genHeaders(historyController: HistoryController) {
 	const undoTitle = 'Undo most recent change.\nShortcut: CTRL + Z'
 	const redoTitle = 'Redo most recent change.\nShortcut: CTRL + ALT + Z'
+	console.log('regen headers')
 	const headers: JGridTypes.Header[] = [
 		{
 			content: (
