@@ -1,35 +1,48 @@
-## Unsolved
+# Unsolved
 
-### Needed before beta
+## Needed before beta
 
 -   Add some welcome text
 
-### Can wait
+## Can wait
 
--   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
--   Switch "create new transaction" button to add row to grid
--   When saving changes and a transaction's date changes, it should be added at the top of the list for that date.
-    This will require some sortOrder magic and querying when saving.
--   Clean up JGrid system to support percentages better
--   Add better category/account management systems
--   Switch preferred column widths to localStorage instead of DB
--   Add Theme system
--   Standardize margins/padding to CSS variables
+### High Priority
+
 -   Make history system work for all types of changes in the dashboard
 
-#
+### Medium Priority
 
-#
+-   Switch "create new transaction" button to add row to grid
+-   Clean up JGrid system to support percentages better
+-   Switch preferred column widths to localStorage instead of DB
 
-#
+### Low Priority
 
-#
+-   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
+-   When saving changes and a transaction's date changes, it should be added at the top of the list for that date. This will require some sortOrder magic and querying when saving.
+-   Add Theme system
+-   Standardize margins/padding to CSS variables
 
-#
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
+    [//]: #
 
-#
-
-## Solved
+# Solved
 
 -   Add a recruiter welcome page /recruiter-login, with a link to create temp account
 -   History buttons don't seem to be working
@@ -51,13 +64,14 @@
 -   Add different signup/login methods
 -   Make sure that data methods don't have any cross-user overlap (they shouldn't)
 -   Add error reporting mechanism
+-   Add better category/account management systems
 -   Phase out old Category/Account managers + implement new ones
 -   Update Category / Account Managers
 -   Add save check for "Create New Transaction"
 -   Save button should work on reorders alone
 -   Set up all needed data/save methods
 -   Set up SimpleValues options for:
-    time period (past two weeks, since last item in category (e.x. income), this month)
+    -   time period (past two weeks, since last item in category (e.x. income), this month)
 -   GridNav not working when a row is folded- add a check for disabled inputs
 -   Add delete tiles option
 -   Pretty up the popups
