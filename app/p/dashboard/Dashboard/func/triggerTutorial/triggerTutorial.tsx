@@ -14,13 +14,11 @@ export function triggerTutorial(
 	// first, make sure that the tiles are positioned properly for the tutorial.  temporarily create a "Simple Values" tile if one is not present already
 	const tmTileIndex = tileData.findIndex((ti) => ti.type === 'transaction_manager')
 	const prevTMTile = structuredClone(tileData[tmTileIndex])
-	console.log('tmTileIndex:', tmTileIndex, 'tileData', tileData)
 
 	let svTileIndex = tileData.findIndex((ti) => ti.type === 'simple_values')
 	let prevSVTile = svTileIndex === -1 ? undefined : structuredClone(tileData[svTileIndex])
 	setTileData((prev) => {
 		const clone = structuredClone(prev)
-		console.log('tmTileIndex:', tmTileIndex, 'clone', clone)
 		clone[tmTileIndex].position = { top: 30, left: 30 }
 		clone[tmTileIndex].size = { height: 690, width: 750 }
 		if (svTileIndex === -1) {
@@ -41,7 +39,6 @@ export function triggerTutorial(
 			})
 			svTileIndex = clone.length - 1
 		} else {
-			console.log(clone)
 			clone[svTileIndex].position = { top: 30, left: 810 }
 			clone[svTileIndex].size = { height: 180, width: 240 }
 		}

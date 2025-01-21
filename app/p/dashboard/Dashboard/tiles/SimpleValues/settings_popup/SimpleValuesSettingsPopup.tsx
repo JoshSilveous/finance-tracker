@@ -297,44 +297,13 @@ export function SimpleValuesSettingsPopup({
 	const ExplanationSection = genExplanationSection(formData)
 
 	const onDeleteClick = () => {
-		const handleDelete = () => {
-			setTileData((prev) => {
-				const clone = structuredClone(prev)
-				const thisTileIndex = clone.findIndex((entry) => entry.id === tile!.id)
-				clone.splice(thisTileIndex, 1)
-				return clone
-			})
-			deletePopup.close()
-			closePopup()
-		}
-
-		const deletePopup = createPopup({
-			content: (
-				<div className={s.delete_tile_popup}>
-					<h3>Delete Tile</h3>
-					<p>
-						<strong>This cannot be undone</strong>
-						<br />
-						Are you sure?
-					</p>
-					<div style={{ display: 'flex', gap: '10px' }}>
-						<JButton
-							jstyle='secondary'
-							onClick={() => {
-								deletePopup.close()
-							}}
-						>
-							Go Back
-						</JButton>
-						<JButton jstyle='secondary' onClick={handleDelete}>
-							Delete
-						</JButton>
-					</div>
-				</div>
-			),
-			type: 'error',
+		setTileData((prev) => {
+			const clone = structuredClone(prev)
+			const thisTileIndex = clone.findIndex((entry) => entry.id === tile!.id)
+			clone.splice(thisTileIndex, 1)
+			return clone
 		})
-		deletePopup.trigger()
+		closePopup()
 	}
 
 	return (

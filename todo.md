@@ -1,6 +1,6 @@
 ## Unsolved
 
--   Remove delete confirm for tiles
+-   Add data.clearchanges method
 
 ### Needed before beta
 
@@ -34,6 +34,7 @@
 
 ## Solved
 
+-   Remove delete confirm for tiles
 -   Fix mouse position when moving tiles around
 -   Redirect home to login page
 -   Set up tutorial system
