@@ -201,10 +201,11 @@ export function Dashboard() {
 		function discardChanges() {
 			data.clearChanges()
 			setTileData(origTileDataRef.current)
+			sortOrder.discardChanges()
 		}
 		const popup = createPopup({
 			content: (
-				<div>
+				<div style={{ width: '200px' }}>
 					<h3>Discard Changes</h3>
 					<p>Are you sure?</p>
 					<div style={{ display: 'flex', gap: '10px' }}>

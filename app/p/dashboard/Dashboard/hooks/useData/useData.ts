@@ -24,9 +24,6 @@ export function useData(p: UseDataOptions) {
 		categories: [],
 		accounts: [],
 	})
-	useEffect(() => {
-		origDataRef.current = origDataRef.current
-	}, [origDataRef.current])
 
 	const [isLoading, setIsLoading] = useState(false)
 	const [isPendingSave, setIsPendingSave] = useState(false)
@@ -434,6 +431,7 @@ export function useData(p: UseDataOptions) {
 
 	const clearChanges = () => {
 		console.log('NEED TO MAKE')
+		setData(origDataRef.current)
 	}
 
 	const controller: Data.Controller = {

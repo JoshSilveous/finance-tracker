@@ -1,6 +1,6 @@
 ## Unsolved
 
--   Add data.clearchanges method
+-   Make better discard changes confirm form
 
 ### Needed before beta
 
@@ -34,6 +34,7 @@
 
 ## Solved
 
+-   Add data.clearchanges method + sortorder clear
 -   Remove delete confirm for tiles
 -   Fix mouse position when moving tiles around
 -   Redirect home to login page

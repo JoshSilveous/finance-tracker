@@ -362,6 +362,10 @@ export function useSortOrder({
 		[]
 	)
 
+	const discardChanges = () => {
+		setCurSortOrder(defSortOrder)
+	}
+
 	/* END ITEM REORDERING LOGIC */
 
 	const updateItemSortOrder = useCallback(
@@ -476,6 +480,7 @@ export function useSortOrder({
 		genDefaultSortOrder,
 		addNewItem,
 		removeNewItem,
+		discardChanges,
 	} as SortOrder.Controller
 }
 
@@ -564,6 +569,7 @@ export namespace SortOrder {
 			first_item_id?: string
 		) => void
 		removeNewItem: (transaction_id: string, date: string, item_id: string) => void
+		discardChanges: () => void
 	}
 
 	/**
