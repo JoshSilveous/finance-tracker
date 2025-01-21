@@ -3,7 +3,6 @@
 ### Needed before beta
 
 -   Add some welcome text
--   Add a recruiter welcome page /recruiter-login, with a link to create temp account
 
 ### Can wait
 
@@ -32,6 +31,7 @@
 
 ## Solved
 
+-   Add a recruiter welcome page /recruiter-login, with a link to create temp account
 -   History buttons don't seem to be working
 -   Make better discard changes confirm form
 -   Add "Tutorial / Setup" sequence
