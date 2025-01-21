@@ -1,3 +1,4 @@
+'use client'
 import { HTMLAttributes, useState } from 'react'
 import s from './SignInAnonymouslyButton.module.scss'
 import { createClient } from '@/database/supabase/client'
@@ -7,7 +8,11 @@ import { default as AnonymousLogo } from '@/public/anonymous.svg'
 
 const supabase = createClient()
 
-export function SignInAnonymouslyButton(props: HTMLAttributes<HTMLButtonElement>) {
+interface SignInAnonymouslyButtonProps extends HTMLAttributes<HTMLButtonElement> {
+	text: string
+}
+
+export function SignInAnonymouslyButton(props: SignInAnonymouslyButtonProps) {
 	const [loading, setLoading] = useState(false)
 
 	const router = useRouter()
@@ -25,14 +30,8 @@ export function SignInAnonymouslyButton(props: HTMLAttributes<HTMLButtonElement>
 		<div className={s.main}>
 			<JButton jstyle='secondary' onClick={handleClick} loading={loading} {...props}>
 				<AnonymousLogo />
-				Sign In with Temporary Account *
+				{props.text}
 			</JButton>
-			<p>
-				* Creates an <strong>anonymous</strong> profile in the database, providing
-				access to all features without entering any personal information. This allows
-				you to "demo" the project, and your anonymous profile{' '}
-				<strong>will disappear when your browser's cache is cleared</strong>.
-			</p>
 		</div>
 	)
 }

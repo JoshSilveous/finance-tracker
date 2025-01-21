@@ -20,7 +20,6 @@ export default function LoginPage() {
 	useEffect(() => {
 		if (window.location.hash === '#signup') {
 			setCurrentForm('signup')
-		} else {
 		}
 		setFormLoading(false)
 	}, [])
@@ -62,7 +61,13 @@ export default function LoginPage() {
 			)}
 			<div className={s.separator}>or</div>
 			<GithubButton className={s.github_button} />
-			<SignInAnonymouslyButton />
+			<SignInAnonymouslyButton text='Sign In with Temporary Account *' />
+			<p className={s.anonymous_text}>
+				* Creates an <strong>anonymous</strong> profile in the database, providing
+				access to all features without entering any personal information. This allows
+				you to "demo" the project, and your anonymous profile{' '}
+				<strong>will disappear when your browser's cache is cleared</strong>.
+			</p>
 		</div>
 	)
 }
