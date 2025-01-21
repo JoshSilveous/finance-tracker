@@ -25,13 +25,7 @@ import {
 } from '@/database'
 import { triggerTutorial } from '../../func/triggerTutorial/triggerTutorial'
 
-export function InitialSetupPopup({
-	closePopup,
-	refreshAllData,
-}: {
-	closePopup: () => void
-	refreshAllData: () => Promise<void>
-}) {
+export function InitialSetupPopup({ closePopup }: { closePopup: () => void }) {
 	const [currentStage, setCurrentStage] = useState(1)
 	const [catData, setCatData] = useState<CategoryItem[]>([
 		{ id: crypto.randomUUID(), name: '' },
@@ -163,8 +157,6 @@ export function InitialSetupPopup({
 			await upsertTransactionPromise
 
 			closePopup()
-			await refreshAllData()
-			triggerTutorial()
 		} catch (e) {
 			reportErrorToDB(e as Error)
 			if (isStandardError(e)) {

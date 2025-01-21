@@ -1,8 +1,8 @@
 ## Unsolved
 
--   Set up tutorial system
-    -   Add a SimpleTile to the default user stuff
-    -   Add a system that highlights different parts of the window and explains them
+-   Remove delete confirm for tiles
+-   Fix mouse position when moving tiles around
+-   Redirect home to login page
 
 ### Needed before beta
 
@@ -36,6 +36,9 @@
 
 ## Solved
 
+-   Set up tutorial system
+    -   Add a SimpleTile to the default user stuff
+    -   Add a system that highlights different parts of the window and explains them
 -   Transaction form isn't auto-refreshing on exit. Seems to happen when entering the first item? idk
 -   Cat / Act managers should take focus on popup
 -   Add different signup/login methods

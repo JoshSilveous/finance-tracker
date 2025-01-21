@@ -20,6 +20,7 @@ import { triggerTutorial } from './func/triggerTutorial/triggerTutorial'
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
 	const origTileDataRef = useRef<TileData[]>([])
+	const curTileDataRef = useRef<TileData[]>([])
 	const [tileData, setTileData] = useState<TileData[]>([])
 	const data = useData({
 		onReload: (newData) => {
@@ -30,15 +31,10 @@ export function Dashboard() {
 		getSortOrderController: () => sortOrder,
 		getHistoryController: () => historyController,
 	})
-	const tutorialTriggered = useRef(false)
-	useEffect(() => {
-		if (tutorialTriggered.current === false) {
-			tutorialTriggered.current = true
-			delay(500).then(() => {
-				triggerTutorial()
-			})
-		}
-	}, [isLoading])
+
+	const startTutorial = () => {
+		triggerTutorial(curTileDataRef.current, setTileData, tileContainerRef)
+	}
 	useEffect(() => {
 		fetchInitSetupProgress()
 			.then((res) => {
@@ -46,10 +42,11 @@ export function Dashboard() {
 					const popup = createPopup({
 						content: (
 							<InitialSetupPopup
-								closePopup={() => {
+								closePopup={async () => {
 									popup.close()
+									await refreshAllData()
+									startTutorial()
 								}}
-								refreshAllData={refreshAllData}
 							/>
 						),
 						hideExitButton: true,
@@ -113,17 +110,21 @@ export function Dashboard() {
 
 	useLayoutEffect(() => {
 		// re-calculate size needed for dashboard component
+		curTileDataRef.current = tileData
 
-		let maxWidth = 0
-		let maxHeight = 0
+		const [maxWidth, maxHeight] = (() => {
+			let maxWidth = 0
+			let maxHeight = 0
 
-		tileData.forEach((tile) => {
-			const { top, left } = tile.position
-			const { width, height } = tile.size
+			tileData.forEach((tile) => {
+				const { top, left } = tile.position
+				const { width, height } = tile.size
 
-			maxWidth = Math.max(maxWidth, left + width)
-			maxHeight = Math.max(maxHeight, top + height)
-		})
+				maxWidth = Math.max(maxWidth, left + width)
+				maxHeight = Math.max(maxHeight, top + height)
+			})
+			return [maxWidth, maxHeight]
+		})()
 
 		tileContainerRef.current!.style.width = `calc(${maxWidth}px + (var(--GRID_SPACING) * 3))`
 		tileContainerRef.current!.style.height = `calc(${maxHeight}px + (var(--GRID_SPACING) * 3))`
@@ -300,7 +301,7 @@ export function Dashboard() {
 						{
 							content: <>Tutorial</>,
 							onClick: () => {
-								triggerTutorial()
+								startTutorial()
 							},
 						},
 					]}

@@ -1,12 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import s from './TutorialOverlay.module.scss'
 import { genStages, StageConfig } from './genStages'
 import { isolateWindowListener, removeWindowListener, setWindowListener } from '@/utils'
 import { JButton } from '@/components/JForm'
+import { TileData } from '../../../tiles'
 
 export const TRANSITION_TIME_MS = 300
-
-export function TutorialOverlay({ close }: { close: () => void }) {
+interface TutorialOverlayProps {
+	close: () => void
+}
+export function TutorialOverlay({ close }: TutorialOverlayProps) {
 	const [currentStageIndex, setCurrentStageIndex] = useState(0)
 	const prevStageIndexRef = useRef<number | null>(null)
 	const [stages, setStages] = useState<StageConfig[]>(
@@ -16,8 +19,6 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 	function regenStages() {
 		setStages(genStages(regenStages, prevStageIndexRef))
 	}
-
-	useEffect(() => {}, [])
 
 	useEffect(() => {
 		if (prevStageIndexRef.current !== currentStageIndex) {
@@ -45,7 +46,11 @@ export function TutorialOverlay({ close }: { close: () => void }) {
 		}
 		const handleFocus = (e: FocusEvent) => {
 			if (e.target !== null && !containerRef.current!.contains(e.target as Node)) {
-				nextButtonRef.current!.focus()
+				if (currentButtonRef.current === 'next') {
+					nextButtonRef.current!.focus()
+				} else {
+					backButtonRef.current!.focus()
+				}
 			}
 		}
 		setWindowListener('TUTORIAL_WINDOW_RESIZE', 'resize', updateOnResize)

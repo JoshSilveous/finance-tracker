@@ -76,7 +76,9 @@
 		box-sizing: border-box;
 		justify-content: flex-end;
 		z-index: 10;
-		button,
+		.discard,
+		.save,
+		.submit_feedback,
 		.options_flyout {
 			width: 200px;
 		}

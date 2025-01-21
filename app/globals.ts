@@ -3,3 +3,5 @@
  */
 export const GRID_SPACING = 30 // also defined in ./globals.scss
 // TODO:
+
+export const NAVBAR_HEIGHT = 60
