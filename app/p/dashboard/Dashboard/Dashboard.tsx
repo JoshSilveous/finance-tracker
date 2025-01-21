@@ -16,6 +16,7 @@ import { AccountEditorPopup } from './components/AccountEditorPopup/AccountEdito
 import { JFlyoutMenu } from '@/components/JFlyoutMenu/JFlyoutMenu'
 import { InitialSetupPopup } from './components/InitialSetupPopup/InitialSetupPopup'
 import { triggerTutorial } from './func/triggerTutorial/triggerTutorial'
+import { DiscardConfirmPopup } from './components/DiscardConfirmPopup/DiscardConfirmPopup'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -205,29 +206,13 @@ export function Dashboard() {
 		}
 		const popup = createPopup({
 			content: (
-				<div style={{ width: '200px' }}>
-					<h3>Discard Changes</h3>
-					<p>Are you sure?</p>
-					<div style={{ display: 'flex', gap: '10px' }}>
-						<JButton
-							jstyle='secondary'
-							onClick={() => {
-								popup.close()
-							}}
-						>
-							No
-						</JButton>
-						<JButton
-							jstyle='primary'
-							onClick={() => {
-								discardChanges()
-								popup.close()
-							}}
-						>
-							Yes
-						</JButton>
-					</div>
-				</div>
+				<DiscardConfirmPopup
+					onBackout={() => popup.close()}
+					onConfirm={() => {
+						discardChanges()
+						popup.close()
+					}}
+				/>
 			),
 		})
 		popup.trigger()

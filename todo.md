@@ -2,7 +2,7 @@
 
 ### Needed before beta
 
--   Make better discard changes confirm form
+-   History buttons don't seem to be working
 -   Add some welcome text
 -   Add a recruiter welcome page /recruiter-login, with a link to create temp account
 
@@ -15,6 +15,8 @@
 -   Clean up JGrid system to support percentages better
 -   Add better category/account management systems
 -   Switch preferred column widths to localStorage instead of DB
+-   Add Theme system
+-   Standardize margins/padding to CSS variables
 
 #
 
@@ -30,6 +32,7 @@
 
 ## Solved
 
+-   Make better discard changes confirm form
 -   Add "Tutorial / Setup" sequence
     -   Basic intro page
     -   Set up categories
