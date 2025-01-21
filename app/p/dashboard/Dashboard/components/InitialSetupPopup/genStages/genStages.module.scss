@@ -1,15 +1,19 @@
 .stage_categories,
 .stage_accounts,
 .stage_confirm {
-	height: 100%;
+	flex: 1;
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
 	align-items: center;
+	height: 100%;
 	h2 {
 		margin: 0;
+		flex: 0;
 	}
 	.top_text {
+		flex: 0;
 		p:first-child {
 			margin-top: 0px;
 		}
@@ -20,18 +24,24 @@
 		max-width: 400px;
 	}
 	.editor_container {
-		padding-right: 10px;
+		padding-right: 30px;
+		padding: 10px 3px 10px 10px;
 		box-sizing: border-box;
 		border-radius: 20px;
 		border: 5px solid var(--bg-color-lighter-3);
 		width: fit-content;
 		margin: 0 auto;
 		margin-top: 20px;
+		margin-bottom: 20px;
+		max-width: 100%;
+		overflow: hidden;
+		height: 100%;
+		flex: 1;
 		.editor {
-			margin: 10px 0 10px 10px;
-			padding: 10px calc(10px - var(--scrollbar-width-thin)) 10px 10px;
-			height: 340px;
-			width: fit-content;
+			padding: 0 calc(10px - var(--scrollbar-width-thin)) 0 0;
+			height: 100%;
+			box-sizing: border-box;
+			width: 100%;
 			overflow-y: auto;
 			scrollbar-gutter: stable;
 			scrollbar-width: thin;
@@ -44,6 +54,7 @@
 		}
 	}
 	.button_container {
+		flex: 0;
 		width: 100%;
 		margin-top: auto;
 		display: flex;
@@ -53,6 +64,14 @@
 		}
 	}
 }
+
+.stage_categories .editor_container {
+	width: 300px;
+}
+.stage_accounts .editor_container {
+	width: 440px;
+}
+
 .stage_welcome {
 	height: 100%;
 	display: flex;

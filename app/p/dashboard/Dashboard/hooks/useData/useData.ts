@@ -426,11 +426,10 @@ export function useData(p: UseDataOptions) {
 	}
 
 	const unstageCreate: Data.Create = (type, ...args) => {
-		console.log('MEED TO MAKE')
+		console.log('NEED TO MAKE')
 	}
 
 	const clearChanges = () => {
-		console.log('NEED TO MAKE')
 		setData(origDataRef.current)
 	}
 
