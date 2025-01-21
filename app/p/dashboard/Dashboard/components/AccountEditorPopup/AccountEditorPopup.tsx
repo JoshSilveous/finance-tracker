@@ -393,7 +393,7 @@ export function AccountEditorPopup({
 			reportErrorToDB(e as Error)
 			if (isStandardError(e)) {
 				promptError(
-					'An unexpected error has occurred while propagating table layout preferences in the database:',
+					'An unexpected error has occurred while saving changes in the database:',
 					e.message,
 					'Try refreshing the page to resolve this issue.'
 				)
