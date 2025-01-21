@@ -60,20 +60,38 @@ export function Tile({
 			const startY = e.clientY
 			const startWidth = wrapperRef.current!.offsetWidth
 			const startHeight = wrapperRef.current!.offsetHeight
+			const node = e.currentTarget
+			const startScrollTop =
+				node.parentElement!.parentElement!.parentElement!.parentElement!.scrollTop
+			const startScrollLeft =
+				node.parentElement!.parentElement!.parentElement!.parentElement!.scrollLeft
+
 			document.body.style.userSelect = 'none'
 			document.body.style.cursor = 'se-resize'
 
 			const handleMouseMove = (e: MouseEvent) => {
+				const diffScrollTop =
+					node.parentElement!.parentElement!.parentElement!.parentElement!
+						.scrollTop - startScrollTop
+				const diffScrollLeft =
+					node.parentElement!.parentElement!.parentElement!.parentElement!
+						.scrollLeft - startScrollLeft
 				const newWidth = roundToMultiple(
 					Math.min(
-						Math.max(startWidth + (e.clientX - startX), minWidth),
+						Math.max(
+							startWidth + (e.clientX - startX) + diffScrollLeft,
+							minWidth
+						),
 						maxWidth !== undefined ? maxWidth : Infinity
 					),
 					GRID_SPACING
 				)
 				const newHeight = roundToMultiple(
 					Math.min(
-						Math.max(startHeight + (e.clientY - startY), minHeight),
+						Math.max(
+							startHeight + (e.clientY - startY) + diffScrollTop,
+							minHeight
+						),
 						maxHeight !== undefined ? maxHeight : Infinity
 					),
 					GRID_SPACING
@@ -106,16 +124,28 @@ export function Tile({
 		const startY = e.clientY
 		const startTop = parseInt(wrapperRef.current!.style.top)
 		const startLeft = parseInt(wrapperRef.current!.style.left)
+		const node = e.currentTarget
+		const startScrollTop =
+			node.parentElement!.parentElement!.parentElement!.parentElement!.scrollTop
+		const startScrollLeft =
+			node.parentElement!.parentElement!.parentElement!.parentElement!.scrollLeft
+
 		document.body.style.userSelect = 'none'
 		document.body.style.cursor = 'move'
 
-		const onMouseMove = (e: MouseEvent) => {
+		const onMouseMove = (me: MouseEvent) => {
+			const diffScrollTop =
+				node.parentElement!.parentElement!.parentElement!.parentElement!.scrollTop -
+				startScrollTop
+			const diffScrollLeft =
+				node.parentElement!.parentElement!.parentElement!.parentElement!.scrollLeft -
+				startScrollLeft
 			const diffX = roundToMultiple(
-				Math.max(e.clientX - startX + startLeft, 0),
+				Math.max(me.clientX - startX + startLeft + diffScrollLeft, 0),
 				GRID_SPACING
 			)
 			const diffY = roundToMultiple(
-				Math.max(e.clientY - startY + startTop, 0),
+				Math.max(me.clientY - startY + startTop + diffScrollTop, 0),
 				GRID_SPACING
 			)
 

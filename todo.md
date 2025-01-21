@@ -1,8 +1,6 @@
 ## Unsolved
 
 -   Remove delete confirm for tiles
--   Fix mouse position when moving tiles around
--   Redirect home to login page
 
 ### Needed before beta
 
@@ -36,6 +34,8 @@
 
 ## Solved
 
+-   Fix mouse position when moving tiles around
+-   Redirect home to login page
 -   Set up tutorial system
     -   Add a SimpleTile to the default user stuff
     -   Add a system that highlights different parts of the window and explains them
