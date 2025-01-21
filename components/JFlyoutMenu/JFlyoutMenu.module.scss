@@ -5,9 +5,9 @@
 	width: 100%;
 	height: var(--button-height);
 	.expandable_container {
-		--button-height: 36px;
 		position: absolute;
 		width: 100%;
+		height: var(--button-height);
 		bottom: 0;
 		overflow: hidden;
 		border-radius: 3px;
