@@ -28,6 +28,8 @@ export function genStages(
 		'dash_options_reset_tile_position',
 		'dash_options_categories_and_accounts',
 		'dash_options_tutorial_trigger',
+		'dash_feedback',
+		'goodbye_stage',
 	]
 
 	const stages: StageConfig[] = (() => {
@@ -52,6 +54,7 @@ export function genStages(
 							justifyContent: 'center',
 							flexDirection: 'column',
 							height: '100%',
+							textAlign: 'center',
 						}}
 					>
 						<p>
@@ -500,7 +503,7 @@ export function genStages(
 				}
 			})()
 
-			const dashFlyoutStages: StageConfig[] = (() => {
+			const dashOptionsFlyoutStages: StageConfig[] = (() => {
 				const flyoutNode = document.querySelector(
 					`.${dashboardStyles.options_flyout}`
 				)!.children[0] as HTMLDivElement
@@ -698,7 +701,80 @@ export function genStages(
 				]
 			})()
 
-			return [...dashFlyoutStages, dash_saving]
+			const dash_feedback: StageConfig = (() => {
+				const rect = (
+					document.querySelector(
+						`.${dashboardStyles.submit_feedback}`
+					) as HTMLButtonElement
+				).getBoundingClientRect()
+
+				const margin = 5
+				const tipHeight = 220
+				const tipWidth = 300
+
+				return {
+					id: 'dash_feedback',
+					cutoutDimensions: {
+						top: rect.top - margin,
+						left: rect.left - margin,
+						width: rect.width + margin * 2,
+						height: rect.height + margin * 2,
+						borderRadius: 10,
+					},
+					tipDimensions: {
+						top: rect.top - margin * 3 - tipHeight,
+						left:
+							rect.left - margin - (tipWidth - (rect.width + margin * 2)) / 2,
+						width: tipWidth,
+						height: tipHeight,
+						borderRadius: 10,
+					},
+					tipContent: (
+						<div className={s.tip}>
+							<p>
+								If you have any ideas, comments, or issues to report, feel
+								free to send me a message here!
+							</p>
+						</div>
+					),
+				}
+			})()
+
+			return [...dashOptionsFlyoutStages, dash_saving, dash_feedback]
+		})()
+
+		const goodbye_stage = (() => {
+			const dimensions = {
+				height: 200,
+				width: 300,
+				top: window.innerHeight / 2 - 200 / 2,
+				left: window.innerWidth / 2 - 300 / 2,
+				borderRadius: 20,
+			}
+
+			return {
+				id: 'goodbye_stage',
+				cutoutDimensions: dimensions,
+				tipDimensions: dimensions,
+				tipContent: (
+					<div
+						style={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							flexDirection: 'column',
+							height: '100%',
+							textAlign: 'center',
+						}}
+					>
+						<p>That's it!</p>
+						<p>
+							Feel free to return to this tutorial in the{' '}
+							<strong>Options</strong> menu if you get lost.
+						</p>
+					</div>
+				),
+			}
 		})()
 
 		return [
@@ -706,6 +782,7 @@ export function genStages(
 			...dashboardStages,
 			...simpleValuesStages,
 			welcome_stage,
+			goodbye_stage,
 		] as StageConfig[]
 	})()
 
