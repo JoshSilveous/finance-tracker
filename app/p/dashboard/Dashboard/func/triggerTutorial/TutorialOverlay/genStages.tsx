@@ -39,7 +39,7 @@ export function genStages(
 				width: 300,
 				top: window.innerHeight / 2 - 200 / 2,
 				left: window.innerWidth / 2 - 300 / 2,
-				borderRadius: 20,
+				borderRadius: 10,
 			}
 
 			return {
@@ -749,7 +749,7 @@ export function genStages(
 				width: 300,
 				top: window.innerHeight / 2 - 200 / 2,
 				left: window.innerWidth / 2 - 300 / 2,
-				borderRadius: 20,
+				borderRadius: 10,
 			}
 
 			return {

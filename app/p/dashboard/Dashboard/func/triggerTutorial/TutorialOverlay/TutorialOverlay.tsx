@@ -112,7 +112,7 @@ export function TutorialOverlay({ close }: TutorialOverlayProps) {
 				<div className={s.tip_container}>
 					<div className={s.progress_container}>
 						{stages.map((_, index) => {
-							if (index === 0) {
+							if (index === 0 || index === stages.length - 1) {
 								return ''
 							}
 							return (
