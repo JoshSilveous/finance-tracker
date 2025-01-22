@@ -31,17 +31,32 @@ export function genStages(
 	})()
 	const stages: JSX.Element[] = [
 		<div className={s.stage_welcome}>
-			Welcome!
+			<h2>Welcome!</h2>
+			<div className={s.paragraph_container}>
+				<p>
+					This application allows you to track your finances by using different{' '}
+					<strong>Categories</strong> and <strong>Accounts</strong>. Right now, you
+					can consider this as a <strong>Beta Test</strong>, as many features that
+					I'd like to have are still in the works.
+				</p>
+				<p>
+					This is a passion project of mine. I've put tons of hours of hard work
+					into this, and I've learned a lot about structuring a project of this
+					size (as well as neat JavaScript/React tricks).
+				</p>
+				<p>
+					And if you stumbled upon this without knowing who I am, be sure to check
+					out my <a href='https://silveo.us/'>Portfolio Site</a>. I enjoy writing
+					code and building apps a ton, and would love to make a career out of it.
+				</p>
+				<p>Thank you all for using my app!</p>
+				<p style={{ textAlign: 'right' }}>- Joshua Silveous</p>
+			</div>
 			<div className={s.button_container}>
 				<div />
 				<JButton
 					jstyle='primary'
 					disabled={catData.length === 0}
-					title={
-						catData.length === 0
-							? 'You must have at least 1 category before continuing'
-							: undefined
-					}
 					onClick={() => setCurrentStage((p) => p + 1)}
 				>
 					Next

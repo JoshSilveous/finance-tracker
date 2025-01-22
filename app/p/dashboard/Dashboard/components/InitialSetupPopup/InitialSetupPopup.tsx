@@ -1,18 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import s from './InitialSetupPopup.module.scss'
 import { CategoryItem } from './InitialSetupCategoryEditor/InitialSetupCategoryEditor'
 import { genStages } from './genStages/genStages'
 import { AccountItem } from './InitialSetupAccountEditor/InitialSetupAccountEditor'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import {
-	delay,
-	getCurDate,
-	getCurDateString,
-	getDateString,
-	getRandomArrItem,
-	isStandardError,
-	promptError,
-} from '@/utils'
+import { getCurDateString, getRandomArrItem, isStandardError, promptError } from '@/utils'
 import {
 	insertAccounts,
 	insertCategories,
@@ -20,10 +12,7 @@ import {
 	InsertTransactionEntry,
 	reportErrorToDB,
 	setInitSetupProgress,
-	upsertAccounts,
-	upsertCategories,
 } from '@/database'
-import { triggerTutorial } from '../../func/triggerTutorial/triggerTutorial'
 
 export function InitialSetupPopup({ closePopup }: { closePopup: () => void }) {
 	const [currentStage, setCurrentStage] = useState(1)
