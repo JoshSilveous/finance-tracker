@@ -1,0 +1,23 @@
+.container {
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 9999999;
+	background-color: var(--bg-color);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	.main {
+		max-width: 70vw;
+		font-size: 18px;
+	}
+}
+
+@media (min-width: 768px) {
+	.container {
+		display: none;
+	}
+}

@@ -3,10 +3,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import s from './createPopup.module.scss'
 
-// const popupDomLocation = ReactDOM.createRoot(
-// 	document.getElementById('popup-root') as HTMLDivElement
-// )
-
 /**
  * Creates a blocking popup on the screen. Overrides other popups.
  * @param content The JSX content to hold within the popup.
@@ -73,7 +69,6 @@ export function createPopup({
 			)
 		},
 		close() {
-			console.trace('closePopup called')
 			popupDomLocation.render(<></>)
 			popupDomLocation.unmount()
 			popupContainer.remove()

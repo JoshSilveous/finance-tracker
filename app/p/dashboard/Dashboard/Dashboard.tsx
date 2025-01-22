@@ -17,6 +17,7 @@ import { JFlyoutMenu } from '@/components/JFlyoutMenu/JFlyoutMenu'
 import { InitialSetupPopup } from './components/InitialSetupPopup/InitialSetupPopup'
 import { triggerTutorial } from './func/triggerTutorial/triggerTutorial'
 import { DiscardConfirmPopup } from './components/DiscardConfirmPopup/DiscardConfirmPopup'
+import { blockOnMobile } from '@/utils/blockOnMobile/blockOnMobile'
 
 export function Dashboard() {
 	const [isLoading, setIsLoading] = useState(true)
@@ -56,12 +57,16 @@ export function Dashboard() {
 				}
 			})
 			.catch((e) => console.error(e))
+	}, [])
+	useEffect(() => {
+		blockOnMobile()
+	}, [])
+	useEffect(() => {
 		if (!data.isPendingSave) {
 			refreshAllData().then(() => {
 				setIsLoading(false)
 			})
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 	const refreshAllData = async () => {
 		const [_, tileDataRes] = await Promise.all([data.reload(), fetchTileData()])
