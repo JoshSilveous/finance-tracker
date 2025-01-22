@@ -82,6 +82,7 @@ export function AccountEditorPopup({
 				createButtonRef.current!.focus()
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [firstLoadRef.current])
 
 	const refreshData = async () => {

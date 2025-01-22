@@ -102,7 +102,7 @@ export function DeleteForm({
 	if (associatedTransactionCount === undefined) {
 		return (
 			<div className={s.main}>
-				<h1>Delete "{category_name}"</h1>
+				<h1>Delete &quot;{category_name}&quot;</h1>
 				<div className={`${s.content} ${s.loading}`}>
 					<LoadingIcon />
 				</div>
@@ -111,11 +111,12 @@ export function DeleteForm({
 	} else if (associatedTransactionCount === 0) {
 		return (
 			<div className={s.main}>
-				<h1>Delete "{category_name}"</h1>
+				<h1>Delete &quot;{category_name}&quot;</h1>
 				<div className={`${s.content} ${s.zero_transactions}`}>
 					<p>
 						There are <strong>0</strong> transactions associated with this
-						category. Are you sure you want to delete "{category_name}"?
+						category. Are you sure you want to delete &quot;{category_name}
+						&quot;?
 					</p>
 					<div className={s.warning}>THIS CANNOT BE UNDONE</div>
 				</div>
@@ -180,7 +181,7 @@ export function DeleteForm({
 
 		return (
 			<div className={s.main}>
-				<h1>Delete "{category_name}"</h1>
+				<h1>Delete &quot;{category_name}&quot;</h1>
 				<div
 					className={`${s.content} ${s.has_transactions} ${
 						otherCategories!.length === 0 ? s.no_other_categories : ''
@@ -231,7 +232,10 @@ export function DeleteForm({
 					</div>
 					{deleteMethod === 'replace' && (
 						<div className={s.replace_dropdown}>
-							<p>Choose an category to replace "{category_name}" with:</p>
+							<p>
+								Choose an category to replace &quot;{category_name}&quot;
+								with:
+							</p>
 							<JDropdown
 								options={
 									otherCategories !== undefined

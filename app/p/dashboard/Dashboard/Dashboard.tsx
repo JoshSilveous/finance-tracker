@@ -56,14 +56,12 @@ export function Dashboard() {
 				}
 			})
 			.catch((e) => console.error(e))
-	}, [])
-	useEffect(() => {
-		// guard only needed for development
 		if (!data.isPendingSave) {
 			refreshAllData().then(() => {
 				setIsLoading(false)
 			})
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 	const refreshAllData = async () => {
 		const [_, tileDataRes] = await Promise.all([data.reload(), fetchTileData()])

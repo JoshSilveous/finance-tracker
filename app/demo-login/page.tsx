@@ -9,9 +9,9 @@ export default function DemoLoginPage() {
 				<p>
 					Thank you for checking out my Finance Tracker website! You can use the
 					button below to create a <strong>Temporary Anonymous Account</strong>, if
-					you just want to "demo" my project. Alternatively, you can go to the{' '}
-					<a href='/login#signup'>Signup Page</a> to create a permanent account
-					with <strong>GitHub</strong> or <strong>Email</strong>.
+					you just want to &quot;demo&quot; my project. Alternatively, you can go
+					to the <a href='/login#signup'>Signup Page</a> to create a permanent
+					account with <strong>GitHub</strong> or <strong>Email</strong>.
 				</p>
 				<div className={s.button_container}>
 					<SignInAnonymouslyButton text='Sign In with Temporary Account' />

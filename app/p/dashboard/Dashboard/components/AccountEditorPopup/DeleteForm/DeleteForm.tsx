@@ -95,7 +95,7 @@ export function DeleteForm({
 	if (associatedTransactionCount === undefined) {
 		return (
 			<div className={s.main}>
-				<h1>Delete "{account_name}"</h1>
+				<h1>Delete &quot;{account_name}&quot;</h1>
 				<div className={`${s.content} ${s.loading}`}>
 					<LoadingIcon />
 				</div>
@@ -104,11 +104,11 @@ export function DeleteForm({
 	} else if (associatedTransactionCount === 0) {
 		return (
 			<div className={s.main}>
-				<h1>Delete "{account_name}"</h1>
+				<h1>Delete &quot;{account_name}&quot;</h1>
 				<div className={`${s.content} ${s.zero_transactions}`}>
 					<p>
 						There are <strong>0</strong> transactions associated with this
-						account. Are you sure you want to delete "{account_name}"?
+						account. Are you sure you want to delete &quot;{account_name}&quot;?
 					</p>
 					<div className={s.warning}>THIS CANNOT BE UNDONE</div>
 				</div>
@@ -173,7 +173,7 @@ export function DeleteForm({
 
 		return (
 			<div className={s.main}>
-				<h1>Delete "{account_name}"</h1>
+				<h1>Delete &quot;{account_name}&quot;</h1>
 				<div
 					className={`${s.content} ${s.has_transactions} ${
 						otherAccounts!.length === 0 ? s.no_other_accounts : ''
@@ -224,7 +224,9 @@ export function DeleteForm({
 					</div>
 					{deleteMethod === 'replace' && (
 						<div className={s.replace_dropdown}>
-							<p>Choose an account to replace "{account_name}" with:</p>
+							<p>
+								Choose an account to replace &quot;{account_name}&quot; with:
+							</p>
 							<JDropdown
 								options={
 									otherAccounts !== undefined

@@ -30,19 +30,19 @@ export function genStages(
 		return !actData.some((act) => !!act.name)
 	})()
 	const stages: JSX.Element[] = [
-		<div className={s.stage_welcome}>
+		<div className={s.stage_welcome} key='stage_welcome'>
 			<h2>Welcome!</h2>
 			<div className={s.paragraph_container}>
 				<p>
 					This application allows you to track your finances by using different{' '}
 					<strong>Categories</strong> and <strong>Accounts</strong>. Right now, you
 					can consider this as a <strong>Beta Test</strong>, as many features that
-					I'd like to have are still in the works.
+					I&apos;d like to have are still in the works.
 				</p>
 				<p>
-					This is a passion project of mine. I've put tons of hours of hard work
-					into this, and I've learned a lot about structuring a project of this
-					size (as well as neat JavaScript/React tricks).
+					This is a passion project of mine. I&apos;ve put tons of hours of hard
+					work into this, and I&apos;ve learned a lot about structuring a project
+					of this size (as well as neat JavaScript/React tricks).
 				</p>
 				<p>
 					And if you stumbled upon this without knowing who I am, be sure to check
@@ -63,7 +63,7 @@ export function genStages(
 				</JButton>
 			</div>
 		</div>,
-		<div className={s.stage_categories}>
+		<div className={s.stage_categories} key='stage_categories'>
 			<h2>Set up Categories</h2>
 			<div className={s.top_text}>
 				<p>
@@ -95,16 +95,16 @@ export function genStages(
 				</JButton>
 			</div>
 		</div>,
-		<div className={s.stage_accounts}>
+		<div className={s.stage_accounts} key='stage_accounts'>
 			<h2>Set up Accounts</h2>
 			<div className={s.top_text}>
 				<p>
 					<strong>Accounts</strong> represent your bank accounts, loans, or any
-					type of balance you'd like to keep track of.
+					type of balance you&apos;d like to keep track of.
 				</p>
 				<p>
-					For each account, you'll set a <strong>Starting Amount</strong>—this is
-					the balance of the account{' '}
+					For each account, you&apos;ll set a <strong>Starting Amount</strong>—this
+					is the balance of the account{' '}
 					<strong>when you begin tracking transactions</strong>. As you add
 					transactions, the starting amount will update to show your current
 					account balance.
@@ -133,11 +133,11 @@ export function genStages(
 				</JButton>
 			</div>
 		</div>,
-		<div className={s.stage_confirm}>
+		<div className={s.stage_confirm} key='stage_confirm'>
 			<h2>Ready to continue?</h2>
 			<div className={s.top_text}>
 				<p>
-					After continuing, the categories and accounts you've set up will be
+					After continuing, the categories and accounts you&apos;ve set up will be
 					saved. These can be edited at any time.
 				</p>
 				<p>Up next is a brief walkthrough of how to navigate the dashboard.</p>

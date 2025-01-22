@@ -193,6 +193,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			className={`${s.cell_container} ${s.first_row} ${s.more_controls_container} ${
 				p.transaction.pendingDeletion ? s.transaction_pending_deletion : ''
 			}`}
+			key={`${p.transaction.id}-7`}
 		>
 			<OptionsMenu
 				width={150}
@@ -575,3 +576,5 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		</div>
 	)
 })
+
+MultiRow.displayName = 'MultiRow'

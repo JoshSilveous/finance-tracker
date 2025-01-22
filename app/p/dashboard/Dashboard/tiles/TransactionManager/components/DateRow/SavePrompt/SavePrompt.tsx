@@ -31,7 +31,7 @@ export function SavePrompt({ closePopup, afterSave, handleSave }: SavePromptProp
 	return (
 		<div className={s.main}>
 			<p>
-				You'll have to save your changes before creating a new transaction.
+				You&apos;ll have to save your changes before creating a new transaction.
 				<br /> This is temporary, this will soon be updated to support inline
 				transaction creation.
 			</p>

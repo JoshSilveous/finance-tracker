@@ -45,7 +45,7 @@ export default function LoginPage() {
 					<h1>Sign in to your account</h1>
 					<LoginForm />
 					<div className={s.toggle_container}>
-						<span>Don't have an account?</span>{' '}
+						<span>Don&apos;t have an account?</span>{' '}
 						<a onClick={toggleForm}>Create an account</a>
 					</div>
 				</div>
@@ -65,8 +65,8 @@ export default function LoginPage() {
 			<p className={s.anonymous_text}>
 				* Creates an <strong>anonymous</strong> profile in the database, providing
 				access to all features without entering any personal information. This allows
-				you to "demo" the project, and your anonymous profile{' '}
-				<strong>will disappear when your browser's cache is cleared</strong>.
+				you to &quot;demo&quot; the project, and your anonymous profile{' '}
+				<strong>will disappear when your browser&apos;s cache is cleared</strong>.
 			</p>
 		</div>
 	)

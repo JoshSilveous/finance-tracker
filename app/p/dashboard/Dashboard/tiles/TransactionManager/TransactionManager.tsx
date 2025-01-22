@@ -327,8 +327,8 @@ export function TransactionManager({
 			) : sortedData!.length === 0 ? (
 				<div className={s.no_transactions_container}>
 					<div>
-						You do not have any transactions, click "Create new transaction"
-						below to get started!
+						You do not have any transactions, click &quot;Create new
+						transaction&quot; below to get started!
 					</div>
 					<JButton
 						jstyle='primary'

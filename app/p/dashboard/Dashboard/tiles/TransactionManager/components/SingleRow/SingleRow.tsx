@@ -308,7 +308,8 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					className={s.text}
 					style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
 				>
-					"{p.transaction.name.val}" will be deleted when you save changes.
+					&quot;{p.transaction.name.val}&quot; will be deleted when you save
+					changes.
 				</div>
 				<div
 					className={s.button_container}
@@ -332,3 +333,5 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 		</div>
 	)
 })
+
+SingleRow.displayName = 'SingleRow'

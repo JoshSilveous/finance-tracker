@@ -9,6 +9,7 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
+		"@next/eslint-plugin-next": "^15.1.5",
 		"@supabase/ssr": "^0.5.1",
 		"@supabase/supabase-js": "^2.45.2",
 		"@svgr/webpack": "^8.1.0",

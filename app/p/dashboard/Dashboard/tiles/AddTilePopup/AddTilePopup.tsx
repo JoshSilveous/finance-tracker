@@ -72,7 +72,7 @@ export function AddTilePopup({ closePopup, setTileData, data }: AddTilePopupProp
 					onClick={handleNewSimpleValuesTile}
 					ref={firstFocusRef}
 				>
-					New "Simple Values" Tile
+					New &quot;Simple Values&quot; Tile
 				</JButton>
 				<JButton jstyle='secondary' disabled onClick={handleNewSimpleValuesTile}>
 					New Graph Tile (work in progress)

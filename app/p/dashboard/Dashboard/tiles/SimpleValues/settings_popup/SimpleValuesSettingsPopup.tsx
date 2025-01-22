@@ -308,7 +308,9 @@ export function SimpleValuesSettingsPopup({
 
 	return (
 		<div className={s.main}>
-			<h3>{context === 'create' ? 'Create' : 'Edit'} "Simple Values" Tile</h3>
+			<h3>
+				{context === 'create' ? 'Create' : 'Edit'} &quot;Simple Values&quot; Tile
+			</h3>
 			<div className={s.title_container}>
 				<div className={s.title}>
 					<label htmlFor='title'>Title:</label>

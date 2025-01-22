@@ -106,7 +106,7 @@ export function genStages(
 							This is the <strong>Transaction Manager</strong>.
 						</p>
 						<p>
-							Here is where you'll enter your transactions, payments, and
+							Here is where you&apos;ll enter your transactions, payments, and
 							anything that affects your account balances.
 						</p>
 					</div>
@@ -443,7 +443,7 @@ export function genStages(
 							<strong style={{ color: 'var(--font-color-changed)' }}>
 								this color
 							</strong>
-							, indicating that these changes haven't been saved yet.
+							, indicating that these changes haven&apos;t been saved yet.
 						</p>
 						<p>
 							Use these buttons to save those changes to the database, or to
@@ -584,8 +584,8 @@ export function genStages(
 							<p>
 								There are different types of tiles that can be added, such as
 								the <strong>Simple Values</strong> tile shown earlier. You
-								can add as many tiles as you'd like, and customize them each
-								to show whatever information is relevant to you.
+								can add as many tiles as you&apos;d like, and customize them
+								each to show whatever information is relevant to you.
 							</p>
 						</div>
 					),
@@ -767,7 +767,7 @@ export function genStages(
 							textAlign: 'center',
 						}}
 					>
-						<p>That's it!</p>
+						<p>That&apos;s it!</p>
 						<p>
 							Feel free to return to this tutorial in the{' '}
 							<strong>Options</strong> menu if you get lost.
