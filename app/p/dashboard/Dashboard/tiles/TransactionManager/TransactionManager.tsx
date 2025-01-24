@@ -20,7 +20,6 @@ import { sortTransactions, genHeaders } from './func'
 import { DateRow, MultiRowProps, MultiRow, SingleRow, SingleRowProps } from './components'
 import { JButton, JNumberAccounting } from '@/components/JForm'
 import { useTabIndexer, useGridNav } from './hooks'
-import { NewTransactionForm } from './components/DateRow/NewTransactionForm/NewTransactionForm'
 import {
 	Data,
 	SortOrder,
@@ -29,7 +28,6 @@ import {
 	FoldState,
 } from '../../hooks'
 import { TileDefaultSettings } from '../types'
-import { SavePrompt } from './components/DateRow/SavePrompt/SavePrompt'
 
 export const transactionManagerTileDefaults: TileDefaultSettings = {
 	minWidth: 740,
@@ -330,53 +328,7 @@ export function TransactionManager({
 						You do not have any transactions, click &quot;Create new
 						transaction&quot; below to get started!
 					</div>
-					<JButton
-						jstyle='primary'
-						onClick={() => {
-							const createNewTransactionPopup = () => {
-								let refreshRequired = false
-
-								const onClose = () => {
-									if (refreshRequired) {
-										handleSave()
-									}
-								}
-
-								const popup = createPopup({
-									content: (
-										<NewTransactionForm
-											dropdownOptions={dropdownOptions}
-											defaultDate={getCurDateString()}
-											forceClosePopup={() => {
-												popup.close()
-												onClose()
-											}}
-											setRefreshRequired={() =>
-												(refreshRequired = true)
-											}
-										/>
-									),
-									handleClose: onClose,
-								})
-								popup.trigger()
-							}
-							if (changesArePending) {
-								// this is temporary, will be removed once inline transaction adding is ready
-								const popup = createPopup({
-									content: (
-										<SavePrompt
-											closePopup={() => popup.close()}
-											afterSave={() => createNewTransactionPopup()}
-											handleSave={handleSave}
-										/>
-									),
-								})
-								popup.trigger()
-							} else {
-								createNewTransactionPopup()
-							}
-						}}
-					>
+					<JButton jstyle='primary' onClick={() => {}}>
 						Create new transaction
 					</JButton>
 				</div>

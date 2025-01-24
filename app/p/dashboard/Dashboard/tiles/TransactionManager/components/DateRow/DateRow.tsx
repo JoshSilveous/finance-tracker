@@ -2,11 +2,9 @@ import s from './DateRow.module.scss'
 import { formatDate } from '@/utils/formatDate'
 import { JButton } from '@/components/JForm'
 import { createPopup, parseDateString } from '@/utils'
-import { NewTransactionForm } from './NewTransactionForm/NewTransactionForm'
 import { DropdownOptions } from '../../TransactionManager'
 import { TabIndexer } from '../../hooks'
 import { getCurDateString } from '@/utils'
-import { SavePrompt } from './SavePrompt/SavePrompt'
 
 interface DateRowProps {
 	date: string
@@ -30,45 +28,7 @@ export function DateRow({
 }: DateRowProps) {
 	const { day, year, month } = formatDate(date)
 
-	const handleNewTransactionClickWhilePendingSaves = () => {
-		// this is temporary, will be removed once inline transaction adding is ready
-		const popup = createPopup({
-			content: (
-				<SavePrompt
-					closePopup={() => popup.close()}
-					afterSave={() => handleNewTransactionClick()}
-					handleSave={handleSave}
-				/>
-			),
-		})
-		popup.trigger()
-	}
-
-	const handleNewTransactionClick = () => {
-		let refreshRequired = false
-
-		const afterPopupClosed = () => {
-			if (refreshRequired) {
-				refreshData()
-			}
-		}
-
-		const popup = createPopup({
-			content: (
-				<NewTransactionForm
-					defaultDate={date}
-					dropdownOptions={dropdownOptions}
-					forceClosePopup={() => {
-						popup.close()
-						afterPopupClosed()
-					}}
-					setRefreshRequired={() => (refreshRequired = true)}
-				/>
-			),
-			handleClose: afterPopupClosed,
-		})
-		popup.trigger()
-	}
+	const handleNewTransactionClick = () => {}
 
 	const isToday = date === getCurDateString()
 	const isYesterday = date === getCurDateString(-1)
@@ -91,11 +51,7 @@ export function DateRow({
 				<div className={s.new_transaction_container}>
 					<JButton
 						jstyle='secondary'
-						onClick={
-							changesArePending
-								? handleNewTransactionClickWhilePendingSaves
-								: handleNewTransactionClick
-						}
+						onClick={handleNewTransactionClick}
 						tabIndex={tabIndexer()}
 						data-grid_nav_col='TM_account'
 						data-grid_nav_index={gridNavIndex}

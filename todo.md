@@ -1,18 +1,22 @@
 # Unsolved
 
-## Needed before beta
-
--   Add some welcome text
-
-## Can wait
-
 ### High Priority
 
+-   Switch "create new transaction" button to add row to grid
+    -   DateRow section
+    -   Transaction count = 0 section
 -   Make history system work for all types of changes in the dashboard
+    -   Types of changes to track:
+        value changes
+        sort order changes
+        deleted items / transactions
+        created items / transactions
+        tile changes (movement, config, size, generally anything in the TileData structure)
+        tile creations
+        tile deletions
 
 ### Medium Priority
 
--   Switch "create new transaction" button to add row to grid
 -   Clean up JGrid system to support percentages better
 -   Switch preferred column widths to localStorage instead of DB
 
@@ -44,6 +48,7 @@
 
 # Solved
 
+-   Add some welcome text
 -   Add a recruiter welcome page /recruiter-login, with a link to create temp account
 -   History buttons don't seem to be working
 -   Make better discard changes confirm form
