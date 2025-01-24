@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 	title: 'Finance Tracker',
 	description: 'By Joshua Silveous',
 }
-
+//test
 export default function RootLayout({
 	children,
 }: Readonly<{
