@@ -18,10 +18,24 @@
 ### Medium Priority
 
 -   Clean up JGrid system to support percentages better
+    -   CHARISSA: Fix width of the date picker to be full by default
 -   Switch preferred column widths to localStorage instead of DB
+-   CHARISSA: InitialSetup - Fix padding on "welcome" stage, maybe make the module's width/height dynamic based on content
+    -   Either add an "exit" button (with default categories/accounts) OR make this fullscreen so it doesn't "feel" like a popup
+    -   Look at stuff like Monday, Jira, ClickUp for reference ideas
+    -   PROPER ERROR DISPLAY for no categories/accounts filled out, instead of button title
+-   CHARISSA: Some HTML inputs seem to still have default borders (at least on chrome macos)
+    -   JNumberAccounting
+    -   Test others
 
 ### Low Priority
 
+-   CHARISSA: Add hover effects for jstyle='invisible' buttons
+-   CHARISSA: Make empty border thickness consistent between JRadio and JCheckbox
+-   CHARISSA: Add more padding between "stages" and text in tutorial
+    -   https://i.imgur.com/2eIBSkz.png
+-   CHARISSA: Add padding between "Sign in with Temporary Account" and text on login pages
+    -   https://i.imgur.com/KSvgkaZ.png
 -   Switch SortOrder to use arrays for all items [transaction_id, item_id ...]
 -   When saving changes and a transaction's date changes, it should be added at the top of the list for that date. This will require some sortOrder magic and querying when saving.
 -   Add Theme system
