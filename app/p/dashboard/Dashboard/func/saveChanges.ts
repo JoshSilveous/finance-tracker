@@ -212,10 +212,13 @@ export async function saveChanges(
 		await Promise.all(orderPositionPromises)
 
 		//	5. Move creations from both arrays into separate arrays
-		// note: transactions cannot be created this way yet, only by using the "Create New Transaction" form.
+		const createdTransactions = transactions.filter((trn) => trn.pendingCreation)
 		const createdItems = items.filter((item) => item.pendingCreation)
 
 		//	6. Move creations from both arrays into separate
+		createdTransactions.forEach((trn) =>
+			transactions.splice(transactions.indexOf(trn), 1)
+		)
 		createdItems.forEach((item) => items.splice(items.indexOf(item), 1))
 
 		// 	7. Filter out unchanged transactions + items
@@ -233,6 +236,9 @@ export async function saveChanges(
 				item.name.changed ||
 				item.amount.changed
 		)
+
+		console.log('createdItems:', structuredClone(createdItems))
+		console.log('changedItems:', structuredClone(changedItems))
 
 		// 	8. Filter out arrays where transaction has been deleted (database handles cascading automatically)
 		deletedTransactions.forEach((transaction) => {
@@ -278,43 +284,40 @@ export async function saveChanges(
 		const deleteItemsPromise = deleteItems(deletedItems.map((itm) => itm.id))
 
 		const upsertPromise = (() => {
-			const mergedTransactions: UpsertTransactionEntry[] = changedTransactions.map(
-				(trn) => ({
+			const mergedTransactions: UpsertTransactionEntry[] = [
+				...changedTransactions.map((trn) => ({
 					id: trn.id,
 					name: trn.name.val,
 					date: trn.date.val,
 					order_position: trn.order_position,
-				})
-			)
+				})),
+				...createdTransactions.map((trn) => ({
+					id: trn.id,
+					name: trn.name.val,
+					date: trn.date.val,
+					order_position: trn.order_position,
+				})),
+			]
 
 			const mergedItems: UpsertItemEntry[] = [
-				...changedItems.map((itm) => {
-					const thisItem = {
-						id: itm.id,
-						account_id: itm.account_id.val,
-						category_id: itm.category_id.val,
-						name: itm.name.val,
-						amount: itm.amount.val,
-						transaction_id: itm.parentTransaction.id,
-					} as UpsertItemEntry
-					if (itm.order_position !== undefined) {
-						thisItem.order_position = itm.order_position
-					}
-					return thisItem
-				}),
-				...createdItems.map((itm) => {
-					const thisItem = {
-						account_id: itm.account_id.val,
-						category_id: itm.category_id.val,
-						name: itm.name.val,
-						amount: itm.amount.val,
-						transaction_id: itm.parentTransaction.id,
-					} as UpsertItemEntry
-					if (itm.order_position !== undefined) {
-						thisItem.order_position = itm.order_position
-					}
-					return thisItem
-				}),
+				...changedItems.map((itm) => ({
+					id: itm.id,
+					account_id: itm.account_id.val,
+					category_id: itm.category_id.val,
+					name: itm.name.val,
+					amount: itm.amount.val,
+					transaction_id: itm.parentTransaction.id,
+					order_position: itm.order_position,
+				})),
+				...createdItems.map((itm) => ({
+					id: itm.id,
+					account_id: itm.account_id.val,
+					category_id: itm.category_id.val,
+					name: itm.name.val,
+					amount: itm.amount.val,
+					transaction_id: itm.parentTransaction.id,
+					order_position: itm.order_position,
+				})),
 			]
 
 			return upsertTransactionsAndItems(mergedTransactions, mergedItems)

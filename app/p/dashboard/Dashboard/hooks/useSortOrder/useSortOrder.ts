@@ -452,6 +452,19 @@ export function useSortOrder({
 			return clone
 		})
 	}
+	const addNewTransaction = (sortItem: SortOrder.Item, date: string) => {
+		// right now, this function will only add transactions at the top of the date's sortOrder
+		if (!Array.isArray(sortItem)) {
+			throw new Error(
+				'Provided sortItem is not an array! Putting this measure in place since soon, all SortItems will be in array format.'
+			)
+		}
+		setCurSortOrder((prev) => {
+			const clone = structuredClone(prev)
+			clone[date].unshift(sortItem)
+			return clone
+		})
+	}
 
 	// const addNewTransaction = (
 	// 	transaction_id: string,
@@ -481,6 +494,7 @@ export function useSortOrder({
 		addNewItem,
 		removeNewItem,
 		discardChanges,
+		addNewTransaction,
 	} as SortOrder.Controller
 }
 
@@ -570,6 +584,7 @@ export namespace SortOrder {
 		) => void
 		removeNewItem: (transaction_id: string, date: string, item_id: string) => void
 		discardChanges: () => void
+		addNewTransaction: (sortItem: SortOrder.Item, date: string) => void
 	}
 
 	/**

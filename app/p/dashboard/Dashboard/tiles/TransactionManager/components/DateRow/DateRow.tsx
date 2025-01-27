@@ -1,34 +1,27 @@
 import s from './DateRow.module.scss'
 import { formatDate } from '@/utils/formatDate'
 import { JButton } from '@/components/JForm'
-import { createPopup, parseDateString } from '@/utils'
-import { DropdownOptions } from '../../TransactionManager'
 import { TabIndexer } from '../../hooks'
 import { getCurDateString } from '@/utils'
+import { Data } from '../../../../hooks'
 
 interface DateRowProps {
+	data: Data.Controller
 	date: string
-	dropdownOptions: DropdownOptions
-	refreshData: () => void
 	gridRow: number
 	tabIndexer: TabIndexer
 	gridNavIndex: number
-	changesArePending: boolean
-	handleSave: () => Promise<void>
 }
-export function DateRow({
-	date,
-	dropdownOptions,
-	refreshData,
-	gridRow,
-	tabIndexer,
-	gridNavIndex,
-	changesArePending,
-	handleSave,
-}: DateRowProps) {
+export function DateRow({ data, date, gridRow, tabIndexer, gridNavIndex }: DateRowProps) {
 	const { day, year, month } = formatDate(date)
 
-	const handleNewTransactionClick = () => {}
+	const handleNewTransactionClick = () => {
+		data.stageCreate('transaction', {
+			name: '',
+			date: date,
+			items: [{ name: '', amount: '', account_id: '', category_id: '' }],
+		})
+	}
 
 	const isToday = date === getCurDateString()
 	const isYesterday = date === getCurDateString(-1)

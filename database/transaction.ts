@@ -127,13 +127,13 @@ export async function insertTransactionAndItems(transaction: InsertTransactionEn
 }
 
 export interface UpsertTransactionEntry {
-	id?: string
+	id: string
 	name: string
 	date: string
 	order_position?: number
 }
 export interface UpsertItemEntry {
-	id?: string
+	id: string
 	name: string | null
 	amount: string
 	category_id: string | null
@@ -147,37 +147,64 @@ export async function upsertTransactionsAndItems(
 ) {
 	const user_id = await getUserID()
 
-	const transactionUpdatesWithUserID = transactions.map((transaction) => {
+	const transactionUpdatesFormatted = transactions.map((trn) => {
 		return {
-			...transaction,
-			user_id: user_id,
-		}
-	})
-	const itemUpdatesWithUserID = items.map((item) => {
-		return {
-			...item,
-			amount: Number(item.amount),
-			category_id: item.category_id ? item.category_id : null,
-			account_id: item.account_id ? item.account_id : null,
+			...trn,
+			id: trn.id.split('||')[0] === 'PENDING_CREATION' ? undefined : trn.id,
 			user_id: user_id,
 		}
 	})
 
-	const { error: transactionError } = await supabase
+	const newIDMap: { [pendingId: string]: string } = {}
+
+	const { data, error: transactionError } = (await supabase
 		.from('transactions')
-		.upsert(transactionUpdatesWithUserID, {
+		.upsert(transactionUpdatesFormatted, {
 			defaultToNull: false,
 			onConflict: 'id',
 			ignoreDuplicates: false,
 		})
+		.select('id')) as { data: { id: string }[]; error: PostgrestError | null }
+	console.log('transactions', transactions, '\ndata', data)
 	if (transactionError) {
 		console.error(transactionError)
 		throw new Error(transactionError.message)
 	}
 
+	transactions.forEach((trn, index) => {
+		if (trn.id.split('||')[0] === 'PENDING_CREATION') {
+			newIDMap[trn.id] = data[index].id
+		}
+	})
+
+	const itemUpdatesFormatted = items.map((item) => {
+		return {
+			...item,
+			id: item.id.split('||')[0] === 'PENDING_CREATION' ? undefined : item.id,
+			amount: Number(item.amount),
+			transaction_id:
+				item.transaction_id.split('||')[0] === 'PENDING_CREATION'
+					? newIDMap[item.transaction_id]
+					: item.transaction_id,
+			category_id: item.category_id ? item.category_id : null,
+			account_id: item.account_id ? item.account_id : null,
+			user_id: user_id,
+		}
+	})
+	console.log(
+		'\ntransactions',
+		transactions,
+		'\ntransactionUpdatesFormatted',
+		transactionUpdatesFormatted,
+		'\nitemUpdatesFormatted',
+		itemUpdatesFormatted,
+		'\nitems',
+		items
+	)
+
 	const { error: itemError } = await supabase
 		.from('transaction_items')
-		.upsert(itemUpdatesWithUserID, {
+		.upsert(itemUpdatesFormatted, {
 			defaultToNull: false,
 			onConflict: 'id',
 			ignoreDuplicates: false,

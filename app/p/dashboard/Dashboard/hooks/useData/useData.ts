@@ -281,33 +281,42 @@ export function useData(p: UseDataOptions) {
 
 	const stageCreate: Data.Create = (type, ...args) => {
 		if (type === 'transaction') {
-			// NOT READY FOR INLINE TRANSACTION CREATION YET - will come in future update
-			// const [transaction] = args as Data.CreateTransactionArgs
-			// if (transaction.items.length === 0) {
-			// 	throw new Error('New transaction must have at least one item provided.')
-			// }
-			// setData((prev) => {
-			// 	const clone = structuredClone(prev)
-			// 	const newTransaction: Data.StateTransaction = {
-			// 		id: 'PENDING_CREATION||' + crypto.randomUUID(),
-			// 		name: { val: transaction.name, changed: true },
-			// 		date: { val: transaction.date, changed: true },
-			// 		items: transaction.items.map((item) => ({
-			// 			id: 'PENDING_CREATION||' + crypto.randomUUID(),
-			// 			name: { val: item.name, changed: true },
-			// 			amount: { val: item.amount, changed: true },
-			// 			category_id: { val: item.category_id, changed: true },
-			// 			account_id: { val: item.account_id, changed: true },
-			// 			pendingCreation: true,
-			// 			pendingDeletion: false,
-			// 		})),
-			// 		pendingCreation: true,
-			// 		pendingDeletion: false,
-			// 	}
-			// 	clone.transactions.push(newTransaction)
-			// 	return clone
-			// })
-			// p.getHistoryController().clearRedo()
+			const [transaction] = args as Data.CreateTransactionArgs
+			if (transaction.items.length === 0) {
+				throw new Error('New transaction must have at least one item provided.')
+			}
+
+			const newTransactionID = 'PENDING_CREATION||' + crypto.randomUUID()
+			const newItemIDs = transaction.items.map(
+				(_i) => 'PENDING_CREATION||' + crypto.randomUUID()
+			)
+
+			setData((prev) => {
+				const clone = structuredClone(prev)
+				const newTransaction: Data.StateTransaction = {
+					id: newTransactionID,
+					name: { val: transaction.name, changed: true },
+					date: { val: transaction.date, changed: true, orig: transaction.date },
+					items: transaction.items.map((item, itemIndex) => ({
+						id: newItemIDs[itemIndex],
+						name: { val: item.name, changed: true },
+						amount: { val: item.amount, changed: true },
+						category_id: { val: item.category_id, changed: true },
+						account_id: { val: item.account_id, changed: true },
+						pendingCreation: true,
+						pendingDeletion: false,
+					})),
+					pendingCreation: true,
+					pendingDeletion: false,
+				}
+				clone.transactions.push(newTransaction)
+				return clone
+			})
+			p.getHistoryController().clearRedo()
+			p.getSortOrderController().addNewTransaction(
+				[newTransactionID, ...newItemIDs],
+				transaction.date
+			)
 		} else if (type === 'item') {
 			const [transaction_id, itemInsertIndex, date, item] = args as Data.CreateItemArgs
 			const newItemID = 'PENDING_CREATION||' + crypto.randomUUID()

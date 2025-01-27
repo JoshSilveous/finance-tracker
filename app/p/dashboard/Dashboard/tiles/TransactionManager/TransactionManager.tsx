@@ -182,15 +182,12 @@ export function TransactionManager({
 				if (inputDate < getCurDate()) {
 					cells.push(
 						<DateRow
+							data={data}
 							date={getCurDateString()}
-							dropdownOptions={dropdownOptions}
-							refreshData={data.reload}
 							gridRow={gridRow}
 							key={`${groupedItem.date}-TODAY`}
 							tabIndexer={tabIndexer}
 							gridNavIndex={gridNavIndex}
-							changesArePending={changesArePending}
-							handleSave={handleSave}
 						/>
 					)
 					gridRow++
@@ -199,15 +196,12 @@ export function TransactionManager({
 			}
 			cells.push(
 				<DateRow
+					data={data}
 					date={groupedItem.date}
-					dropdownOptions={dropdownOptions}
-					refreshData={data.reload}
 					gridRow={gridRow}
 					key={`${groupedItem.date}-${groupedItemIndex}`}
 					tabIndexer={tabIndexer}
 					gridNavIndex={gridNavIndex}
-					changesArePending={changesArePending}
-					handleSave={handleSave}
 				/>
 			)
 			gridRow++
