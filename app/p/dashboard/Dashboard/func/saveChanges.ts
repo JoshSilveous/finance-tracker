@@ -156,12 +156,13 @@ export async function saveChanges(
 						: sortItem === transaction.id
 				)
 
-				const defOrderPosition = defSortOrder[transaction.date.val].findIndex(
-					(sortItem) =>
-						Array.isArray(sortItem)
-							? sortItem[0] === transaction.id
-							: sortItem === transaction.id
-				)
+				const defOrderPosition = defSortOrder[transaction.date.val]
+					? defSortOrder[transaction.date.val].findIndex((sortItem) =>
+							Array.isArray(sortItem)
+								? sortItem[0] === transaction.id
+								: sortItem === transaction.id
+					  )
+					: null
 
 				if (curOrderPosition !== defOrderPosition) {
 					transaction.order_position = curOrderPosition
@@ -183,7 +184,7 @@ export async function saveChanges(
 				)
 			}
 		})
-		items.forEach((item) => {
+		items.forEach((item, index) => {
 			const curTransactionSort = sortOrder.cur[item.parentTransaction.date.orig].find(
 				(sortItem) =>
 					Array.isArray(sortItem)
@@ -194,15 +195,19 @@ export async function saveChanges(
 				? curTransactionSort.indexOf(item.id)
 				: 1
 
-			const defTransactionSort = defSortOrder[item.parentTransaction.date.orig].find(
-				(sortItem) =>
-					Array.isArray(sortItem)
-						? sortItem[0] === item.parentTransaction.id
-						: sortItem === item.parentTransaction.id
-			)
-			const defOrderPosition = Array.isArray(defTransactionSort)
-				? defTransactionSort.indexOf(item.id)
-				: 1
+			const defTransactionSort = defSortOrder[item.parentTransaction.date.orig]
+				? defSortOrder[item.parentTransaction.date.orig].find((sortItem) =>
+						Array.isArray(sortItem)
+							? sortItem[0] === item.parentTransaction.id
+							: sortItem === item.parentTransaction.id
+				  )
+				: null
+			const defOrderPosition =
+				defTransactionSort !== null
+					? Array.isArray(defTransactionSort)
+						? defTransactionSort.indexOf(item.id)
+						: 1
+					: null
 
 			if (curOrderPosition !== defOrderPosition) {
 				item.order_position = curOrderPosition + 1

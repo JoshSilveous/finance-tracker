@@ -461,7 +461,11 @@ export function useSortOrder({
 		}
 		setCurSortOrder((prev) => {
 			const clone = structuredClone(prev)
-			clone[date].unshift(sortItem)
+			if (clone[date] !== undefined) {
+				clone[date].unshift(sortItem)
+			} else {
+				clone[date] = [sortItem]
+			}
 			return clone
 		})
 	}
