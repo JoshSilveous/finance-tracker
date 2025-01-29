@@ -62,6 +62,7 @@ export function Dashboard() {
 		blockOnMobile()
 	}, [])
 	useEffect(() => {
+		// only for dev, only happens on hot reload
 		if (!data.isPendingSave) {
 			refreshAllData().then(() => {
 				setIsLoading(false)
