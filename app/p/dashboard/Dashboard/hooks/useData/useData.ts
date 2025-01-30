@@ -3,13 +3,14 @@ import { fetchAccountData, fetchCategoryData, fetchTransactionData } from '@/dat
 import { areDeeplyEqual, getCurDateString } from '@/utils'
 import { SortOrder } from '../useSortOrder'
 import { HistoryController } from '../useHistory'
+import { DashboardController } from '../useDashboardState'
 
 export type UseDataOptions = {
 	onReload?: (newData: Data.State) => void
 	getSortOrderController: () => SortOrder.Controller
 	getHistoryController: () => HistoryController
 }
-export function useData(p: UseDataOptions) {
+export function useData(getDashboardController: () => DashboardController) {
 	const [data, setData] = useState<Data.State>({
 		transactions: [],
 		categories: [],
@@ -142,11 +143,11 @@ export function useData(p: UseDataOptions) {
 				return clone
 			})
 			if (!skipHistoryItem && transaction_id.split('||')[0] !== 'PENDING_CREATION') {
-				p.getHistoryController().add({
+				getDashboardController().history.add({
 					type: 'transaction_deletion',
 					transaction_id,
 				})
-				p.getHistoryController().clearRedo()
+				getDashboardController().history.clearRedo()
 			}
 		} else if (type === 'item') {
 			const [item_id, transaction_id, skipHistoryItem] = args as Data.DeleteItemArgs
@@ -193,15 +194,19 @@ export function useData(p: UseDataOptions) {
 				dataRef.current.transactions[transactionIndex].items[itemIndex]
 					.pendingCreation === true
 			) {
-				p.getSortOrderController().removeNewItem(transaction_id, date, item_id)
+				getDashboardController().sortOrder.removeNewItem(
+					transaction_id,
+					date,
+					item_id
+				)
 			}
 			if (!skipHistoryItem && item_id.split('||')[0] !== 'PENDING_CREATION') {
-				p.getHistoryController().add({
+				getDashboardController().history.add({
 					type: 'item_deletion',
 					transaction_id,
 					item_id,
 				})
-				p.getHistoryController().clearRedo()
+				getDashboardController().history.clearRedo()
 			}
 		}
 	}
@@ -230,11 +235,11 @@ export function useData(p: UseDataOptions) {
 				return clone
 			})
 			if (!skipHistoryItem && transaction_id.split('||')[0] !== 'PENDING_CREATION') {
-				p.getHistoryController().add({
+				getDashboardController().history.add({
 					type: 'transaction_deletion_reversed',
 					transaction_id,
 				})
-				p.getHistoryController().clearRedo()
+				getDashboardController().history.clearRedo()
 			}
 		} else if (type === 'item') {
 			const [item_id, transaction_id, skipHistoryItem] = args as Data.DeleteItemArgs
@@ -269,12 +274,12 @@ export function useData(p: UseDataOptions) {
 				return clone
 			})
 			if (!skipHistoryItem && item_id.split('||')[0] !== 'PENDING_CREATION') {
-				p.getHistoryController().add({
+				getDashboardController().history.add({
 					type: 'item_deletion_reversed',
 					transaction_id,
 					item_id,
 				})
-				p.getHistoryController().clearRedo()
+				getDashboardController().history.clearRedo()
 			}
 		}
 	}
@@ -312,8 +317,8 @@ export function useData(p: UseDataOptions) {
 				clone.transactions.push(newTransaction)
 				return clone
 			})
-			p.getHistoryController().clearRedo()
-			p.getSortOrderController().addNewTransaction(
+			getDashboardController().history.clearRedo()
+			getDashboardController().sortOrder.addNewTransaction(
 				[newTransactionID, ...newItemIDs],
 				transaction.date
 			)
@@ -366,19 +371,19 @@ export function useData(p: UseDataOptions) {
 
 				return clone
 			})
-			p.getSortOrderController().addNewItem(
+			getDashboardController().sortOrder.addNewItem(
 				transaction_id,
 				date,
 				newItemID,
 				itemInsertIndex,
 				firstItemID
 			)
-			p.getHistoryController().add({
+			getDashboardController().history.add({
 				type: 'item_deletion_reversed',
 				transaction_id,
 				item_id: newItemID,
 			})
-			p.getHistoryController().clearRedo()
+			getDashboardController().history.clearRedo()
 		}
 	}
 
@@ -429,9 +434,9 @@ export function useData(p: UseDataOptions) {
 		setData(newData)
 		origDataRef.current = structuredClone(newData)
 		setIsLoading(false)
-		if (p && p.onReload) {
-			p.onReload(newData)
-		}
+
+		getDashboardController().foldState.genDefault(newData.transactions)
+		getDashboardController().sortOrder.genDefaultSortOrder(newData.transactions)
 	}
 
 	const unstageCreate: Data.Create = (type, ...args) => {

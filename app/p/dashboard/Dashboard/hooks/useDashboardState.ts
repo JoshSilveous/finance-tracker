@@ -1,92 +1,88 @@
 import { MutableRefObject, useRef, useState } from 'react'
 import { TileData } from '../tiles'
-import { useFoldState } from './useFoldState'
-import { useHistory } from './useHistory'
-import { useSortOrder } from './useSortOrder'
-import { useData } from '.'
-import { TransactionManagerRowsRef } from '../Dashboard'
+import { FoldStateController, useFoldState } from './useFoldState'
+import { HistoryController, useHistory } from './useHistory'
+import { SortOrder, useSortOrder } from './useSortOrder'
+import { Data, TileController, useData, useTiles } from '.'
+import { saveChanges } from '../func/saveChanges'
+import { areDeeplyEqual } from '@/utils'
 
-export function useDashboardState(
-	transactionManagerRowsRef: MutableRefObject<TransactionManagerRowsRef>
-) {
+export function useDashboardState() {
 	const [isLoading, setIsLoading] = useState(true)
 
-	const [tileData, setTileData] = useState<TileData[]>([])
-	const origTileDataRef = useRef<TileData[]>([])
-	const curTileDataRef = useRef<TileData[]>([])
-
-	const dataController = useData({
-		onReload: (newData) => {
-			// re-generate sort order & foldState
-			foldStateController.genDefault(newData.transactions)
-			sortOrderController.genDefaultSortOrder(newData.transactions)
-		},
-		getSortOrderController: () => sortOrderController,
-		getHistoryController: () => historyController,
-	})
-
-	const foldStateController = useFoldState()
-
-	const sortOrderController = useSortOrder({
-		// move reorder logic from sortOrder to individual items
-		getFoldState: foldStateController.get,
-		updateFoldState: foldStateController.update,
-		afterTransactionPositionChange: (date, oldIndex, newIndex) => {
-			historyController.add({
-				type: 'transaction_position_change',
-				date: date,
-				oldIndex: oldIndex,
-				newIndex: newIndex,
-			})
-		},
-		afterItemPositionChange: (transaction, oldItemIndex, newItemIndex) => {
-			historyController.add({
-				type: 'item_position_change',
-				transaction_id: transaction.id,
-				date: transaction.date.val,
-				oldIndex: oldItemIndex,
-				newIndex: newItemIndex,
-			})
-		},
-		transactionManagerRowsRef,
-	})
-
-	const reload = async () => {
+	const reloadAll = async () => {
 		setIsLoading(true)
-		// fetch data
+		await Promise.all([dataController.reload(), tileController.data.reload()])
+		setIsLoading(false)
 	}
 
-	const save = async () => {}
+	const save = async () => {
+		setIsLoading(true)
+		await saveChanges(dashboardController)
+		setIsLoading(false)
+	}
 
-	const historyController = useHistory({
-		data: dataController,
-		sortOrder: sortOrderController,
-	})
+	const discard = () => {
+		dataController.clearChanges()
+		tileController.data.clearChanges()
+		sortOrderController.discardChanges()
+	}
 
-	// update history when event is fired, not in state functions.
-
-	const testtest = Object.defineProperties(
-		{},
-		{
-			test1: {
-				value: 123,
-				writable: false,
-				enumerable: true,
-			},
-		}
-	)
-
-	const dashboardController = {
-		data: dataController,
-		sortOrder: sortOrderController,
-		foldState: foldStateController,
-		history: historyController,
-		tiles: {
-			cur: tileData,
-			get curRef() {
-				return curTileDataRef.current
-			},
+	const dashboardController: DashboardController = {
+		get data() {
+			return dataController
 		},
+		get sortOrder() {
+			return sortOrderController
+		},
+		get foldState() {
+			return foldStateController
+		},
+		get history() {
+			return historyController
+		},
+		get tiles() {
+			return tileController
+		},
+		reloadAll,
+		save,
+		discard,
+		get changesArePending() {
+			if (dataController.isPendingSave) {
+				// covers actual data changes
+				return true
+			}
+			if (!areDeeplyEqual(sortOrderController.cur, sortOrderController.def)) {
+				// covers sort order
+				return true
+			}
+			// check differences in tiles
+			if (tileController.changed) {
+				return true
+			}
+			return false
+		},
+		loading: isLoading,
 	}
-	dashboardController.tiles.curRef
+
+	const dataController = useData(() => dashboardController)
+	const foldStateController = useFoldState()
+	const sortOrderController = useSortOrder(() => dashboardController)
+	const historyController = useHistory(() => dashboardController)
+	const tileController = useTiles(() => dashboardController)
+
+	return dashboardController
+}
+
+export type DashboardController = {
+	data: Data.Controller
+	sortOrder: SortOrder.Controller
+	foldState: FoldStateController
+	history: HistoryController
+	tiles: TileController
+	reloadAll: () => Promise<void>
+	save: () => Promise<void>
+	discard: () => void
+	changesArePending: boolean
+	loading: boolean
 }

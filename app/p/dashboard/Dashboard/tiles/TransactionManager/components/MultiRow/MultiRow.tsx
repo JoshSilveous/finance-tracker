@@ -124,7 +124,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				<JButton
 					jstyle='invisible'
 					disabled={p.disableTransactionResort}
-					ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
+					// ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
 					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_left_controls'
 					data-grid_nav_index={p.gridNavIndex}
@@ -297,11 +297,11 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 				>
 					<JButton
 						jstyle='invisible'
-						ref={p.sortOrder.addToItemReorderRefs(
-							p.transaction,
-							item,
-							itemRowsRef
-						)}
+						// ref={p.sortOrder.addToItemReorderRefs(
+						// 	p.transaction,
+						// 	item,
+						// 	itemRowsRef
+						// )}
 						tabIndex={
 							p.transaction.pendingDeletion || item.pendingDeletion
 								? -1

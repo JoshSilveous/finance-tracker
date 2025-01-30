@@ -8,14 +8,9 @@ import {
 	useCallback,
 } from 'react'
 import { areDeeplyEqual, moveItemInArray } from '@/utils'
-import { Data, SortOrder } from '.'
+import { DashboardController, Data, SortOrder } from '.'
 
-export interface UseHistoryProps {
-	data: Data.Controller
-	sortOrder: SortOrder.Controller
-}
-
-export function useHistory({ data, sortOrder }: UseHistoryProps) {
+export function useHistory(getDashboardController: () => DashboardController) {
 	const historyStackRef = useRef<HistoryState>({ undoStack: [], redoStack: [] })
 
 	const undo = useCallback(() => {
@@ -24,7 +19,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 			if (historyItem !== undefined) {
 				switch (historyItem.type) {
 					case 'transaction_position_change': {
-						sortOrder.setCurrent((prev) => {
+						getDashboardController().sortOrder.setCurrent((prev) => {
 							const clone = structuredClone(prev)
 							moveItemInArray(
 								clone[historyItem.date],
@@ -36,7 +31,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'item_position_change': {
-						sortOrder.setCurrent((prev) => {
+						getDashboardController().sortOrder.setCurrent((prev) => {
 							const clone = structuredClone(prev)
 							const thisSortIndex = clone[historyItem.date].findIndex(
 								(sortItem) => {
@@ -63,7 +58,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						const query = `[data-transaction_id="${historyItem.transaction_id}"][data-key="${historyItem.key}"]:not([data-item_id])`
 						const node = document.querySelector(query) as HTMLInputElement
 
-						data.update(
+						getDashboardController().data.update(
 							'transaction',
 							historyItem.transaction_id,
 							historyItem.key,
@@ -79,7 +74,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						const query = `[data-transaction_id="${historyItem.transaction_id}"][data-key="${historyItem.key}"][data-item_id="${historyItem.item_id}"]`
 						const node = document.querySelector(query) as HTMLInputElement
 
-						data.update(
+						getDashboardController().data.update(
 							'item',
 							historyItem.item_id,
 							historyItem.transaction_id,
@@ -93,7 +88,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'item_deletion': {
-						data.unstageDelete(
+						getDashboardController().data.unstageDelete(
 							'item',
 							historyItem.item_id,
 							historyItem.transaction_id,
@@ -102,11 +97,15 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'transaction_deletion': {
-						data.unstageDelete('transaction', historyItem.transaction_id, true)
+						getDashboardController().data.unstageDelete(
+							'transaction',
+							historyItem.transaction_id,
+							true
+						)
 						break
 					}
 					case 'item_deletion_reversed': {
-						data.stageDelete(
+						getDashboardController().data.stageDelete(
 							'item',
 							historyItem.item_id,
 							historyItem.transaction_id,
@@ -115,11 +114,15 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'transaction_deletion_reversed': {
-						data.stageDelete('transaction', historyItem.transaction_id, true)
+						getDashboardController().data.stageDelete(
+							'transaction',
+							historyItem.transaction_id,
+							true
+						)
 						break
 					}
 					case 'item_creation': {
-						data.stageDelete(
+						getDashboardController().data.stageDelete(
 							'item',
 							historyItem.item_id,
 							historyItem.transaction_id,
@@ -138,7 +141,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 			if (historyItem !== undefined) {
 				switch (historyItem.type) {
 					case 'transaction_position_change': {
-						sortOrder.setCurrent((prev) => {
+						getDashboardController().sortOrder.setCurrent((prev) => {
 							const clone = structuredClone(prev)
 							moveItemInArray(
 								clone[historyItem.date],
@@ -150,7 +153,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'item_position_change': {
-						sortOrder.setCurrent((prev) => {
+						getDashboardController().sortOrder.setCurrent((prev) => {
 							const clone = structuredClone(prev)
 							const thisSortIndex = clone[historyItem.date].findIndex(
 								(sortItem) => {
@@ -176,7 +179,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						const query = `[data-transaction_id="${historyItem.transaction_id}"][data-key="${historyItem.key}"]:not([data-item_id])`
 						const node = document.querySelector(query) as HTMLInputElement
 
-						data.update(
+						getDashboardController().data.update(
 							'transaction',
 							historyItem.transaction_id,
 							historyItem.key,
@@ -191,7 +194,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						const query = `[data-transaction_id="${historyItem.transaction_id}"][data-key="${historyItem.key}"][data-item_id="${historyItem.item_id}"]`
 						const node = document.querySelector(query) as HTMLInputElement
 
-						data.update(
+						getDashboardController().data.update(
 							'item',
 							historyItem.item_id,
 							historyItem.transaction_id,
@@ -205,7 +208,7 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'item_deletion': {
-						data.stageDelete(
+						getDashboardController().data.stageDelete(
 							'item',
 							historyItem.item_id,
 							historyItem.transaction_id,
@@ -214,12 +217,16 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						break
 					}
 					case 'transaction_deletion': {
-						data.stageDelete('transaction', historyItem.transaction_id, true)
+						getDashboardController().data.stageDelete(
+							'transaction',
+							historyItem.transaction_id,
+							true
+						)
 						break
 					}
 					case 'item_deletion_reversed':
 						{
-							data.unstageDelete(
+							getDashboardController().data.unstageDelete(
 								'item',
 								historyItem.item_id,
 								historyItem.transaction_id,
@@ -228,7 +235,11 @@ export function useHistory({ data, sortOrder }: UseHistoryProps) {
 						}
 						break
 					case 'transaction_deletion_reversed': {
-						data.unstageDelete('transaction', historyItem.transaction_id, true)
+						getDashboardController().data.unstageDelete(
+							'transaction',
+							historyItem.transaction_id,
+							true
+						)
 						break
 					}
 				}

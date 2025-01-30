@@ -8,25 +8,22 @@ import {
 	UpsertTransactionEntry,
 	upsertTransactionsAndItems,
 } from '@/database'
-import { Data, SortOrder } from '../hooks'
+import { DashboardController, Data, SortOrder } from '../hooks'
 import { TileData } from '../tiles'
 import { MutableRefObject, SetStateAction } from 'react'
 import { areDeeplyEqual } from '@/utils'
 
-export async function saveChanges(
-	data: Data.Controller,
-	tileData: TileData[],
-	origTileDataRef: MutableRefObject<TileData[]>,
-	sortOrder: SortOrder.Controller,
-	refreshAllData: () => Promise<void>,
-	setIsLoading: (value: SetStateAction<boolean>) => void
-) {
-	setIsLoading(true)
-	if (data.isPendingSave || !areDeeplyEqual(sortOrder.cur, sortOrder.def)) {
+export async function saveChanges(dashboardController: DashboardController) {
+	if (
+		dashboardController.data.isPendingSave ||
+		!areDeeplyEqual(dashboardController.sortOrder.cur, dashboardController.sortOrder.def)
+	) {
 		//	1. Filter transactions and items into separate arrays
 		const transactions = (() => {
 			return structuredClone(
-				data.cur.transactions.map(({ items, ...rest }) => ({ ...rest }))
+				dashboardController.data.cur.transactions.map(({ items, ...rest }) => ({
+					...rest,
+				}))
 			) as {
 				order_position?: number
 				id: string
@@ -68,7 +65,7 @@ export async function saveChanges(
 				order_position?: number
 			}[] = []
 
-			data.cur.transactions.forEach((transaction) => {
+			dashboardController.data.cur.transactions.forEach((transaction) => {
 				transaction.items.forEach((item) => {
 					remainingItems.push({ ...item, parentTransaction: transaction })
 				})
@@ -88,7 +85,9 @@ export async function saveChanges(
 
 		//	4. Apply order_position changes for transactions + items where needed
 		const curSortOrderAfterChanges = (() => {
-			const curSortOrderAfterChanges = structuredClone(sortOrder.cur)
+			const curSortOrderAfterChanges = structuredClone(
+				dashboardController.sortOrder.cur
+			)
 			transactions.forEach((transaction) => {
 				if (transaction.date.changed === true) {
 					// remove transaction from current sort order
@@ -138,7 +137,7 @@ export async function saveChanges(
 			curSortOrderAfterChanges[key].reverse()
 		})
 		const defSortOrder = (() => {
-			const clone = structuredClone(sortOrder.def)
+			const clone = structuredClone(dashboardController.sortOrder.def)
 			Object.keys(clone).forEach((key) => clone[key].reverse())
 			return clone
 		})()
@@ -146,7 +145,7 @@ export async function saveChanges(
 		// apply order_position changes for transactions + items where needed
 		const orderPositionPromises: Promise<any>[] = []
 		transactions.forEach((transaction) => {
-			if (sortOrder.cur[transaction.date.val] !== undefined) {
+			if (dashboardController.sortOrder.cur[transaction.date.val] !== undefined) {
 				// sort order entry already exists for this date
 				const curOrderPosition = curSortOrderAfterChanges[
 					transaction.date.val
@@ -185,11 +184,12 @@ export async function saveChanges(
 			}
 		})
 		items.forEach((item, index) => {
-			const curTransactionSort = sortOrder.cur[item.parentTransaction.date.orig].find(
-				(sortItem) =>
-					Array.isArray(sortItem)
-						? sortItem[0] === item.parentTransaction.id
-						: sortItem === item.parentTransaction.id
+			const curTransactionSort = dashboardController.sortOrder.cur[
+				item.parentTransaction.date.orig
+			].find((sortItem) =>
+				Array.isArray(sortItem)
+					? sortItem[0] === item.parentTransaction.id
+					: sortItem === item.parentTransaction.id
 			)
 			const curOrderPosition = Array.isArray(curTransactionSort)
 				? curTransactionSort.indexOf(item.id)
@@ -333,11 +333,16 @@ export async function saveChanges(
 	}
 
 	// check for tile changes
-	if (!areDeeplyEqual(tileData, origTileDataRef.current)) {
+	if (
+		!areDeeplyEqual(
+			dashboardController.tiles.data.cur,
+			dashboardController.tiles.data.origRef
+		)
+	) {
 		// check for changed / new tiles
 		const changedTiles: TileData[] = []
-		tileData.forEach((tile) => {
-			const origTile = origTileDataRef.current.find(
+		dashboardController.tiles.data.cur.forEach((tile) => {
+			const origTile = dashboardController.tiles.data.origRef.find(
 				(origTile) => origTile.id === tile.id
 			)
 			if (origTile === undefined || !areDeeplyEqual(origTile, tile)) {
@@ -347,8 +352,10 @@ export async function saveChanges(
 
 		// check for deleted tiles
 		const deletedTiles: TileData[] = []
-		origTileDataRef.current.forEach((tile) => {
-			const curTileIndex = tileData.findIndex((curTile) => curTile.id === tile.id)
+		dashboardController.tiles.data.origRef.forEach((tile) => {
+			const curTileIndex = dashboardController.tiles.data.cur.findIndex(
+				(curTile) => curTile.id === tile.id
+			)
 			if (curTileIndex === -1) {
 				deletedTiles.push(tile)
 			}
@@ -360,7 +367,6 @@ export async function saveChanges(
 			deleteTiles(deletedTiles.map((it) => it.id)),
 		])
 	}
-	await refreshAllData()
-	setIsLoading(false)
+	await dashboardController.reloadAll()
 	return
 }

@@ -41,9 +41,6 @@ export interface TransactionManagerProps {
 	sortOrder: SortOrder.Controller
 	foldState: FoldStateController
 	historyController: HistoryController
-	setTransactionManagerRowRef: (transaction_id: string) => (node: HTMLInputElement) => void
-	changesArePending: boolean
-	handleSave: () => Promise<void>
 }
 
 export function TransactionManager({
@@ -51,9 +48,6 @@ export function TransactionManager({
 	sortOrder,
 	foldState,
 	historyController,
-	setTransactionManagerRowRef,
-	changesArePending,
-	handleSave,
 }: TransactionManagerProps) {
 	const mainContainerRef = useRef<HTMLDivElement>(null)
 	const prevFoldStateRef = useRef<FoldState>({})
@@ -229,7 +223,6 @@ export function TransactionManager({
 					cells.push(
 						<SingleRow
 							{...props}
-							ref={setTransactionManagerRowRef(transaction.id)}
 							key={`${groupedItemIndex}-${transaction.id}-${transactionIndex}`}
 						/>
 					)
@@ -263,7 +256,6 @@ export function TransactionManager({
 					cells.push(
 						<MultiRow
 							{...props}
-							ref={setTransactionManagerRowRef(transaction.id)}
 							key={`${groupedItemIndex}-${transaction.id}-${transactionIndex}`}
 						/>
 					)
