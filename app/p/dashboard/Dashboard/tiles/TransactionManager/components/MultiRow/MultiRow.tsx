@@ -237,18 +237,14 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 	]
 
 	const itemRows = p.transaction.items.map((item, itemIndex) => {
-		const itemSortPosChanged = (() => {
+		const itemSortPosChanged: boolean = (() => {
 			if (item.pendingCreation) {
 				return true
 			}
-			const defSort = p.sortOrder.def[p.transaction.date.orig].find((it) =>
-				Array.isArray(it) ? it[0] === p.transaction.id : it === p.transaction.id
+			const defSort = p.sortOrder.def[p.transaction.date.orig].find(
+				(it) => it[0] === p.transaction.id
 			)!
-			if (Array.isArray(defSort)) {
-				return defSort.findIndex((it) => it === item.id) !== itemIndex + 1
-			} else {
-				return true
-			}
+			return defSort.findIndex((it) => it === item.id) !== itemIndex + 1
 		})()
 
 		const handleDelete = () => {

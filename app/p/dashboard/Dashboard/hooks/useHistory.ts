@@ -1,14 +1,6 @@
-import {
-	MutableRefObject,
-	Dispatch,
-	SetStateAction,
-	useState,
-	useEffect,
-	useRef,
-	useCallback,
-} from 'react'
+import { useRef, useCallback } from 'react'
 import { areDeeplyEqual, moveItemInArray } from '@/utils'
-import { DashboardController, Data, SortOrder } from '.'
+import { DashboardController } from '.'
 
 export function useHistory(getDashboardController: () => DashboardController) {
 	const historyStackRef = useRef<HistoryState>({ undoStack: [], redoStack: [] })

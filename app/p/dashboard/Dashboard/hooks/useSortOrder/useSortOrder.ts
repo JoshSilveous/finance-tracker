@@ -1,19 +1,6 @@
 import { moveItemInArray } from '@/utils'
-import {
-	Dispatch,
-	MutableRefObject,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-} from 'react'
-import { itemReorderMouseEffect } from './handleItemReorder'
-import { FoldStateGetter, FoldStateUpdater } from '../useFoldState'
-import { transactionReorderMouseEffect } from './handleTransactionReorder'
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
 import { Data } from '../../../Dashboard/hooks/useData/useData'
-import { TransactionManagerRowsRef } from '../../Dashboard'
-import { ItemRowsRef } from '../../tiles/TransactionManager/components'
 import { DashboardController } from '../useDashboardState'
 
 export function useSortOrder(getDashboardController: () => DashboardController) {
@@ -31,25 +18,14 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 		const sortOrder: SortOrder.State = {}
 		transactions.forEach((transaction) => {
 			if (sortOrder[transaction.date.orig] === undefined) {
-				if (transaction.items.length > 1) {
-					sortOrder[transaction.date.orig] = [
-						[transaction.id, ...transaction.items.map((item) => item.id)],
-					]
-				} else {
-					sortOrder[transaction.date.orig] = [transaction.id]
-				}
+				sortOrder[transaction.date.orig] = [
+					[transaction.id, ...transaction.items.map((item) => item.id)],
+				]
 			} else {
-				if (transaction.items.length > 1) {
-					sortOrder[transaction.date.orig] = [
-						...sortOrder[transaction.date.orig],
-						[transaction.id, ...transaction.items.map((item) => item.id)],
-					]
-				} else {
-					sortOrder[transaction.date.orig] = [
-						...sortOrder[transaction.date.orig],
-						transaction.id,
-					]
-				}
+				sortOrder[transaction.date.orig] = [
+					...sortOrder[transaction.date.orig],
+					[transaction.id, ...transaction.items.map((item) => item.id)],
+				]
 			}
 		})
 
@@ -408,21 +384,11 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 		setCurSortOrder((prev) => {
 			const clone = structuredClone(prev)
 
-			const transactionIndex = clone[date].findIndex((sortItem) =>
-				Array.isArray(sortItem)
-					? sortItem[0] === transaction_id
-					: sortItem === transaction_id
+			const transactionIndex = clone[date].findIndex(
+				(sortItem) => sortItem[0] === transaction_id
 			)
 
-			if (Array.isArray(clone[date][transactionIndex])) {
-				clone[date][transactionIndex].splice(itemInsertIndex, 0, item_id)
-			} else {
-				clone[date][transactionIndex] = [
-					clone[date][transactionIndex],
-					first_item_id!,
-					item_id,
-				]
-			}
+			clone[date][transactionIndex].splice(itemInsertIndex, 0, item_id)
 
 			return clone
 		})
@@ -430,10 +396,8 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 	const removeNewItem = (transaction_id: string, date: string, item_id: string) => {
 		setCurSortOrder((prev) => {
 			const clone = structuredClone(prev)
-			const transactionIndex = clone[date].findIndex((sortItem) =>
-				Array.isArray(sortItem)
-					? sortItem[0] === transaction_id
-					: sortItem === transaction_id
+			const transactionIndex = clone[date].findIndex(
+				(sortItem) => sortItem[0] === transaction_id
 			)
 			const itemIndex = (clone[date][transactionIndex] as string[]).findIndex(
 				(id) => id === item_id
@@ -442,13 +406,7 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 			return clone
 		})
 	}
-	const addNewTransaction = (sortItem: SortOrder.Item, date: string) => {
-		// right now, this function will only add transactions at the top of the date's sortOrder
-		if (!Array.isArray(sortItem)) {
-			throw new Error(
-				'Provided sortItem is not an array! Putting this measure in place since soon, all SortItems will be in array format.'
-			)
-		}
+	const addNewTransaction = (sortItem: SortOrder.SortItem, date: string) => {
 		setCurSortOrder((prev) => {
 			const clone = structuredClone(prev)
 			if (clone[date] !== undefined) {
@@ -459,17 +417,6 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 			return clone
 		})
 	}
-
-	// const addNewTransaction = (
-	// 	transaction_id: string,
-	// 	date: string,
-	// 	transactionIndex: number
-	// ) => {
-	// 	// not yet available
-	// }
-	// const removeNewTransaction = (transaction_id: string, date: string) => {
-	// 	// not yet available
-	// }
 
 	return {
 		setDefault: setDefSortOrder,
@@ -492,13 +439,26 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 
 export namespace SortOrder {
 	/**
-	 * Can either be a string (representing the transaction_id of a single-item) or an array of string (with the first item representing the transaction_id of a multi-item, and the following items representing the item_ids)
+	 * An array of strings, with the first string being the `transaction_id` and subsequent strings being the matching transaction's item's `item_id`s, in order of sort.
 	 *
-	 * @example ```ts
-	 * const sortItems: SortOrderItem[] = ['single_1', 'single_2', ['multi_1', 'item_1', 'item_2', ...], 'single_3', ...]
+	 *
+	 * @example
+	 * ```ts
+	 * const transaction = {
+	 * 	id: 'trn_1',
+	 * 	...,
+	 * 	items: [
+	 * 		{id: 'itm_1', ...}, // order in data doesn't reliably reflect sort order
+	 * 		{id: 'itm_2', ...},
+	 * 		{id: 'itm_3', ...},
+	 * 	]
+	 * }
+	 *
+	 *	const sortItem = ['trn_1', 'itm_3', 'itm_1', 'itm_2']
+	 *
 	 * ```
 	 */
-	export type Item = string | string[]
+	export type SortItem = string[]
 
 	/**
 	 * An object that keeps the sort order, keyed by `date`.
@@ -513,7 +473,7 @@ export namespace SortOrder {
 	 *
 	 */
 	export type State = {
-		[date: string]: Item[]
+		[date: string]: SortItem[]
 	}
 
 	/**
@@ -549,6 +509,6 @@ export namespace SortOrder {
 		) => void
 		removeNewItem: (transaction_id: string, date: string, item_id: string) => void
 		discardChanges: () => void
-		addNewTransaction: (sortItem: SortOrder.Item, date: string) => void
+		addNewTransaction: (sortItem: SortOrder.SortItem, date: string) => void
 	}
 }

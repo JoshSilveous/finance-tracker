@@ -202,12 +202,13 @@ export function TransactionManager({
 			gridNavIndex++
 
 			groupedItem.transactions.forEach((transaction, transactionIndex) => {
+				const sortPosChanged = sortOrder.def[transaction.date.orig]
+					? sortOrder.def[transaction.date.orig].findIndex(
+							(it) => it[0] === transaction.id
+					  ) !== transactionIndex
+					: true
+
 				if (transaction.items.length === 1) {
-					const sortPosChanged = sortOrder.def[transaction.date.orig]
-						? sortOrder.def[transaction.date.orig].findIndex(
-								(it) => it === transaction.id
-						  ) !== transactionIndex
-						: true
 					const props: SingleRowProps = {
 						transaction,
 						data,
@@ -228,10 +229,6 @@ export function TransactionManager({
 					)
 					gridNavIndex++
 				} else {
-					const sortPosChanged =
-						sortOrder.def[transaction.date.orig].findIndex(
-							(it) => it[0] === transaction.id
-						) !== transactionIndex
 					const props: MultiRowProps = {
 						transaction,
 						data,

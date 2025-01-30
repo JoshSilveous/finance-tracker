@@ -1,5 +1,4 @@
-import { MutableRefObject, useRef, useState } from 'react'
-import { TileData } from '../tiles'
+import { useState } from 'react'
 import { FoldStateController, useFoldState } from './useFoldState'
 import { HistoryController, useHistory } from './useHistory'
 import { SortOrder, useSortOrder } from './useSortOrder'
