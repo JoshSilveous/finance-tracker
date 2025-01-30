@@ -1,42 +1,18 @@
 import { JGrid } from '@/components/JGrid'
-import { Data } from '../../hooks'
+import { Data, SimpleValuesTile } from '../../hooks'
 import { default as LoadingAnim } from '@/public/loading.svg'
-import { SimpleValuesTile, TileDefaultSettings } from '../types'
 import s from './SimpleValues.module.scss'
-import { addCommas, createPopup, getNumPref, setNumPref } from '@/utils'
+import { addCommas, setNumPref } from '@/utils'
 import { JGridTypes } from '@/components/JGrid/JGrid'
 import { useEffect, useRef, useState } from 'react'
 import { getStartingAmounts as getStartingAmounts } from './func/getStartingAmounts'
-import { SimpleValuesSettingsPopup } from './settings_popup/SimpleValuesSettingsPopup'
+
 export interface SimpleValuesProps {
 	data: Data.Controller
 	changed: boolean
 	tileOptions: SimpleValuesTile['options']
 	tileID: string
 }
-
-export const simpleValuesTileDefaults: TileDefaultSettings = {
-	minWidth: 180,
-	minHeight: 180,
-	maxWidth: undefined,
-	maxHeight: undefined,
-	showEditButton: true,
-	onEditButtonClick: (tile, setTileData, data) => {
-		const popup = createPopup({
-			content: (
-				<SimpleValuesSettingsPopup
-					context='edit'
-					tile={tile as SimpleValuesTile}
-					setTileData={setTileData}
-					data={data}
-					closePopup={() => popup.close()}
-				/>
-			),
-		})
-		popup.trigger()
-	},
-}
-
 export type TotalEntry = { id: string; total_amount: number }
 
 export function SimpleValues({ data, changed, tileOptions, tileID }: SimpleValuesProps) {

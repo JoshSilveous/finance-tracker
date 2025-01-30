@@ -1,4 +1,5 @@
-import { Data } from '../hooks'
+import { SetStateAction } from 'react'
+import { Data } from '..'
 
 interface TileDataBase {
 	id: string

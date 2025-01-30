@@ -8,16 +8,14 @@ import s from './SingleRow.module.scss'
 import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } from 'react'
 import { TabIndexer } from '../../hooks'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
-import { Data, HistoryController, SortOrder } from '../../../../hooks'
+import { DashboardController, Data } from '../../../../hooks'
 
 export interface SingleRowProps {
 	transaction: Data.StateTransaction
-	data: Data.Controller
+	dashCtrl: DashboardController
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	sortPosChanged: boolean
 	disableTransactionResort: boolean
-	historyController: HistoryController
-	sortOrder: SortOrder.Controller
 	gridRow: number
 	tabIndexer: TabIndexer
 	gridNavIndex: number
@@ -39,24 +37,24 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 				const item_id = item.id
 				const newVal = e.target.value
 
-				p.historyController.clearRedo()
+				p.dashCtrl.history.clearRedo()
 
 				// update pendingChanges
 				if (key === 'date' || key === 'name') {
-					p.data.update('transaction', p.transaction.id, key, newVal)
+					p.dashCtrl.data.update('transaction', p.transaction.id, key, newVal)
 				} else if (
 					key === 'amount' ||
 					key === 'category_id' ||
 					key === 'account_id'
 				) {
-					p.data.update('item', item_id, p.transaction.id, key, newVal)
+					p.dashCtrl.data.update('item', item_id, p.transaction.id, key, newVal)
 				}
 
 				// update history
 				const oldVal = e.target.dataset.value_on_focus
 				if (oldVal !== undefined && newVal !== oldVal) {
 					if (key === 'date' || key === 'name') {
-						p.historyController.upsert({
+						p.dashCtrl.history.upsert({
 							type: 'transaction_value_change',
 							transaction_id: p.transaction.id,
 							key,
@@ -68,7 +66,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						key === 'category_id' ||
 						key === 'account_id'
 					) {
-						p.historyController.upsert({
+						p.dashCtrl.history.upsert({
 							type: 'item_value_change',
 							transaction_id: p.transaction.id,
 							item_id: item_id,
@@ -92,7 +90,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 
 				if (oldVal !== undefined && newVal !== oldVal) {
 					if (key === 'date' || key === 'name') {
-						p.historyController.upsert({
+						p.dashCtrl.history.upsert({
 							type: 'transaction_value_change',
 							transaction_id: p.transaction.id,
 							key,
@@ -104,7 +102,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 						key === 'category_id' ||
 						key === 'account_id'
 					) {
-						p.historyController.upsert({
+						p.dashCtrl.history.upsert({
 							type: 'item_value_change',
 							transaction_id: p.transaction.id,
 							item_id: item_id,
@@ -269,7 +267,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							text: 'Delete',
 							icon: <DeleteIcon />,
 							onClick: () => {
-								p.data.stageDelete('transaction', p.transaction.id)
+								p.dashCtrl.data.stageDelete('transaction', p.transaction.id)
 								if (undoDeleteRef.current !== null) {
 									undoDeleteRef.current.focus()
 								}
@@ -280,7 +278,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 							text: 'Add Item',
 							icon: <InsertRowIcon />,
 							onClick: () =>
-								p.data.stageCreate(
+								p.dashCtrl.data.stageCreate(
 									'item',
 									p.transaction.id,
 									1,
@@ -318,7 +316,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					<JButton
 						jstyle='invisible'
 						onClick={() => {
-							p.data.unstageDelete('transaction', p.transaction.id)
+							p.dashCtrl.data.unstageDelete('transaction', p.transaction.id)
 							if (dateSelectRef.current !== null) {
 								dateSelectRef.current.focus()
 							}

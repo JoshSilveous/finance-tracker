@@ -6,7 +6,7 @@ import { Data, TileController, useData, useTiles } from '.'
 import { saveChanges } from '../func/saveChanges'
 import { areDeeplyEqual } from '@/utils'
 
-export function useDashboardState() {
+export function useDashboardController() {
 	const [isLoading, setIsLoading] = useState(true)
 
 	const reloadAll = async () => {

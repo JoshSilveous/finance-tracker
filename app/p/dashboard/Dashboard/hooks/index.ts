@@ -1,4 +1,4 @@
-export * from './useDashboardState'
+export * from './useDashboardController'
 export * from './useData'
 export * from './useFoldState'
 export * from './useHistory'

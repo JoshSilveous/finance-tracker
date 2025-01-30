@@ -13,11 +13,11 @@ export function genEventHandlers(p: MultiRowProps) {
 			const item_id = e.target.dataset.item_id
 			const newVal = e.target.value
 
-			p.historyController.clearRedo()
+			p.dashCtrl.history.clearRedo()
 
 			if (item_id === undefined) {
 				if (key === 'date' || key === 'name') {
-					p.data.update('transaction', p.transaction.id, key, newVal)
+					p.dashCtrl.data.update('transaction', p.transaction.id, key, newVal)
 				}
 			} else {
 				if (
@@ -26,7 +26,7 @@ export function genEventHandlers(p: MultiRowProps) {
 					key === 'category_id' ||
 					key === 'account_id'
 				) {
-					p.data.update('item', item_id, p.transaction.id, key, newVal)
+					p.dashCtrl.data.update('item', item_id, p.transaction.id, key, newVal)
 				}
 			}
 
@@ -34,7 +34,7 @@ export function genEventHandlers(p: MultiRowProps) {
 			const oldVal = e.target.dataset.value_on_focus
 			if (oldVal !== undefined && newVal !== oldVal) {
 				if (key === 'date') {
-					p.historyController.upsert({
+					p.dashCtrl.history.upsert({
 						type: 'transaction_value_change',
 						transaction_id: p.transaction.id,
 						key,
@@ -42,7 +42,7 @@ export function genEventHandlers(p: MultiRowProps) {
 						newVal,
 					})
 				} else if (key === 'name' && item_id === undefined) {
-					p.historyController.upsert({
+					p.dashCtrl.history.upsert({
 						type: 'transaction_value_change',
 						transaction_id: p.transaction.id,
 						key,
@@ -56,7 +56,7 @@ export function genEventHandlers(p: MultiRowProps) {
 						key === 'account_id') &&
 					item_id !== undefined
 				) {
-					p.historyController.upsert({
+					p.dashCtrl.history.upsert({
 						type: 'item_value_change',
 						transaction_id: p.transaction.id,
 						item_id: item_id,
@@ -79,7 +79,7 @@ export function genEventHandlers(p: MultiRowProps) {
 			const oldVal = e.target.dataset.value_on_focus
 			if (oldVal !== undefined && newVal !== oldVal) {
 				if (key === 'date') {
-					p.historyController.upsert({
+					p.dashCtrl.history.upsert({
 						type: 'transaction_value_change',
 						transaction_id: p.transaction.id,
 						key,
@@ -87,7 +87,7 @@ export function genEventHandlers(p: MultiRowProps) {
 						newVal,
 					})
 				} else if (key === 'name' && item_id === undefined) {
-					p.historyController.upsert({
+					p.dashCtrl.history.upsert({
 						type: 'transaction_value_change',
 						transaction_id: p.transaction.id,
 						key,
@@ -101,7 +101,7 @@ export function genEventHandlers(p: MultiRowProps) {
 						key === 'account_id') &&
 					item_id !== undefined
 				) {
-					p.historyController.upsert({
+					p.dashCtrl.history.upsert({
 						type: 'item_value_change',
 						transaction_id: p.transaction.id,
 						item_id: item_id,

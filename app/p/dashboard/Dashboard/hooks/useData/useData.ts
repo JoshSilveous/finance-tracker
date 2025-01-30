@@ -3,7 +3,7 @@ import { fetchAccountData, fetchCategoryData, fetchTransactionData } from '@/dat
 import { areDeeplyEqual, getCurDateString } from '@/utils'
 import { SortOrder } from '../useSortOrder'
 import { HistoryController } from '../useHistory'
-import { DashboardController } from '../useDashboardState'
+import { DashboardController } from '../useDashboardController'
 
 export type UseDataOptions = {
 	onReload?: (newData: Data.State) => void

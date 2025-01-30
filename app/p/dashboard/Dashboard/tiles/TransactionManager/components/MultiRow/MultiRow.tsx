@@ -1,5 +1,5 @@
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
-import { useMemo, useRef, forwardRef, useEffect, useCallback } from 'react'
+import { useRef, forwardRef, useEffect, useCallback } from 'react'
 import { default as FoldArrow } from '@/public/dropdown_arrow.svg'
 import { default as ReorderIcon } from '@/public/reorder.svg'
 import { default as DeleteIcon } from '@/public/delete.svg'
@@ -13,20 +13,17 @@ import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 import { genEventHandlers } from './func/genEventHandlers'
 import { genUniqueLists } from './func/genUniqueLists'
 import { delay } from '@/utils'
-import { Data, FoldStateUpdater, HistoryController, SortOrder } from '../../../../hooks'
+import { DashboardController, Data } from '../../../../hooks'
 
 export interface MultiRowProps {
 	transaction: Data.StateTransaction
-	data: Data.Controller
+	dashCtrl: DashboardController
 	transactionIndex: number
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	folded: boolean
 	playAnimation: boolean
-	updateFoldState: FoldStateUpdater
 	transactionSortPosChanged: boolean
 	disableTransactionResort: boolean
-	historyController: HistoryController
-	sortOrder: SortOrder.Controller
 	gridRow: number
 	tabIndexer: TabIndexer
 	gridNavIndex: number
@@ -134,7 +131,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			</div>
 			<div
 				className={`${s.fold_toggle} ${p.folded || p.playAnimation ? s.folded : ''}`}
-				onClick={() => p.updateFoldState(p.transaction.id)}
+				onClick={() => p.dashCtrl.foldState.update(p.transaction.id)}
 				title={p.folded ? 'Click to reveal items' : 'Click to hide items'}
 			>
 				<JButton
@@ -208,12 +205,12 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						text: 'Delete',
 						icon: <DeleteIcon />,
 						onClick: () => {
-							p.data.stageDelete('transaction', p.transaction.id)
+							p.dashCtrl.data.stageDelete('transaction', p.transaction.id)
 							if (undoDeleteRef.current !== null) {
 								undoDeleteRef.current.focus()
 							}
 							if (!p.folded) {
-								p.updateFoldState(p.transaction.id, true)
+								p.dashCtrl.foldState.update(p.transaction.id, true)
 							}
 						},
 						className: s.delete,
@@ -222,7 +219,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						text: 'Add Item',
 						icon: <InsertRowIcon />,
 						onClick: () =>
-							p.data.stageCreate(
+							p.dashCtrl.data.stageCreate(
 								'item',
 								p.transaction.id,
 								1,
@@ -241,14 +238,14 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			if (item.pendingCreation) {
 				return true
 			}
-			const defSort = p.sortOrder.def[p.transaction.date.orig].find(
+			const defSort = p.dashCtrl.sortOrder.def[p.transaction.date.orig].find(
 				(it) => it[0] === p.transaction.id
 			)!
 			return defSort.findIndex((it) => it === item.id) !== itemIndex + 1
 		})()
 
 		const handleDelete = () => {
-			p.data.stageDelete('item', item.id, p.transaction.id)
+			p.dashCtrl.data.stageDelete('item', item.id, p.transaction.id)
 
 			if (!item.pendingCreation) {
 				delay(10).then(() => {
@@ -263,7 +260,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 		}
 
 		const handleAddItem = () =>
-			p.data.stageCreate(
+			p.dashCtrl.data.stageCreate(
 				'item',
 				p.transaction.id,
 				itemIndex + 2,
@@ -475,7 +472,11 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 						<JButton
 							jstyle='invisible'
 							onClick={() => {
-								p.data.unstageDelete('item', item.id, p.transaction.id)
+								p.dashCtrl.data.unstageDelete(
+									'item',
+									item.id,
+									p.transaction.id
+								)
 							}}
 							ref={undoDeleteRef}
 							className={s.undo_delete_button}
@@ -557,7 +558,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 					<JButton
 						jstyle='invisible'
 						onClick={() => {
-							p.data.unstageDelete('transaction', p.transaction.id)
+							p.dashCtrl.data.unstageDelete('transaction', p.transaction.id)
 							if (dateSelectRef.current !== null) {
 								dateSelectRef.current.focus()
 							}

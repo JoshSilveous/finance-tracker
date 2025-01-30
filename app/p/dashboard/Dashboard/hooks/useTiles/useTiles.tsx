@@ -1,14 +1,11 @@
 import { Dispatch, SetStateAction, useRef, useState } from 'react'
-import { genDisplayTiles, TileData } from '../tiles'
+import { genDisplayTiles, TileData } from '.'
 import { GRID_SPACING } from '@/app/globals'
 import { areDeeplyEqual } from '@/utils'
-import { Data } from './useData'
-import { FoldStateController } from './useFoldState'
-import { HistoryController } from './useHistory'
-import { DashboardController, SortOrder } from '.'
+import { DashboardController } from '..'
 import { fetchTileData } from '@/database'
 
-export function useTiles(getDashboardController: () => DashboardController) {
+export function useTiles(getDashCtrl: () => DashboardController) {
 	const [tileData, setTileData] = useState<TileData[]>([])
 	const origTileDataRef = useRef<TileData[]>([])
 	const curTileDataRef = useRef<TileData[]>([])
@@ -50,10 +47,7 @@ export function useTiles(getDashboardController: () => DashboardController) {
 		tileData,
 		origTileDataRef,
 		setTileData,
-		getDashboardController().data,
-		getDashboardController().foldState,
-		getDashboardController().sortOrder,
-		getDashboardController().history
+		getDashCtrl()
 	)
 
 	const reload = async () => {

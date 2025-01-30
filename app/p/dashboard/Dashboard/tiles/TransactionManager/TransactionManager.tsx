@@ -3,7 +3,6 @@ import { ReactNode, useEffect, useMemo, useRef } from 'react'
 import s from './TransactionManager.module.scss'
 import {
 	areDeeplyEqual,
-	createPopup,
 	addIsolatedKeyListeners,
 	IsolatedKeyListener,
 	removeIsolatedKeyListeners,
@@ -20,35 +19,13 @@ import { sortTransactions, genHeaders } from './func'
 import { DateRow, MultiRowProps, MultiRow, SingleRow, SingleRowProps } from './components'
 import { JButton, JNumberAccounting } from '@/components/JForm'
 import { useTabIndexer, useGridNav } from './hooks'
-import {
-	Data,
-	SortOrder,
-	FoldStateController,
-	HistoryController,
-	FoldState,
-} from '../../hooks'
-import { TileDefaultSettings } from '../types'
-
-export const transactionManagerTileDefaults: TileDefaultSettings = {
-	minWidth: 740,
-	minHeight: 350,
-	maxWidth: 1200,
-	maxHeight: undefined,
-}
+import { FoldState, DashboardController } from '../../hooks'
 
 export interface TransactionManagerProps {
-	data: Data.Controller
-	sortOrder: SortOrder.Controller
-	foldState: FoldStateController
-	historyController: HistoryController
+	dashCtrl: DashboardController
 }
 
-export function TransactionManager({
-	data,
-	sortOrder,
-	foldState,
-	historyController,
-}: TransactionManagerProps) {
+export function TransactionManager({ dashCtrl }: TransactionManagerProps) {
 	const mainContainerRef = useRef<HTMLDivElement>(null)
 	const prevFoldStateRef = useRef<FoldState>({})
 
@@ -75,7 +52,7 @@ export function TransactionManager({
 				char: 'Z',
 				ctrlKey: true,
 				shiftKey: false,
-				run: historyController.undo,
+				run: dashCtrl.history.undo,
 				preventDefault: true,
 			},
 			{
@@ -83,7 +60,7 @@ export function TransactionManager({
 				char: 'Z',
 				ctrlKey: true,
 				shiftKey: true,
-				run: historyController.redo,
+				run: dashCtrl.history.redo,
 				preventDefault: true,
 			},
 			{
@@ -126,16 +103,17 @@ export function TransactionManager({
 		 * current render. This allows animations to be played only when foldState changes,
 		 * instead of every re-render
 		 */
-		prevFoldStateRef.current = foldState.cur
-	}, [foldState.cur])
+		prevFoldStateRef.current = dashCtrl.foldState.cur
+	}, [dashCtrl.foldState.cur])
 
 	const isChangedRef = useRef<boolean>(false)
 	isChangedRef.current =
-		data.isPendingSave || !areDeeplyEqual(sortOrder.cur, sortOrder.def)
+		dashCtrl.data.isPendingSave ||
+		!areDeeplyEqual(dashCtrl.sortOrder.cur, dashCtrl.sortOrder.def)
 
 	const dropdownOptions: DropdownOptions = {
 		category: (() => {
-			const options = data.cur.categories.map((cat) => {
+			const options = dashCtrl.data.cur.categories.map((cat) => {
 				return {
 					name: cat.name,
 					value: cat.id,
@@ -145,7 +123,7 @@ export function TransactionManager({
 			return options
 		})(),
 		account: (() => {
-			const options = data.cur.accounts.map((act) => {
+			const options = dashCtrl.data.cur.accounts.map((act) => {
 				return {
 					name: act.name,
 					value: act.id,
@@ -157,10 +135,10 @@ export function TransactionManager({
 	}
 
 	const sortedData = useMemo(() => {
-		return sortTransactions(sortOrder.cur, data.cur.transactions)
-	}, [data.cur.transactions, sortOrder.cur])
+		return sortTransactions(dashCtrl.sortOrder.cur, dashCtrl.data.cur.transactions)
+	}, [dashCtrl.data.cur.transactions, dashCtrl.sortOrder.cur])
 
-	const headers: JGridTypes.Header[] = genHeaders(historyController)
+	const headers: JGridTypes.Header[] = genHeaders(dashCtrl.history)
 
 	let grid: ReactNode
 
@@ -176,7 +154,7 @@ export function TransactionManager({
 				if (inputDate < getCurDate()) {
 					cells.push(
 						<DateRow
-							data={data}
+							data={dashCtrl.data}
 							date={getCurDateString()}
 							gridRow={gridRow}
 							key={`${groupedItem.date}-TODAY`}
@@ -190,7 +168,7 @@ export function TransactionManager({
 			}
 			cells.push(
 				<DateRow
-					data={data}
+					data={dashCtrl.data}
 					date={groupedItem.date}
 					gridRow={gridRow}
 					key={`${groupedItem.date}-${groupedItemIndex}`}
@@ -202,8 +180,8 @@ export function TransactionManager({
 			gridNavIndex++
 
 			groupedItem.transactions.forEach((transaction, transactionIndex) => {
-				const sortPosChanged = sortOrder.def[transaction.date.orig]
-					? sortOrder.def[transaction.date.orig].findIndex(
+				const sortPosChanged = dashCtrl.sortOrder.def[transaction.date.orig]
+					? dashCtrl.sortOrder.def[transaction.date.orig].findIndex(
 							(it) => it[0] === transaction.id
 					  ) !== transactionIndex
 					: true
@@ -211,12 +189,10 @@ export function TransactionManager({
 				if (transaction.items.length === 1) {
 					const props: SingleRowProps = {
 						transaction,
-						data,
+						dashCtrl,
 						dropdownOptions,
 						sortPosChanged,
 						disableTransactionResort: groupedItem.transactions.length === 1,
-						historyController,
-						sortOrder,
 						gridRow,
 						tabIndexer,
 						gridNavIndex,
@@ -231,20 +207,17 @@ export function TransactionManager({
 				} else {
 					const props: MultiRowProps = {
 						transaction,
-						data,
+						dashCtrl,
 						transactionIndex,
 						dropdownOptions,
-						folded: foldState.cur[transaction.id],
+						folded: dashCtrl.foldState.cur[transaction.id],
 						playAnimation:
 							prevFoldStateRef.current[transaction.id] === undefined
 								? false
 								: prevFoldStateRef.current[transaction.id] !==
-								  foldState.cur[transaction.id],
-						updateFoldState: foldState.update,
+								  dashCtrl.foldState.cur[transaction.id],
 						transactionSortPosChanged: sortPosChanged,
 						disableTransactionResort: groupedItem.transactions.length === 1,
-						historyController,
-						sortOrder,
 						gridRow,
 						tabIndexer,
 						gridNavIndex,
@@ -304,7 +277,7 @@ export function TransactionManager({
 			onClick={makeActiveContext}
 			onKeyDown={makeActiveContext}
 		>
-			{data.isLoading ? (
+			{dashCtrl.data.isLoading ? (
 				<div className={s.loading_container}>Loading...</div>
 			) : sortedData!.length === 0 ? (
 				<div className={s.no_transactions_container}>

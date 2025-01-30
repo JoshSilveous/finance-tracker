@@ -4,6 +4,7 @@ import { Data } from '../../Dashboard/hooks/useData/useData'
 export function useFoldState() {
 	const [foldState, setFoldState] = useState<FoldState>({})
 	const foldStateRef = useRef<FoldState>({})
+	const prevFoldStateRef = useRef<FoldState>({})
 	useEffect(() => {
 		foldStateRef.current = foldState
 	}, [foldState])

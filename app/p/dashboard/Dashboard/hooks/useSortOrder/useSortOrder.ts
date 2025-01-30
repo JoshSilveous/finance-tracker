@@ -1,7 +1,7 @@
 import { moveItemInArray } from '@/utils'
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
 import { Data } from '../../../Dashboard/hooks/useData/useData'
-import { DashboardController } from '../useDashboardState'
+import { DashboardController } from '../useDashboardController'
 
 export function useSortOrder(getDashboardController: () => DashboardController) {
 	const [defSortOrder, setDefSortOrder] = useState<SortOrder.State>({})
@@ -317,11 +317,11 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 	// 	[]
 	// )
 
+	/* END ITEM REORDERING LOGIC */
+
 	const discardChanges = () => {
 		setCurSortOrder(defSortOrder)
 	}
-
-	/* END ITEM REORDERING LOGIC */
 
 	const updateItemSortOrder = useCallback(
 		(

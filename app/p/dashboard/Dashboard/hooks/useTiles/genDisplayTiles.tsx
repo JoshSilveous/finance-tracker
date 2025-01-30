@@ -1,23 +1,18 @@
-import Tile from '@/components/Tile/Tile'
-import s from '../Dashboard.module.scss'
+import s from '../../Dashboard.module.scss'
 import { MutableRefObject, SetStateAction } from 'react'
-import { Data, FoldStateController, SortOrder, HistoryController } from '../hooks'
-import { SimpleValues, simpleValuesTileDefaults } from './SimpleValues/SimpleValues'
-import {
-	TransactionManager,
-	transactionManagerTileDefaults,
-} from './TransactionManager/TransactionManager'
-import { TileData } from './types'
-import { areDeeplyEqual } from '@/utils'
+import { DashboardController } from '..'
+import { SimpleValues } from '../../tiles/SimpleValues/SimpleValues'
+import { TransactionManager } from '../../tiles/TransactionManager/TransactionManager'
+import { SimpleValuesTile, TileData, TileDefaultSettings } from './types'
+import { areDeeplyEqual, createPopup } from '@/utils'
+import Tile from './Tile/Tile'
+import { SimpleValuesSettingsPopup } from '../../tiles/SimpleValues/settings_popup/SimpleValuesSettingsPopup'
 
 export function genDisplayTiles(
 	tileData: TileData[],
 	origTileDataRef: MutableRefObject<TileData[]>,
 	setTileData: (value: SetStateAction<TileData[]>) => void,
-	data: Data.Controller,
-	foldState: FoldStateController,
-	sortOrder: SortOrder.Controller,
-	historyController: HistoryController
+	dashCtrl: DashboardController
 ) {
 	return tileData.map((tile, index) => {
 		const onResize = (width: number, height: number) => {
@@ -66,10 +61,39 @@ export function genDisplayTiles(
 			return !areDeeplyEqual(origTileWithoutZIndex, curTileWithoutZIndex)
 		})()
 
-		const tileDefaults =
-			tile.type === 'simple_values'
-				? simpleValuesTileDefaults
-				: transactionManagerTileDefaults
+		const tileDefaults: TileDefaultSettings = (() => {
+			if (tile.type === 'simple_values') {
+				return {
+					minWidth: 180,
+					minHeight: 180,
+					maxWidth: undefined,
+					maxHeight: undefined,
+					showEditButton: true,
+					onEditButtonClick: (tile, setTileData, data) => {
+						const popup = createPopup({
+							content: (
+								<SimpleValuesSettingsPopup
+									context='edit'
+									tile={tile as SimpleValuesTile}
+									setTileData={setTileData}
+									data={data}
+									closePopup={() => popup.close()}
+								/>
+							),
+						})
+						popup.trigger()
+					},
+				}
+			} else {
+				// tile.type === 'transaction_manager'
+				return {
+					minWidth: 740,
+					minHeight: 350,
+					maxWidth: 1200,
+					maxHeight: undefined,
+				}
+			}
+		})()
 
 		return (
 			<Tile
@@ -85,24 +109,23 @@ export function genDisplayTiles(
 				{...tileDefaults}
 				onEditButtonClick={
 					tileDefaults.onEditButtonClick !== undefined
-						? () => tileDefaults.onEditButtonClick!(tile, setTileData, data)
+						? () =>
+								tileDefaults.onEditButtonClick!(
+									tile,
+									setTileData,
+									dashCtrl.data
+								)
 						: undefined
 				}
 				key={tile.id}
 				resizable
 			>
 				{tile.type === 'transaction_manager' && (
-					<TransactionManager
-						data={data}
-						foldState={foldState}
-						sortOrder={sortOrder}
-						historyController={historyController}
-						key={`tm-${index}`}
-					/>
+					<TransactionManager dashCtrl={dashCtrl} key={`tm-${index}`} />
 				)}
 				{tile.type === 'simple_values' && (
 					<SimpleValues
-						data={data}
+						data={dashCtrl.data}
 						changed={changed}
 						tileOptions={tile.options!}
 						tileID={tile.id}
