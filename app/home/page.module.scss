@@ -1,0 +1,56 @@
+.main {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	.content_container {
+		width: 1120px;
+		max-width: 90%;
+		.content {
+			max-width: 100%;
+			padding-top: 96px;
+			.first_tagline_container {
+				max-width: 712px;
+				h1 {
+					font-size: 60px;
+				}
+				p {
+					font-size: 36px;
+					color: var(--font-color-disabled);
+				}
+				.action_container {
+					display: flex;
+					align-items: center;
+					font-size: 18px;
+					a {
+						padding: 15px 30px;
+						background-color: var(--prim-bg);
+						color: var(--font-color);
+						border-radius: 10px;
+						text-decoration: none;
+						transition: background-color 0.2s ease;
+						&:hover {
+							background-color: var(--prim-bg-light-1);
+						}
+					}
+					.demo_button {
+						color: var(--prim-bg-light-2);
+						font-size: 18px;
+						font-weight: 700;
+						margin-left: 18px;
+						transition: background-color 0.2s ease;
+						width: 100px;
+						box-sizing: content-box;
+						&:hover {
+							background-color: var(--prim-bg-light-3);
+						}
+						svg {
+							height: 22px;
+						}
+					}
+				}
+			}
+		}
+	}
+}
