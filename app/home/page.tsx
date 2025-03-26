@@ -17,9 +17,12 @@ export default async function Home() {
 			<div className={s.content_container}>
 				<div className={s.content}>
 					<div className={s.first_tagline_container}>
-						<LBLogo />
+						<div className={s.logo_container}>
+							<LBLogo />
+							<p>LedgerBoard</p>
+						</div>
 						<h1>Your finances. Your way.</h1>
-						<p>
+						<p className={s.some_text}>
 							A manual-first finance app for clarity, control, and
 							customization.
 						</p>
