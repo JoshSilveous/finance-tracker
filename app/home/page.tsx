@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import s from './page.module.scss'
 import { createClient } from '@/database/supabase/server'
+import { default as LBLogo } from '@/public/lb_logo.svg'
 
 import Link from 'next/link'
 import { DemoButton } from './DemoButton/DemoButton'
@@ -16,6 +17,7 @@ export default async function Home() {
 			<div className={s.content_container}>
 				<div className={s.content}>
 					<div className={s.first_tagline_container}>
+						<LBLogo />
 						<h1>Your finances. Your way.</h1>
 						<p>
 							A manual-first finance app for clarity, control, and
