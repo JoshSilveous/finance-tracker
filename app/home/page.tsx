@@ -38,10 +38,10 @@ export default async function Home() {
 					</p>
 					<div className={s.tagline_actions}>
 						{userAlreadyLoggedIn ? (
-							<Link href='/p/dashboard'>Go to Dashboard</Link>
+							<Link href='/p/dashboard'>Dashboard</Link>
 						) : (
 							<>
-								<Link href='/login'>Login Page</Link>
+								<Link href='/login'>Login</Link>
 								<DemoButton className={s.demo_button} />
 							</>
 						)}
