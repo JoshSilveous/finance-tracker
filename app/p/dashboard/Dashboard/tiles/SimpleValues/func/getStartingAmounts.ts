@@ -6,8 +6,7 @@ import {
 	fetchAccountTotalsWithinDateRange,
 } from '@/database'
 import { getCurDateString, getCurDate, parseDateString, getDateString } from '@/utils'
-import { SimpleValuesTile } from '../..'
-import { Data } from '../../../hooks'
+import { Data, SimpleValuesTile } from '../../../hooks'
 import { TotalEntry } from '../SimpleValues'
 
 export async function getStartingAmounts(

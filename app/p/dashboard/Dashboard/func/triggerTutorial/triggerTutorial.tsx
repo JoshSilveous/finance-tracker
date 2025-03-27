@@ -4,7 +4,7 @@ import transactionManagerStyles from '../../tiles/TransactionManager/Transaction
 import ReactDOM from 'react-dom/client'
 import { TutorialOverlay } from './TutorialOverlay/TutorialOverlay'
 import { Dispatch, RefObject, SetStateAction } from 'react'
-import { TileData } from '../../tiles'
+import { TileData } from '../../hooks'
 
 export function triggerTutorial(
 	tileData: TileData[],

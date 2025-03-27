@@ -1,6 +1,6 @@
 import { formatDate, getCurDateString } from '@/utils'
-import { SimpleValuesTile } from '../../types'
 import s from './SimpleValuesSettingsPopup.module.scss'
+import { SimpleValuesTile } from '../../../hooks'
 
 export function genExplanationSection(formData: SimpleValuesTile['options']) {
 	let text = null

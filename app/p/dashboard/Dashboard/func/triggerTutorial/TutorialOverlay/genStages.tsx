@@ -6,7 +6,6 @@ import simpleValuesStyles from '../../../tiles/SimpleValues/SimpleValues.module.
 import s from './TutorialOverlay.module.scss'
 import { clearGlobalInterval, delay, setGlobalInterval } from '@/utils'
 import { Dispatch, MutableRefObject, SetStateAction } from 'react'
-import { TileData } from '../../../tiles'
 
 export function genStages(
 	regenStages: () => void,

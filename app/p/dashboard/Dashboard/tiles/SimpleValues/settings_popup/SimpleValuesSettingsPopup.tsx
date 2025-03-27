@@ -5,11 +5,10 @@ import { JButton, JInput } from '@/components/JForm'
 import { JCheckbox } from '@/components/JForm/JCheckbox/JCheckbox'
 import { JDropdown, JDropdownTypes } from '@/components/JForm/JDropdown/JDropdown'
 import { createFocusLoop, createPopup, delay, getCurDate, getCurDateString } from '@/utils'
-import { Data } from '../../../hooks'
-import { SimpleValuesTile, TileData } from '../../types'
+import { Data, SimpleValuesTile, TileData } from '../../../hooks'
 import { GRID_SPACING } from '@/app/globals'
-import { simpleValuesTileDefaults } from '../SimpleValues'
 import { genExplanationSection } from './genExplanationSection'
+import { simpleValuesTileDefaults } from '../SimpleValues'
 
 interface SimpleValuesSettingsPopupProps {
 	context: 'edit' | 'create'

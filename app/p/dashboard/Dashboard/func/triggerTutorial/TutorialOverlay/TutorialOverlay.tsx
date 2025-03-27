@@ -3,7 +3,6 @@ import s from './TutorialOverlay.module.scss'
 import { genStages, StageConfig } from './genStages'
 import { isolateWindowListener, removeWindowListener, setWindowListener } from '@/utils'
 import { JButton } from '@/components/JForm'
-import { TileData } from '../../../tiles'
 
 export const TRANSITION_TIME_MS = 300
 interface TutorialOverlayProps {

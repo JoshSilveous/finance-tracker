@@ -8,8 +8,7 @@ import {
 	UpsertTransactionEntry,
 	upsertTransactionsAndItems,
 } from '@/database'
-import { DashboardController, Data, SortOrder } from '../hooks'
-import { TileData } from '../tiles'
+import { DashboardController, Data, SortOrder, TileData } from '../hooks'
 import { MutableRefObject, SetStateAction } from 'react'
 import { areDeeplyEqual } from '@/utils'
 

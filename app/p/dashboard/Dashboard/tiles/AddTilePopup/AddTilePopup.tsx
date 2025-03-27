@@ -4,8 +4,8 @@ import { createFocusLoop, createPopup, delay } from '@/utils'
 import { SetStateAction, useEffect, useLayoutEffect, useRef } from 'react'
 import { SimpleValuesSettingsPopup } from '../SimpleValues/settings_popup/SimpleValuesSettingsPopup'
 import { Data } from '../../hooks/useData/useData'
-import { TileData } from '..'
 import { FeedbackPopup } from '@/components/FeedbackPopup/FeedbackPopup'
+import { TileData } from '../../hooks'
 
 interface AddTilePopupProps {
 	closePopup: () => void
