@@ -7,8 +7,8 @@ import { ClientScrollbarWidthSetter } from '@/utils'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-	title: 'Finance Tracker',
-	description: 'By Joshua Silveous',
+	title: 'LedgerBoard',
+	description: 'The Customizable Finance Tracker',
 }
 
 export default function RootLayout({
