@@ -1,5 +1,7 @@
 # Unsolved
 
+-   Allow esc key for popups and tutorial
+
 ### High Priority
 
 -   Switch "create new transaction" button to add row to grid
