@@ -3,40 +3,38 @@ import s from './page.module.scss'
 import { createClient } from '@/database/supabase/server'
 import { default as LBLogo } from '@/public/lb_logo.svg'
 import Image from 'next/image'
-
 import Link from 'next/link'
 import { DemoButton } from './DemoButton/DemoButton'
 
 export default async function Home() {
 	const supabase = createClient()
-
 	const { data, error } = await supabase.auth.getUser()
 	const userAlreadyLoggedIn = !(error || !data?.user)
 
 	return (
 		<div className={s.main}>
-			<div className={s.top_bar}>
-				<div className={s.logo_container}>
-					<LBLogo />
-					<p>LedgerBoard</p>
-				</div>
-				<div className={s.action_container}>
-					{userAlreadyLoggedIn ? (
-						<Link href='/p/dashboard'>Dashboard</Link>
-					) : (
-						<Link href='/login'>Login</Link>
-					)}
-				</div>
-			</div>
 			<div className={s.content_container}>
 				<div className={s.content}>
-					<div className={s.first_tagline_container}>
+					<div className={s.top_bar}>
+						<div className={s.logo}>
+							<LBLogo />
+							<p>LedgerBoard</p>
+						</div>
+						<div className={s.top_bar_actions}>
+							{userAlreadyLoggedIn ? (
+								<Link href='/p/dashboard'>Dashboard</Link>
+							) : (
+								<Link href='/login'>Login</Link>
+							)}
+						</div>
+					</div>
+					<div className={s.tagline}>
 						<h1>Your finances. Your way.</h1>
-						<p className={s.some_text}>
+						<p className={s.text}>
 							A manual-first finance app for clarity, control, and
 							customization.
 						</p>
-						<div className={s.action_container}>
+						<div className={s.tagline_actions}>
 							{userAlreadyLoggedIn ? (
 								<Link href='/p/dashboard'>Go to Dashboard</Link>
 							) : (
@@ -55,7 +53,7 @@ export default async function Home() {
 							alt='REPLACEME'
 						/>
 					</div>
-					<div className={s.more_details_container}>
+					<div className={s.more_details}>
 						<div className={s.detail}>
 							<p className={s.bold}>Manual-first. Meaningful always.</p>
 							<p className={s.reg}>
