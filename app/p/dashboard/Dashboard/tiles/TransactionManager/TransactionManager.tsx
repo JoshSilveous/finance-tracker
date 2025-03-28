@@ -189,6 +189,7 @@ export function TransactionManager({ dashCtrl }: TransactionManagerProps) {
 				if (transaction.items.length === 1) {
 					const props: SingleRowProps = {
 						transaction,
+						transactionIndex,
 						dashCtrl,
 						dropdownOptions,
 						sortPosChanged,

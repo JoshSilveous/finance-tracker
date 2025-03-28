@@ -352,7 +352,7 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 		[]
 	)
 
-	const updateTransactionSortOrder = useCallback(
+	const updateTransactionPosition = useCallback(
 		(date: string, oldIndex: number, newIndex: number) => {
 			setCurSortOrder((prev) => {
 				const clone = structuredClone(prev)
@@ -434,6 +434,7 @@ export function useSortOrder(getDashboardController: () => DashboardController) 
 		removeNewItem,
 		discardChanges,
 		addNewTransaction,
+		updateTransactionPosition,
 	} as SortOrder.Controller
 }
 
@@ -510,5 +511,6 @@ export namespace SortOrder {
 		removeNewItem: (transaction_id: string, date: string, item_id: string) => void
 		discardChanges: () => void
 		addNewTransaction: (sortItem: SortOrder.SortItem, date: string) => void
+		updateTransactionPosition: (date: string, oldIndex: number, newIndex: number) => void
 	}
 }

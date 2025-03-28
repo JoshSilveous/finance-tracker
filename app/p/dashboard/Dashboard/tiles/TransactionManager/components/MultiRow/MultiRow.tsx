@@ -529,6 +529,7 @@ export const MultiRow = forwardRef<HTMLDivElement, MultiRowProps>((p, forwardedR
 			className={s.container}
 			style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
 			ref={forwardedRef}
+			data-transaction_row_id={p.transaction.id}
 		>
 			{columns}
 

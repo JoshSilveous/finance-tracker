@@ -9,9 +9,11 @@ import { ChangeEventHandler, FocusEventHandler, forwardRef, useMemo, useRef } fr
 import { TabIndexer } from '../../hooks'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 import { DashboardController, Data } from '../../../../hooks'
+import { handleReorderMouseDown } from './func/handleReorderMouseDown'
 
 export interface SingleRowProps {
 	transaction: Data.StateTransaction
+	transactionIndex: number
 	dashCtrl: DashboardController
 	dropdownOptions: { category: JDropdownTypes.Option[]; account: JDropdownTypes.Option[] }
 	sortPosChanged: boolean
@@ -133,6 +135,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 			className={s.container}
 			style={{ gridRow: `${p.gridRow} / ${p.gridRow + 1}` }}
 			ref={forwardedRef}
+			data-transaction_row_id={p.transaction.id}
 		>
 			<div
 				style={genGridStyle()}
@@ -151,7 +154,19 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					<JButton
 						jstyle='invisible'
 						disabled={p.disableTransactionResort}
-						// ref={p.sortOrder.addToTransactionReorderRefs(p.transaction)}
+						onMouseDown={handleReorderMouseDown(
+							p.transaction,
+							p.transactionIndex,
+							p.dashCtrl.sortOrder,
+							(oldIndex, newIndex) => {
+								console.log(oldIndex, newIndex)
+								p.dashCtrl.sortOrder.updateTransactionPosition(
+									p.transaction.date.orig,
+									oldIndex,
+									newIndex
+								)
+							}
+						)}
 						tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 						data-grid_nav_col='TM_left_controls'
 						data-grid_nav_index={p.gridNavIndex}
