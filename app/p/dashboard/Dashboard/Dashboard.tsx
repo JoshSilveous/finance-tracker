@@ -26,26 +26,26 @@ export function Dashboard() {
 			tileContainerRef
 		)
 	}
-	useEffect(() => {
-		fetchInitSetupProgress()
-			.then((res) => {
-				if (!res.completed) {
-					const popup = createPopup({
-						content: (
-							<InitialSetupPopup
-								closePopup={async () => {
-									popup.close()
-									await dashCtrl.reloadAll()
-									startTutorial()
-								}}
-							/>
-						),
-					})
-					popup.trigger()
-				}
-			})
-			.catch((e) => console.error(e))
-	}, [])
+	// useEffect(() => {
+	// 	fetchInitSetupProgress()
+	// 		.then((res) => {
+	// 			if (!res.completed) {
+	// 				const popup = createPopup({
+	// 					content: (
+	// 						<InitialSetupPopup
+	// 							closePopup={async () => {
+	// 								popup.close()
+	// 								await dashCtrl.reloadAll()
+	// 								startTutorial()
+	// 							}}
+	// 						/>
+	// 					),
+	// 				})
+	// 				popup.trigger()
+	// 			}
+	// 		})
+	// 		.catch((e) => console.error(e))
+	// }, [])
 
 	useEffect(() => {
 		blockOnMobile()
