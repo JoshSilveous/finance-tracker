@@ -40,16 +40,25 @@ export function createPopup({
 	body.appendChild(popupContainer)
 	const popupDomLocation = ReactDOM.createRoot(popupContainer)
 
-	const onUndoOrRedo = () => {
+	const close = () => {
 		popupDomLocation.render(<></>)
 		popupDomLocation.unmount()
 		popupContainer.remove()
-		window.removeEventListener('popstate', onUndoOrRedo)
+		window.removeEventListener('popstate', close)
+		window.removeEventListener('keydown', onKeyPress)
+	}
+
+	const onKeyPress = (e: KeyboardEvent) => {
+		console.log('keypress! ', e.key)
+		if (e.key === 'Escape') {
+			close()
+		}
 	}
 
 	return {
 		trigger() {
-			window.addEventListener('popstate', onUndoOrRedo)
+			window.addEventListener('popstate', close)
+			window.addEventListener('keydown', onKeyPress)
 			popupDomLocation.render(
 				<div className={`${s.popup_background} ${s[type]}`}>
 					<div
@@ -76,11 +85,6 @@ export function createPopup({
 				</div>
 			)
 		},
-		close() {
-			popupDomLocation.render(<></>)
-			popupDomLocation.unmount()
-			popupContainer.remove()
-			window.removeEventListener('popstate', onUndoOrRedo)
-		},
+		close,
 	}
 }
