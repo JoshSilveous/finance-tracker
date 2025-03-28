@@ -4,10 +4,12 @@
 
 ### High Priority
 
+-   Re-set up grab-n-drag repositioning
 -   Switch "create new transaction" button to add row to grid
     -   DateRow section
     -   Transaction count = 0 section
 -   Make history system work for all types of changes in the dashboard
+    -   Use functions for undo/redo in stack, instead of historycontroller running everything
     -   Types of changes to track:
         value changes
         sort order changes
