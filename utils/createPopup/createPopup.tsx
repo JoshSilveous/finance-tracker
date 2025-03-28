@@ -40,8 +40,16 @@ export function createPopup({
 	body.appendChild(popupContainer)
 	const popupDomLocation = ReactDOM.createRoot(popupContainer)
 
+	const onUndoOrRedo = () => {
+		popupDomLocation.render(<></>)
+		popupDomLocation.unmount()
+		popupContainer.remove()
+		window.removeEventListener('popstate', onUndoOrRedo)
+	}
+
 	return {
 		trigger() {
+			window.addEventListener('popstate', onUndoOrRedo)
 			popupDomLocation.render(
 				<div className={`${s.popup_background} ${s[type]}`}>
 					<div
@@ -72,6 +80,7 @@ export function createPopup({
 			popupDomLocation.render(<></>)
 			popupDomLocation.unmount()
 			popupContainer.remove()
+			window.removeEventListener('popstate', onUndoOrRedo)
 		},
 	}
 }
