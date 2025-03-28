@@ -40,7 +40,6 @@ export function Dashboard() {
 								}}
 							/>
 						),
-						hideExitButton: true,
 					})
 					popup.trigger()
 				}

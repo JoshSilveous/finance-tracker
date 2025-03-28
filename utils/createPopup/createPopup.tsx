@@ -19,21 +19,12 @@ export interface PopupConfig {
 	 */
 	type?: 'normal' | 'error'
 	/**
-	 * Hide the top-right exit button.
-	 */
-	hideExitButton?: boolean
-	/**
 	 * Runs when the top-right exit button is used to close the popup
 	 */
 	handleClose?: () => void
 }
 
-export function createPopup({
-	content,
-	type = 'normal',
-	hideExitButton,
-	handleClose,
-}: PopupConfig) {
+export function createPopup({ content, type = 'normal', handleClose }: PopupConfig) {
 	const body = document.body
 	const popupContainer = document.createElement('div')
 
@@ -49,7 +40,6 @@ export function createPopup({
 	}
 
 	const onKeyPress = (e: KeyboardEvent) => {
-		console.log('keypress! ', e.key)
 		if (e.key === 'Escape') {
 			close()
 		}
@@ -61,24 +51,18 @@ export function createPopup({
 			window.addEventListener('keydown', onKeyPress)
 			popupDomLocation.render(
 				<div className={`${s.popup_background} ${s[type]}`}>
-					<div
-						className={`${s.popup_container} ${
-							hideExitButton ? s.exit_hidden : ''
-						}`}
-					>
-						{!hideExitButton && (
-							<div
-								className={s.popup_exit}
-								onClick={() => {
-									this.close()
-									if (handleClose) {
-										handleClose()
-									}
-								}}
-							>
-								✖
-							</div>
-						)}
+					<div className={s.popup_container}>
+						<div
+							className={s.popup_exit}
+							onClick={() => {
+								this.close()
+								if (handleClose) {
+									handleClose()
+								}
+							}}
+						>
+							✖
+						</div>
 
 						{content}
 					</div>
