@@ -1,5 +1,5 @@
 import { DashboardController, Data } from '@/app/p/dashboard/Dashboard/hooks'
-import { delay } from '@/utils'
+import { delay, typedQuerySelectAll } from '@/utils'
 import s from '../../../TransactionManager.module.scss'
 
 export const handleReorderMouseDown =
@@ -12,56 +12,59 @@ export const handleReorderMouseDown =
 	(e: React.MouseEvent) => {
 		const trnSortOrder = sortOrder.cur[transaction.date.orig].map((it) => it[0])
 
-		const allRowElems = trnSortOrder.map((id) => {
-			return document.querySelector(
-				`[data-transaction_row_id="${id}"]`
-			) as HTMLDivElement
+		const allRows = trnSortOrder.map((id) => {
+			return Array.from(
+				(
+					document.querySelector(
+						`[data-transaction_row_id="${id}"]`
+					) as HTMLDivElement
+				).children
+			) as HTMLDivElement[]
 		})
-		const thisRowElem = document.querySelector(
-			`[data-transaction_row_id="${transaction.id}"]`
-		) as HTMLDivElement
 
-		const thisRowChildren = Array.from(thisRowElem.children) as HTMLDivElement[]
+		const thisRow = Array.from(
+			(
+				document.querySelector(
+					`[data-transaction_row_id="${transaction.id}"]`
+				) as HTMLDivElement
+			).children
+		) as HTMLDivElement[]
 
-		const otherRowElems = allRowElems.toSpliced(allRowElems.indexOf(thisRowElem), 1)
+		const otherRows = allRows.toSpliced(transactionIndex, 1) // potential issue, test
 
-		const gridElem = thisRowElem.parentElement as HTMLDivElement
+		const gridElem = thisRow[0].parentElement!.parentElement as HTMLDivElement
 
 		const grabberNode = e.currentTarget as HTMLButtonElement
-		console.log(thisRowElem)
 
 		const offsetX = grabberNode.offsetLeft + grabberNode.offsetWidth / 2 - 4
 		const offsetY = grabberNode.offsetHeight * 1.5 - 2
 
 		const topOffset = gridElem.getBoundingClientRect().top
 
-		const colStyle = getComputedStyle(thisRowChildren[1])
+		const colStyle = getComputedStyle(thisRow[1])
 		const gapHeight = parseInt(colStyle.getPropertyValue('--gap-row-height'))
 
 		let calculatedRowHeight = 0
 
-		calculatedRowHeight = thisRowChildren[1].offsetHeight
+		calculatedRowHeight = thisRow[1].offsetHeight
 
 		document.body.style.cursor = 'grabbing'
 		const breakpoints: number[] = (() => {
-			const arr = otherRowElems.map((row, index) => {
-				return (row.children[0] as HTMLDivElement).offsetTop - gapHeight / 2
+			const arr = otherRows.map((row, index) => {
+				return row[0].offsetTop - gapHeight / 2
 			})
-			arr.push(
-				arr.at(-1)! +
-					(allRowElems.at(-1)!.children[0] as HTMLDivElement).offsetHeight
-			)
+			arr.push(arr.at(-1)! + allRows.at(-1)![0].offsetHeight)
 			return arr
 		})()
 
 		let leftOffset = 0
-		const startWidths = thisRowChildren.map((item) => getComputedStyle(item).width)
-		thisRowChildren.forEach((node, nodeIndex) => {
+		const startWidths = thisRow.map((item) => getComputedStyle(item).width)
+		thisRow.forEach((node, nodeIndex) => {
 			node.style.width = startWidths[nodeIndex]
 			node.style.left = `${e.clientX - offsetX + leftOffset}px`
 			node.style.top = `${e.clientY - offsetY}px`
 			node.classList.add(s.popped_out)
-			if (nodeIndex === 0 || nodeIndex === thisRowChildren.length - 2) {
+			if (nodeIndex === 0 || nodeIndex === thisRow.length - 2) {
 				node.classList.add(s.drop_shadow)
 			}
 			leftOffset += node.clientWidth
@@ -72,15 +75,15 @@ export const handleReorderMouseDown =
 		function putMarginGapOnRow(rowIndex: number | 'none') {
 			// if ending the animation, remove transition effects
 			if (rowIndex === 'none') {
-				allRowElems.forEach((rowElem) => {
-					;(Array.from(rowElem.children) as HTMLDivElement[]).forEach((node) => {
+				allRows.forEach((rowElem) => {
+					rowElem.forEach((node) => {
 						node.classList.remove(s.transitions)
 					})
 				})
 			}
 			// remove all current margin modifications
-			allRowElems.forEach((rowElem) => {
-				;(Array.from(rowElem.children) as HTMLDivElement[]).forEach((node) => {
+			allRows.forEach((rowElem) => {
+				rowElem.forEach((node) => {
 					node.style.marginTop = ''
 					node.style.marginBottom = '0px'
 				})
@@ -91,32 +94,28 @@ export const handleReorderMouseDown =
 
 			// if hovering over first row
 			if (rowIndex === 0) {
-				;(Array.from(otherRowElems[0].children) as HTMLDivElement[]).forEach(
-					(node) => {
-						node.style.marginTop = marginSize + 'px'
-					}
-				)
+				otherRows[0].forEach((node) => {
+					node.style.marginTop = marginSize + 'px'
+				})
 			}
 			// if hovering over last row
-			else if (rowIndex === otherRowElems.length) {
-				;(Array.from(otherRowElems.at(-1)!.children) as HTMLDivElement[]).forEach(
-					(node) => {
-						node.style.marginBottom = marginSize + 'px'
-					}
-				)
+			else if (rowIndex === otherRows.length) {
+				otherRows.at(-1)!.forEach((node) => {
+					node.style.marginBottom = marginSize + 'px'
+				})
 			} else {
-				;(
-					Array.from(otherRowElems[rowIndex - 1].children) as HTMLDivElement[]
-				).forEach((node) => (node.style.marginBottom = marginSize / 2 + 'px'))
-				;(Array.from(otherRowElems[rowIndex].children) as HTMLDivElement[]).forEach(
+				otherRows[rowIndex - 1].forEach(
+					(node) => (node.style.marginBottom = marginSize / 2 + 'px')
+				)
+				otherRows[rowIndex].forEach(
 					(node) => (node.style.marginTop = marginSize / 2 + 'px')
 				)
 			}
 
 			if (firstRun) {
 				delay(10).then(() => {
-					allRowElems.forEach((row) => {
-						;(Array.from(row.children) as HTMLDivElement[]).forEach((node) => {
+					allRows.forEach((row) => {
+						row.forEach((node) => {
 							node.classList.add(s.transitions)
 						})
 					})
@@ -199,11 +198,11 @@ export const handleReorderMouseDown =
 
 		function handleReorderMouseMove(e: MouseEvent) {
 			let leftOffset = 0
-			thisRowChildren.forEach((node, nodeIndex) => {
+			thisRow.forEach((node, nodeIndex) => {
 				node.style.left = `${e.clientX - offsetX + leftOffset}px`
 				node.style.top = `${e.clientY - offsetY}px`
 				node.classList.add(s.popped_out)
-				if (nodeIndex === 0 || nodeIndex === thisRowChildren.length - 2) {
+				if (nodeIndex === 0 || nodeIndex === thisRow.length - 2) {
 					node.classList.add(s.drop_shadow)
 				}
 				leftOffset += node.clientWidth
@@ -235,7 +234,7 @@ export const handleReorderMouseDown =
 
 		function handleReorderMouseUp() {
 			putMarginGapOnRow('none')
-			thisRowChildren.forEach((node) => {
+			thisRow.forEach((node) => {
 				node.style.width = ''
 				node.style.top = ''
 				node.style.left = ''

@@ -10,6 +10,7 @@ import { TabIndexer } from '../../hooks'
 import { OptionsMenu } from '../OptionsMenu/OptionsMenu'
 import { DashboardController, Data } from '../../../../hooks'
 import { handleReorderMouseDown } from './func/handleReorderMouseDown'
+import { delay } from '@/utils'
 
 export interface SingleRowProps {
 	transaction: Data.StateTransaction
@@ -27,7 +28,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 	const undoDeleteRef = useRef<HTMLButtonElement>(null)
 	const dateSelectRef = useRef<HTMLInputElement>(null)
 
-	const eventHandlers = useMemo(() => {
+	const inputEventHandlers = useMemo(() => {
 		return {
 			onChange: ((e) => {
 				const key = e.target.dataset.key as
@@ -130,6 +131,64 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 		} as React.CSSProperties
 	}
 
+	const sortEventHandlers = {
+		onMouseDown: handleReorderMouseDown(
+			p.transaction,
+			p.transactionIndex,
+			p.dashCtrl.sortOrder,
+			(oldIndex, newIndex) => {
+				p.dashCtrl.sortOrder.updateTransactionPosition(
+					p.transaction.date.orig,
+					oldIndex,
+					newIndex
+				)
+				delay(10).then(() => {
+					const newButtonNode = document.querySelector(
+						`[data-transaction_row_id="${p.transaction.id}"] button[data-grid_nav_col="TM_left_controls"]`
+					)
+					if (newButtonNode) {
+						;(newButtonNode as HTMLDivElement).focus()
+					}
+				})
+			}
+		),
+		onKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => {
+			if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') {
+				return
+			}
+
+			const attemptToRecaptureFocus = async () => {
+				await delay(10)
+				const newButtonNode = document.querySelector(
+					`[data-transaction_row_id="${p.transaction.id}"] button[data-grid_nav_col="TM_left_controls"]`
+				)
+				if (newButtonNode) {
+					;(newButtonNode as HTMLDivElement).focus()
+				}
+			}
+
+			const curSortOrderLength =
+				p.dashCtrl.sortOrder.cur[p.transaction.date.orig].length
+
+			if (e.key === 'ArrowDown' && p.transactionIndex + 1 < curSortOrderLength) {
+				p.dashCtrl.sortOrder.updateTransactionPosition(
+					p.transaction.date.orig,
+					p.transactionIndex,
+					p.transactionIndex + 1
+				)
+				attemptToRecaptureFocus()
+			}
+			if (e.key === 'ArrowUp' && p.transactionIndex !== 0) {
+				p.dashCtrl.sortOrder.updateTransactionPosition(
+					p.transaction.date.orig,
+					p.transactionIndex,
+					p.transactionIndex - 1
+				)
+				attemptToRecaptureFocus()
+			}
+		},
+	}
+
 	return (
 		<div
 			className={s.container}
@@ -154,19 +213,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					<JButton
 						jstyle='invisible'
 						disabled={p.disableTransactionResort}
-						onMouseDown={handleReorderMouseDown(
-							p.transaction,
-							p.transactionIndex,
-							p.dashCtrl.sortOrder,
-							(oldIndex, newIndex) => {
-								console.log(oldIndex, newIndex)
-								p.dashCtrl.sortOrder.updateTransactionPosition(
-									p.transaction.date.orig,
-									oldIndex,
-									newIndex
-								)
-							}
-						)}
+						{...sortEventHandlers}
 						tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 						data-grid_nav_col='TM_left_controls'
 						data-grid_nav_index={p.gridNavIndex}
@@ -185,7 +232,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					value={p.transaction.date.val}
 					data-transaction_id={p.transaction.id}
 					data-key='date'
-					{...eventHandlers}
+					{...inputEventHandlers}
 					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					ref={dateSelectRef}
 					data-grid_nav_col='TM_date'
@@ -202,7 +249,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					value={p.transaction.name.val}
 					data-transaction_id={p.transaction.id}
 					data-key='name'
-					{...eventHandlers}
+					{...inputEventHandlers}
 					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_name'
 					data-grid_nav_index={p.gridNavIndex}
@@ -221,7 +268,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-key='amount'
 					maxDigLeftOfDecimal={8}
 					maxDigRightOfDecimal={2}
-					{...eventHandlers}
+					{...inputEventHandlers}
 					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_amount'
 					data-grid_nav_index={p.gridNavIndex}
@@ -239,7 +286,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-transaction_id={p.transaction.id}
 					data-item_id={p.transaction.items[0].id}
 					data-key='category_id'
-					{...eventHandlers}
+					{...inputEventHandlers}
 					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_category'
 					data-grid_nav_index={p.gridNavIndex}
@@ -257,7 +304,7 @@ export const SingleRow = forwardRef<HTMLDivElement, SingleRowProps>((p, forwarde
 					data-transaction_id={p.transaction.id}
 					data-item_id={p.transaction.items[0].id}
 					data-key='account_id'
-					{...eventHandlers}
+					{...inputEventHandlers}
 					tabIndex={p.transaction.pendingDeletion ? -1 : p.tabIndexer()}
 					data-grid_nav_col='TM_account'
 					data-grid_nav_index={p.gridNavIndex}
